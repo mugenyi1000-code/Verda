@@ -51,6 +51,35 @@
 
   function uid(prefix) { return prefix + "_" + Math.random().toString(36).slice(2, 9); }
 
+  /* ---------------------------- ICONS (inline SVG, no external deps) ---------------------------- */
+  const ICON_PATHS = {
+    dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    reporting: '<path d="M6 2.5h8l4 4V21a.5.5 0 0 1-.5.5h-11A.5.5 0 0 1 6 21V3a.5.5 0 0 1 .5-.5Z"/><path d="M14 2.5V7h4"/><path d="M9 12h6M9 15.5h6M9 8.5h3"/>',
+    esia: '<rect x="4.5" y="3.5" width="15" height="18" rx="1.5"/><path d="M9 2.5h6a1 1 0 0 1 1 1V5H8V3.5a1 1 0 0 1 1-1Z"/><path d="m8.5 12.5 2 2 4-4.5M8.5 17h7"/>',
+    audits: '<circle cx="10.5" cy="10.5" r="7"/><path d="m20 20-4.3-4.3"/><path d="M7.5 10.5h6M10.5 7.5v6"/>',
+    records: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2.5h9A1.5 1.5 0 0 1 21 9v9.5A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-12Z"/>',
+    maps: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    workflows: '<circle cx="5" cy="6" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="18" cy="12" r="2.5"/><path d="M7.3 7 15.7 11M7.3 17 15.7 13"/>',
+    clients: '<circle cx="9" cy="8" r="3.2"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><circle cx="17.5" cy="8.5" r="2.6"/><path d="M15.8 13.2a5.6 5.6 0 0 1 5.4 5.6"/>',
+    documents: '<path d="M7 3.5h7l4 4V19a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V8h4"/><path d="M9.5 12h5M9.5 15h5"/>',
+    checklists: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="m7.5 12 2.5 2.5 5-5"/>',
+    credits: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.2v9.6M9.3 15.2c0 1 .9 1.8 2.7 1.8s2.7-.7 2.7-1.7c0-2.6-5.4-1.2-5.4-3.8 0-1 .9-1.7 2.7-1.7s2.7.6 2.7 1.6"/>',
+    skills: '<path d="M12 4 2 8.5 12 13l10-4.5L12 4Z"/><path d="M6 10.8V16c0 1.4 2.7 2.6 6 2.6s6-1.2 6-2.6v-5.2"/><path d="M21 8.5v5.3"/>',
+    resources: '<path d="M4 5.2A2.2 2.2 0 0 1 6.2 3H11v17.5H6.2A2.2 2.2 0 0 0 4 22.7Z"/><path d="M20 5.2A2.2 2.2 0 0 0 17.8 3H13v17.5h4.8a2.2 2.2 0 0 1 2.2 2.2Z"/>',
+    supplies: '<path d="M3.5 8.2 12 3.7l8.5 4.5V16L12 20.5 3.5 16Z"/><path d="M3.5 8.2 12 12.7l8.5-4.5M12 12.7v7.8"/>',
+    iec: '<path d="M3 10.5v3l14 4V6.5Z"/><path d="M17 8.3a3.4 3.4 0 0 1 0 7.4"/><path d="m7.5 14.5.7 3.6a1.6 1.6 0 0 0 3.1-.6l-.3-2.5"/>',
+    solutions: '<path d="M9.5 3.5h-4A1 1 0 0 0 4.5 4.5v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1Z"/><path d="M18.5 3.5h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1Z"/><path d="M9.5 12.5h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1Z"/><path d="M18.5 12.5h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1Z"/>',
+    coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M8.8 14.8c0 1.2 1.1 2.1 3.2 2.1s3.2-.8 3.2-2c0-3.1-6.4-1.4-6.4-4.5 0-1.2 1.1-2 3.2-2s3.2.7 3.2 1.9"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/>',
+    theme: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor" stroke="none"/>',
+    warn: '<path d="M12 3.5 21.5 20h-19Z"/><path d="M12 9.5v4.2M12 16.8h.01"/>'
+  };
+  function icon(name, cls) {
+    const path = ICON_PATHS[name];
+    if (!path) return "";
+    return `<svg class="icon ${cls || ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
+  }
+
   function creditBalance() {
     if (!state.user) return 0;
     return state.credits[state.user.email] || 0;
@@ -111,7 +140,7 @@
     nav.innerHTML = groups.map(g => `
       <div class="nav-group">
         <div class="nav-group-title">${g.label}</div>
-        ${SECTIONS.filter(s => s.group === g.id).map(s => `<a href="#/${s.id}" class="nav-item" data-id="${s.id}">${s.label()}</a>`).join("")}
+        ${SECTIONS.filter(s => s.group === g.id).map(s => `<a href="#/${s.id}" class="nav-item" data-id="${s.id}">${icon(s.id)}<span>${s.label()}</span></a>`).join("")}
       </div>`).join("");
   }
 
@@ -127,7 +156,13 @@
     const main = document.getElementById("main");
     main.innerHTML = "";
     section.render(main);
-    document.getElementById("topbar-credits").textContent = state.user ? `${creditBalance()} credits` : "";
+    updateCreditsChip();
+  }
+
+  function updateCreditsChip() {
+    const el = document.getElementById("topbar-credits");
+    el.hidden = !state.user;
+    el.innerHTML = state.user ? `${icon("coin")}<span>${creditBalance()} credits</span>` : "";
   }
 
   /* ---------------------------- helpers ---------------------------------- */
@@ -142,6 +177,16 @@
   }
   function card(title, bodyHtml, extraClass) {
     return `<div class="card ${extraClass || ""}"><h3>${title}</h3>${bodyHtml}</div>`;
+  }
+  function statCard(iconName, label, value, sub, warn) {
+    return `<div class="card stat-card">
+      <div class="stat-icon ${warn ? "stat-icon-warn" : ""}">${icon(iconName)}</div>
+      <div class="stat-body">
+        <div class="stat-label">${label}</div>
+        <div class="stat ${warn ? "warn" : ""}">${value}</div>
+        <p class="muted small">${sub}</p>
+      </div>
+    </div>`;
   }
   function fileToDataUrl(file) {
     return new Promise((resolve, reject) => {
@@ -167,19 +212,19 @@
           </div>` : `<p>Signed in as <strong>${state.user.name}</strong> · ${state.user.role || ""} · ${creditBalance()} credits</p>`}
         </div>
         <div class="grid grid-3">
-          ${card("Active Compliance Care Plans", `<div class="stat">${state.clients.length}</div><p class="muted">Recurring clients under a Verda compliance care plan.</p>`)}
-          ${card("Permits due within 60 days", `<div class="stat ${permitsSoon.length ? 'warn' : ''}">${permitsSoon.length}</div><p class="muted">Check Checklists → Permits for the full list.</p>`)}
-          ${card("Reports generated", `<div class="stat">${state.reports.length}</div><p class="muted">EEIS Reporting drafts created so far.</p>`)}
+          ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
+          ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
+          ${statCard("reporting", "Reports generated", state.reports.length, "EEIS Reporting drafts created so far.")}
         </div>
         <div class="grid grid-2">
           ${card("Upcoming site visits", `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
             upcoming.map(c => `<tr><td>${c.name}</td><td>${c.industry}</td><td>${c.nextVisit}</td></tr>`).join("")
           }</tbody></table>`)}
           ${card("Quick actions", `<div class="quick-actions">
-            <a class="btn" href="#/reporting">+ New EEIS Report</a>
-            <a class="btn" href="#/esia">+ New ToR / ESIA Draft</a>
-            <a class="btn" href="#/audits">+ Run an Audit</a>
-            <a class="btn" href="#/records">+ Add a Record / Photo</a>
+            <a class="btn" href="#/reporting">${icon("reporting")}<span>New EEIS Report</span></a>
+            <a class="btn" href="#/esia">${icon("esia")}<span>New ToR / ESIA Draft</span></a>
+            <a class="btn" href="#/audits">${icon("audits")}<span>Run an Audit</span></a>
+            <a class="btn" href="#/records">${icon("records")}<span>Add a Record / Photo</span></a>
           </div>`)}
         </div>
       </section>
@@ -247,7 +292,7 @@
       document.getElementById("login-btn").addEventListener("click", () => openAuthModal("login"));
       document.getElementById("signup-btn").addEventListener("click", () => openAuthModal("signup"));
     }
-    document.getElementById("topbar-credits").textContent = state.user ? `${creditBalance()} credits` : "";
+    updateCreditsChip();
   }
 
   /* ============================ EEIS REPORTING ============================ */
