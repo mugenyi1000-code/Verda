@@ -80,6 +80,58 @@
     return `<svg class="icon ${cls || ""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
   }
 
+  /* ---------------------------- ILLUSTRATIONS (original flat-style SVG art, no stock photos/hotlinking) ---------------------------- */
+  const ILLUS_CONTENT = {
+    environment: `
+      <path d="M0 112 Q50 96 100 110 T200 104 V140 H0 Z" class="illus-fill-3"/>
+      <circle cx="162" cy="32" r="15" class="illus-fill-accent"/>
+      <rect x="70" y="74" width="7" height="32" rx="3" class="illus-fill-muted"/>
+      <circle cx="73" cy="60" r="24" class="illus-fill-1"/>
+      <circle cx="53" cy="72" r="17" class="illus-fill-2"/>
+      <circle cx="95" cy="70" r="19" class="illus-fill-2"/>
+      <circle cx="140" cy="100" r="5" class="illus-fill-1"/>
+      <circle cx="26" cy="106" r="4" class="illus-fill-accent"/>
+      <circle cx="176" cy="110" r="4" class="illus-fill-1"/>`,
+    people: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <circle cx="58" cy="54" r="15" class="illus-fill-1"/>
+      <path d="M34 122 Q34 82 58 82 Q82 82 82 122 Z" class="illus-fill-1"/>
+      <circle cx="102" cy="42" r="17" class="illus-fill-2"/>
+      <path d="M74 122 Q74 72 102 72 Q130 72 130 122 Z" class="illus-fill-2"/>
+      <circle cx="146" cy="56" r="14" class="illus-fill-accent"/>
+      <path d="M124 122 Q124 84 146 84 Q168 84 168 122 Z" class="illus-fill-accent"/>`,
+    wildlife: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <ellipse cx="112" cy="92" rx="30" ry="18" class="illus-fill-1"/>
+      <circle cx="150" cy="70" r="13" class="illus-fill-1"/>
+      <path d="M146 60 Q142 50 136 52 Q142 54 142 62Z" class="illus-fill-1"/>
+      <path d="M136 54 Q126 40 116 44 Q128 44 130 56Z" class="illus-fill-muted"/>
+      <path d="M144 52 Q140 36 148 30 Q146 40 150 46Z" class="illus-fill-muted"/>
+      <path d="M154 52 Q160 36 168 32 Q162 42 160 48Z" class="illus-fill-muted"/>
+      <rect x="90" y="104" width="6" height="18" rx="2" class="illus-fill-1"/>
+      <rect x="104" y="106" width="6" height="18" rx="2" class="illus-fill-1"/>
+      <rect x="118" y="106" width="6" height="18" rx="2" class="illus-fill-1"/>
+      <rect x="130" y="104" width="6" height="18" rx="2" class="illus-fill-1"/>
+      <path d="M38 46 Q46 36 56 44 Q48 40 46 50 Q42 40 34 45Z" class="illus-fill-accent"/>
+      <path d="M58 30 Q66 20 76 28 Q68 24 66 34 Q62 24 54 29Z" class="illus-fill-2"/>`,
+    safety: `
+      <circle cx="100" cy="76" r="42" class="illus-fill-1"/>
+      <path d="M100 46 L134 60 V80 Q134 106 100 118 Q66 106 66 80 V60 Z" class="illus-fill-surface"/>
+      <path d="M84 80 L96 92 L118 64" fill="none" stroke="var(--brand-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M74 40 Q100 20 126 40 L120 48 Q100 34 80 48 Z" class="illus-fill-accent"/>
+      <rect x="88" y="34" width="24" height="10" rx="2" class="illus-fill-accent"/>`,
+    health: `
+      <path d="M100 118 C60 92 40 70 40 48 C40 30 56 20 70 26 C82 31 90 42 100 54 C110 42 118 31 130 26 C144 20 160 30 160 48 C160 70 140 92 100 118Z" class="illus-fill-accent"/>
+      <rect x="90" y="52" width="20" height="44" class="illus-fill-surface"/>
+      <rect x="78" y="64" width="44" height="20" class="illus-fill-surface"/>
+      <path d="M40 100 H70 L80 84 L92 112 L100 92 L108 100 H160" fill="none" stroke="var(--brand-1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
+  };
+  function illustration(name, cls) {
+    const content = ILLUS_CONTENT[name];
+    if (!content) return "";
+    return `<svg class="illus ${cls || ""}" viewBox="0 0 200 140" aria-hidden="true">${content}</svg>`;
+  }
+
   function creditBalance() {
     if (!state.user) return 0;
     return state.credits[state.user.email] || 0;
@@ -215,6 +267,14 @@
           ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
           ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
           ${statCard("reporting", "Reports generated", state.reports.length, "EEIS Reporting drafts created so far.")}
+        </div>
+        <h3>Focus areas</h3>
+        <div class="focus-grid">
+          <a class="focus-card" href="#/checklists">${illustration("environment")}<h4>Environment</h4><p class="muted small">Effluent, air, waste &amp; water — checklists and monitoring.</p></a>
+          <a class="focus-card" href="#/clients">${illustration("people")}<h4>People &amp; Community</h4><p class="muted small">Compliance care plans, grievances and CSR engagement.</p></a>
+          <a class="focus-card" href="#/esia">${illustration("wildlife")}<h4>Wildlife</h4><p class="muted small">Biodiversity impacts in ToR &amp; ESIA reporting.</p></a>
+          <a class="focus-card" href="#/audits">${illustration("safety")}<h4>Safety</h4><p class="muted small">Auto EHS audits and incident/near-miss tracking.</p></a>
+          <a class="focus-card" href="#/iec">${illustration("health")}<h4>Health</h4><p class="muted small">Free IEC materials and first-aid awareness.</p></a>
         </div>
         <div class="grid grid-2">
           ${card("Upcoming site visits", `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
@@ -969,16 +1029,28 @@
 
   /* ============================ IEC MATERIALS ============================ */
   function renderIec(main) {
+    const CATEGORY_ILLUS = { Health: "health", Safety: "safety", Social: "people", Environment: "environment" };
+    const categories = [...new Set(VERDA_SEED.iecMaterials.map(m => m.category))];
     main.appendChild(h(`
       <section>
         <h1>Free IEC Materials</h1>
         <p class="muted">Information, Education & Communication materials across Health, Safety, Social and Environment — free to download and print.</p>
-        <div class="grid grid-2" id="iec-list"></div>
+        ${categories.map(cat => `
+          <div class="card">
+            <div class="iec-cat-header">
+              ${illustration(CATEGORY_ILLUS[cat] || "environment", "iec-cat-illus")}
+              <h3>${cat}</h3>
+            </div>
+            <div class="grid grid-2" id="iec-list-${cat}"></div>
+          </div>`).join("")}
       </section>
     `));
-    main.querySelector("#iec-list").innerHTML = VERDA_SEED.iecMaterials.map((m, i) =>
-      card(`${m.title} <span class="badge">${m.category}</span>`, `<button class="btn" data-iec="${i}">Download</button>`)
-    ).join("");
+    categories.forEach(cat => {
+      const items = VERDA_SEED.iecMaterials.map((m, i) => ({ ...m, i })).filter(m => m.category === cat);
+      main.querySelector(`#iec-list-${cat}`).innerHTML = items.map(m =>
+        card(m.title, `<button class="btn" data-iec="${m.i}">Download</button>`)
+      ).join("");
+    });
     main.querySelectorAll("[data-iec]").forEach(btn => btn.addEventListener("click", () => {
       const m = VERDA_SEED.iecMaterials[parseInt(btn.dataset.iec, 10)];
       downloadText(m.title.replace(/\s+/g, "_") + ".txt", m.body);
