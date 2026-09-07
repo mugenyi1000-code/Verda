@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en" data-theme="forest">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verda — EHS Compliance Platform</title>
+  <meta name="description" content="Verda by EEIS — environmental, health & safety compliance monitoring, reporting, audits and resources in one platform." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">V</span> Verda <span class="muted small">by EEIS</span></div>
+    <div class="topbar-right">
+      <span id="topbar-credits"></span>
+      <select id="lang-select" title="Language">
+        <option value="en">English</option>
+        <option value="sw">Kiswahili</option>
+        <option value="fr">Français</option>
+        <option value="pt">Português</option>
+      </select>
+      <select id="theme-select" title="Colour theme">
+        <option value="forest">Forest</option>
+        <option value="ocean">Ocean</option>
+        <option value="amber">Amber</option>
+        <option value="slate">Slate</option>
+      </select>
+      <div id="topbar-auth"></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="sidebar"></nav>
+    <main id="main"></main>
+  </div>
+
+  <footer class="app-footer">Verda — a compliance monitoring platform by EEIS. Prototype build: AI drafting, payments and multi-user auth are simulated in-browser pending backend integration.</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="./data.js"></script>
+  <script src="./ai.js"></script>
+  <script src="./map.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

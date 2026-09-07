@@ -1,0 +1,12 @@
+{
+  "name": "Verda — EHS Compliance Platform",
+  "short_name": "Verda",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6f8f6",
+  "theme_color": "#1f7a4d",
+  "description": "Verda by EEIS — environmental, health & safety compliance monitoring, reporting, audits and resources.",
+  "icons": [
+    { "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231f7a4d'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EV%3C/text%3E%3C/svg%3E", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
