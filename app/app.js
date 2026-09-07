@@ -307,7 +307,7 @@
             <select name="industry">${VERDA_SEED.industries.map(i => `<option value="${i.name}">${i.name}</option>`).join("")}</select>
           </label>
           <label>Role
-            <select name="role">${VERDA_SEED.solutionsByRole.map(r => `<option>${r}</option>`).join("")}</select>
+            <select name="role">${VERDA_SEED.solutionsByRole.map(r => `<option>${r.name}</option>`).join("")}</select>
           </label>` : ""}
         <label>Email<input required type="email" name="email" /></label>
         <label>Password<input required type="password" name="password" /></label>
@@ -1071,7 +1071,17 @@
       </section>
     `));
     const panel = main.querySelector("#sol-panel");
-    function fill(list) { panel.innerHTML = list.map(x => card(x, `<a class="btn btn-ghost" href="#/dashboard">Explore →</a>`)).join(""); }
+    function sectionLink(id) {
+      const section = SECTIONS.find(s => s.id === id);
+      if (!section) return "";
+      return `<a class="btn btn-ghost btn-sm" href="#/${id}">${icon(id)}<span>${section.label()}</span></a>`;
+    }
+    function fill(list) {
+      panel.className = "grid grid-2";
+      panel.innerHTML = list.map(x => card(x.name,
+        `<p class="muted">${x.blurb}</p><div class="solution-links">${x.sections.map(sectionLink).join("")}</div>`
+      )).join("");
+    }
     fill(VERDA_SEED.solutionsByNeed);
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));

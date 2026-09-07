@@ -116,6 +116,8 @@ a { color: var(--brand-1); }
 .iec-cat-illus { width: 64px; height: 44px; flex-shrink: 0; }
 .iec-cat-header h3 { margin: 0; }
 
+.solution-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
 /* ---- Top bar ---- */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
