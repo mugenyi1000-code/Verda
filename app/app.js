@@ -31,7 +31,12 @@
       forumPosts: [
         { id: "p1", author: "Verda Team", text: "Welcome to the Verda Community — post questions or share compliance tips here.", date: "2026-09-01" }
       ],
-      workflowRuns: []
+      workflowRuns: [],
+      incidents: [],
+      risks: [],
+      actions: [],
+      training: [],
+      ui: { checklistIndustry: null }
     };
   }
 
@@ -72,7 +77,12 @@
     coin: '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M8.8 14.8c0 1.2 1.1 2.1 3.2 2.1s3.2-.8 3.2-2c0-3.1-6.4-1.4-6.4-4.5 0-1.2 1.1-2 3.2-2s3.2.7 3.2 1.9"/>',
     globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/>',
     theme: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor" stroke="none"/>',
-    warn: '<path d="M12 3.5 21.5 20h-19Z"/><path d="M12 9.5v4.2M12 16.8h.01"/>'
+    warn: '<path d="M12 3.5 21.5 20h-19Z"/><path d="M12 9.5v4.2M12 16.8h.01"/>',
+    analytics: '<path d="M3.5 20.5h17"/><rect x="5" y="12" width="3.6" height="6" rx="1"/><rect x="10.2" y="7.5" width="3.6" height="10.5" rx="1"/><rect x="15.4" y="10" width="3.6" height="8" rx="1"/>',
+    incidents: '<path d="M12 3.2 21.4 20H2.6Z"/><path d="M12 9.6v4.3M12 17h.01"/>',
+    risk: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M9 3.5v17M15 3.5v17M3.5 9h17M3.5 15h17"/>',
+    actions: '<path d="M4 12.5 9 17.5 20 6.5"/><path d="M4 6.5h8"/>',
+    training: '<path d="M12 4 2.5 8.2 12 12.4l9.5-4.2L12 4Z"/><path d="M6.5 10.4V15c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.6"/><path d="M21.5 8.2v5.1"/>'
   };
   function icon(name, cls) {
     const path = ICON_PATHS[name];
@@ -124,7 +134,14 @@
       <path d="M100 118 C60 92 40 70 40 48 C40 30 56 20 70 26 C82 31 90 42 100 54 C110 42 118 31 130 26 C144 20 160 30 160 48 C160 70 140 92 100 118Z" class="illus-fill-accent"/>
       <rect x="90" y="52" width="20" height="44" class="illus-fill-surface"/>
       <rect x="78" y="64" width="44" height="20" class="illus-fill-surface"/>
-      <path d="M40 100 H70 L80 84 L92 112 L100 92 L108 100 H160" fill="none" stroke="var(--brand-1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`
+      <path d="M40 100 H70 L80 84 L92 112 L100 92 L108 100 H160" fill="none" stroke="var(--brand-1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+    governance: `
+      <rect x="52" y="26" width="70" height="92" rx="6" class="illus-fill-3"/>
+      <rect x="66" y="44" width="42" height="5" rx="2.5" class="illus-fill-2"/>
+      <rect x="66" y="58" width="42" height="5" rx="2.5" class="illus-fill-2"/>
+      <rect x="66" y="72" width="26" height="5" rx="2.5" class="illus-fill-2"/>
+      <path d="M132 40 L162 51 V72 Q162 96 132 108 Q102 96 102 72 V51 Z" class="illus-fill-1"/>
+      <path d="M120 72 L129 82 L146 62" fill="none" stroke="var(--surface)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`
   };
   function illustration(name, cls) {
     const content = ILLUS_CONTENT[name];
@@ -162,24 +179,32 @@
 
   /* ---------------------------- NAV / SECTIONS -------------------------- */
   const SECTIONS = [
+    // Monitor — what's happening on site right now
     { id: "dashboard", group: "monitor", label: () => T().dashboard, render: renderDashboard },
-    { id: "reporting", group: "monitor", label: () => T().reporting, render: renderReporting },
-    { id: "esia", group: "monitor", label: () => T().esia, render: renderEsia },
+    { id: "analytics", group: "monitor", label: () => T().analytics, render: renderAnalytics },
+    { id: "incidents", group: "monitor", label: () => T().incidents, render: renderIncidents },
+    { id: "risk", group: "monitor", label: () => T().risk, render: renderRisk },
     { id: "audits", group: "monitor", label: () => T().audits, render: renderAudits },
     { id: "records", group: "monitor", label: () => T().records, render: renderRecords },
     { id: "maps", group: "monitor", label: () => T().maps, render: renderMaps },
-    { id: "workflows", group: "monitor", label: () => T().workflows, render: renderWorkflows },
 
+    // Manage — the programmes and deliverables that follow from it
+    { id: "actions", group: "manage", label: () => T().actions, render: renderActions },
+    { id: "reporting", group: "manage", label: () => T().reporting, render: renderReporting },
+    { id: "esia", group: "manage", label: () => T().esia, render: renderEsia },
+    { id: "training", group: "manage", label: () => T().training, render: renderTraining },
+    { id: "workflows", group: "manage", label: () => T().workflows, render: renderWorkflows },
     { id: "clients", group: "manage", label: () => T().clients, render: renderClients },
-    { id: "documents", group: "manage", label: () => T().documents, render: renderDocuments },
     { id: "checklists", group: "manage", label: () => T().checklists, render: renderChecklists },
+    { id: "documents", group: "manage", label: () => T().documents, render: renderDocuments },
     { id: "credits", group: "manage", label: () => T().credits, render: renderCredits },
-    { id: "skills", group: "manage", label: () => T().skills, render: renderSkills },
 
+    // Grow — enablement, marketplace and community
+    { id: "solutions", group: "grow", label: () => T().solutions, render: renderSolutions },
     { id: "resources", group: "grow", label: () => T().resources, render: renderResources },
     { id: "supplies", group: "grow", label: () => T().supplies, render: renderSupplies },
     { id: "iec", group: "grow", label: () => T().iec, render: renderIec },
-    { id: "solutions", group: "grow", label: () => T().solutions, render: renderSolutions }
+    { id: "skills", group: "grow", label: () => T().skills, render: renderSkills }
   ];
 
   function buildNav() {
@@ -240,6 +265,60 @@
       </div>
     </div>`;
   }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    return Math.round((new Date(dateStr) - new Date(today())) / 86400000);
+  }
+  function addMonths(dateStr, months) {
+    const d = new Date(dateStr);
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().slice(0, 10);
+  }
+  function statusBadge(label, status) {
+    return `<span class="badge badge-${status || "neutral"}">${label}</span>`;
+  }
+  function riskBandFor(score) {
+    return VERDA_SEED.riskBands.find(b => score <= b.max) || VERDA_SEED.riskBands[VERDA_SEED.riskBands.length - 1];
+  }
+  function trainingStatus(expiry) {
+    const d = daysUntil(expiry);
+    if (d === null) return { label: "Unknown", status: "neutral" };
+    if (d < 0) return { label: "Expired", status: "critical" };
+    if (d <= 60) return { label: "Expiring soon", status: "warning" };
+    return { label: "Valid", status: "good" };
+  }
+
+  /* ---- Charts: inline SVG, no chart library (keeps the app offline-capable).
+     Colors come from CSS custom properties so they follow the active theme;
+     the status palette is fixed and always paired with a visible label. ---- */
+  function barChart(rows, title) {
+    const W = 520, H = 210, padL = 16, padR = 12, padT = 26, padB = 40;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const max = Math.max(1, ...rows.map(r => r.value));
+    const n = rows.length || 1;
+    const slot = plotW / n, barW = Math.min(52, slot * 0.6);
+    const bars = rows.map((r, i) => {
+      const hgt = Math.round((r.value / max) * plotH);
+      const x = padL + slot * i + (slot - barW) / 2;
+      const y = padT + plotH - hgt;
+      const rad = Math.min(4, hgt);
+      const d = hgt <= 0 ? "" :
+        `M${x} ${y + hgt} V${y + rad} q0 -${rad} ${rad} -${rad} h${barW - 2 * rad} q${rad} 0 ${rad} ${rad} V${y + hgt} Z`;
+      return `<g><title>${r.label}: ${r.value}</title>` +
+        (hgt > 0 ? `<path d="${d}" style="fill:${r.color}"/>` : "") +
+        `<text x="${x + barW / 2}" y="${y - 7}" class="chart-value">${r.value}</text>` +
+        `<text x="${x + barW / 2}" y="${padT + plotH + 17}" class="chart-label">${r.label}</text></g>`;
+    }).join("");
+    const table = `<details class="chart-table"><summary>View data table</summary>
+      <table class="table"><thead><tr><th>${title}</th><th>Count</th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${r.label}</td><td>${r.value}</td></tr>`).join("")}
+      </tbody></table></details>`;
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">
+      <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" class="chart-axis"/>
+      ${bars}</svg>${table}`;
+  }
+
   function fileToDataUrl(file) {
     return new Promise((resolve, reject) => {
       const r = new FileReader();
@@ -268,13 +347,23 @@
           ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
           ${statCard("reporting", "Reports generated", state.reports.length, "EEIS Reporting drafts created so far.")}
         </div>
-        <h3>Focus areas</h3>
+        <h3>What Verda covers</h3>
         <div class="focus-grid">
-          <a class="focus-card" href="#/checklists">${illustration("environment")}<h4>Environment</h4><p class="muted small">Effluent, air, waste &amp; water — checklists and monitoring.</p></a>
-          <a class="focus-card" href="#/clients">${illustration("people")}<h4>People &amp; Community</h4><p class="muted small">Compliance care plans, grievances and CSR engagement.</p></a>
-          <a class="focus-card" href="#/esia">${illustration("wildlife")}<h4>Wildlife</h4><p class="muted small">Biodiversity impacts in ToR &amp; ESIA reporting.</p></a>
-          <a class="focus-card" href="#/audits">${illustration("safety")}<h4>Safety</h4><p class="muted small">Auto EHS audits and incident/near-miss tracking.</p></a>
-          <a class="focus-card" href="#/iec">${illustration("health")}<h4>Health</h4><p class="muted small">Free IEC materials and first-aid awareness.</p></a>
+          ${VERDA_SEED.pillars.map(p => `
+            <a class="focus-card" href="#/${p.link}">${illustration(p.illus)}<h4>${p.name}</h4><p class="muted small">${p.blurb}</p></a>
+          `).join("")}
+        </div>
+        <h3>Every sector, one platform</h3>
+        <p class="muted small">${VERDA_SEED.industries.length} sectors with their own compliance checklists — pick yours to jump straight in.</p>
+        <div class="sector-groups">
+          ${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(group => `
+            <div class="sector-group">
+              <div class="sector-group-title">${group}</div>
+              <div class="sector-chips">
+                ${VERDA_SEED.industries.filter(i => i.group === group).map(i =>
+                  `<button class="sector-chip" data-sector="${i.id}">${i.name}</button>`).join("")}
+              </div>
+            </div>`).join("")}
         </div>
         <div class="grid grid-2">
           ${card("Upcoming site visits", `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
@@ -292,6 +381,12 @@
     const su = document.getElementById("hero-signup"), li = document.getElementById("hero-login");
     if (su) su.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("signup"); });
     if (li) li.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("login"); });
+
+    main.querySelectorAll("[data-sector]").forEach(btn => btn.addEventListener("click", () => {
+      state.ui.checklistIndustry = btn.dataset.sector;
+      save();
+      location.hash = "#/checklists";
+    }));
   }
 
   /* ============================ AUTH (demo) ============================ */
@@ -826,7 +921,8 @@
     const panel = main.querySelector("#checklist-panel");
     function industryPanel() {
       panel.innerHTML = `
-        <label>Industry<select id="chk-industry">${VERDA_SEED.industries.map(i => `<option value="${i.id}">${i.name}</option>`).join("")}</select></label>
+        <label>Industry<select id="chk-industry">${VERDA_SEED.industries.map(i =>
+          `<option value="${i.id}" ${state.ui && state.ui.checklistIndustry === i.id ? "selected" : ""}>${i.name}</option>`).join("")}</select></label>
         <div id="chk-items"></div>
         <button class="btn" id="chk-download">Download checklist</button>`;
       function load() {
@@ -1088,6 +1184,311 @@
       btn.classList.add("active");
       fill({ need: VERDA_SEED.solutionsByNeed, industry: VERDA_SEED.solutionsByIndustry, role: VERDA_SEED.solutionsByRole }[btn.dataset.tab]);
     }));
+  }
+
+  /* ============================ INCIDENTS ============================ */
+  function renderIncidents(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <h1>Incidents</h1>
+        <p class="muted">Report and investigate incidents and near-misses. Raise a corrective action straight from any record.</p>
+        <div class="card">
+          <h3>Report an incident</h3>
+          <div class="form-row">
+            <label>Date<input id="inc-date" type="date" value="${today()}" /></label>
+            <label>Site / client<select id="inc-client">${state.clients.map(c => `<option>${c.name}</option>`).join("")}</select></label>
+            <label>Type<select id="inc-type">${S.incidentTypes.map(t => `<option>${t}</option>`).join("")}</select></label>
+            <label>Severity<select id="inc-sev">${S.incidentSeverities.map(t => `<option>${t}</option>`).join("")}</select></label>
+          </div>
+          <label>What happened<textarea id="inc-desc" placeholder="Describe the event, who was involved, and the immediate action taken..."></textarea></label>
+          <button class="btn btn-primary" id="inc-add">${icon("incidents")}<span>Log incident</span></button>
+        </div>
+        <div class="card">
+          <h3>Incident register</h3>
+          <table class="table"><thead><tr><th>Date</th><th>Site</th><th>Type</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+          <tbody id="inc-rows"></tbody></table>
+        </div>
+      </section>`));
+
+    const SEV_STATUS = { Low: "good", Medium: "warning", High: "serious", Critical: "critical" };
+    function refresh() {
+      main.querySelector("#inc-rows").innerHTML = state.incidents.slice().reverse().map(i => `
+        <tr>
+          <td>${i.date}</td><td>${i.client}</td><td>${i.type}</td>
+          <td>${statusBadge(i.severity, SEV_STATUS[i.severity])}</td>
+          <td><select class="inc-status" data-id="${i.id}">${S.incidentStatuses.map(s => `<option ${s === i.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+          <td><button class="btn btn-ghost btn-sm" data-raise="${i.id}">Raise action</button></td>
+        </tr>`).join("") || `<tr><td colspan="6" class="muted">No incidents logged yet.</td></tr>`;
+
+      main.querySelectorAll(".inc-status").forEach(sel => sel.addEventListener("change", () => {
+        const inc = state.incidents.find(x => x.id === sel.dataset.id);
+        inc.status = sel.value; save();
+      }));
+      main.querySelectorAll("[data-raise]").forEach(btn => btn.addEventListener("click", () => {
+        const inc = state.incidents.find(x => x.id === btn.dataset.raise);
+        state.actions.push({
+          id: uid("act"), title: `Corrective action: ${inc.type} at ${inc.client}`,
+          source: "Incident", owner: "", due: addMonths(today(), 1),
+          priority: inc.severity === "Critical" || inc.severity === "High" ? "High" : "Medium",
+          status: "Open", created: today()
+        });
+        save();
+        alert("Corrective action raised — see Actions (CAPA).");
+      }));
+    }
+    refresh();
+
+    main.querySelector("#inc-add").addEventListener("click", () => {
+      const desc = main.querySelector("#inc-desc").value.trim();
+      if (!desc) { alert("Describe what happened."); return; }
+      state.incidents.push({
+        id: uid("inc"), date: main.querySelector("#inc-date").value || today(),
+        client: main.querySelector("#inc-client").value, type: main.querySelector("#inc-type").value,
+        severity: main.querySelector("#inc-sev").value, desc, status: "Open"
+      });
+      save();
+      main.querySelector("#inc-desc").value = "";
+      refresh();
+    });
+  }
+
+  /* ============================ RISK REGISTER ============================ */
+  function renderRisk(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <h1>Risk Register</h1>
+        <p class="muted">Score hazards on a 5×5 likelihood × severity matrix. Verda bands the score and tracks controls and ownership.</p>
+        <div class="card">
+          <h3>Add a hazard</h3>
+          <div class="form-row">
+            <label>Hazard<input id="risk-hazard" placeholder="e.g. Unguarded conveyor drive" /></label>
+            <label>Area / activity<input id="risk-area" placeholder="e.g. Packing line" /></label>
+            <label>Likelihood<select id="risk-l">${S.riskLikelihood.map((l, i) => `<option value="${i + 1}">${i + 1} — ${l}</option>`).join("")}</select></label>
+            <label>Severity<select id="risk-s">${S.riskSeverity.map((l, i) => `<option value="${i + 1}">${i + 1} — ${l}</option>`).join("")}</select></label>
+          </div>
+          <div class="form-row">
+            <label>Existing controls<input id="risk-controls" placeholder="e.g. Fixed guard, LOTO procedure" /></label>
+            <label>Owner<input id="risk-owner" placeholder="Who owns this risk" /></label>
+          </div>
+          <button class="btn btn-primary" id="risk-add">${icon("risk")}<span>Add to register</span></button>
+        </div>
+        <div class="grid grid-2">
+          <div class="card"><h3>Risk matrix</h3><div id="risk-matrix"></div>
+            <p class="muted small">Likelihood (rows) × Severity (columns). Cell numbers are hazards currently at that score.</p></div>
+          <div class="card"><h3>Profile</h3><div id="risk-profile"></div></div>
+        </div>
+        <div class="card">
+          <h3>Register</h3>
+          <table class="table"><thead><tr><th>Hazard</th><th>Area</th><th>Score</th><th>Band</th><th>Controls</th><th>Owner</th></tr></thead>
+          <tbody id="risk-rows"></tbody></table>
+        </div>
+      </section>`));
+
+    function refresh() {
+      // matrix
+      let m = `<table class="risk-matrix"><thead><tr><th></th>${S.riskSeverity.map((s, i) => `<th>${i + 1}</th>`).join("")}</tr></thead><tbody>`;
+      for (let l = 5; l >= 1; l--) {
+        m += `<tr><th>${l}</th>`;
+        for (let s = 1; s <= 5; s++) {
+          const band = riskBandFor(l * s);
+          const count = state.risks.filter(r => r.likelihood === l && r.severity === s).length;
+          m += `<td class="risk-cell risk-${band.status}" title="${band.label} — score ${l * s}">${count || ""}</td>`;
+        }
+        m += `</tr>`;
+      }
+      m += `</tbody></table>`;
+      main.querySelector("#risk-matrix").innerHTML = m;
+
+      // profile chart
+      const rows = S.riskBands.map(b => ({
+        label: b.label,
+        value: state.risks.filter(r => riskBandFor(r.likelihood * r.severity).label === b.label).length,
+        color: `var(--chart-${b.status})`
+      }));
+      main.querySelector("#risk-profile").innerHTML = barChart(rows, "Hazards by risk band");
+
+      main.querySelector("#risk-rows").innerHTML = state.risks.slice().reverse().map(r => {
+        const score = r.likelihood * r.severity, band = riskBandFor(score);
+        return `<tr><td>${r.hazard}</td><td>${r.area}</td><td>${score}</td>
+          <td>${statusBadge(band.label, band.status)}</td><td>${r.controls || "—"}</td><td>${r.owner || "—"}</td></tr>`;
+      }).join("") || `<tr><td colspan="6" class="muted">No hazards recorded yet.</td></tr>`;
+    }
+    refresh();
+
+    main.querySelector("#risk-add").addEventListener("click", () => {
+      const hazard = main.querySelector("#risk-hazard").value.trim();
+      if (!hazard) { alert("Name the hazard."); return; }
+      state.risks.push({
+        id: uid("risk"), hazard, area: main.querySelector("#risk-area").value,
+        likelihood: parseInt(main.querySelector("#risk-l").value, 10),
+        severity: parseInt(main.querySelector("#risk-s").value, 10),
+        controls: main.querySelector("#risk-controls").value, owner: main.querySelector("#risk-owner").value
+      });
+      save();
+      main.querySelector("#risk-hazard").value = ""; main.querySelector("#risk-area").value = "";
+      refresh();
+    });
+  }
+
+  /* ============================ ACTIONS (CAPA) ============================ */
+  function renderActions(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <h1>Actions (CAPA)</h1>
+        <p class="muted">One tracker for every corrective and preventive action — whatever raised it. Overdue items are flagged automatically.</p>
+        <div class="card">
+          <h3>Add an action</h3>
+          <div class="form-row">
+            <label>Action<input id="act-title" placeholder="e.g. Fit guard to conveyor drive" /></label>
+            <label>Source<select id="act-source">${S.actionSources.map(s => `<option>${s}</option>`).join("")}</select></label>
+            <label>Owner<input id="act-owner" placeholder="Assigned to" /></label>
+            <label>Due<input id="act-due" type="date" value="${addMonths(today(), 1)}" /></label>
+            <label>Priority<select id="act-priority">${S.actionPriorities.map(p => `<option ${p === "Medium" ? "selected" : ""}>${p}</option>`).join("")}</select></label>
+          </div>
+          <button class="btn btn-primary" id="act-add">${icon("actions")}<span>Add action</span></button>
+        </div>
+        <div class="card">
+          <h3>Action tracker</h3>
+          <table class="table"><thead><tr><th>Action</th><th>Source</th><th>Owner</th><th>Due</th><th>Priority</th><th>Status</th></tr></thead>
+          <tbody id="act-rows"></tbody></table>
+        </div>
+      </section>`));
+
+    const PRI_STATUS = { Low: "good", Medium: "warning", High: "critical" };
+    function refresh() {
+      main.querySelector("#act-rows").innerHTML = state.actions.slice().reverse().map(a => {
+        const overdue = a.status !== "Closed" && daysUntil(a.due) < 0;
+        return `<tr class="${overdue ? "row-overdue" : ""}">
+          <td>${a.title}</td><td>${a.source}</td><td>${a.owner || "—"}</td>
+          <td>${a.due || "—"} ${overdue ? statusBadge("Overdue", "critical") : ""}</td>
+          <td>${statusBadge(a.priority, PRI_STATUS[a.priority])}</td>
+          <td><select class="act-status" data-id="${a.id}">${S.actionStatuses.map(s => `<option ${s === a.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+        </tr>`;
+      }).join("") || `<tr><td colspan="6" class="muted">No actions yet — raise one here or from an incident.</td></tr>`;
+
+      main.querySelectorAll(".act-status").forEach(sel => sel.addEventListener("change", () => {
+        state.actions.find(a => a.id === sel.dataset.id).status = sel.value;
+        save(); refresh();
+      }));
+    }
+    refresh();
+
+    main.querySelector("#act-add").addEventListener("click", () => {
+      const title = main.querySelector("#act-title").value.trim();
+      if (!title) { alert("Describe the action."); return; }
+      state.actions.push({
+        id: uid("act"), title, source: main.querySelector("#act-source").value,
+        owner: main.querySelector("#act-owner").value, due: main.querySelector("#act-due").value,
+        priority: main.querySelector("#act-priority").value, status: "Open", created: today()
+      });
+      save();
+      main.querySelector("#act-title").value = ""; main.querySelector("#act-owner").value = "";
+      refresh();
+    });
+  }
+
+  /* ============================ TRAINING & COMPETENCY ============================ */
+  function renderTraining(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <h1>Training & Competency</h1>
+        <p class="muted">Who is trained on what, and when it expires. Verda calculates the refresher date from each course's validity period.</p>
+        <div class="card">
+          <h3>Record training</h3>
+          <div class="form-row">
+            <label>Person<input id="tr-person" placeholder="Full name" /></label>
+            <label>Site / client<select id="tr-client">${state.clients.map(c => `<option>${c.name}</option>`).join("")}</select></label>
+            <label>Course<select id="tr-course">${S.trainingCourses.map(c => `<option value="${c.name}">${c.name} (${c.validityMonths} mo)</option>`).join("")}</select></label>
+            <label>Completed<input id="tr-date" type="date" value="${today()}" /></label>
+          </div>
+          <button class="btn btn-primary" id="tr-add">${icon("training")}<span>Add record</span></button>
+        </div>
+        <div class="card">
+          <h3>Competency matrix</h3>
+          <table class="table"><thead><tr><th>Person</th><th>Site</th><th>Course</th><th>Completed</th><th>Expires</th><th>Status</th></tr></thead>
+          <tbody id="tr-rows"></tbody></table>
+        </div>
+      </section>`));
+
+    function refresh() {
+      main.querySelector("#tr-rows").innerHTML = state.training.slice().reverse().map(t => {
+        const st = trainingStatus(t.expires);
+        return `<tr><td>${t.person}</td><td>${t.client}</td><td>${t.course}</td>
+          <td>${t.completed}</td><td>${t.expires}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
+      }).join("") || `<tr><td colspan="6" class="muted">No training records yet.</td></tr>`;
+    }
+    refresh();
+
+    main.querySelector("#tr-add").addEventListener("click", () => {
+      const person = main.querySelector("#tr-person").value.trim();
+      if (!person) { alert("Enter the person's name."); return; }
+      const courseName = main.querySelector("#tr-course").value;
+      const course = S.trainingCourses.find(c => c.name === courseName);
+      const completed = main.querySelector("#tr-date").value || today();
+      state.training.push({
+        id: uid("tr"), person, client: main.querySelector("#tr-client").value,
+        course: courseName, completed, expires: addMonths(completed, course.validityMonths)
+      });
+      save();
+      main.querySelector("#tr-person").value = "";
+      refresh();
+    });
+  }
+
+  /* ============================ ANALYTICS ============================ */
+  function renderAnalytics(main) {
+    const openActions = state.actions.filter(a => a.status !== "Closed");
+    const overdue = openActions.filter(a => daysUntil(a.due) < 0);
+    const highRisks = state.risks.filter(r => r.likelihood * r.severity > 9);
+    const expiredTraining = state.training.filter(t => trainingStatus(t.expires).status === "critical");
+    const trainingValid = state.training.length
+      ? Math.round((state.training.filter(t => trainingStatus(t.expires).status === "good").length / state.training.length) * 100)
+      : null;
+
+    // last 6 months of incidents
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i);
+      months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleString("en", { month: "short" }) });
+    }
+    const incidentRows = months.map(m => ({
+      label: m.label,
+      value: state.incidents.filter(i => (i.date || "").slice(0, 7) === m.key).length,
+      color: "var(--chart-1)"
+    }));
+    const actionRows = VERDA_SEED.actionStatuses.map(s => ({
+      label: s, value: state.actions.filter(a => a.status === s).length, color: "var(--chart-1)"
+    }));
+    const riskRows = VERDA_SEED.riskBands.map(b => ({
+      label: b.label,
+      value: state.risks.filter(r => riskBandFor(r.likelihood * r.severity).label === b.label).length,
+      color: `var(--chart-${b.status})`
+    }));
+
+    main.appendChild(h(`
+      <section>
+        <h1>Analytics</h1>
+        <p class="muted">Leading and lagging indicators across every module — the management view of what the records add up to.</p>
+        <div class="grid grid-3">
+          ${statCard("incidents", "Incidents logged", state.incidents.length, "All severities, all sites.")}
+          ${statCard("actions", "Open actions", openActions.length, `${overdue.length} overdue.`, overdue.length > 0)}
+          ${statCard("risk", "High / critical risks", highRisks.length, "Score above 9 on the 5×5 matrix.", highRisks.length > 0)}
+        </div>
+        <div class="grid grid-3">
+          ${statCard("training", "Training records", state.training.length, expiredTraining.length ? `${expiredTraining.length} expired.` : "None expired.", expiredTraining.length > 0)}
+          ${statCard("clients", "Compliance care plans", state.clients.length, "Active recurring clients.")}
+          ${statCard("analytics", "Training currency", trainingValid === null ? "—" : trainingValid + "%", "Records currently valid.")}
+        </div>
+        <div class="grid grid-2">
+          <div class="card"><h3>Incidents by month</h3>${barChart(incidentRows, "Incidents by month")}</div>
+          <div class="card"><h3>Actions by status</h3>${barChart(actionRows, "Actions by status")}</div>
+        </div>
+        <div class="card"><h3>Risk profile</h3>${barChart(riskRows, "Hazards by risk band")}</div>
+      </section>`));
   }
 
   /* ============================ BOOTSTRAP ============================ */

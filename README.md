@@ -42,46 +42,61 @@ Reporting" document it produces. It's a single static app — open
 host. All data is stored locally in the browser (`localStorage`); there is
 no server yet.
 
+It covers **18 sectors across every part of the economy** — industrial,
+energy/resources/construction, services and commerce, and public/health/
+agriculture — each with its own compliance checklist. See
+`docs/competitive-benchmark.md` for how Verda's module coverage compares
+with established EHS platforms and what is still on the roadmap.
+
 Organized into three groups (Monitor / Manage / Grow), each with its own
 sub-sections in the sidebar:
 
-**Monitor**
-- **Dashboard** — redesigned home screen: active care plans, permits due
-  soon, upcoming visits, quick actions.
-- **EEIS Reporting** — the monthly/quarterly report, renamed from the old
-  "ESSR" label. Segments (Safety, Security, Environment, GHG, Community,
-  Permitting) can each be added or omitted per report. "Generate with AI
-  Assist" drafts the narrative from your notes and the report downloads as
-  a real file — this was the "report not loading" bug, now fixed and
-  covered by an automated browser test (see below).
-- **ToR & ESIA Reporting** — structured input following the standard
-  ESIA/ToR outline (background, legal framework, baseline, impacts,
-  alternatives, ESMP, engagement, monitoring plan, institutional
-  arrangements, conclusion), with an AI-assisted draft and a "submit for
-  EEIS processing" step that spends credits.
-- **Audits** — Auto EHS Audit (per-industry checklist, AI-assisted findings
+**Monitor — what's happening on site**
+- **Dashboard** — the six capability pillars Verda covers (Safety, Health &
+  Wellbeing, Environment, People & Community, Biodiversity & ESG,
+  Governance & Compliance), every sector as a one-click entry point, plus
+  headline counts, upcoming visits and quick actions.
+- **Analytics** — leading/lagging indicators: incidents by month, actions by
+  status, risk profile, and KPI tiles for open/overdue actions, high risks
+  and training currency. Charts are inline SVG (no chart library, so they
+  work offline) with a data-table view under each one.
+- **Incidents** — report and classify incidents and near-misses by type and
+  severity, track investigation status, and raise a corrective action
+  straight from any record.
+- **Risk Register** — 5×5 likelihood × severity matrix with automatic
+  scoring and banding (Low/Medium/High/Critical), controls and owner per
+  hazard, and a live matrix heatmap.
+- **Audits** — Auto EHS Audit (per-sector checklist, AI-assisted findings
   summary) and ESIA Audit (against your own ESMP commitments).
 - **Records** — PPE, Environment, Community and CSR records with a photo
   gallery.
 - **Maps & Site Visits** — client sites on a real ArcGIS/Esri basemap
   (via Leaflet), colour-matched to the active theme, plus a Matterport
   embed slot for virtual walkthroughs.
-- **Workflows** — HR, Environmental Management, and Safety Administration
-  step-by-step workflow templates.
 
-**Manage**
-- **Clients & Compliance Care Plans**, **Documents Library** (downloadable
-  templates), **Checklists** (per industry + an EHS permits checklist),
-  **Credits & Billing**, **Skills Advisor** (keyword-based course/
-  certification suggestions from what you type).
+**Manage — the programmes and deliverables**
+- **Actions (CAPA)** — one tracker for every corrective/preventive action
+  whatever raised it, with owner, due date, priority and overdue flagging.
+- **EEIS Reporting** — the monthly/quarterly report, renamed from the old
+  "ESSR" label. Segments (Safety, Security, Environment, GHG, Community,
+  Permitting) can each be added or omitted per report; "Generate with AI
+  Assist" drafts the narrative and the report downloads as a real file.
+- **ToR & ESIA Reporting** — structured input following the standard
+  ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
+  for EEIS processing" step.
+- **Training & Competency** — course records per person with validity
+  periods and automatic Valid / Expiring soon / Expired status.
+- **Workflows**, **Clients & Compliance Care Plans**, **Checklists** (per
+  sector + an EHS permits checklist), **Documents Library**, **Credits &
+  Billing**.
 
-**Grow**
-- **Resources Hub** (Demo, QHSE Library, Events & Webinars, Community),
-  **Supplies & Hire** (PPE/tools organized by the standard categories
-  used industry-wide by suppliers like Honeywell, DuPont, MSA Safety and
-  SafeSourceDirect — no branded products reproduced), **Free IEC
-  Materials** (Health/Safety/Social/Environment), **Solutions** (by
-  business need, by industry, by role).
+**Grow — enablement, marketplace and community**
+- **Solutions** (by business need, by industry, by role — frontline to
+  executive, each linking into the sections that solve it), **Resources
+  Hub** (Demo, QHSE Library, Events & Webinars, Community), **Supplies &
+  Hire** (PPE/tools organized by the standard categories used industry-wide
+  by suppliers like Honeywell, DuPont, MSA Safety and SafeSourceDirect — no
+  branded products reproduced), **Free IEC Materials**, **Skills Advisor**.
 
 Other platform features: free sign-up with starter credits then buy more
 (demo billing), a colour theme switcher (Forest/Ocean/Amber/Slate — also

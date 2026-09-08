@@ -100,8 +100,9 @@ a { color: var(--brand-1); }
 .illus-fill-muted { fill: var(--muted); }
 .illus-fill-surface { fill: var(--surface); }
 
-.focus-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 20px; }
-@media (max-width: 1100px) { .focus-grid { grid-template-columns: repeat(2, 1fr); } }
+.focus-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 20px; }
+@media (max-width: 1400px) { .focus-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 900px) { .focus-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .focus-grid { grid-template-columns: 1fr; } }
 .focus-card {
   background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px 14px 16px;
@@ -117,6 +118,58 @@ a { color: var(--brand-1); }
 .iec-cat-header h3 { margin: 0; }
 
 .solution-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* ---- Sector grid ---- */
+.sector-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 900px) { .sector-groups { grid-template-columns: 1fr; } }
+.sector-group { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
+.sector-group-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 800; margin-bottom: 10px; }
+.sector-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.sector-chip {
+  border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer;
+  padding: 6px 12px; border-radius: 999px; font-size: .82rem; font-weight: 600; font-family: inherit;
+  transition: all .14s ease;
+}
+.sector-chip:hover { background: var(--brand-3); border-color: var(--brand-2); }
+
+/* ---- Status badges ----
+   Doubled class (.badge.badge-x) so these win over the base .badge rule
+   regardless of source order. Every status badge carries its own label,
+   so color never has to be read on its own. */
+.badge.badge-good { background: rgba(12, 163, 12, .16); color: #0a7d0a; }
+.badge.badge-warning { background: rgba(250, 178, 25, .24); color: #8a6000; }
+.badge.badge-serious { background: rgba(236, 131, 90, .24); color: #a54a22; }
+.badge.badge-critical { background: rgba(208, 59, 59, .16); color: #b02a2a; }
+:root[data-theme="slate"] .badge.badge-good { color: #4ed24e; }
+:root[data-theme="slate"] .badge.badge-warning { color: #fab219; }
+:root[data-theme="slate"] .badge.badge-serious { color: #ec835a; }
+:root[data-theme="slate"] .badge.badge-critical { color: #f08585; }
+.row-overdue { background: color-mix(in srgb, #d03b3b 7%, transparent); }
+
+/* ---- Charts ----
+   Categorical slot 1 and the fixed status palette from the validated
+   reference palette; dark steps applied under the Slate theme. */
+:root { --chart-1: #2a78d6; --chart-good: #0ca30c; --chart-warning: #fab219; --chart-serious: #ec835a; --chart-critical: #d03b3b; }
+:root[data-theme="slate"] { --chart-1: #3987e5; }
+/* max-width keeps type at a sane size when a chart sits in a full-width card */
+.chart { width: 100%; max-width: 560px; height: auto; display: block; margin-top: 6px; }
+.chart-axis { stroke: var(--border); stroke-width: 1; }
+.chart-value { font-size: 13px; font-weight: 700; text-anchor: middle; fill: var(--text); }
+.chart-label { font-size: 12px; text-anchor: middle; fill: var(--muted); }
+.chart-table { margin-top: 8px; }
+.chart-table summary { cursor: pointer; font-size: .82rem; color: var(--muted); }
+
+/* ---- Risk matrix ---- */
+.risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
+.risk-matrix th { font-size: .75rem; color: var(--muted); font-weight: 700; width: 16%; text-align: center; }
+.risk-cell {
+  text-align: center; font-weight: 800; font-size: .9rem; color: #fff;
+  border-radius: 7px; height: 38px;
+}
+.risk-good { background: #0ca30c; }
+.risk-warning { background: #fab219; color: #4a3600; }
+.risk-serious { background: #ec835a; }
+.risk-critical { background: #d03b3b; }
 
 /* ---- Top bar ---- */
 .topbar {

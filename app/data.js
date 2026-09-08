@@ -16,7 +16,7 @@ const VERDA_SEED = {
   // ---- Industries + baseline compliance checklists --------------------------
   industries: [
     {
-      id: "manufacturing", name: "Manufacturing / Factories",
+      id: "manufacturing", group: "Industrial & Manufacturing", name: "Manufacturing / Factories",
       checklist: [
         "Valid NEMA (or national regulator) EIA certificate displayed on site",
         "Effluent discharge permit current and monitoring log up to date",
@@ -31,7 +31,7 @@ const VERDA_SEED = {
       ]
     },
     {
-      id: "quarrying", name: "Quarrying & Mining",
+      id: "quarrying", group: "Energy, Resources & Construction", name: "Quarrying & Mining",
       checklist: [
         "Valid environmental/mining licence and EIA certificate on site",
         "Blast management plan and licensed blaster records (if applicable)",
@@ -46,7 +46,7 @@ const VERDA_SEED = {
       ]
     },
     {
-      id: "timber", name: "Timber & Wood Processing",
+      id: "timber", group: "Industrial & Manufacturing", name: "Timber & Wood Processing",
       checklist: [
         "Valid forestry/timber processing licence and EIA certificate on site",
         "Chain-of-custody / sourcing documentation for timber inputs",
@@ -61,7 +61,7 @@ const VERDA_SEED = {
       ]
     },
     {
-      id: "construction", name: "Construction & Contracting",
+      id: "construction", group: "Energy, Resources & Construction", name: "Construction & Contracting",
       checklist: [
         "Project-level EIA certificate or environmental screening on file",
         "Site-specific ESMP available and briefed to workers",
@@ -76,7 +76,7 @@ const VERDA_SEED = {
       ]
     },
     {
-      id: "oilgas", name: "Oil & Gas",
+      id: "oilgas", group: "Energy, Resources & Construction", name: "Oil & Gas",
       checklist: [
         "Valid environmental and operating licences on site",
         "Spill prevention and emergency response plan current",
@@ -91,7 +91,7 @@ const VERDA_SEED = {
       ]
     },
     {
-      id: "agriculture", name: "Agriculture & Agro-processing",
+      id: "agriculture", group: "Public, Health & Agriculture", name: "Agriculture & Agro-processing",
       checklist: [
         "Environmental approval/EIA certificate on file (where required)",
         "Agrochemical storage, handling, and SDS availability compliant",
@@ -103,6 +103,162 @@ const VERDA_SEED = {
         "Fire safety provisions for storage/processing areas",
         "Incident/near-miss register maintained",
         "Traceability/records for chemical application maintained"
+      ]
+    },
+    {
+      id: "foodbev", group: "Industrial & Manufacturing", name: "Food & Beverage Processing",
+      checklist: [
+        "Food safety / public health licence current and displayed",
+        "Cold chain and temperature monitoring records maintained",
+        "Wastewater from processing permitted and monitored",
+        "Cleaning chemicals stored with SDS available",
+        "Pest control programme in place and logged",
+        "Worker health screening and hygiene training records on file",
+        "Packaging and organic waste segregation implemented",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "textiles", group: "Industrial & Manufacturing", name: "Textiles & Apparel",
+      checklist: [
+        "Environmental approval on file for dyeing/finishing operations",
+        "Effluent discharge permit current with treatment records",
+        "Chemical inventory and SDS available for all dyes and finishes",
+        "Machine guarding on cutting, spinning and pressing equipment",
+        "Dust and noise exposure controls in place",
+        "Fire detection, exits and drills current (high fuel-load environment)",
+        "Working hours and labour standards records maintained",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "energy", group: "Energy, Resources & Construction", name: "Energy & Utilities",
+      checklist: [
+        "Generation/distribution licence and environmental approvals current",
+        "High-voltage work permits and lockout/tagout procedures in place",
+        "Arc-flash risk assessment completed and PPE matched to it",
+        "Emissions and effluent monitoring records current (thermal plant)",
+        "Vegetation and right-of-way management logged",
+        "Emergency and outage response plan tested",
+        "Community notification process for planned outages",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "water", group: "Energy, Resources & Construction", name: "Water, Sanitation & Waste",
+      checklist: [
+        "Abstraction, discharge and waste-handling licences current",
+        "Treatment process monitoring and lab results on file",
+        "Confined space entry procedure and trained attendants in place",
+        "Biological/chemical exposure controls and vaccinations current",
+        "Sludge and residual waste disposal records maintained",
+        "Odour and vector control measures implemented",
+        "Community grievance log maintained",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "transport", group: "Services & Commerce", name: "Transport & Logistics",
+      checklist: [
+        "Operating licences and vehicle roadworthiness certificates current",
+        "Driver licences, hours-of-service and fatigue management records",
+        "Journey management and defensive driving training completed",
+        "Dangerous goods classification, placarding and documentation correct",
+        "Fuel storage and spill response provisions on site",
+        "Load securing and manual handling procedures in place",
+        "Vehicle emissions and maintenance records maintained",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "hospitality", group: "Services & Commerce", name: "Hospitality & Tourism",
+      checklist: [
+        "Operating and food service licences current",
+        "Fire detection, extinguishers, exits and evacuation plan verified",
+        "Kitchen hygiene, temperature and pest control records maintained",
+        "Pool/spa water quality testing logged (where applicable)",
+        "Laundry and cleaning chemical SDS available to staff",
+        "Waste segregation and licensed collection in place",
+        "Guest and staff incident register maintained",
+        "Water and energy consumption tracked"
+      ]
+    },
+    {
+      id: "retail", group: "Services & Commerce", name: "Retail & Wholesale",
+      checklist: [
+        "Trading licence and fire safety certificate current",
+        "Emergency exits clear and evacuation plan posted",
+        "Manual handling and racking/storage safety controls in place",
+        "Slip, trip and fall prevention programme active",
+        "Hazardous consumer products stored per SDS requirements",
+        "Packaging and e-waste take-back/recycling arrangements",
+        "Staff first aid provision and trained first aiders on shift",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "telecom", group: "Services & Commerce", name: "Telecom & ICT",
+      checklist: [
+        "Site and tower construction approvals on file",
+        "Working at height rescue plan and competent climbers certified",
+        "RF exposure assessment and exclusion zones signposted",
+        "Generator fuel storage bunded with spill kit available",
+        "Battery and e-waste disposal through licensed handlers",
+        "Data centre fire suppression system serviced",
+        "Lone-worker and remote-site check-in procedure in place",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "finance", group: "Services & Commerce", name: "Financial & Professional Services",
+      checklist: [
+        "Occupational health & safety workplace registration current",
+        "Fire safety certificate, drills and marshals in place",
+        "Ergonomic/display screen assessments completed",
+        "First aid provision and trained first aiders available",
+        "Business continuity and emergency response plan tested",
+        "E-waste and confidential waste disposal through licensed handlers",
+        "Energy use and paper consumption tracked for ESG reporting",
+        "Incident register maintained"
+      ]
+    },
+    {
+      id: "healthcare", group: "Public, Health & Agriculture", name: "Healthcare & Medical",
+      checklist: [
+        "Facility operating licence and health authority approvals current",
+        "Healthcare waste segregation, storage and licensed disposal records",
+        "Sharps injury prevention and post-exposure procedure in place",
+        "Infection prevention and control programme documented",
+        "Radiation/X-ray source licence and dosimetry (where applicable)",
+        "Medical gas and chemical storage compliant with SDS",
+        "Staff immunisation and health surveillance records maintained",
+        "Incident/near-miss register maintained"
+      ]
+    },
+    {
+      id: "education", group: "Public, Health & Agriculture", name: "Education",
+      checklist: [
+        "Institution registration and building occupancy approvals current",
+        "Fire safety equipment, exits and evacuation drills logged",
+        "Laboratory chemical inventory with SDS and spill provisions",
+        "Playground, sports and workshop equipment inspections recorded",
+        "Safeguarding and student incident reporting procedure in place",
+        "Water quality and sanitation facilities monitored",
+        "Food service hygiene records maintained (where catering on site)",
+        "First aid provision and trained staff available"
+      ]
+    },
+    {
+      id: "publicsector", group: "Public, Health & Agriculture", name: "Public Sector & NGOs",
+      checklist: [
+        "Programme/project environmental screening completed where required",
+        "Workplace OSH registration and fire safety provisions current",
+        "Field staff travel, security and lone-worker procedures in place",
+        "Community engagement and grievance mechanism operating",
+        "Donor/regulator safeguarding and reporting obligations tracked",
+        "Asset, fuel and generator management records maintained",
+        "Waste and e-waste disposal through licensed handlers",
+        "Incident register maintained"
       ]
     }
   ],
@@ -251,6 +407,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
       dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
+      analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
       audits: "Audits", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
       clients: "Clients & Compliance Care Plans", documents: "Documents Library", checklists: "Checklists",
       credits: "Credits & Billing", skills: "Skills Advisor",
@@ -259,6 +416,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
       dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
+      analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
       audits: "Ukaguzi", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
       clients: "Wateja na Mipango ya Uzingatiaji", documents: "Maktaba ya Hati", checklists: "Orodha za Ukaguzi",
       credits: "Mikopo na Malipo", skills: "Mshauri wa Ujuzi",
@@ -267,6 +425,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
       dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
+      analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
       audits: "Audits", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
       clients: "Clients et Plans de Conformité", documents: "Bibliothèque de Documents", checklists: "Listes de Contrôle",
       credits: "Crédits et Facturation", skills: "Conseiller en Compétences",
@@ -275,12 +434,66 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
       dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
+      analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
       audits: "Auditorias", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
       credits: "Créditos e Faturação", skills: "Conselheiro de Competências",
       resources: "Centro de Recursos", supplies: "Suprimentos e Aluguer", iec: "Materiais IEC", solutions: "Soluções",
       login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" }
   },
+
+  // ---- Incidents ----------------------------------------------------------
+  incidentTypes: [
+    "Near-miss", "First aid case", "Medical treatment case", "Lost-time injury",
+    "Property damage", "Environmental spill / release", "Security incident",
+    "Occupational illness", "Fire", "Vehicle incident"
+  ],
+  incidentSeverities: ["Low", "Medium", "High", "Critical"],
+  incidentStatuses: ["Open", "Under investigation", "Closed"],
+
+  // ---- Risk register (5x5 matrix) -----------------------------------------
+  riskLikelihood: ["Rare", "Unlikely", "Possible", "Likely", "Almost certain"],
+  riskSeverity: ["Negligible", "Minor", "Moderate", "Major", "Catastrophic"],
+  // score = likelihood (1-5) x severity (1-5); bands below are inclusive upper bounds
+  riskBands: [
+    { max: 4, label: "Low", status: "good" },
+    { max: 9, label: "Medium", status: "warning" },
+    { max: 15, label: "High", status: "serious" },
+    { max: 25, label: "Critical", status: "critical" }
+  ],
+
+  // ---- Actions (CAPA) ------------------------------------------------------
+  actionSources: ["Incident", "Audit finding", "Inspection", "Risk assessment", "Permit condition", "Community grievance", "Other"],
+  actionPriorities: ["Low", "Medium", "High"],
+  actionStatuses: ["Open", "In progress", "Closed"],
+
+  // ---- Training & competency ----------------------------------------------
+  // validityMonths: how long the certificate stays valid before refresher is due
+  trainingCourses: [
+    { name: "General EHS Induction", validityMonths: 12 },
+    { name: "Fire Safety & Evacuation", validityMonths: 12 },
+    { name: "First Aid at Work", validityMonths: 24 },
+    { name: "Working at Height", validityMonths: 24 },
+    { name: "Confined Space Entry", validityMonths: 12 },
+    { name: "Manual Handling", validityMonths: 36 },
+    { name: "Hazardous Chemicals / SDS Awareness", validityMonths: 24 },
+    { name: "PPE Selection & Use", validityMonths: 24 },
+    { name: "Emergency Response / Spill Response", validityMonths: 12 },
+    { name: "Defensive Driving", validityMonths: 36 },
+    { name: "ISO 45001 Awareness", validityMonths: 36 },
+    { name: "ISO 14001 Awareness", validityMonths: 36 }
+  ],
+
+  // ---- Capability pillars (dashboard) --------------------------------------
+  // Cross-sector pillars — what Verda covers, independent of industry.
+  pillars: [
+    { id: "safety", illus: "safety", name: "Safety", blurb: "Incidents, risk register, audits and corrective actions.", link: "incidents" },
+    { id: "health", illus: "health", name: "Health & Wellbeing", blurb: "Occupational health, first aid and awareness materials.", link: "training" },
+    { id: "environment", illus: "environment", name: "Environment", blurb: "Effluent, air, waste, water and GHG monitoring.", link: "reporting" },
+    { id: "people", illus: "people", name: "People & Community", blurb: "Training, competency, grievances and CSR records.", link: "records" },
+    { id: "esg", illus: "wildlife", name: "Biodiversity & ESG", blurb: "Impact assessment, biodiversity and sustainability reporting.", link: "esia" },
+    { id: "governance", illus: "governance", name: "Governance & Compliance", blurb: "Permits, licences, document control and audit trails.", link: "checklists" }
+  ],
 
   // ---- Solutions matrix ---------------------------------------------------
   // Each entry names the platform sections that actually solve it — the
@@ -301,7 +514,19 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     { name: "Timber & Wood Processing", blurb: "Chain-of-custody and fire-risk checklists alongside document templates for licensing and sourcing records.", sections: ["checklists", "documents"] },
     { name: "Construction & Contracting", blurb: "Site-specific ESMP drafting, sub-contractor pre-qualification workflows, and per-project checklists.", sections: ["esia", "workflows", "checklists"] },
     { name: "Oil & Gas", blurb: "Spill-response and emissions checklists, auto EHS audits, and gas-detection equipment in the supplies catalogue.", sections: ["checklists", "audits", "supplies"] },
-    { name: "Agriculture & Agro-processing", blurb: "Agrochemical handling checklists plus free IEC materials for worker and community health awareness.", sections: ["checklists", "iec"] }
+    { name: "Agriculture & Agro-processing", blurb: "Agrochemical handling checklists plus free IEC materials for worker and community health awareness.", sections: ["checklists", "iec"] },
+    { name: "Food & Beverage Processing", blurb: "Hygiene, cold-chain and effluent checklists with incident tracking for processing lines.", sections: ["checklists", "incidents", "reporting"] },
+    { name: "Textiles & Apparel", blurb: "Dyeing and finishing effluent controls, chemical registers, and machine-guarding audits.", sections: ["checklists", "audits", "risk"] },
+    { name: "Energy & Utilities", blurb: "High-voltage permit-to-work risk assessment, emissions reporting and outage response actions.", sections: ["risk", "reporting", "actions"] },
+    { name: "Water, Sanitation & Waste", blurb: "Confined-space risk assessment, discharge monitoring and licensed-disposal record keeping.", sections: ["risk", "reporting", "records"] },
+    { name: "Transport & Logistics", blurb: "Driver competency records, vehicle incident reporting and dangerous-goods checklists.", sections: ["training", "incidents", "checklists"] },
+    { name: "Hospitality & Tourism", blurb: "Fire safety and kitchen hygiene checklists with guest and staff incident registers.", sections: ["checklists", "incidents", "training"] },
+    { name: "Retail & Wholesale", blurb: "Slip/trip prevention, manual handling training and store-level inspection checklists.", sections: ["checklists", "training", "incidents"] },
+    { name: "Telecom & ICT", blurb: "Working-at-height risk assessment for tower crews, plus site mapping and lone-worker checks.", sections: ["risk", "maps", "training"] },
+    { name: "Financial & Professional Services", blurb: "Office-scale fire, ergonomics and continuity checklists with ESG reporting for disclosures.", sections: ["checklists", "reporting", "actions"] },
+    { name: "Healthcare & Medical", blurb: "Healthcare waste, sharps and infection-control checklists with staff competency records.", sections: ["checklists", "incidents", "training"] },
+    { name: "Education", blurb: "Lab chemical safety, drill logging and student/staff incident reporting for institutions.", sections: ["checklists", "incidents", "training"] },
+    { name: "Public Sector & NGOs", blurb: "Programme screening, field-staff safety procedures and community grievance tracking.", sections: ["esia", "records", "actions"] }
   ],
   solutionsByRole: [
     { name: "Frontline Worker / Site Technician", blurb: "Offline-capable checklists and free IEC materials on the exact task at hand — usable with patchy site connectivity.", sections: ["checklists", "iec"] },
