@@ -116,6 +116,7 @@ const body = `
         <option value="sw">Kiswahili</option>
         <option value="fr">Français</option>
         <option value="pt">Português</option>
+        <option value="zh">中文</option>
       </select>
       <select id="theme-select" title="Colour theme">
         <option value="forest">Forest</option>

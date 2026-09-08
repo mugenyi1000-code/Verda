@@ -439,7 +439,16 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
       credits: "Créditos e Faturação", skills: "Conselheiro de Competências",
       resources: "Centro de Recursos", supplies: "Suprimentos e Aluguer", iec: "Materiais IEC", solutions: "Soluções",
-      login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" }
+      login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" },
+    zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
+      nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
+      dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
+      analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
+      audits: "审核", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
+      clients: "客户与合规服务计划", documents: "文档库", checklists: "检查表",
+      credits: "积分与账单", skills: "技能顾问",
+      resources: "资源中心", supplies: "用品与租赁", iec: "IEC 宣传材料", solutions: "解决方案",
+      login: "登录", signup: "免费注册", logout: "退出" }
   },
 
   // ---- Incidents ----------------------------------------------------------

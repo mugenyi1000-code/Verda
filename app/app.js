@@ -135,6 +135,54 @@
       <rect x="90" y="52" width="20" height="44" class="illus-fill-surface"/>
       <rect x="78" y="64" width="44" height="20" class="illus-fill-surface"/>
       <path d="M40 100 H70 L80 84 L92 112 L100 92 L108 100 H160" fill="none" stroke="var(--brand-1)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`,
+    industry: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <path d="M18 122 V70 L54 88 V70 L90 88 V52 H108 V122 Z" class="illus-fill-1"/>
+      <rect x="118" y="46" width="16" height="76" rx="3" class="illus-fill-2"/>
+      <rect x="142" y="62" width="16" height="60" rx="3" class="illus-fill-2"/>
+      <path d="M126 40 q-6 -10 2 -18 q-2 10 6 14 q4 4 0 10Z" class="illus-fill-muted"/>
+      <path d="M150 56 q-5 -8 1 -14 q-1 8 5 11 q3 3 0 8Z" class="illus-fill-muted"/>
+      <rect x="30" y="96" width="12" height="12" rx="2" class="illus-fill-surface"/>
+      <rect x="62" y="100" width="12" height="12" rx="2" class="illus-fill-surface"/>`,
+    audit: `
+      <rect x="42" y="18" width="86" height="106" rx="7" class="illus-fill-3"/>
+      <rect x="70" y="10" width="30" height="16" rx="5" class="illus-fill-2"/>
+      <path d="M58 50 l8 8 16 -18" fill="none" stroke="var(--brand-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M58 78 l8 8 16 -18" fill="none" stroke="var(--brand-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="92" y="48" width="26" height="5" rx="2.5" class="illus-fill-2"/>
+      <rect x="92" y="76" width="26" height="5" rx="2.5" class="illus-fill-2"/>
+      <circle cx="140" cy="92" r="24" fill="none" stroke="var(--accent)" stroke-width="7"/>
+      <path d="M157 109 L176 128" stroke="var(--accent)" stroke-width="9" stroke-linecap="round"/>`,
+    training: `
+      <path d="M0 124 H200 V140 H0 Z" class="illus-fill-3"/>
+      <path d="M100 30 L164 56 L100 82 L36 56 Z" class="illus-fill-1"/>
+      <path d="M56 66 V96 q0 16 44 16 t44 -16 V66" fill="none" stroke="var(--brand-2)" stroke-width="7" stroke-linecap="round"/>
+      <path d="M170 60 V96" stroke="var(--accent)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="170" cy="102" r="7" class="illus-fill-accent"/>`,
+    supplies: `
+      <path d="M0 124 H200 V140 H0 Z" class="illus-fill-3"/>
+      <path d="M56 62 q0 -30 26 -30 t26 30 v6 H56Z" class="illus-fill-accent"/>
+      <rect x="46" y="66" width="76" height="10" rx="5" class="illus-fill-accent"/>
+      <path d="M132 78 h34 l6 42 h-46Z" class="illus-fill-1"/>
+      <path d="M138 78 v-10 q0 -8 11 -8 t11 8 v10" fill="none" stroke="var(--brand-2)" stroke-width="5"/>
+      <path d="M30 92 h28 v28 H30Z" class="illus-fill-2"/>
+      <path d="M30 92 q-8 -14 6 -18 q6 -2 8 6" fill="none" stroke="var(--brand-2)" stroke-width="5" stroke-linecap="round"/>`,
+    documents: `
+      <rect x="34" y="20" width="72" height="94" rx="6" class="illus-fill-2"/>
+      <rect x="52" y="30" width="72" height="94" rx="6" class="illus-fill-3"/>
+      <rect x="70" y="40" width="72" height="94" rx="6" class="illus-fill-1"/>
+      <rect x="84" y="60" width="44" height="6" rx="3" class="illus-fill-surface"/>
+      <rect x="84" y="76" width="44" height="6" rx="3" class="illus-fill-surface"/>
+      <rect x="84" y="92" width="26" height="6" rx="3" class="illus-fill-surface"/>
+      <circle cx="158" cy="96" r="20" class="illus-fill-accent"/>
+      <path d="M158 86 v20 M148 98 l10 10 10 -10" fill="none" stroke="var(--surface)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+    sitemap: `
+      <circle cx="100" cy="72" r="52" class="illus-fill-3"/>
+      <path d="M48 72 h104 M100 20 q22 26 0 104 q-22 -52 0 -104" fill="none" stroke="var(--brand-2)" stroke-width="3"/>
+      <circle cx="100" cy="72" r="52" fill="none" stroke="var(--brand-2)" stroke-width="3"/>
+      <path d="M138 118 q-18 -22 -18 -34 a18 18 0 1 1 36 0 q0 12 -18 34Z" class="illus-fill-1"/>
+      <circle cx="138" cy="83" r="7" class="illus-fill-surface"/>
+      <path d="M56 108 q-12 -15 -12 -23 a12 12 0 1 1 24 0 q0 8 -12 23Z" class="illus-fill-accent"/>`,
     governance: `
       <rect x="52" y="26" width="70" height="92" rx="6" class="illus-fill-3"/>
       <rect x="66" y="44" width="42" height="5" rx="2.5" class="illus-fill-2"/>
@@ -221,6 +269,37 @@
       </div>`).join("");
   }
 
+  /* Which illustration heads each module page. Dashboard is excluded — it
+     leads with the hero and the pillar gallery instead. */
+  const SECTION_ILLUS = {
+    analytics: "governance", incidents: "safety", risk: "safety", audits: "audit",
+    records: "people", maps: "sitemap", actions: "audit", reporting: "documents",
+    esia: "wildlife", training: "training", workflows: "governance", clients: "people",
+    checklists: "industry", documents: "documents", credits: "governance",
+    solutions: "industry", resources: "training", supplies: "supplies",
+    iec: "health", skills: "training"
+  };
+
+  /* Give every module page a picture without touching 20 render functions:
+     wrap its <h1> (and the lead paragraph after it) beside an illustration. */
+  function addPageHeaderIllustration(main, sectionId) {
+    const name = SECTION_ILLUS[sectionId];
+    if (!name) return;
+    const h1 = main.querySelector("h1");
+    if (!h1 || h1.closest(".hero")) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "page-header";
+    const text = document.createElement("div");
+    text.className = "page-header-text";
+    h1.parentNode.insertBefore(wrap, h1);
+    const lead = h1.nextElementSibling && h1.nextElementSibling.matches("p") ? h1.nextElementSibling : null;
+    wrap.appendChild(text);
+    text.appendChild(h1);
+    if (lead) text.appendChild(lead);
+    wrap.insertAdjacentHTML("beforeend", illustration(name, "page-header-illus"));
+  }
+
   function currentSectionId() {
     const h = location.hash.replace(/^#\//, "");
     return SECTIONS.some(s => s.id === h) ? h : "dashboard";
@@ -233,6 +312,7 @@
     const main = document.getElementById("main");
     main.innerHTML = "";
     section.render(main);
+    addPageHeaderIllustration(main, id);
     updateCreditsChip();
   }
 
