@@ -292,6 +292,27 @@ const VERDA_SEED = {
     { id: "permitting", label: "Permitting", hint: "Licence status, renewal dates, submissions" }
   ],
 
+  // ---- IFC Performance Standards reporting --------------------------------
+  // The eight IFC Performance Standards on Environmental and Social
+  // Sustainability — the framework lenders and international clients most
+  // often require alongside national (e.g. NEMA) reporting.
+  ifcStandards: [
+    { id: "ps1", label: "PS1 — Assessment & Management of E&S Risks and Impacts", hint: "ESMS, risk identification, management programmes, monitoring and review" },
+    { id: "ps2", label: "PS2 — Labor and Working Conditions", hint: "Working conditions, worker grievance mechanism, OHS, contracted and supply-chain workers" },
+    { id: "ps3", label: "PS3 — Resource Efficiency and Pollution Prevention", hint: "Resource use, GHG emissions, effluent, air emissions, waste and hazardous materials" },
+    { id: "ps4", label: "PS4 — Community Health, Safety and Security", hint: "Community exposure to risk, emergency preparedness, conduct of security personnel" },
+    { id: "ps5", label: "PS5 — Land Acquisition and Involuntary Resettlement", hint: "Physical/economic displacement, compensation, livelihood restoration" },
+    { id: "ps6", label: "PS6 — Biodiversity Conservation & Living Natural Resources", hint: "Habitat and species impacts, ecosystem services, sustainable resource management" },
+    { id: "ps7", label: "PS7 — Indigenous Peoples", hint: "Consultation, free prior and informed consent where applicable, impacts on lands and culture" },
+    { id: "ps8", label: "PS8 — Cultural Heritage", hint: "Chance-finds procedure, tangible and intangible cultural heritage" }
+  ],
+
+  // Which frameworks a periodic report can be built against.
+  reportStandards: [
+    { id: "eeis", name: "EEIS Reporting — modular segments", title: "EEIS REPORTING", segmentsKey: "reportSegments" },
+    { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" }
+  ],
+
   // ---- ToR / ESIA structure ---------------------------------------------
   esiaSections: [
     { id: "background", title: "1. Project Description & Background" },

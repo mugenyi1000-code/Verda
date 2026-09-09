@@ -78,9 +78,13 @@ sub-sections in the sidebar:
 - **Actions (CAPA)** — one tracker for every corrective/preventive action
   whatever raised it, with owner, due date, priority and overdue flagging.
 - **EEIS Reporting** — the monthly/quarterly report, renamed from the old
-  "ESSR" label. Segments (Safety, Security, Environment, GHG, Community,
-  Permitting) can each be added or omitted per report; "Generate with AI
-  Assist" drafts the narrative and the report downloads as a real file.
+  "ESSR" label. Choose the reporting standard: **EEIS modular segments**
+  (Safety, Security, Environment, GHG, Community, Permitting) or the
+  **IFC Performance Standards** (PS1–PS8), the framework lenders and
+  international clients most often require alongside national reporting.
+  Either way each segment can be added or omitted per report; "Generate
+  with AI Assist" drafts the narrative and the report downloads as a real
+  file.
 - **ToR & ESIA Reporting** — structured input following the standard
   ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
   for EEIS processing" step.

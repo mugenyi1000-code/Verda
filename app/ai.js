@@ -18,7 +18,7 @@ const VerdaAI = (() => {
     return items.filter(Boolean).map(i => `  • ${i}`).join("\n");
   }
 
-  function narrativeForSegment(seg, data) {
+  function narrativeForSegment(seg, data, label) {
     const d = data || {};
     switch (seg) {
       case "safety":
@@ -48,20 +48,30 @@ const VerdaAI = (() => {
           `Current permit status: ${d.permitStatus || "valid"}. Next renewal due: ${d.renewalDate || "not set"}. ${d.submissionNote || "No new submissions were made this period."}\n` +
           (d.notes ? `Notes: ${d.notes}\n` : "");
       default:
-        return "";
+        // Any framework segment without a bespoke template — e.g. the IFC
+        // Performance Standards — is rendered from its own label and input.
+        return `${label || seg}\n` +
+          ((d.notes && d.notes.trim())
+            ? d.notes.trim()
+            : "Status not yet recorded for this period. Add site data, monitoring results and any corrective actions before this report is issued.") + "\n";
     }
   }
 
-  function generateAIDraft({ clientName, period, segments, segmentData }) {
+  function generateAIDraft({ clientName, period, segments, segmentData, standardTitle, segmentDefs }) {
+    const defs = segmentDefs || [];
+    const labelFor = (id) => {
+      const d = defs.find((x) => x.id === id);
+      return d ? d.label : id[0].toUpperCase() + id.slice(1);
+    };
     const header =
-`EEIS REPORTING
+`${standardTitle || "EEIS REPORTING"}
 Client: ${clientName || "—"}
 Reporting Period: ${period || "—"}
-Segments included: ${segments.map(s => s[0].toUpperCase() + s.slice(1)).join(", ")}
+Segments included: ${segments.map(labelFor).join("; ")}
 Generated: ${new Date().toISOString().slice(0, 10)}
 -----------------------------------------------------------------------`;
 
-    const body = segments.map(s => narrativeForSegment(s, segmentData[s] || {})).join("\n");
+    const body = segments.map(s => narrativeForSegment(s, segmentData[s] || {}, labelFor(s))).join("\n");
 
     const summary =
 `\nSUMMARY\nThis report was compiled from the ${segments.length} selected segment(s) above. ` +

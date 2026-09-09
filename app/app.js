@@ -532,19 +532,27 @@
 
   /* ============================ EEIS REPORTING ============================ */
   function renderReporting(main) {
-    const segs = VERDA_SEED.reportSegments;
+    // Which framework the report is built against: EEIS's own modular
+    // segments, or the eight IFC Performance Standards.
+    let standard = VERDA_SEED.reportStandards[0];
+    const segsFor = (std) => VERDA_SEED[std.segmentsKey];
+    let segs = segsFor(standard);
+
     main.appendChild(h(`
       <section>
         <h1>EEIS Reporting</h1>
-        <p class="muted">Build a monthly or quarterly report from modular segments — include only what's relevant to this client.</p>
+        <p class="muted">Build a monthly or quarterly report from modular segments — include only what's relevant to this client. Report against EEIS segments or the IFC Performance Standards.</p>
         <div class="card">
+          <label>Reporting standard
+            <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
+          </label>
           <label>Client
             <select id="rep-client">${state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select>
           </label>
           <label>Reporting period<input id="rep-period" placeholder="e.g. Q3 2026 / September 2026" /></label>
           <fieldset class="segments">
             <legend>Segments to include</legend>
-            ${segs.map(s => `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${s.id}" checked /> ${s.label} <span class="muted small">— ${s.hint}</span></label>`).join("")}
+            <div id="seg-toggles"></div>
           </fieldset>
           <div id="seg-forms"></div>
           <div class="modal-actions">
@@ -554,7 +562,7 @@
         <div id="report-output"></div>
         <div class="card">
           <h3>Past reports</h3>
-          <table class="table"><thead><tr><th>Client</th><th>Period</th><th>Segments</th><th>Generated</th><th></th></tr></thead>
+          <table class="table"><thead><tr><th>Client</th><th>Standard</th><th>Period</th><th>Segments</th><th>Generated</th><th></th></tr></thead>
           <tbody id="reports-list"></tbody></table>
         </div>
       </section>
@@ -567,21 +575,36 @@
         const s = segs.find(x => x.id === id);
         return `<div class="seg-form" data-seg="${id}">
           <h4>${s.label}</h4>
-          <textarea data-field="notes" placeholder="Notes / narrative for ${s.label.toLowerCase()} this period..."></textarea>
+          <textarea data-field="notes" placeholder="Notes / narrative for this ${standard.id === "ifc" ? "Performance Standard" : "segment"} this period..."></textarea>
         </div>`;
       }).join("") || `<p class="muted">Select at least one segment above.</p>`;
     }
-    renderSegForms();
-    main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderSegForms));
+
+    function renderSegToggles() {
+      main.querySelector("#seg-toggles").innerHTML = segs.map(s =>
+        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${s.id}" checked /> ${s.label} <span class="muted small">— ${s.hint}</span></label>`
+      ).join("");
+      main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderSegForms));
+      renderSegForms();
+    }
+    renderSegToggles();
+
+    main.querySelector("#rep-standard").addEventListener("change", (e) => {
+      standard = VERDA_SEED.reportStandards.find(s => s.id === e.target.value);
+      segs = segsFor(standard);
+      renderSegToggles();
+    });
 
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${r.clientName}</td><td>${r.period}</td><td>${r.segments.join(", ")}</td><td>${r.date.slice(0,10)}</td>
+        <tr><td>${r.clientName}</td><td>${statusBadge(r.standardName || "EEIS", r.standard === "ifc" ? "serious" : "good")}</td>
+        <td>${r.period}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
         <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
-        `<tr><td colspan="5" class="muted">No reports generated yet.</td></tr>`;
+        `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
-        downloadText(`EEIS-Reporting-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
+        const prefix = r.standard === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting";
+        downloadText(`${prefix}-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
       }));
     }
     refreshList();
@@ -598,13 +621,21 @@
         const notes = main.querySelector(`.seg-form[data-seg="${id}"] [data-field="notes"]`).value;
         segmentData[id] = { notes };
       });
-      const text = VerdaAI.generateAIDraft({ clientName: client.name, period, segments, segmentData });
-      const rec = { id: uid("rep"), clientName: client.name, period, segments, text, date: new Date().toISOString() };
+      const text = VerdaAI.generateAIDraft({
+        clientName: client.name, period, segments, segmentData,
+        standardTitle: standard.title, segmentDefs: segs
+      });
+      const rec = {
+        id: uid("rep"), clientName: client.name, period, segments, text,
+        standard: standard.id, standardName: standard.id === "ifc" ? "IFC PS" : "EEIS",
+        date: new Date().toISOString()
+      };
       state.reports.push(rec);
       save();
       main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${text}</pre>
         <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
-      main.querySelector("#dl-now").addEventListener("click", () => downloadText(`EEIS-Reporting-${client.name.replace(/\s+/g,"_")}.txt`, text));
+      main.querySelector("#dl-now").addEventListener("click", () =>
+        downloadText(`${standard.id === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
       renderTopbar();
       refreshList();
     });
