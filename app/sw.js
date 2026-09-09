@@ -37,6 +37,13 @@ self.addEventListener("fetch", (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
         return res;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+      .catch(() => caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        // Only a page navigation may fall back to the app shell. Serving
+        // index.html for a missed script or style request hands HTML to a
+        // JS/CSS parser ("Unexpected token '<'") and breaks the whole app.
+        if (event.request.mode === "navigate") return caches.match("./index.html");
+        return new Response("", { status: 504, statusText: "Offline and not cached" });
+      }))
   );
 });

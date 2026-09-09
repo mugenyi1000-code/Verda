@@ -82,7 +82,8 @@
     incidents: '<path d="M12 3.2 21.4 20H2.6Z"/><path d="M12 9.6v4.3M12 17h.01"/>',
     risk: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M9 3.5v17M15 3.5v17M3.5 9h17M3.5 15h17"/>',
     actions: '<path d="M4 12.5 9 17.5 20 6.5"/><path d="M4 6.5h8"/>',
-    training: '<path d="M12 4 2.5 8.2 12 12.4l9.5-4.2L12 4Z"/><path d="M6.5 10.4V15c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.6"/><path d="M21.5 8.2v5.1"/>'
+    training: '<path d="M12 4 2.5 8.2 12 12.4l9.5-4.2L12 4Z"/><path d="M6.5 10.4V15c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.6"/><path d="M21.5 8.2v5.1"/>',
+    revenue: '<path d="M3.5 20.5h17"/><path d="M6 17V9.5M11 17V5.5M16 17v-5M21 17V3.5"/><path d="M17.8 6.2 21 3.5M21 3.5h-3.4M21 3.5v3.3"/>'
   };
   function icon(name, cls) {
     const path = ICON_PATHS[name];
@@ -246,6 +247,7 @@
     { id: "checklists", group: "manage", label: () => T().checklists, render: renderChecklists },
     { id: "documents", group: "manage", label: () => T().documents, render: renderDocuments },
     { id: "credits", group: "manage", label: () => T().credits, render: renderCredits },
+    { id: "revenue", group: "manage", label: () => T().revenue, render: renderRevenue },
 
     // Grow — enablement, marketplace and community
     { id: "solutions", group: "grow", label: () => T().solutions, render: renderSolutions },
@@ -275,7 +277,7 @@
     analytics: "governance", incidents: "safety", risk: "safety", audits: "audit",
     records: "people", maps: "sitemap", actions: "audit", reporting: "documents",
     esia: "wildlife", training: "training", workflows: "governance", clients: "people",
-    checklists: "industry", documents: "documents", credits: "governance",
+    checklists: "industry", documents: "documents", credits: "governance", revenue: "governance",
     solutions: "industry", resources: "training", supplies: "supplies",
     iec: "health", skills: "training"
   };
@@ -372,7 +374,7 @@
   /* ---- Charts: inline SVG, no chart library (keeps the app offline-capable).
      Colors come from CSS custom properties so they follow the active theme;
      the status palette is fixed and always paired with a visible label. ---- */
-  function barChart(rows, title) {
+  function barChart(rows, title, valueLabel) {
     const W = 520, H = 210, padL = 16, padR = 12, padT = 26, padB = 40;
     const plotW = W - padL - padR, plotH = H - padT - padB;
     const max = Math.max(1, ...rows.map(r => r.value));
@@ -391,7 +393,7 @@
         `<text x="${x + barW / 2}" y="${padT + plotH + 17}" class="chart-label">${r.label}</text></g>`;
     }).join("");
     const table = `<details class="chart-table"><summary>View data table</summary>
-      <table class="table"><thead><tr><th>${title}</th><th>Count</th></tr></thead><tbody>
+      <table class="table"><thead><tr><th>${title}</th><th>${valueLabel || "Count"}</th></tr></thead><tbody>
       ${rows.map(r => `<tr><td>${r.label}</td><td>${r.value}</td></tr>`).join("")}
       </tbody></table></details>`;
     return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}">
@@ -1548,6 +1550,159 @@
       main.querySelector("#tr-person").value = "";
       refresh();
     });
+  }
+
+  /* ============================ REVENUE PLANNER ============================ */
+  function renderRevenue(main) {
+    if (!state.revenue) state.revenue = JSON.parse(JSON.stringify(VERDA_SEED.revenueDefaults));
+    const R = state.revenue;
+    const money = (n) => `${R.currency} ${Math.round(n).toLocaleString()}`;
+
+    /* One visit falls in each billing period (a quarterly plan is visited
+       quarterly, a monthly plan monthly), so the fee for a period must clear
+       the cost of that period's visit — that is the break-even fee. */
+    function tierMaths(t) {
+      const costPerVisit = t.labCost + (t.daysPerVisit * R.dayRate) + t.travel;
+      const annualRevenue = t.fee * t.visitsPerYear * t.clients;
+      const annualCost = costPerVisit * t.visitsPerYear * t.clients;
+      const marginPerVisit = t.fee - costPerVisit;
+      return {
+        costPerVisit, annualRevenue, annualCost, marginPerVisit,
+        annualMargin: annualRevenue - annualCost,
+        mrr: annualRevenue / 12,
+        monthlyMargin: (annualRevenue - annualCost) / 12,
+        marginPct: t.fee > 0 ? (marginPerVisit / t.fee) * 100 : 0
+      };
+    }
+
+    main.appendChild(h(`
+      <section>
+        <h1>Revenue Planner</h1>
+        <p class="muted">What the compliance care plans earn, once your real rates go in. Enter fees, client counts and delivery costs — Verda works out recurring revenue, gross margin per visit, and how many clients it takes to cover overhead.</p>
+        <div class="card notice-card">
+          <strong>These are placeholder figures, not EEIS rates.</strong>
+          <p class="muted small">Replace every number below with your own rate card before quoting. The three that decide everything: your fee per tier, your lab cost per visit, and your loaded day rate.</p>
+        </div>
+        <div class="card">
+          <h3>Shared inputs</h3>
+          <div class="form-row">
+            <label>Currency<input id="rv-currency" value="${R.currency}" /></label>
+            <label>Loaded day rate<input id="rv-dayrate" type="number" min="0" value="${R.dayRate}" /></label>
+            <label>Fixed monthly overhead<input id="rv-overhead" type="number" min="0" value="${R.overhead}" /></label>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Per tier</h3>
+          <div class="table-scroll">
+            <table class="table"><thead><tr>
+              <th>Tier</th><th>Billing</th><th>Fee per period</th><th>Clients</th>
+              <th>Lab cost / visit</th><th>Days / visit</th><th>Travel / visit</th>
+            </tr></thead><tbody>
+              ${R.tiers.map(t => `<tr>
+                <td>${t.name}</td>
+                <td class="muted small">${t.billing}<br>${t.visitsPerYear} visits/yr</td>
+                <td><input class="rv-in" data-tier="${t.id}" data-field="fee" type="number" min="0" value="${t.fee}" /></td>
+                <td><input class="rv-in" data-tier="${t.id}" data-field="clients" type="number" min="0" value="${t.clients}" /></td>
+                <td><input class="rv-in" data-tier="${t.id}" data-field="labCost" type="number" min="0" value="${t.labCost}" /></td>
+                <td><input class="rv-in" data-tier="${t.id}" data-field="daysPerVisit" type="number" min="0" step="0.25" value="${t.daysPerVisit}" /></td>
+                <td><input class="rv-in" data-tier="${t.id}" data-field="travel" type="number" min="0" value="${t.travel}" /></td>
+              </tr>`).join("")}
+            </tbody></table>
+          </div>
+        </div>
+        <div id="rv-results"></div>
+      </section>`));
+
+    function refresh() {
+      const rows = R.tiers.map(t => ({ t, m: tierMaths(t) }));
+      const totalClients = R.tiers.reduce((a, t) => a + t.clients, 0);
+      const mrr = rows.reduce((a, r) => a + r.m.mrr, 0);
+      const monthlyMargin = rows.reduce((a, r) => a + r.m.monthlyMargin, 0);
+      const marginPct = mrr > 0 ? (monthlyMargin / mrr) * 100 : 0;
+      const marginPerClient = totalClients > 0 ? monthlyMargin / totalClients : 0;
+      const breakEvenClients = marginPerClient > 0 ? Math.ceil(R.overhead / marginPerClient) : null;
+      const profit = monthlyMargin - R.overhead;
+
+      const chartRows = rows.map(r => ({
+        label: r.t.name.split("—")[0].trim(),
+        value: Math.max(0, Math.round(r.m.monthlyMargin)),
+        color: "var(--chart-1)"
+      }));
+
+      main.querySelector("#rv-results").innerHTML = `
+        <div class="grid grid-3">
+          ${statCard("revenue", "Monthly recurring revenue", money(mrr), `${totalClients} client${totalClients === 1 ? "" : "s"} across ${R.tiers.length} tiers.`)}
+          ${statCard("analytics", "Monthly gross margin", money(monthlyMargin), `${marginPct.toFixed(0)}% of revenue after delivery cost.`, marginPct < 30)}
+          ${statCard("governance", "After overhead", money(profit), profit >= 0 ? "Covers overhead." : "Does not yet cover overhead.", profit < 0)}
+        </div>
+        <div class="grid grid-2">
+          <div class="card"><h3>Break-even</h3>
+            ${breakEvenClients === null
+              ? `<p class="muted">No tier earns a positive margin yet — a fee has to clear its own cost per visit before client count can help.</p>`
+              : `<div class="stat">${breakEvenClients}</div>
+                 <p class="muted">clients at the current mix to cover ${money(R.overhead)} of monthly overhead (average margin ${money(marginPerClient)} per client per month).</p>`}
+            <p class="muted small">Annual: revenue ${money(mrr * 12)} · gross margin ${money(monthlyMargin * 12)}</p>
+          </div>
+          <div class="card"><h3>Monthly gross margin by tier</h3>${barChart(chartRows, "Monthly gross margin by tier", R.currency + " / month")}</div>
+        </div>
+        <div class="card">
+          <h3>Margin per visit</h3>
+          <p class="muted small">A tier only works if its fee for the period clears the cost of that period's visit. Anything at or below zero loses more money with every client you add.</p>
+          <div class="table-scroll">
+            <table class="table" id="rv-margin-table"><thead><tr>
+              <th>Tier</th><th>Fee</th><th>Cost / visit</th><th>Margin / visit</th><th>Margin %</th><th>MRR</th><th>Monthly margin</th>
+            </tr></thead><tbody>
+              ${rows.map(r => {
+                const band = r.m.marginPerVisit <= 0 ? "critical" : r.m.marginPct < 30 ? "warning" : "good";
+                return `<tr>
+                  <td>${r.t.name}</td>
+                  <td>${money(r.t.fee)}</td>
+                  <td>${money(r.m.costPerVisit)}</td>
+                  <td>${money(r.m.marginPerVisit)}</td>
+                  <td>${statusBadge(r.m.marginPct.toFixed(0) + "%", band)}</td>
+                  <td>${money(r.m.mrr)}</td>
+                  <td>${money(r.m.monthlyMargin)}</td>
+                </tr>`;
+              }).join("")}
+            </tbody></table>
+          </div>
+          <div class="modal-actions"><button class="btn" id="rv-export">Download summary</button></div>
+        </div>`;
+
+      main.querySelector("#rv-export").addEventListener("click", () => {
+        const lines = [
+          "VERDA REVENUE PLANNER — SUMMARY",
+          `Generated: ${today()}`,
+          `Currency: ${R.currency} · Loaded day rate: ${money(R.dayRate)} · Monthly overhead: ${money(R.overhead)}`,
+          "-----------------------------------------------------------------------",
+          ...rows.map(r =>
+            `${r.t.name} (${r.t.billing}, ${r.t.visitsPerYear} visits/yr, ${r.t.clients} clients)\n` +
+            `  Fee ${money(r.t.fee)} · cost/visit ${money(r.m.costPerVisit)} · margin/visit ${money(r.m.marginPerVisit)} (${r.m.marginPct.toFixed(0)}%)\n` +
+            `  MRR ${money(r.m.mrr)} · monthly margin ${money(r.m.monthlyMargin)}`),
+          "-----------------------------------------------------------------------",
+          `TOTAL MRR: ${money(mrr)}`,
+          `TOTAL MONTHLY GROSS MARGIN: ${money(monthlyMargin)} (${marginPct.toFixed(0)}%)`,
+          `AFTER OVERHEAD: ${money(profit)}`,
+          breakEvenClients === null ? "BREAK-EVEN: not reachable at current fees" : `BREAK-EVEN: ${breakEvenClients} clients at the current mix`,
+          "",
+          "Figures are only as good as the rates entered. Verify against EEIS's rate card."
+        ];
+        downloadText("Verda-Revenue-Summary.txt", lines.join("\n"));
+      });
+    }
+
+    function bindInputs() {
+      main.querySelector("#rv-currency").addEventListener("input", (e) => { R.currency = e.target.value || "USD"; save(); refresh(); });
+      main.querySelector("#rv-dayrate").addEventListener("input", (e) => { R.dayRate = parseFloat(e.target.value) || 0; save(); refresh(); });
+      main.querySelector("#rv-overhead").addEventListener("input", (e) => { R.overhead = parseFloat(e.target.value) || 0; save(); refresh(); });
+      main.querySelectorAll(".rv-in").forEach(inp => inp.addEventListener("input", () => {
+        const tier = R.tiers.find(t => t.id === inp.dataset.tier);
+        tier[inp.dataset.field] = parseFloat(inp.value) || 0;
+        save(); refresh();
+      }));
+    }
+    bindInputs();
+    refresh();
   }
 
   /* ============================ ANALYTICS ============================ */

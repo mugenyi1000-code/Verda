@@ -132,6 +132,15 @@ a { color: var(--brand-1); }
 
 .solution-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
+/* ---- Wide tables scroll in their own container, never the page body ---- */
+.table-scroll { overflow-x: auto; }
+.table-scroll .table { min-width: 640px; }
+.table-scroll input { min-width: 84px; }
+
+/* ---- Notice card: a caveat that must not read as decoration ---- */
+.notice-card { border-left: 4px solid var(--accent); background: var(--brand-3); }
+.notice-card p { margin: 6px 0 0; }
+
 /* ---- Sector grid ---- */
 .sector-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 @media (max-width: 900px) { .sector-groups { grid-template-columns: 1fr; } }

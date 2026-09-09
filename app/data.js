@@ -428,6 +428,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
       dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
+      revenue: "Revenue Planner",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
       audits: "Audits", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
       clients: "Clients & Compliance Care Plans", documents: "Documents Library", checklists: "Checklists",
@@ -437,6 +438,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
       dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
+      revenue: "Mpango wa Mapato",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
       audits: "Ukaguzi", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
       clients: "Wateja na Mipango ya Uzingatiaji", documents: "Maktaba ya Hati", checklists: "Orodha za Ukaguzi",
@@ -446,6 +448,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
       dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
+      revenue: "Planificateur de Revenus",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
       audits: "Audits", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
       clients: "Clients et Plans de Conformité", documents: "Bibliothèque de Documents", checklists: "Listes de Contrôle",
@@ -455,6 +458,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
       dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
+      revenue: "Planeador de Receitas",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
       audits: "Auditorias", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
@@ -464,6 +468,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
       dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
+      revenue: "收入测算",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
       audits: "审核", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
       clients: "客户与合规服务计划", documents: "文档库", checklists: "检查表",
@@ -513,6 +518,25 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     { name: "ISO 45001 Awareness", validityMonths: 36 },
     { name: "ISO 14001 Awareness", validityMonths: 36 }
   ],
+
+  // ---- Revenue planner defaults --------------------------------------------
+  // PLACEHOLDER FIGURES — they exist so the planner opens with something to
+  // look at, not because they are EEIS's rates. Replace every one of them
+  // with the real rate card before quoting anything (see docs/pricing-tiers.md,
+  // which deliberately ships without prices for the same reason).
+  revenueDefaults: {
+    currency: "USD",
+    dayRate: 180,          // loaded cost of one consultant-day
+    overhead: 2500,        // fixed monthly overhead the plans must cover
+    tiers: [
+      { id: "t1", name: "Tier 1 — Essential", billing: "Quarterly", visitsPerYear: 4,
+        fee: 450, clients: 2, labCost: 0, daysPerVisit: 0.5, travel: 40 },
+      { id: "t2", name: "Tier 2 — Standard", billing: "Quarterly", visitsPerYear: 4,
+        fee: 900, clients: 2, labCost: 260, daysPerVisit: 1, travel: 60 },
+      { id: "t3", name: "Tier 3 — Priority", billing: "Monthly", visitsPerYear: 12,
+        fee: 700, clients: 1, labCost: 180, daysPerVisit: 1, travel: 60 }
+    ]
+  },
 
   // ---- Capability pillars (dashboard) --------------------------------------
   // Cross-sector pillars — what Verda covers, independent of industry.
