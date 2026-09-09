@@ -139,6 +139,30 @@ a { color: var(--brand-1); }
 .table-scroll .table { min-width: 640px; }
 .table-scroll input { min-width: 84px; }
 
+/* ---- Pricing plans ---- */
+.plan-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; align-items: stretch; }
+@media (max-width: 1200px) { .plan-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) { .plan-grid { grid-template-columns: 1fr; } }
+.plan-card {
+  position: relative; display: flex; flex-direction: column; gap: 4px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 20px; box-shadow: var(--shadow-sm);
+}
+.plan-featured { border-color: var(--brand-2); box-shadow: var(--shadow-md); }
+.plan-flag {
+  position: absolute; top: -11px; left: 20px; background: var(--solid-1); color: #fff;
+  font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 999px;
+}
+.plan-card h3 { margin: 4px 0 2px; }
+.plan-price { font-size: 1.9rem; font-weight: 800; color: var(--brand-1); letter-spacing: -.02em; }
+.plan-per { font-size: .82rem; font-weight: 600; color: var(--muted); letter-spacing: 0; }
+.plan-seats { margin: 0 0 8px; }
+.plan-pitch { font-size: .88rem; margin: 0 0 8px; }
+.plan-features { flex: 1; margin-bottom: 14px; }
+.plan-features li { font-size: .85rem; }
+.plan-card .btn { width: 100%; justify-content: center; }
+
 /* ---- Notice card: a caveat that must not read as decoration ---- */
 .notice-card { border-left: 4px solid var(--accent); background: var(--brand-3); }
 .notice-card p { margin: 6px 0 0; }
@@ -147,7 +171,9 @@ a { color: var(--brand-1); }
 .sector-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 @media (max-width: 900px) { .sector-groups { grid-template-columns: 1fr; } }
 .sector-group { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
-.sector-group-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 800; margin-bottom: 10px; }
+.sector-group-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.sector-group-illus { width: 72px; height: 48px; flex-shrink: 0; }
+.sector-group-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 800; }
 .sector-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .sector-chip {
   border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer;
@@ -844,6 +870,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
       dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
       revenue: "Revenue Planner",
+      plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
       audits: "Audits", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
       clients: "Clients & Compliance Care Plans", documents: "Documents Library", checklists: "Checklists",
@@ -854,6 +881,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
       dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
       revenue: "Mpango wa Mapato",
+      plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
       audits: "Ukaguzi", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
       clients: "Wateja na Mipango ya Uzingatiaji", documents: "Maktaba ya Hati", checklists: "Orodha za Ukaguzi",
@@ -864,6 +892,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
       dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
       revenue: "Planificateur de Revenus",
+      plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
       audits: "Audits", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
       clients: "Clients et Plans de Conformité", documents: "Bibliothèque de Documents", checklists: "Listes de Contrôle",
@@ -874,6 +903,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
       dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
       revenue: "Planeador de Receitas",
+      plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
       audits: "Auditorias", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
@@ -884,6 +914,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
       dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
       revenue: "收入测算",
+      plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
       audits: "审核", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
       clients: "客户与合规服务计划", documents: "文档库", checklists: "检查表",
@@ -951,6 +982,48 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       { id: "t3", name: "Tier 3 — Priority", billing: "Monthly", visitsPerYear: 12,
         fee: 700, clients: 1, labCost: 180, daysPerVisit: 1, travel: 60 }
     ]
+  },
+
+  // ---- Verda as a product: subscription packaging --------------------------
+  // How Verda is sold to other organisations (distinct from the compliance
+  // care plans EEIS sells as a service). Prices are a starting proposal, not
+  // a committed rate card — and nothing here can be charged until the
+  // backend, real auth and a payment gateway exist. See docs/monetisation.md.
+  platformPlans: [
+    { id: "free", name: "Starter", price: 0, per: "month", seats: "1 site, 1 user",
+      pitch: "Prove the value on one site before paying anything.",
+      features: ["All 18 sector checklists", "Incidents, risk register and actions", "EEIS Reporting (1 report/month)", "Free IEC materials", "Community access"],
+      cta: "Free forever" },
+    { id: "team", name: "Team", price: 49, per: "month", seats: "up to 5 sites, 10 users",
+      pitch: "For a single operator running their own compliance in-house.",
+      features: ["Everything in Starter", "Unlimited reports, EEIS and IFC PS", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
+      cta: "Most popular" },
+    { id: "business", name: "Business", price: 149, per: "month", seats: "up to 25 sites, 50 users",
+      pitch: "For consultancies and groups managing compliance across clients.",
+      features: ["Everything in Team", "Multi-client compliance care plans", "ToR & ESIA drafting", "ArcGIS site mapping and Matterport walkthroughs", "Document control and audit trail", "Priority support"],
+      cta: "Best for consultancies" },
+    { id: "enterprise", name: "Enterprise", price: null, per: "quote", seats: "unlimited sites and users",
+      pitch: "For multi-site operators and lender-reporting obligations.",
+      features: ["Everything in Business", "Single sign-on and role-based permissions", "Custom checklists and report templates", "API access and data export", "Onboarding and training", "Named account manager"],
+      cta: "Talk to us" }
+  ],
+
+  // Credit packs — usage revenue on top of subscription, for AI drafting and
+  // ESIA processing (see creditCosts).
+  creditPacks: [
+    { credits: 500, price: 25, label: "Starter pack" },
+    { credits: 1500, price: 60, label: "Growth pack" },
+    { credits: 5000, price: 175, label: "Scale pack" }
+  ],
+
+  // Defaults for the platform (SaaS) side of the revenue planner.
+  platformRevenueDefaults: {
+    subscribers: { team: 12, business: 4, enterprise: 1 },
+    enterprisePrice: 600,
+    monthlyChurnPct: 3,
+    creditRevenuePerPayingAccount: 8,
+    infraCostPerAccount: 3,
+    monthlyBuildCost: 4000
   },
 
   // ---- Capability pillars (dashboard) --------------------------------------
@@ -1272,7 +1345,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       risks: [],
       actions: [],
       training: [],
-      ui: { checklistIndustry: null }
+      ui: { checklistIndustry: null },
+      platformRevenue: null
     };
   }
 
@@ -1319,7 +1393,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     risk: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M9 3.5v17M15 3.5v17M3.5 9h17M3.5 15h17"/>',
     actions: '<path d="M4 12.5 9 17.5 20 6.5"/><path d="M4 6.5h8"/>',
     training: '<path d="M12 4 2.5 8.2 12 12.4l9.5-4.2L12 4Z"/><path d="M6.5 10.4V15c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.6"/><path d="M21.5 8.2v5.1"/>',
-    revenue: '<path d="M3.5 20.5h17"/><path d="M6 17V9.5M11 17V5.5M16 17v-5M21 17V3.5"/><path d="M17.8 6.2 21 3.5M21 3.5h-3.4M21 3.5v3.3"/>'
+    revenue: '<path d="M3.5 20.5h17"/><path d="M6 17V9.5M11 17V5.5M16 17v-5M21 17V3.5"/><path d="M17.8 6.2 21 3.5M21 3.5h-3.4M21 3.5v3.3"/>',
+    plans: '<path d="M20.5 12.7 12.8 20.4a1.7 1.7 0 0 1-2.4 0l-7-7A1.7 1.7 0 0 1 2.9 12V4.6a1.7 1.7 0 0 1 1.7-1.7H12c.45 0 .88.18 1.2.5l7.3 7.3a1.7 1.7 0 0 1 0 2.4Z"/><circle cx="7.6" cy="7.6" r="1.3"/>'
   };
   function icon(name, cls) {
     const path = ICON_PATHS[name];
@@ -1381,6 +1456,39 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       <path d="M150 56 q-5 -8 1 -14 q-1 8 5 11 q3 3 0 8Z" class="illus-fill-muted"/>
       <rect x="30" y="96" width="12" height="12" rx="2" class="illus-fill-surface"/>
       <rect x="62" y="100" width="12" height="12" rx="2" class="illus-fill-surface"/>`,
+    energy: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <path d="M56 122 L64 44 L72 122 Z" class="illus-fill-muted"/>
+      <circle cx="64" cy="42" r="6" class="illus-fill-1"/>
+      <path d="M64 36 L60 6 L70 8 Z" class="illus-fill-1"/>
+      <path d="M69 45 L96 58 L90 66 Z" class="illus-fill-1"/>
+      <path d="M59 45 L32 58 L38 66 Z" class="illus-fill-1"/>
+      <path d="M126 122 L134 46 H150 L158 122 Z" fill="none" stroke="var(--brand-2)" stroke-width="4"/>
+      <path d="M131 96 H153 M133 74 H151 M135 58 H149" stroke="var(--brand-2)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M128 46 H118 M156 46 H166" stroke="var(--brand-2)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="176" cy="30" r="12" class="illus-fill-accent"/>`,
+    services: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <rect x="34" y="56" width="86" height="66" rx="4" class="illus-fill-1"/>
+      <path d="M28 56 H126 L118 34 H36 Z" class="illus-fill-accent"/>
+      <rect x="50" y="76" width="26" height="26" rx="3" class="illus-fill-surface"/>
+      <rect x="88" y="76" width="20" height="46" rx="3" class="illus-fill-surface"/>
+      <rect x="132" y="76" width="40" height="34" rx="4" class="illus-fill-2"/>
+      <path d="M172 86 h14 l10 12 v12 h-24Z" class="illus-fill-2"/>
+      <circle cx="146" cy="116" r="8" class="illus-fill-muted"/>
+      <circle cx="182" cy="116" r="8" class="illus-fill-muted"/>`,
+    publichealth: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <rect x="30" y="42" width="72" height="80" rx="5" class="illus-fill-1"/>
+      <rect x="60" y="56" width="12" height="34" class="illus-fill-surface"/>
+      <rect x="49" y="67" width="34" height="12" class="illus-fill-surface"/>
+      <rect x="44" y="100" width="18" height="22" rx="2" class="illus-fill-surface"/>
+      <rect x="72" y="100" width="18" height="22" rx="2" class="illus-fill-surface"/>
+      <path d="M140 122 V70" stroke="var(--brand-2)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M140 84 q-18 -6 -20 -24 q20 2 20 24Z" class="illus-fill-2"/>
+      <path d="M140 76 q18 -8 20 -26 q-20 4 -20 26Z" class="illus-fill-accent"/>
+      <path d="M168 122 V88" stroke="var(--brand-2)" stroke-width="4" stroke-linecap="round"/>
+      <path d="M168 98 q-14 -5 -15 -19 q15 2 15 19Z" class="illus-fill-2"/>`,
     audit: `
       <rect x="42" y="18" width="86" height="106" rx="7" class="illus-fill-3"/>
       <rect x="70" y="10" width="30" height="16" rx="5" class="illus-fill-2"/>
@@ -1484,6 +1592,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     { id: "documents", group: "manage", label: () => T().documents, render: renderDocuments },
     { id: "credits", group: "manage", label: () => T().credits, render: renderCredits },
     { id: "revenue", group: "manage", label: () => T().revenue, render: renderRevenue },
+    { id: "plans", group: "grow", label: () => T().plans, render: renderPlans },
 
     // Grow — enablement, marketplace and community
     { id: "solutions", group: "grow", label: () => T().solutions, render: renderSolutions },
@@ -1507,13 +1616,21 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       </div>`).join("");
   }
 
+  /* Picture for each sector family on the dashboard's coverage grid. */
+  const SECTOR_GROUP_ILLUS = {
+    "Industrial & Manufacturing": "industry",
+    "Energy, Resources & Construction": "energy",
+    "Services & Commerce": "services",
+    "Public, Health & Agriculture": "publichealth"
+  };
+
   /* Which illustration heads each module page. Dashboard is excluded — it
      leads with the hero and the pillar gallery instead. */
   const SECTION_ILLUS = {
     analytics: "governance", incidents: "safety", risk: "safety", audits: "audit",
     records: "people", maps: "sitemap", actions: "audit", reporting: "documents",
     esia: "wildlife", training: "training", workflows: "governance", clients: "people",
-    checklists: "industry", documents: "documents", credits: "governance", revenue: "governance",
+    checklists: "industry", documents: "documents", credits: "governance", revenue: "governance", plans: "revenue",
     solutions: "industry", resources: "training", supplies: "supplies",
     iec: "health", skills: "training"
   };
@@ -1583,6 +1700,18 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       </div>
     </div>`;
   }
+  /* Every value a user typed is escaped before it reaches innerHTML.
+     With local-only storage this is self-XSS, but the moment records are
+     shared between tenants an unescaped incident description becomes
+     stored XSS in someone else's session — so it is escaped at the seam,
+     not left for the backend to worry about. */
+  function esc(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
   function today() { return new Date().toISOString().slice(0, 10); }
   function daysUntil(dateStr) {
     if (!dateStr) return null;
@@ -1658,7 +1787,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           ${!state.user ? `<div class="hero-actions">
             <a class="btn btn-primary" href="#/dashboard" id="hero-signup">${T().signup}</a>
             <a class="btn btn-ghost" href="#/dashboard" id="hero-login">${T().login}</a>
-          </div>` : `<p>Signed in as <strong>${state.user.name}</strong> · ${state.user.role || ""} · ${creditBalance()} credits</p>`}
+          </div>` : `<p>Signed in as <strong>${esc(state.user.name)}</strong> · ${esc(state.user.role) || ""} · ${creditBalance()} credits</p>`}
         </div>
         <div class="grid grid-3">
           ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
@@ -1676,7 +1805,10 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <div class="sector-groups">
           ${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(group => `
             <div class="sector-group">
-              <div class="sector-group-title">${group}</div>
+              <div class="sector-group-header">
+                ${illustration(SECTOR_GROUP_ILLUS[group] || "industry", "sector-group-illus")}
+                <div class="sector-group-title">${group}</div>
+              </div>
               <div class="sector-chips">
                 ${VERDA_SEED.industries.filter(i => i.group === group).map(i =>
                   `<button class="sector-chip" data-sector="${i.id}">${i.name}</button>`).join("")}
@@ -1685,7 +1817,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         </div>
         <div class="grid grid-2">
           ${card("Upcoming site visits", `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
-            upcoming.map(c => `<tr><td>${c.name}</td><td>${c.industry}</td><td>${c.nextVisit}</td></tr>`).join("")
+            upcoming.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.nextVisit)}</td></tr>`).join("")
           }</tbody></table>`)}
           ${card("Quick actions", `<div class="quick-actions">
             <a class="btn" href="#/reporting">${icon("reporting")}<span>New EEIS Report</span></a>
@@ -1758,7 +1890,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
   function renderTopbar() {
     const box = document.getElementById("topbar-auth");
     if (state.user) {
-      box.innerHTML = `<span class="muted small">${state.user.name}</span> <button class="btn btn-ghost" id="logout-btn">${T().logout}</button>`;
+      box.innerHTML = `<span class="muted small">${esc(state.user.name)}</span> <button class="btn btn-ghost" id="logout-btn">${T().logout}</button>`;
       document.getElementById("logout-btn").addEventListener("click", () => { state.user = null; save(); renderTopbar(); route(); });
     } else {
       box.innerHTML = `<button class="btn btn-ghost" id="login-btn">${T().login}</button><button class="btn btn-primary" id="signup-btn">${T().signup}</button>`;
@@ -1785,7 +1917,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
             <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
           </label>
           <label>Client
-            <select id="rep-client">${state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join("")}</select>
+            <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
           </label>
           <label>Reporting period<input id="rep-period" placeholder="e.g. Q3 2026 / September 2026" /></label>
           <fieldset class="segments">
@@ -1835,8 +1967,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${r.clientName}</td><td>${statusBadge(r.standardName || "EEIS", r.standard === "ifc" ? "serious" : "good")}</td>
-        <td>${r.period}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
+        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "EEIS"), r.standard === "ifc" ? "serious" : "good")}</td>
+        <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
         <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
         `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
@@ -1870,7 +2002,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       };
       state.reports.push(rec);
       save();
-      main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${text}</pre>
+      main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${esc(text)}</pre>
         <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
       main.querySelector("#dl-now").addEventListener("click", () =>
         downloadText(`${standard.id === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
@@ -1910,7 +2042,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
     function refreshSubs() {
       main.querySelector("#esia-subs").innerHTML = state.esiaSubmissions.slice().reverse().map(s =>
-        `<tr><td>${s.project}</td><td><span class="badge">${s.status}</span></td><td>${s.date.slice(0,10)}</td></tr>`
+        `<tr><td>${esc(s.project)}</td><td><span class="badge">${esc(s.status)}</span></td><td>${esc(s.date.slice(0,10))}</td></tr>`
       ).join("") || `<tr><td colspan="3" class="muted">No submissions yet.</td></tr>`;
     }
     refreshSubs();
@@ -1924,7 +2056,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       const text = VerdaAI.generateEsiaDraft({ projectName, sections: collectSections() });
       const rec = { id: uid("esia"), project: projectName, text, date: new Date().toISOString() };
       state.esiaDrafts.push(rec); save();
-      main.querySelector("#esia-output").innerHTML = card("ToR / ESIA draft (preview)", `<pre class="report-pre">${text}</pre>
+      main.querySelector("#esia-output").innerHTML = card("ToR / ESIA draft (preview)", `<pre class="report-pre">${esc(text)}</pre>
         <div class="modal-actions"><button class="btn btn-primary" id="esia-dl">Download .txt</button></div>`);
       main.querySelector("#esia-dl").addEventListener("click", () => downloadText(`ESIA-${projectName.replace(/\s+/g,"_")}.txt`, text));
     });
@@ -1987,7 +2119,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         const text = VerdaAI.generateAuditSummary({ industry: ind.name, findings });
         state.audits.push({ id: uid("aud"), type: "EHS", industry: ind.name, text, date: new Date().toISOString() });
         save(); renderTopbar();
-        panel.querySelector("#audit-output").innerHTML = card("Audit findings (AI-assisted)", `<pre class="report-pre">${text}</pre>
+        panel.querySelector("#audit-output").innerHTML = card("Audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
           <div class="modal-actions"><button class="btn btn-primary" id="audit-dl">Download .txt</button></div>`);
         panel.querySelector("#audit-dl").addEventListener("click", () => downloadText(`EHS-Audit-${ind.name.replace(/\s+/g,"_")}.txt`, text));
       });
@@ -2022,7 +2154,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         const text = VerdaAI.generateAuditSummary({ industry: "ESMP Commitments", findings });
         state.audits.push({ id: uid("aud"), type: "ESIA", industry: "ESMP", text, date: new Date().toISOString() });
         save(); renderTopbar();
-        panel.querySelector("#ea-output").innerHTML = card("ESIA audit findings (AI-assisted)", `<pre class="report-pre">${text}</pre>
+        panel.querySelector("#ea-output").innerHTML = card("ESIA audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
           <div class="modal-actions"><button class="btn btn-primary" id="ea-dl">Download .txt</button></div>`);
         panel.querySelector("#ea-dl").addEventListener("click", () => downloadText("ESIA-Audit.txt", text));
       });
@@ -2047,7 +2179,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           <label>Category<select id="rec-cat">${cats.map(c => `<option>${c}</option>`).join("")}</select></label>
           <label>Description<input id="rec-desc" placeholder="e.g. PPE issued to site crew, tree planting event..." /></label>
           <label>Site / client
-            <select id="rec-client">${state.clients.map(c => `<option value="${c.name}">${c.name}</option>`).join("")}</select>
+            <select id="rec-client">${state.clients.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("")}</select>
           </label>
           <label>Photo (optional)<input id="rec-photo" type="file" accept="image/*" /></label>
           <button class="btn btn-primary" id="rec-add">Add record</button>
@@ -2058,11 +2190,11 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     function refresh() {
       main.querySelector("#rec-gallery").innerHTML = state.records.slice().reverse().map(r => `
         <div class="record-card">
-          ${r.photo ? `<img src="${r.photo}" alt="" />` : `<div class="record-noimg">No photo</div>`}
+          ${r.photo ? `<img src="${esc(r.photo)}" alt="" />` : `<div class="record-noimg">No photo</div>`}
           <div class="record-body">
-            <span class="badge">${r.category}</span>
-            <p>${r.desc}</p>
-            <p class="muted small">${r.client} · ${r.date.slice(0,10)}</p>
+            <span class="badge">${esc(r.category)}</span>
+            <p>${esc(r.desc)}</p>
+            <p class="muted small">${esc(r.client)} · ${esc(r.date.slice(0,10))}</p>
           </div>
         </div>`).join("") || `<p class="muted">No records yet.</p>`;
     }
@@ -2097,9 +2229,9 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           <table class="table"><thead><tr><th>Client</th><th>Lat</th><th>Lng</th><th></th></tr></thead>
           <tbody id="coord-rows">
             ${state.clients.map(c => `<tr>
-              <td>${c.name}</td>
-              <td><input class="coord-lat" data-id="${c.id}" value="${c.lat ?? ""}" placeholder="e.g. 0.3476" /></td>
-              <td><input class="coord-lng" data-id="${c.id}" value="${c.lng ?? ""}" placeholder="e.g. 32.5825" /></td>
+              <td>${esc(c.name)}</td>
+              <td><input class="coord-lat" data-id="${esc(c.id)}" value="${esc(c.lat ?? "")}" placeholder="e.g. 0.3476" /></td>
+              <td><input class="coord-lng" data-id="${esc(c.id)}" value="${esc(c.lng ?? "")}" placeholder="e.g. 32.5825" /></td>
               <td><button class="btn btn-ghost btn-sm" data-save="${c.id}">Save</button></td>
             </tr>`).join("")}
           </tbody></table>
@@ -2166,7 +2298,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       main.querySelector("#wf-runs").innerHTML = state.workflowRuns.slice().reverse().map(run => {
         const tpl = VERDA_SEED.workflowTemplates.find(t => t.id === run.templateId);
         return `<div class="wf-run">
-          <strong>${tpl.name}</strong> — ${run.client || "Unassigned"} <span class="muted small">${run.date.slice(0,10)}</span>
+          <strong>${esc(tpl.name)}</strong> — ${esc(run.client) || "Unassigned"} <span class="muted small">${run.date.slice(0,10)}</span>
           ${tpl.steps.map((s, i) => `<label class="seg-toggle"><input type="checkbox" class="wf-step" data-run="${run.id}" data-idx="${i}" ${run.done[i] ? "checked" : ""}/> ${s}</label>`).join("")}
         </div>`;
       }).join("") || `<p class="muted">No workflow runs yet — start one above.</p>`;
@@ -2211,7 +2343,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     `));
     function refresh() {
       main.querySelector("#cl-rows").innerHTML = state.clients.map(c => `
-        <tr><td>${c.name}</td><td>${c.industry}</td><td>${c.site}</td><td>${c.plan}</td><td>${c.nextVisit}</td><td>${c.permitExpiry}</td><td><span class="badge">${c.status}</span></td></tr>
+        <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td><td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>
       `).join("");
     }
     refresh();
@@ -2326,7 +2458,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     `));
     function refresh() {
       main.querySelector("#cr-ledger").innerHTML = state.creditLedger.filter(t => state.user && t.user === state.user.email).slice().reverse()
-        .map(t => `<tr><td>${t.date.slice(0,10)}</td><td>${t.reason}</td><td>${t.amount > 0 ? "+" : ""}${t.amount}</td></tr>`).join("")
+        .map(t => `<tr><td>${esc(t.date.slice(0,10))}</td><td>${esc(t.reason)}</td><td>${t.amount > 0 ? "+" : ""}${esc(t.amount)}</td></tr>`).join("")
         || `<tr><td colspan="3" class="muted">No transactions yet.</td></tr>`;
     }
     refresh();
@@ -2406,7 +2538,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <button class="btn btn-primary" id="ev-add">Add</button></div></div>
         <div class="grid grid-2" id="ev-list"></div>`;
       function refresh() {
-        panel.querySelector("#ev-list").innerHTML = state.events.map(e => card(e.title, `<p>${e.desc}</p><p class="muted small">${e.date}</p>`)).join("");
+        panel.querySelector("#ev-list").innerHTML = state.events.map(e => card(esc(e.title), `<p>${esc(e.desc)}</p><p class="muted small">${esc(e.date)}</p>`)).join("");
       }
       refresh();
       panel.querySelector("#ev-add").addEventListener("click", () => {
@@ -2423,7 +2555,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <div id="cm-list"></div>`;
       function refresh() {
         panel.querySelector("#cm-list").innerHTML = state.forumPosts.slice().reverse().map(p =>
-          card(p.author, `<p>${p.text}</p><p class="muted small">${p.date.slice(0,10)}</p>`)).join("");
+          card(esc(p.author), `<p>${esc(p.text)}</p><p class="muted small">${esc(p.date.slice(0,10))}</p>`)).join("");
       }
       refresh();
       panel.querySelector("#cm-post").addEventListener("click", () => {
@@ -2451,7 +2583,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <div class="card">
           <h3>Add an item to a category</h3>
           <div class="form-row">
-            <select id="sp-cat">${state.supplies.map(c => `<option>${c.category}</option>`).join("")}</select>
+            <select id="sp-cat">${state.supplies.map(c => `<option>${esc(c.category)}</option>`).join("")}</select>
             <input id="sp-item" placeholder="Item name" />
             <button class="btn btn-primary" id="sp-add">Add</button>
           </div>
@@ -2459,7 +2591,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       </section>
     `));
     function refresh() {
-      main.querySelector("#supply-list").innerHTML = state.supplies.map(c => card(c.category, `<ul class="checklist">${c.items.map(i => `<li>${i}</li>`).join("")}</ul>`)).join("");
+      main.querySelector("#supply-list").innerHTML = state.supplies.map(c => card(esc(c.category), `<ul class="checklist">${c.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`)).join("");
     }
     refresh();
     main.querySelector("#sp-add").addEventListener("click", () => {
@@ -2546,7 +2678,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           <h3>Report an incident</h3>
           <div class="form-row">
             <label>Date<input id="inc-date" type="date" value="${today()}" /></label>
-            <label>Site / client<select id="inc-client">${state.clients.map(c => `<option>${c.name}</option>`).join("")}</select></label>
+            <label>Site / client<select id="inc-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
             <label>Type<select id="inc-type">${S.incidentTypes.map(t => `<option>${t}</option>`).join("")}</select></label>
             <label>Severity<select id="inc-sev">${S.incidentSeverities.map(t => `<option>${t}</option>`).join("")}</select></label>
           </div>
@@ -2564,7 +2696,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     function refresh() {
       main.querySelector("#inc-rows").innerHTML = state.incidents.slice().reverse().map(i => `
         <tr>
-          <td>${i.date}</td><td>${i.client}</td><td>${i.type}</td>
+          <td>${esc(i.date)}</td><td>${esc(i.client)}</td><td>${esc(i.type)}</td>
           <td>${statusBadge(i.severity, SEV_STATUS[i.severity])}</td>
           <td><select class="inc-status" data-id="${i.id}">${S.incidentStatuses.map(s => `<option ${s === i.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
           <td><button class="btn btn-ghost btn-sm" data-raise="${i.id}">Raise action</button></td>
@@ -2660,8 +2792,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
       main.querySelector("#risk-rows").innerHTML = state.risks.slice().reverse().map(r => {
         const score = r.likelihood * r.severity, band = riskBandFor(score);
-        return `<tr><td>${r.hazard}</td><td>${r.area}</td><td>${score}</td>
-          <td>${statusBadge(band.label, band.status)}</td><td>${r.controls || "—"}</td><td>${r.owner || "—"}</td></tr>`;
+        return `<tr><td>${esc(r.hazard)}</td><td>${esc(r.area)}</td><td>${score}</td>
+          <td>${statusBadge(band.label, band.status)}</td><td>${esc(r.controls) || "—"}</td><td>${esc(r.owner) || "—"}</td></tr>`;
       }).join("") || `<tr><td colspan="6" class="muted">No hazards recorded yet.</td></tr>`;
     }
     refresh();
@@ -2711,8 +2843,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       main.querySelector("#act-rows").innerHTML = state.actions.slice().reverse().map(a => {
         const overdue = a.status !== "Closed" && daysUntil(a.due) < 0;
         return `<tr class="${overdue ? "row-overdue" : ""}">
-          <td>${a.title}</td><td>${a.source}</td><td>${a.owner || "—"}</td>
-          <td>${a.due || "—"} ${overdue ? statusBadge("Overdue", "critical") : ""}</td>
+          <td>${esc(a.title)}</td><td>${esc(a.source)}</td><td>${esc(a.owner) || "—"}</td>
+          <td>${esc(a.due) || "—"} ${overdue ? statusBadge("Overdue", "critical") : ""}</td>
           <td>${statusBadge(a.priority, PRI_STATUS[a.priority])}</td>
           <td><select class="act-status" data-id="${a.id}">${S.actionStatuses.map(s => `<option ${s === a.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
         </tr>`;
@@ -2750,7 +2882,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           <h3>Record training</h3>
           <div class="form-row">
             <label>Person<input id="tr-person" placeholder="Full name" /></label>
-            <label>Site / client<select id="tr-client">${state.clients.map(c => `<option>${c.name}</option>`).join("")}</select></label>
+            <label>Site / client<select id="tr-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
             <label>Course<select id="tr-course">${S.trainingCourses.map(c => `<option value="${c.name}">${c.name} (${c.validityMonths} mo)</option>`).join("")}</select></label>
             <label>Completed<input id="tr-date" type="date" value="${today()}" /></label>
           </div>
@@ -2766,8 +2898,8 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     function refresh() {
       main.querySelector("#tr-rows").innerHTML = state.training.slice().reverse().map(t => {
         const st = trainingStatus(t.expires);
-        return `<tr><td>${t.person}</td><td>${t.client}</td><td>${t.course}</td>
-          <td>${t.completed}</td><td>${t.expires}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
+        return `<tr><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.course)}</td>
+          <td>${esc(t.completed)}</td><td>${esc(t.expires)}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
       }).join("") || `<tr><td colspan="6" class="muted">No training records yet.</td></tr>`;
     }
     refresh();
@@ -2788,11 +2920,153 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     });
   }
 
+  /* ---- Platform (SaaS) revenue: what Verda earns its developers ---- */
+  function renderPlatformRevenue(container) {
+    const P = state.platformRevenue;
+    const plans = VERDA_SEED.platformPlans;
+    const priceOf = (id) => id === "enterprise" ? P.enterprisePrice : (plans.find(p => p.id === id) || {}).price || 0;
+    const usd = (n) => `$${Math.round(n).toLocaleString()}`;
+
+    const paidPlans = ["team", "business", "enterprise"];
+    const rows = paidPlans.map(id => {
+      const plan = plans.find(p => p.id === id);
+      const subs = P.subscribers[id] || 0;
+      const price = priceOf(id);
+      return { id, name: plan.name, subs, price, mrr: subs * price };
+    });
+    const subscriptionMrr = rows.reduce((a, r) => a + r.mrr, 0);
+    const payingAccounts = rows.reduce((a, r) => a + r.subs, 0);
+    const creditMrr = payingAccounts * P.creditRevenuePerPayingAccount;
+    const grossMrr = subscriptionMrr + creditMrr;
+    const infraCost = payingAccounts * P.infraCostPerAccount;
+    const netMrr = grossMrr - infraCost - P.monthlyBuildCost;
+    const churnedPerMonth = payingAccounts * (P.monthlyChurnPct / 100);
+    const arpa = payingAccounts > 0 ? grossMrr / payingAccounts : 0;
+    // Lifetime = 1/churn rate (months); LTV = ARPA x lifetime, net of infra.
+    const lifetimeMonths = P.monthlyChurnPct > 0 ? 100 / P.monthlyChurnPct : null;
+    const ltv = lifetimeMonths ? (arpa - P.infraCostPerAccount) * lifetimeMonths : null;
+    const accountsToBreakEven = (arpa - P.infraCostPerAccount) > 0
+      ? Math.ceil(P.monthlyBuildCost / (arpa - P.infraCostPerAccount)) : null;
+
+    container.innerHTML = `
+      <div class="card notice-card">
+        <strong>This models the product business, and it cannot start today.</strong>
+        <p class="muted small">Subscriptions need a backend, real authentication, multi-tenancy and a payment gateway. Until those exist this tab is a plan, not a forecast — the services tab is the revenue that is available now.</p>
+      </div>
+      <div class="card">
+        <h3>Assumptions</h3>
+        <div class="form-row">
+          ${rows.map(r => `<label>${esc(r.name)} subscribers${r.id === "enterprise" ? "" : ` <span class="muted small">($${r.price}/mo)</span>`}
+            <input class="pr-in" data-field="subs" data-plan="${esc(r.id)}" type="number" min="0" value="${r.subs}" /></label>`).join("")}
+          <label>Enterprise price /mo<input class="pr-in" data-field="enterprisePrice" type="number" min="0" value="${P.enterprisePrice}" /></label>
+        </div>
+        <div class="form-row">
+          <label>Monthly churn %<input class="pr-in" data-field="monthlyChurnPct" type="number" min="0" step="0.5" value="${P.monthlyChurnPct}" /></label>
+          <label>Credit revenue / account /mo<input class="pr-in" data-field="creditRevenuePerPayingAccount" type="number" min="0" value="${P.creditRevenuePerPayingAccount}" /></label>
+          <label>Infra cost / account /mo<input class="pr-in" data-field="infraCostPerAccount" type="number" min="0" value="${P.infraCostPerAccount}" /></label>
+          <label>Build &amp; run cost /mo<input class="pr-in" data-field="monthlyBuildCost" type="number" min="0" value="${P.monthlyBuildCost}" /></label>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        ${statCard("revenue", "Platform MRR", usd(grossMrr), `${payingAccounts} paying accounts · ${usd(subscriptionMrr)} subscriptions + ${usd(creditMrr)} credits.`)}
+        ${statCard("analytics", "Annual run rate", usd(grossMrr * 12), "Gross, before costs.")}
+        ${statCard("governance", "Net after costs", usd(netMrr), netMrr >= 0 ? "Covers infra and build cost." : "Does not yet cover infra and build cost.", netMrr < 0)}
+      </div>
+      <div class="grid grid-2">
+        <div class="card"><h3>Unit economics</h3>
+          <table class="table"><tbody>
+            <tr><td>Average revenue per account</td><td>${usd(arpa)}/mo</td></tr>
+            <tr><td>Infra cost per account</td><td>${usd(P.infraCostPerAccount)}/mo</td></tr>
+            <tr><td>Expected account lifetime</td><td>${lifetimeMonths ? lifetimeMonths.toFixed(0) + " months" : "—"}</td></tr>
+            <tr><td>Lifetime value per account</td><td>${ltv !== null ? usd(ltv) : "—"}</td></tr>
+            <tr><td>Accounts lost per month at ${P.monthlyChurnPct}% churn</td><td>${churnedPerMonth.toFixed(1)}</td></tr>
+            <tr><td>Accounts needed to cover build cost</td><td>${accountsToBreakEven !== null ? accountsToBreakEven : "not reachable"}</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card"><h3>MRR by plan</h3>
+          ${barChart(rows.map(r => ({ label: r.name, value: Math.round(r.mrr), color: "var(--chart-1)" })), "MRR by plan", "$ / month")}
+        </div>
+      </div>
+      <div class="card">
+        <h3>What has to be true first</h3>
+        <ul class="checklist">
+          <li>Backend with real authentication, roles and per-tenant data separation.</li>
+          <li>Payment gateway (card and mobile money) wired to plans and credit packs.</li>
+          <li>A live Claude API proxy so AI drafting is genuinely AI, not templated.</li>
+          <li>Someone answering support, or Team-tier customers churn straight back out.</li>
+        </ul>
+        <p class="muted small">Each is a real build. The order above is also the order they pay off in.</p>
+      </div>`;
+
+    container.querySelectorAll(".pr-in").forEach(inp => inp.addEventListener("input", () => {
+      const val = parseFloat(inp.value) || 0;
+      if (inp.dataset.field === "subs") P.subscribers[inp.dataset.plan] = val;
+      else P[inp.dataset.field] = val;
+      save();
+      renderPlatformRevenue(container);
+      // Re-focus the field the user was typing in. No setSelectionRange here:
+      // it throws on <input type="number">, which every field here is.
+      const focused = container.querySelector(`.pr-in[data-field="${inp.dataset.field}"]${inp.dataset.plan ? `[data-plan="${inp.dataset.plan}"]` : ""}`);
+      if (focused) focused.focus();
+    }));
+  }
+
+  /* ============================ PLANS & PRICING ============================ */
+  function renderPlans(main) {
+    const plans = VERDA_SEED.platformPlans;
+    const packs = VERDA_SEED.creditPacks;
+    main.appendChild(h(`
+      <section>
+        <h1>Plans & Pricing</h1>
+        <p class="muted">How Verda is sold as a product — the packaging a prospect sees. Separate from the compliance care plans EEIS sells as a service.</p>
+        <div class="card notice-card">
+          <strong>Packaging proposal, not a live billing system.</strong>
+          <p class="muted small">These prices are a starting point to test with buyers. Nothing here can actually be charged until the backend, real authentication and a payment gateway are built — see <code>docs/monetisation.md</code> for the sequence.</p>
+        </div>
+        <div class="plan-grid">
+          ${plans.map(p => `
+            <div class="plan-card ${p.id === "team" ? "plan-featured" : ""}">
+              ${p.id === "team" ? `<div class="plan-flag">${esc(p.cta)}</div>` : ""}
+              <h3>${esc(p.name)}</h3>
+              <div class="plan-price">${p.price === null ? "Custom" : (p.price === 0 ? "Free" : `$${p.price}`)}
+                ${p.price ? `<span class="plan-per">/${esc(p.per)}</span>` : ""}</div>
+              <p class="muted small plan-seats">${esc(p.seats)}</p>
+              <p class="plan-pitch">${esc(p.pitch)}</p>
+              <ul class="checklist plan-features">${p.features.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+              <button class="btn ${p.id === "team" ? "btn-primary" : ""}" data-plan="${esc(p.id)}">${p.price === null ? "Talk to us" : "Choose " + esc(p.name)}</button>
+            </div>`).join("")}
+        </div>
+        <div class="card">
+          <h3>Credit packs</h3>
+          <p class="muted small">Usage revenue on top of subscription. Credits pay for AI-assisted drafting (${VERDA_SEED.creditCosts.aiDraft}), audit summaries (${VERDA_SEED.creditCosts.auditAiSummary}) and ESIA processing submissions (${VERDA_SEED.creditCosts.esiaSubmit}).</p>
+          <div class="grid grid-3">
+            ${packs.map(p => `<div class="card"><h3>${esc(p.label)}</h3><div class="stat">${p.credits}</div>
+              <p class="muted small">credits — $${p.price} (${(p.price / p.credits * 100).toFixed(1)}¢ each)</p></div>`).join("")}
+          </div>
+        </div>
+        <div class="card">
+          <h3>Why this is defensible</h3>
+          <ul class="checklist">
+            <li>Coverage: 18 sectors with real checklists, not one vertical.</li>
+            <li>Two reporting frameworks — national (NEMA-style) and IFC PS1–PS8 for lender-financed clients.</li>
+            <li>Works offline on remote sites, which most cloud EHS tools do not.</li>
+            <li>Five languages, so it travels beyond one market.</li>
+            <li>Priced well below enterprise EHS suites, aimed at operators those suites ignore.</li>
+          </ul>
+        </div>
+      </section>`));
+
+    main.querySelectorAll("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
+      alert("Billing isn't connected yet — this is the packaging, not a checkout. Connect a payment provider to make this button real.");
+    }));
+  }
+
   /* ============================ REVENUE PLANNER ============================ */
   function renderRevenue(main) {
     if (!state.revenue) state.revenue = JSON.parse(JSON.stringify(VERDA_SEED.revenueDefaults));
+    if (!state.platformRevenue) state.platformRevenue = JSON.parse(JSON.stringify(VERDA_SEED.platformRevenueDefaults));
     const R = state.revenue;
-    const money = (n) => `${R.currency} ${Math.round(n).toLocaleString()}`;
+    const money = (n) => `${esc(R.currency)} ${Math.round(n).toLocaleString()}`;
 
     /* One visit falls in each billing period (a quarterly plan is visited
        quarterly, a monthly plan monthly), so the fee for a period must clear
@@ -2814,7 +3088,18 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     main.appendChild(h(`
       <section>
         <h1>Revenue Planner</h1>
-        <p class="muted">What the compliance care plans earn, once your real rates go in. Enter fees, client counts and delivery costs — Verda works out recurring revenue, gross margin per visit, and how many clients it takes to cover overhead.</p>
+        <p class="muted">Two ways this makes money: delivering compliance care plans as a service, and licensing Verda itself as a product. Model both here.</p>
+        <div class="tabs">
+          <button class="tab-btn active" data-rev-tab="services">Services — compliance care plans</button>
+          <button class="tab-btn" data-rev-tab="platform">Platform — Verda subscriptions</button>
+        </div>
+        <div id="rev-platform" hidden></div>
+        <div id="rev-services"></div>
+      </section>`));
+
+    const servicesPanel = main.querySelector("#rev-services");
+    servicesPanel.appendChild(h(`
+      <div>
         <div class="card notice-card">
           <strong>These are placeholder figures, not EEIS rates.</strong>
           <p class="muted small">Replace every number below with your own rate card before quoting. The three that decide everything: your fee per tier, your lab cost per visit, and your loaded day rate.</p>
@@ -2847,7 +3132,17 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
           </div>
         </div>
         <div id="rv-results"></div>
-      </section>`));
+      </div>`));
+
+    // Tab switching between the two revenue models.
+    main.querySelectorAll("[data-rev-tab]").forEach(btn => btn.addEventListener("click", () => {
+      main.querySelectorAll("[data-rev-tab]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const showPlatform = btn.dataset.revTab === "platform";
+      main.querySelector("#rev-platform").hidden = !showPlatform;
+      main.querySelector("#rev-services").hidden = showPlatform;
+      if (showPlatform) renderPlatformRevenue(main.querySelector("#rev-platform"));
+    }));
 
     function refresh() {
       const rows = R.tiers.map(t => ({ t, m: tierMaths(t) }));

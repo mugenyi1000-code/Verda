@@ -429,6 +429,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
       dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
       revenue: "Revenue Planner",
+      plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
       audits: "Audits", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
       clients: "Clients & Compliance Care Plans", documents: "Documents Library", checklists: "Checklists",
@@ -439,6 +440,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
       dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
       revenue: "Mpango wa Mapato",
+      plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
       audits: "Ukaguzi", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
       clients: "Wateja na Mipango ya Uzingatiaji", documents: "Maktaba ya Hati", checklists: "Orodha za Ukaguzi",
@@ -449,6 +451,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
       dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
       revenue: "Planificateur de Revenus",
+      plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
       audits: "Audits", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
       clients: "Clients et Plans de Conformité", documents: "Bibliothèque de Documents", checklists: "Listes de Contrôle",
@@ -459,6 +462,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
       dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
       revenue: "Planeador de Receitas",
+      plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
       audits: "Auditorias", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
@@ -469,6 +473,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
       dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
       revenue: "收入测算",
+      plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
       audits: "审核", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
       clients: "客户与合规服务计划", documents: "文档库", checklists: "检查表",
@@ -536,6 +541,48 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       { id: "t3", name: "Tier 3 — Priority", billing: "Monthly", visitsPerYear: 12,
         fee: 700, clients: 1, labCost: 180, daysPerVisit: 1, travel: 60 }
     ]
+  },
+
+  // ---- Verda as a product: subscription packaging --------------------------
+  // How Verda is sold to other organisations (distinct from the compliance
+  // care plans EEIS sells as a service). Prices are a starting proposal, not
+  // a committed rate card — and nothing here can be charged until the
+  // backend, real auth and a payment gateway exist. See docs/monetisation.md.
+  platformPlans: [
+    { id: "free", name: "Starter", price: 0, per: "month", seats: "1 site, 1 user",
+      pitch: "Prove the value on one site before paying anything.",
+      features: ["All 18 sector checklists", "Incidents, risk register and actions", "EEIS Reporting (1 report/month)", "Free IEC materials", "Community access"],
+      cta: "Free forever" },
+    { id: "team", name: "Team", price: 49, per: "month", seats: "up to 5 sites, 10 users",
+      pitch: "For a single operator running their own compliance in-house.",
+      features: ["Everything in Starter", "Unlimited reports, EEIS and IFC PS", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
+      cta: "Most popular" },
+    { id: "business", name: "Business", price: 149, per: "month", seats: "up to 25 sites, 50 users",
+      pitch: "For consultancies and groups managing compliance across clients.",
+      features: ["Everything in Team", "Multi-client compliance care plans", "ToR & ESIA drafting", "ArcGIS site mapping and Matterport walkthroughs", "Document control and audit trail", "Priority support"],
+      cta: "Best for consultancies" },
+    { id: "enterprise", name: "Enterprise", price: null, per: "quote", seats: "unlimited sites and users",
+      pitch: "For multi-site operators and lender-reporting obligations.",
+      features: ["Everything in Business", "Single sign-on and role-based permissions", "Custom checklists and report templates", "API access and data export", "Onboarding and training", "Named account manager"],
+      cta: "Talk to us" }
+  ],
+
+  // Credit packs — usage revenue on top of subscription, for AI drafting and
+  // ESIA processing (see creditCosts).
+  creditPacks: [
+    { credits: 500, price: 25, label: "Starter pack" },
+    { credits: 1500, price: 60, label: "Growth pack" },
+    { credits: 5000, price: 175, label: "Scale pack" }
+  ],
+
+  // Defaults for the platform (SaaS) side of the revenue planner.
+  platformRevenueDefaults: {
+    subscribers: { team: 12, business: 4, enterprise: 1 },
+    enterprisePrice: 600,
+    monthlyChurnPct: 3,
+    creditRevenuePerPayingAccount: 8,
+    infraCostPerAccount: 3,
+    monthlyBuildCost: 4000
   },
 
   // ---- Capability pillars (dashboard) --------------------------------------

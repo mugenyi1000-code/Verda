@@ -95,12 +95,29 @@ sub-sections in the sidebar:
   Billing**.
 
 **Grow — enablement, marketplace and community**
+- **Plans & Pricing** — how Verda is packaged and sold as a product
+  (Starter/Team/Business/Enterprise plus credit packs). Packaging proposal,
+  not a live checkout; see `docs/monetisation.md`.
 - **Solutions** (by business need, by industry, by role — frontline to
   executive, each linking into the sections that solve it), **Resources
   Hub** (Demo, QHSE Library, Events & Webinars, Community), **Supplies &
   Hire** (PPE/tools organized by the standard categories used industry-wide
   by suppliers like Honeywell, DuPont, MSA Safety and SafeSourceDirect — no
   branded products reproduced), **Free IEC Materials**, **Skills Advisor**.
+
+## How it makes money
+
+`docs/monetisation.md` sets out both revenue lines and, importantly, which
+one is available today:
+
+1. **Services — now.** EEIS sells compliance care plans and delivers them
+   with Verda. Model it in **Revenue Planner → Services**. Verda's
+   contribution is capacity, not new revenue: more clients per consultant on
+   the same hours.
+2. **Platform — after a backend exists.** Verda licensed to other
+   organisations. Model it in **Revenue Planner → Platform**. Subscriptions
+   need real auth, multi-tenancy and a payment gateway first; the planner
+   is a plan, not a forecast.
 
 Other platform features: free sign-up with starter credits then buy more
 (demo billing), a colour theme switcher (Forest/Ocean/Amber/Slate — also
