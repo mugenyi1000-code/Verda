@@ -36,7 +36,7 @@ client relationship in-house.
 ## Verda — the app
 
 **Verda** ("VER-da") is the platform name: a 5-letter, easy-to-say brand for
-the tool EEIS staff and clients actually use, distinct from the "EEIS
+the tool EEIS staff and clients actually use, distinct from the "Verda
 Reporting" document it produces. It's a single static app — open
 `app/index.html` in any browser, or serve the `app/` folder from any static
 host. All data is stored locally in the browser (`localStorage`); there is
@@ -77,14 +77,16 @@ sub-sections in the sidebar:
 **Manage — the programmes and deliverables**
 - **Actions (CAPA)** — one tracker for every corrective/preventive action
   whatever raised it, with owner, due date, priority and overdue flagging.
-- **EEIS Reporting** — the monthly/quarterly report, renamed from the old
-  "ESSR" label. Choose the reporting standard: **EEIS modular segments**
-  (Safety, Security, Environment, GHG, Community, Permitting) or the
+- **Verda Reporting** — the monthly/quarterly report, renamed from the old
+  "ESSR" label. Choose the reporting standard: **Verda modular segments**
+  (Safety, Security, Environment, GHG, Community, Permitting); the
   **IFC Performance Standards** (PS1–PS8), the framework lenders and
-  international clients most often require alongside national reporting.
-  Either way each segment can be added or omitted per report; "Generate
-  with AI Assist" drafts the narrative and the report downloads as a real
-  file.
+  international clients most often require alongside national reporting;
+  or the **SBC (Social & Behaviour Change) programme structure** for
+  community awareness and behaviour-change programmes, which pairs with
+  the IEC materials in the app. Whichever is chosen, each segment can be
+  added or omitted per report; "Generate with AI Assist" drafts the
+  narrative and the report downloads as a real file.
 - **ToR & ESIA Reporting** — structured input following the standard
   ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
   for EEIS processing" step.

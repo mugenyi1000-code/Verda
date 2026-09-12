@@ -10,6 +10,16 @@
   const STORE_KEY = "verda_state_v2";
   const T = () => VERDA_SEED.translations[state.lang] || VERDA_SEED.translations.en;
 
+  // Download filename prefix per reporting framework.
+  const REPORT_FILE_PREFIX = {
+    verda: "Verda-Reporting",
+    ifc: "IFC-PS-Report",
+    sbc: "SBC-Programme-Report"
+  };
+  // What one item of each framework is called, and its badge tone in the list.
+  const SEG_NOUN = { verda: "segment", ifc: "Performance Standard", sbc: "programme section" };
+  const STANDARD_BADGE = { verda: "good", ifc: "serious", sbc: "warning" };
+
   function seedState() {
     return {
       lang: "en",
@@ -483,7 +493,7 @@
         <div class="grid grid-3">
           ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
           ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
-          ${statCard("reporting", "Reports generated", state.reports.length, "EEIS Reporting drafts created so far.")}
+          ${statCard("reporting", "Reports generated", state.reports.length, "Verda Reporting drafts created so far.")}
         </div>
         <h3>What Verda covers</h3>
         <div class="focus-grid">
@@ -511,7 +521,7 @@
             upcoming.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.nextVisit)}</td></tr>`).join("")
           }</tbody></table>`)}
           ${card("Quick actions", `<div class="quick-actions">
-            <a class="btn" href="#/reporting">${icon("reporting")}<span>New EEIS Report</span></a>
+            <a class="btn" href="#/reporting">${icon("reporting")}<span>New Verda Report</span></a>
             <a class="btn" href="#/esia">${icon("esia")}<span>New ToR / ESIA Draft</span></a>
             <a class="btn" href="#/audits">${icon("audits")}<span>Run an Audit</span></a>
             <a class="btn" href="#/records">${icon("records")}<span>Add a Record / Photo</span></a>
@@ -591,7 +601,7 @@
     updateCreditsChip();
   }
 
-  /* ============================ EEIS REPORTING ============================ */
+  /* ============================ VERDA REPORTING ============================ */
   function renderReporting(main) {
     // Which framework the report is built against: EEIS's own modular
     // segments, or the eight IFC Performance Standards.
@@ -601,7 +611,7 @@
 
     main.appendChild(h(`
       <section>
-        <h1>EEIS Reporting</h1>
+        <h1>Verda Reporting</h1>
         <p class="muted">Build a monthly or quarterly report from modular segments — include only what's relevant to this client. Report against EEIS segments or the IFC Performance Standards.</p>
         <div class="card">
           <label>Reporting standard
@@ -636,7 +646,7 @@
         const s = segs.find(x => x.id === id);
         return `<div class="seg-form" data-seg="${id}">
           <h4>${s.label}</h4>
-          <textarea data-field="notes" placeholder="Notes / narrative for this ${standard.id === "ifc" ? "Performance Standard" : "segment"} this period..."></textarea>
+          <textarea data-field="notes" placeholder="Notes / narrative for this ${SEG_NOUN[standard.id] || "segment"} this period..."></textarea>
         </div>`;
       }).join("") || `<p class="muted">Select at least one segment above.</p>`;
     }
@@ -658,13 +668,13 @@
 
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "EEIS"), r.standard === "ifc" ? "serious" : "good")}</td>
+        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
         <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
         <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
         `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
-        const prefix = r.standard === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting";
+        const prefix = REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting";
         downloadText(`${prefix}-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
       }));
     }
@@ -676,7 +686,7 @@
       const period = main.querySelector("#rep-period").value.trim() || "Current period";
       const segments = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
       if (!segments.length) { alert("Select at least one segment."); return; }
-      if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "EEIS Reporting AI draft")) return;
+      if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "Verda Reporting AI draft")) return;
       const segmentData = {};
       segments.forEach(id => {
         const notes = main.querySelector(`.seg-form[data-seg="${id}"] [data-field="notes"]`).value;
@@ -688,7 +698,7 @@
       });
       const rec = {
         id: uid("rep"), clientName: client.name, period, segments, text,
-        standard: standard.id, standardName: standard.id === "ifc" ? "IFC PS" : "EEIS",
+        standard: standard.id, standardName: standard.shortName,
         date: new Date().toISOString()
       };
       state.reports.push(rec);
@@ -696,7 +706,7 @@
       main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${esc(text)}</pre>
         <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
       main.querySelector("#dl-now").addEventListener("click", () =>
-        downloadText(`${standard.id === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
+        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
       renderTopbar();
       refreshList();
     });
@@ -1138,7 +1148,7 @@
         </div>
         <div class="card"><h3>Cost per action</h3>
           <ul class="checklist">
-            <li>EEIS Reporting AI draft — ${VERDA_SEED.creditCosts.aiDraft} credits</li>
+            <li>Verda Reporting AI draft — ${VERDA_SEED.creditCosts.aiDraft} credits</li>
             <li>ESIA processing submission — ${VERDA_SEED.creditCosts.esiaSubmit} credits</li>
             <li>Auto EHS / ESIA audit AI summary — ${VERDA_SEED.creditCosts.auditAiSummary} credits</li>
           </ul>
@@ -1204,7 +1214,7 @@
         <ol class="checklist">
           <li>Sign up free and land on your Dashboard.</li>
           <li>Add your first client under Clients & Compliance Care Plans.</li>
-          <li>Build a report in EEIS Reporting — toggle only the segments you need.</li>
+          <li>Build a report in Verda Reporting — toggle only the segments you need.</li>
           <li>Run an Auto EHS Audit against the right industry checklist.</li>
           <li>Draft a ToR/ESIA using the structured input, then submit for processing.</li>
         </ol>

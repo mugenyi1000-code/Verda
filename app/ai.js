@@ -64,7 +64,7 @@ const VerdaAI = (() => {
       return d ? d.label : id[0].toUpperCase() + id.slice(1);
     };
     const header =
-`${standardTitle || "EEIS REPORTING"}
+`${standardTitle || "VERDA REPORTING"}
 Client: ${clientName || "—"}
 Reporting Period: ${period || "—"}
 Segments included: ${segments.map(labelFor).join("; ")}

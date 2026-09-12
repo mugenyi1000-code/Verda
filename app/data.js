@@ -307,10 +307,32 @@ const VERDA_SEED = {
     { id: "ps8", label: "PS8 — Cultural Heritage", hint: "Chance-finds procedure, tangible and intangible cultural heritage" }
   ],
 
+  // ---- SBC (Social & Behaviour Change) programme reporting -----------------
+  // Reporting structure for social and behaviour change programmes — the
+  // framework used alongside the IEC (Information, Education & Communication)
+  // materials this platform already distributes. Used where a client's
+  // obligations include community health, safety awareness or environmental
+  // behaviour campaigns rather than plant monitoring alone.
+  sbcSections: [
+    { id: "sbc-overview", label: "1. Programme Overview & Objectives", hint: "Programme purpose, geography, target population, reporting period objectives" },
+    { id: "sbc-situation", label: "2. Situation & Audience Analysis", hint: "Problem statement, barriers and drivers, primary/secondary/influencing audiences" },
+    { id: "sbc-objectives", label: "3. Behavioural Objectives & Indicators", hint: "Specific behaviours targeted, baseline values, indicators and targets for the period" },
+    { id: "sbc-strategy", label: "4. SBC Strategy & Approaches", hint: "Mix of approaches used — interpersonal communication, community mobilisation, mass/digital media, advocacy" },
+    { id: "sbc-activities", label: "5. Activities Implemented", hint: "What was delivered this period, where, by whom, against the workplan" },
+    { id: "sbc-reach", label: "6. Reach & Exposure", hint: "People reached by channel and audience segment, disaggregated by sex, age and location" },
+    { id: "sbc-materials", label: "7. Materials & Channels", hint: "IEC/SBC materials produced or distributed, languages, pre-testing and channel performance" },
+    { id: "sbc-outcomes", label: "8. Behavioural Outcomes & Change Observed", hint: "Movement against the behavioural indicators, knowledge/attitude/practice shifts, supporting evidence" },
+    { id: "sbc-engagement", label: "9. Community Engagement & Feedback", hint: "Participation, feedback and grievance channels, what communities said and how it was acted on" },
+    { id: "sbc-capacity", label: "10. Capacity Building & Partnerships", hint: "Training of community workers and volunteers, partner and stakeholder collaboration, government linkage" },
+    { id: "sbc-mel", label: "11. Monitoring, Evaluation & Learning", hint: "Data collection methods, data quality, evaluation activities, what the data is telling the programme" },
+    { id: "sbc-next", label: "12. Challenges, Lessons & Next Steps", hint: "Constraints encountered, adaptations made, lessons learned and priorities for the next period" }
+  ],
+
   // Which frameworks a periodic report can be built against.
   reportStandards: [
-    { id: "eeis", name: "EEIS Reporting — modular segments", title: "EEIS REPORTING", segmentsKey: "reportSegments" },
-    { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" }
+    { id: "verda", name: "Verda Reporting — modular segments", shortName: "Verda", title: "VERDA REPORTING", segmentsKey: "reportSegments" },
+    { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", shortName: "IFC PS", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" },
+    { id: "sbc", name: "SBC — Social & Behaviour Change programme report", shortName: "SBC", title: "SOCIAL & BEHAVIOUR CHANGE (SBC) PROGRAMME REPORT", segmentsKey: "sbcSections" }
   ],
 
   // ---- ToR / ESIA structure ---------------------------------------------
@@ -427,7 +449,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   translations: {
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
-      dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
+      dashboard: "Dashboard", reporting: "Verda Reporting", esia: "ToR & ESIA Reporting",
       revenue: "Revenue Planner",
       plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
@@ -438,7 +460,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Log in", signup: "Free Sign Up", logout: "Log out" },
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
-      dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
+      dashboard: "Dashibodi", reporting: "Ripoti ya Verda", esia: "ToR na Ripoti ya ESIA",
       revenue: "Mpango wa Mapato",
       plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
@@ -449,7 +471,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Ingia", signup: "Jisajili Bure", logout: "Toka" },
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
-      dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
+      dashboard: "Tableau de bord", reporting: "Rapport Verda", esia: "TdR et Rapport EIES",
       revenue: "Planificateur de Revenus",
       plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
@@ -460,7 +482,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Connexion", signup: "Inscription Gratuite", logout: "Déconnexion" },
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
-      dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
+      dashboard: "Painel", reporting: "Relatório Verda", esia: "ToR e Relatório AIAS",
       revenue: "Planeador de Receitas",
       plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
@@ -471,7 +493,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" },
     zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
-      dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
+      dashboard: "仪表板", reporting: "Verda 报告", esia: "职责范围与 ESIA 报告",
       revenue: "收入测算",
       plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
@@ -551,11 +573,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   platformPlans: [
     { id: "free", name: "Starter", price: 0, per: "month", seats: "1 site, 1 user",
       pitch: "Prove the value on one site before paying anything.",
-      features: ["All 18 sector checklists", "Incidents, risk register and actions", "EEIS Reporting (1 report/month)", "Free IEC materials", "Community access"],
+      features: ["All 18 sector checklists", "Incidents, risk register and actions", "Verda Reporting (1 report/month)", "Free IEC materials", "Community access"],
       cta: "Free forever" },
     { id: "team", name: "Team", price: 49, per: "month", seats: "up to 5 sites, 10 users",
       pitch: "For a single operator running their own compliance in-house.",
-      features: ["Everything in Starter", "Unlimited reports, EEIS and IFC PS", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
+      features: ["Everything in Starter", "Unlimited reports — Verda, IFC PS and SBC", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
       cta: "Most popular" },
     { id: "business", name: "Business", price: 149, per: "month", seats: "up to 25 sites, 50 users",
       pitch: "For consultancies and groups managing compliance across clients.",
@@ -633,7 +655,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     { name: "Frontline Worker / Site Technician", blurb: "Offline-capable checklists and free IEC materials on the exact task at hand — usable with patchy site connectivity.", sections: ["checklists", "iec"] },
     { name: "Supervisor / Foreman", blurb: "Daily safety administration workflows and PPE/records logging for the crew you're responsible for.", sections: ["workflows", "records"] },
     { name: "Safety Officer", blurb: "Auto EHS audits with AI-assisted findings, PPE records, and the safety administration workflow template.", sections: ["audits", "records", "workflows"] },
-    { name: "Environmental / EHS Manager", blurb: "The full EEIS Reporting builder, audit history, and industry checklists in one place, client by client.", sections: ["reporting", "audits", "checklists"] },
+    { name: "Environmental / EHS Manager", blurb: "The full Verda Reporting builder, audit history, and industry checklists in one place, client by client.", sections: ["reporting", "audits", "checklists"] },
     { name: "Site / Operations Manager", blurb: "Client and compliance-care-plan tracking, site mapping, and cross-team workflow oversight.", sections: ["clients", "maps", "workflows"] },
     { name: "HR Manager", blurb: "The HR compliance workflow (induction, PPE sign-off, training records) plus the skills advisor for staff development.", sections: ["workflows", "skills"] },
     { name: "Compliance / Sustainability Director", blurb: "Portfolio-level EEIS reports, the documents library for audit trails, and credit-based billing oversight.", sections: ["reporting", "documents", "credits"] },

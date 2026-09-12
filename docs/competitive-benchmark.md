@@ -38,7 +38,7 @@ list — not any single vendor's feature page — as the benchmark:
 | 4 · Audits & inspections | **Strong** | Auto EHS Audit + ESIA Audit with AI-assisted findings |
 | 6 · Compliance / permit register | **Strong** | Permit checklist + expiry tracking per client |
 | 8 · Document control | **Present** | Downloadable template library |
-| 11 · Environmental reporting | **Strong** | EEIS Reporting with modular segments incl. GHG; ToR/ESIA drafting |
+| 11 · Environmental reporting | **Strong** | Verda Reporting with modular segments incl. GHG; ToR/ESIA drafting |
 | 12 · Mobile & offline | **Present** | Responsive layout + service-worker app-shell caching |
 | 13 · Multi-tenant | **Partial** | Client list with care plans; no per-tenant data separation yet |
 | 1 · Incidents | **Missing** | The single most-expected module in the category |

@@ -748,10 +748,32 @@ const VERDA_SEED = {
     { id: "ps8", label: "PS8 — Cultural Heritage", hint: "Chance-finds procedure, tangible and intangible cultural heritage" }
   ],
 
+  // ---- SBC (Social & Behaviour Change) programme reporting -----------------
+  // Reporting structure for social and behaviour change programmes — the
+  // framework used alongside the IEC (Information, Education & Communication)
+  // materials this platform already distributes. Used where a client's
+  // obligations include community health, safety awareness or environmental
+  // behaviour campaigns rather than plant monitoring alone.
+  sbcSections: [
+    { id: "sbc-overview", label: "1. Programme Overview & Objectives", hint: "Programme purpose, geography, target population, reporting period objectives" },
+    { id: "sbc-situation", label: "2. Situation & Audience Analysis", hint: "Problem statement, barriers and drivers, primary/secondary/influencing audiences" },
+    { id: "sbc-objectives", label: "3. Behavioural Objectives & Indicators", hint: "Specific behaviours targeted, baseline values, indicators and targets for the period" },
+    { id: "sbc-strategy", label: "4. SBC Strategy & Approaches", hint: "Mix of approaches used — interpersonal communication, community mobilisation, mass/digital media, advocacy" },
+    { id: "sbc-activities", label: "5. Activities Implemented", hint: "What was delivered this period, where, by whom, against the workplan" },
+    { id: "sbc-reach", label: "6. Reach & Exposure", hint: "People reached by channel and audience segment, disaggregated by sex, age and location" },
+    { id: "sbc-materials", label: "7. Materials & Channels", hint: "IEC/SBC materials produced or distributed, languages, pre-testing and channel performance" },
+    { id: "sbc-outcomes", label: "8. Behavioural Outcomes & Change Observed", hint: "Movement against the behavioural indicators, knowledge/attitude/practice shifts, supporting evidence" },
+    { id: "sbc-engagement", label: "9. Community Engagement & Feedback", hint: "Participation, feedback and grievance channels, what communities said and how it was acted on" },
+    { id: "sbc-capacity", label: "10. Capacity Building & Partnerships", hint: "Training of community workers and volunteers, partner and stakeholder collaboration, government linkage" },
+    { id: "sbc-mel", label: "11. Monitoring, Evaluation & Learning", hint: "Data collection methods, data quality, evaluation activities, what the data is telling the programme" },
+    { id: "sbc-next", label: "12. Challenges, Lessons & Next Steps", hint: "Constraints encountered, adaptations made, lessons learned and priorities for the next period" }
+  ],
+
   // Which frameworks a periodic report can be built against.
   reportStandards: [
-    { id: "eeis", name: "EEIS Reporting — modular segments", title: "EEIS REPORTING", segmentsKey: "reportSegments" },
-    { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" }
+    { id: "verda", name: "Verda Reporting — modular segments", shortName: "Verda", title: "VERDA REPORTING", segmentsKey: "reportSegments" },
+    { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", shortName: "IFC PS", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" },
+    { id: "sbc", name: "SBC — Social & Behaviour Change programme report", shortName: "SBC", title: "SOCIAL & BEHAVIOUR CHANGE (SBC) PROGRAMME REPORT", segmentsKey: "sbcSections" }
   ],
 
   // ---- ToR / ESIA structure ---------------------------------------------
@@ -868,7 +890,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   translations: {
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
-      dashboard: "Dashboard", reporting: "EEIS Reporting", esia: "ToR & ESIA Reporting",
+      dashboard: "Dashboard", reporting: "Verda Reporting", esia: "ToR & ESIA Reporting",
       revenue: "Revenue Planner",
       plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
@@ -879,7 +901,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Log in", signup: "Free Sign Up", logout: "Log out" },
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
-      dashboard: "Dashibodi", reporting: "Ripoti ya EEIS", esia: "ToR na Ripoti ya ESIA",
+      dashboard: "Dashibodi", reporting: "Ripoti ya Verda", esia: "ToR na Ripoti ya ESIA",
       revenue: "Mpango wa Mapato",
       plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
@@ -890,7 +912,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Ingia", signup: "Jisajili Bure", logout: "Toka" },
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
-      dashboard: "Tableau de bord", reporting: "Rapport EEIS", esia: "TdR et Rapport EIES",
+      dashboard: "Tableau de bord", reporting: "Rapport Verda", esia: "TdR et Rapport EIES",
       revenue: "Planificateur de Revenus",
       plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
@@ -901,7 +923,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Connexion", signup: "Inscription Gratuite", logout: "Déconnexion" },
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
-      dashboard: "Painel", reporting: "Relatório EEIS", esia: "ToR e Relatório AIAS",
+      dashboard: "Painel", reporting: "Relatório Verda", esia: "ToR e Relatório AIAS",
       revenue: "Planeador de Receitas",
       plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
@@ -912,7 +934,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" },
     zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
-      dashboard: "仪表板", reporting: "EEIS 报告", esia: "职责范围与 ESIA 报告",
+      dashboard: "仪表板", reporting: "Verda 报告", esia: "职责范围与 ESIA 报告",
       revenue: "收入测算",
       plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
@@ -992,11 +1014,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   platformPlans: [
     { id: "free", name: "Starter", price: 0, per: "month", seats: "1 site, 1 user",
       pitch: "Prove the value on one site before paying anything.",
-      features: ["All 18 sector checklists", "Incidents, risk register and actions", "EEIS Reporting (1 report/month)", "Free IEC materials", "Community access"],
+      features: ["All 18 sector checklists", "Incidents, risk register and actions", "Verda Reporting (1 report/month)", "Free IEC materials", "Community access"],
       cta: "Free forever" },
     { id: "team", name: "Team", price: 49, per: "month", seats: "up to 5 sites, 10 users",
       pitch: "For a single operator running their own compliance in-house.",
-      features: ["Everything in Starter", "Unlimited reports, EEIS and IFC PS", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
+      features: ["Everything in Starter", "Unlimited reports — Verda, IFC PS and SBC", "Audits with AI-assisted findings", "Training & competency register", "Analytics dashboard", "Email support"],
       cta: "Most popular" },
     { id: "business", name: "Business", price: 149, per: "month", seats: "up to 25 sites, 50 users",
       pitch: "For consultancies and groups managing compliance across clients.",
@@ -1074,7 +1096,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     { name: "Frontline Worker / Site Technician", blurb: "Offline-capable checklists and free IEC materials on the exact task at hand — usable with patchy site connectivity.", sections: ["checklists", "iec"] },
     { name: "Supervisor / Foreman", blurb: "Daily safety administration workflows and PPE/records logging for the crew you're responsible for.", sections: ["workflows", "records"] },
     { name: "Safety Officer", blurb: "Auto EHS audits with AI-assisted findings, PPE records, and the safety administration workflow template.", sections: ["audits", "records", "workflows"] },
-    { name: "Environmental / EHS Manager", blurb: "The full EEIS Reporting builder, audit history, and industry checklists in one place, client by client.", sections: ["reporting", "audits", "checklists"] },
+    { name: "Environmental / EHS Manager", blurb: "The full Verda Reporting builder, audit history, and industry checklists in one place, client by client.", sections: ["reporting", "audits", "checklists"] },
     { name: "Site / Operations Manager", blurb: "Client and compliance-care-plan tracking, site mapping, and cross-team workflow oversight.", sections: ["clients", "maps", "workflows"] },
     { name: "HR Manager", blurb: "The HR compliance workflow (induction, PPE sign-off, training records) plus the skills advisor for staff development.", sections: ["workflows", "skills"] },
     { name: "Compliance / Sustainability Director", blurb: "Portfolio-level EEIS reports, the documents library for audit trails, and credit-based billing oversight.", sections: ["reporting", "documents", "credits"] },
@@ -1165,7 +1187,7 @@ const VerdaAI = (() => {
       return d ? d.label : id[0].toUpperCase() + id.slice(1);
     };
     const header =
-`${standardTitle || "EEIS REPORTING"}
+`${standardTitle || "VERDA REPORTING"}
 Client: ${clientName || "—"}
 Reporting Period: ${period || "—"}
 Segments included: ${segments.map(labelFor).join("; ")}
@@ -1318,6 +1340,16 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
   const STORE_KEY = "verda_state_v2";
   const T = () => VERDA_SEED.translations[state.lang] || VERDA_SEED.translations.en;
+
+  // Download filename prefix per reporting framework.
+  const REPORT_FILE_PREFIX = {
+    verda: "Verda-Reporting",
+    ifc: "IFC-PS-Report",
+    sbc: "SBC-Programme-Report"
+  };
+  // What one item of each framework is called, and its badge tone in the list.
+  const SEG_NOUN = { verda: "segment", ifc: "Performance Standard", sbc: "programme section" };
+  const STANDARD_BADGE = { verda: "good", ifc: "serious", sbc: "warning" };
 
   function seedState() {
     return {
@@ -1792,7 +1824,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <div class="grid grid-3">
           ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
           ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
-          ${statCard("reporting", "Reports generated", state.reports.length, "EEIS Reporting drafts created so far.")}
+          ${statCard("reporting", "Reports generated", state.reports.length, "Verda Reporting drafts created so far.")}
         </div>
         <h3>What Verda covers</h3>
         <div class="focus-grid">
@@ -1820,7 +1852,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
             upcoming.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.nextVisit)}</td></tr>`).join("")
           }</tbody></table>`)}
           ${card("Quick actions", `<div class="quick-actions">
-            <a class="btn" href="#/reporting">${icon("reporting")}<span>New EEIS Report</span></a>
+            <a class="btn" href="#/reporting">${icon("reporting")}<span>New Verda Report</span></a>
             <a class="btn" href="#/esia">${icon("esia")}<span>New ToR / ESIA Draft</span></a>
             <a class="btn" href="#/audits">${icon("audits")}<span>Run an Audit</span></a>
             <a class="btn" href="#/records">${icon("records")}<span>Add a Record / Photo</span></a>
@@ -1900,7 +1932,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     updateCreditsChip();
   }
 
-  /* ============================ EEIS REPORTING ============================ */
+  /* ============================ VERDA REPORTING ============================ */
   function renderReporting(main) {
     // Which framework the report is built against: EEIS's own modular
     // segments, or the eight IFC Performance Standards.
@@ -1910,7 +1942,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
     main.appendChild(h(`
       <section>
-        <h1>EEIS Reporting</h1>
+        <h1>Verda Reporting</h1>
         <p class="muted">Build a monthly or quarterly report from modular segments — include only what's relevant to this client. Report against EEIS segments or the IFC Performance Standards.</p>
         <div class="card">
           <label>Reporting standard
@@ -1945,7 +1977,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         const s = segs.find(x => x.id === id);
         return `<div class="seg-form" data-seg="${id}">
           <h4>${s.label}</h4>
-          <textarea data-field="notes" placeholder="Notes / narrative for this ${standard.id === "ifc" ? "Performance Standard" : "segment"} this period..."></textarea>
+          <textarea data-field="notes" placeholder="Notes / narrative for this ${SEG_NOUN[standard.id] || "segment"} this period..."></textarea>
         </div>`;
       }).join("") || `<p class="muted">Select at least one segment above.</p>`;
     }
@@ -1967,13 +1999,13 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "EEIS"), r.standard === "ifc" ? "serious" : "good")}</td>
+        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
         <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
         <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
         `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
-        const prefix = r.standard === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting";
+        const prefix = REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting";
         downloadText(`${prefix}-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
       }));
     }
@@ -1985,7 +2017,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       const period = main.querySelector("#rep-period").value.trim() || "Current period";
       const segments = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
       if (!segments.length) { alert("Select at least one segment."); return; }
-      if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "EEIS Reporting AI draft")) return;
+      if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "Verda Reporting AI draft")) return;
       const segmentData = {};
       segments.forEach(id => {
         const notes = main.querySelector(`.seg-form[data-seg="${id}"] [data-field="notes"]`).value;
@@ -1997,7 +2029,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       });
       const rec = {
         id: uid("rep"), clientName: client.name, period, segments, text,
-        standard: standard.id, standardName: standard.id === "ifc" ? "IFC PS" : "EEIS",
+        standard: standard.id, standardName: standard.shortName,
         date: new Date().toISOString()
       };
       state.reports.push(rec);
@@ -2005,7 +2037,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${esc(text)}</pre>
         <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
       main.querySelector("#dl-now").addEventListener("click", () =>
-        downloadText(`${standard.id === "ifc" ? "IFC-PS-Report" : "EEIS-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
+        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
       renderTopbar();
       refreshList();
     });
@@ -2447,7 +2479,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         </div>
         <div class="card"><h3>Cost per action</h3>
           <ul class="checklist">
-            <li>EEIS Reporting AI draft — ${VERDA_SEED.creditCosts.aiDraft} credits</li>
+            <li>Verda Reporting AI draft — ${VERDA_SEED.creditCosts.aiDraft} credits</li>
             <li>ESIA processing submission — ${VERDA_SEED.creditCosts.esiaSubmit} credits</li>
             <li>Auto EHS / ESIA audit AI summary — ${VERDA_SEED.creditCosts.auditAiSummary} credits</li>
           </ul>
@@ -2513,7 +2545,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         <ol class="checklist">
           <li>Sign up free and land on your Dashboard.</li>
           <li>Add your first client under Clients & Compliance Care Plans.</li>
-          <li>Build a report in EEIS Reporting — toggle only the segments you need.</li>
+          <li>Build a report in Verda Reporting — toggle only the segments you need.</li>
           <li>Run an Auto EHS Audit against the right industry checklist.</li>
           <li>Draft a ToR/ESIA using the structured input, then submit for processing.</li>
         </ol>

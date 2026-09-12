@@ -49,8 +49,10 @@ In the order they pay off:
 ### What makes it defensible
 
 - **Coverage:** 18 sectors with real checklists, not one vertical.
-- **Two reporting frameworks:** national (NEMA-style) and IFC PS1–PS8, which
-  matters to every lender-financed client.
+- **Three reporting frameworks:** Verda's modular national (NEMA-style)
+  segments, IFC PS1–PS8 (which matters to every lender-financed client), and
+  an SBC (Social & Behaviour Change) programme structure for community
+  awareness and behaviour-change work.
 - **Offline on remote sites** — most cloud EHS tools simply stop working.
 - **Five languages**, so it is not locked to one market.
 - **Price point** well under enterprise EHS suites, aimed at the operators
