@@ -364,6 +364,18 @@ textarea { min-height: 74px; resize: vertical; }
 .checklist label { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 500; margin: 0; }
 .checklist input { width: auto; }
 
+/* ---- Structured report inputs ----
+   The numeric returns a section's KPI tables ask for, laid out compactly so
+   a long section doesn't become a column of full-width boxes. */
+.field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 14px; margin: 10px 0 14px; }
+@media (max-width: 900px) { .field-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+.field-grid label { margin: 0; font-size: .78rem; }
+.field-grid input { margin-top: 4px; padding: 7px 10px; font-size: .86rem; }
+.seg-form label { margin: 10px 0 0; }
+.seg-form h4 { margin: 0 0 2px; }
+.seg-form .field-grid label { color: var(--muted); }
+
 .report-pre { white-space: pre-wrap; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-size: .85rem; line-height: 1.6; }
 
 .badge { display: inline-block; padding: 3px 11px; border-radius: 999px; background: var(--brand-3); color: var(--brand-1); font-size: .74rem; font-weight: 700; }

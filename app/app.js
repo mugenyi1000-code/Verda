@@ -14,11 +14,13 @@
   const REPORT_FILE_PREFIX = {
     verda: "Verda-Reporting",
     ifc: "IFC-PS-Report",
-    sbc: "SBC-Programme-Report"
+    essr: "ESSR"
   };
   // What one item of each framework is called, and its badge tone in the list.
-  const SEG_NOUN = { verda: "segment", ifc: "Performance Standard", sbc: "programme section" };
-  const STANDARD_BADGE = { verda: "good", ifc: "serious", sbc: "warning" };
+  const SEG_NOUN = { verda: "segment", ifc: "Performance Standard", essr: "section" };
+  const STANDARD_BADGE = { verda: "good", ifc: "serious", essr: "warning" };
+  // Narrative boxes a framework asks for when it doesn't declare its own.
+  const DEFAULT_BLOCKS = [{ key: "notes", label: "Notes / narrative" }];
 
   function seedState() {
     return {
@@ -612,7 +614,7 @@
     main.appendChild(h(`
       <section>
         <h1>Verda Reporting</h1>
-        <p class="muted">Build a monthly or quarterly report from modular segments — include only what's relevant to this client. Report against EEIS segments or the IFC Performance Standards.</p>
+        <p class="muted">Build a periodic report from modular sections — include only what's relevant to this client. Report against Verda's own segments, the IFC Performance Standards, or the full monthly ESSR self-monitoring format used on lender-financed construction contracts.</p>
         <div class="card">
           <label>Reporting standard
             <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
@@ -621,6 +623,7 @@
             <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
           </label>
           <label>Reporting period<input id="rep-period" placeholder="e.g. Q3 2026 / September 2026" /></label>
+          <div id="rep-header-fields" class="field-grid"></div>
           <fieldset class="segments">
             <legend>Segments to include</legend>
             <div id="seg-toggles"></div>
@@ -639,16 +642,38 @@
       </section>
     `));
 
+    // The report header fields a framework asks for (ESSR carries a document
+    // number, version and distribution list; the others need none).
+    function renderHeaderFields() {
+      const box = main.querySelector("#rep-header-fields");
+      const hf = standard.headerFields || [];
+      box.innerHTML = hf.map(f =>
+        `<label>${esc(f.label)}<input data-header="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
+      ).join("");
+    }
+
     function renderSegForms() {
       const checked = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
       const container = main.querySelector("#seg-forms");
+      const blocks = standard.blocks || DEFAULT_BLOCKS;
+      const noun = SEG_NOUN[standard.id] || "segment";
       container.innerHTML = checked.map(id => {
-        const s = segs.find(x => x.id === id);
-        return `<div class="seg-form" data-seg="${id}">
-          <h4>${s.label}</h4>
-          <textarea data-field="notes" placeholder="Notes / narrative for this ${SEG_NOUN[standard.id] || "segment"} this period..."></textarea>
+        const sec = segs.find(x => x.id === id);
+        // Numeric/text returns this section's KPI tables actually ask for.
+        const fields = (sec.fields || []).map(f =>
+          `<label class="field-sm">${esc(f.label)}${f.unit ? ` <span class="muted">(${esc(f.unit)})</span>` : ""}
+            <input type="${f.type === "number" ? "number" : "text"}" data-input="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
+        ).join("");
+        const narrative = blocks.map(b =>
+          `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" placeholder="${esc(b.label)} for this ${noun} this period..."></textarea></label>`
+        ).join("");
+        return `<div class="seg-form" data-seg="${esc(id)}">
+          <h4>${esc(sec.label)}</h4>
+          ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
+          ${fields ? `<div class="field-grid">${fields}</div>` : ""}
+          ${narrative}
         </div>`;
-      }).join("") || `<p class="muted">Select at least one segment above.</p>`;
+      }).join("") || `<p class="muted">Select at least one section above.</p>`;
     }
 
     function renderSegToggles() {
@@ -658,11 +683,13 @@
       main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderSegForms));
       renderSegForms();
     }
+    renderHeaderFields();
     renderSegToggles();
 
     main.querySelector("#rep-standard").addEventListener("change", (e) => {
       standard = VERDA_SEED.reportStandards.find(s => s.id === e.target.value);
       segs = segsFor(standard);
+      renderHeaderFields();
       renderSegToggles();
     });
 
@@ -687,14 +714,29 @@
       const segments = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
       if (!segments.length) { alert("Select at least one segment."); return; }
       if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "Verda Reporting AI draft")) return;
+      // Collect every narrative box and every numeric return per section.
+      const blocks = standard.blocks || DEFAULT_BLOCKS;
       const segmentData = {};
       segments.forEach(id => {
-        const notes = main.querySelector(`.seg-form[data-seg="${id}"] [data-field="notes"]`).value;
-        segmentData[id] = { notes };
+        const form = main.querySelector(`.seg-form[data-seg="${id}"]`);
+        const entry = { inputs: {} };
+        blocks.forEach(b => {
+          const el = form.querySelector(`[data-field="${b.key}"]`);
+          entry[b.key] = el ? el.value : "";
+        });
+        form.querySelectorAll("[data-input]").forEach(el => {
+          if (el.value.trim()) entry.inputs[el.dataset.input] = el.value.trim();
+        });
+        segmentData[id] = entry;
+      });
+      const header = {};
+      main.querySelectorAll("#rep-header-fields [data-header]").forEach(el => {
+        if (el.value.trim()) header[el.dataset.header] = el.value.trim();
       });
       const text = VerdaAI.generateAIDraft({
         clientName: client.name, period, segments, segmentData,
-        standardTitle: standard.title, segmentDefs: segs
+        standardTitle: standard.title, segmentDefs: segs,
+        blocks, header, headerDefs: standard.headerFields || []
       });
       const rec = {
         id: uid("rep"), clientName: client.name, period, segments, text,

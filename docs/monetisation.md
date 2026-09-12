@@ -51,8 +51,10 @@ In the order they pay off:
 - **Coverage:** 18 sectors with real checklists, not one vertical.
 - **Three reporting frameworks:** Verda's modular national (NEMA-style)
   segments, IFC PS1–PS8 (which matters to every lender-financed client), and
-  an SBC (Social & Behaviour Change) programme structure for community
-  awareness and behaviour-change work.
+  the full 23-section monthly ESSR self-monitoring format that large
+  donor- and lender-financed construction contracts are obliged to submit.
+  The ESSR one matters commercially: producing that report by hand every
+  month is weeks of a consultant's time on every major contract.
 - **Offline on remote sites** — most cloud EHS tools simply stop working.
 - **Five languages**, so it is not locked to one market.
 - **Price point** well under enterprise EHS suites, aimed at the operators

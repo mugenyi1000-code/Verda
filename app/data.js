@@ -307,32 +307,223 @@ const VERDA_SEED = {
     { id: "ps8", label: "PS8 — Cultural Heritage", hint: "Chance-finds procedure, tangible and intangible cultural heritage" }
   ],
 
-  // ---- SBC (Social & Behaviour Change) programme reporting -----------------
-  // Reporting structure for social and behaviour change programmes — the
-  // framework used alongside the IEC (Information, Education & Communication)
-  // materials this platform already distributes. Used where a client's
-  // obligations include community health, safety awareness or environmental
-  // behaviour campaigns rather than plant monitoring alone.
-  sbcSections: [
-    { id: "sbc-overview", label: "1. Programme Overview & Objectives", hint: "Programme purpose, geography, target population, reporting period objectives" },
-    { id: "sbc-situation", label: "2. Situation & Audience Analysis", hint: "Problem statement, barriers and drivers, primary/secondary/influencing audiences" },
-    { id: "sbc-objectives", label: "3. Behavioural Objectives & Indicators", hint: "Specific behaviours targeted, baseline values, indicators and targets for the period" },
-    { id: "sbc-strategy", label: "4. SBC Strategy & Approaches", hint: "Mix of approaches used — interpersonal communication, community mobilisation, mass/digital media, advocacy" },
-    { id: "sbc-activities", label: "5. Activities Implemented", hint: "What was delivered this period, where, by whom, against the workplan" },
-    { id: "sbc-reach", label: "6. Reach & Exposure", hint: "People reached by channel and audience segment, disaggregated by sex, age and location" },
-    { id: "sbc-materials", label: "7. Materials & Channels", hint: "IEC/SBC materials produced or distributed, languages, pre-testing and channel performance" },
-    { id: "sbc-outcomes", label: "8. Behavioural Outcomes & Change Observed", hint: "Movement against the behavioural indicators, knowledge/attitude/practice shifts, supporting evidence" },
-    { id: "sbc-engagement", label: "9. Community Engagement & Feedback", hint: "Participation, feedback and grievance channels, what communities said and how it was acted on" },
-    { id: "sbc-capacity", label: "10. Capacity Building & Partnerships", hint: "Training of community workers and volunteers, partner and stakeholder collaboration, government linkage" },
-    { id: "sbc-mel", label: "11. Monitoring, Evaluation & Learning", hint: "Data collection methods, data quality, evaluation activities, what the data is telling the programme" },
-    { id: "sbc-next", label: "12. Challenges, Lessons & Next Steps", hint: "Constraints encountered, adaptations made, lessons learned and priorities for the next period" }
+  // ---- ESSR — Environmental & Social Self-Monitoring Report ---------------
+  // The monthly self-monitoring report a construction contractor submits to
+  // the lender, the independent E&S consultant (IESC), the Employer and the
+  // Engineer. Structure follows the SBC/ESAP/ESSR format used on large
+  // donor- and lender-financed infrastructure contracts: every section
+  // carries the month's updates, cumulative KPI reporting, and a management
+  // comment, plus the numeric returns the reviewers check first.
+  //
+  // `fields` are the figures the section's KPI tables actually ask for.
+  // `blocks` (on the standard, below) are the narrative boxes.
+  essrSections: [
+    { id: "intro", label: "1.0 Introduction", hint: "Purpose, distribution list, reporting basis; \"no change\" where monitoring is less frequent than monthly",
+      fields: [
+        { key: "reportTo", label: "Submitted to", type: "text", placeholder: "Lender, IESC, Employer, Engineer" },
+        { key: "monitoringPlan", label: "Monitoring plan / ESMP ref", type: "text" }
+      ] },
+    { id: "activities", label: "2.0 Main Activities during the Month", hint: "Work fronts active this month and percentage completion by element",
+      fields: [
+        { key: "workFronts", label: "Active work fronts", type: "number" },
+        { key: "overallProgress", label: "Overall progress", type: "number", unit: "%" }
+      ] },
+    { id: "labour-stats", label: "3.0 Labour Statistics", hint: "Direct and indirect employment split by sex, local/non-local and expatriate",
+      fields: [
+        { key: "directTotal", label: "Direct employment — total", type: "number" },
+        { key: "directMale", label: "Direct — male", type: "number" },
+        { key: "directFemale", label: "Direct — female", type: "number" },
+        { key: "directLocal", label: "Direct — from host district", type: "number" },
+        { key: "directOutside", label: "Direct — from outside district", type: "number" },
+        { key: "directExpat", label: "Direct — expatriates", type: "number" },
+        { key: "indirectTotal", label: "Indirect (sub-contractors) — total", type: "number" },
+        { key: "indirectMale", label: "Indirect — male", type: "number" },
+        { key: "indirectFemale", label: "Indirect — female", type: "number" },
+        { key: "indirectLocal", label: "Indirect — from host district", type: "number" }
+      ] },
+    { id: "ehs-org", label: "4.0 EHS Organisation at End of Month", hint: "EHS staffing establishment and any changes during the month",
+      fields: [
+        { key: "ehsStaff", label: "EHS staff in post", type: "number" },
+        { key: "ehsVacancies", label: "Vacant EHS positions", type: "number" },
+        { key: "ehsChanges", label: "Changes this month", type: "text", placeholder: "Joiners / leavers / role changes" }
+      ] },
+    { id: "hs-stats", label: "5.0 Health & Safety Statistics", hint: "Accidents, H&S interactions, PPE penetration, specific trainings, sub-contractor statistics",
+      fields: [
+        { key: "manhours", label: "Man-hours worked (month)", type: "number" },
+        { key: "lti", label: "Lost time injuries", type: "number" },
+        { key: "daysLost", label: "Work days lost", type: "number" },
+        { key: "firstAidCases", label: "First aid cases", type: "number" },
+        { key: "nearMiss", label: "Near-miss cards received", type: "number" },
+        { key: "inductions", label: "H&S inductions conducted", type: "number" },
+        { key: "toolbox", label: "Toolbox talks", type: "number" },
+        { key: "mso", label: "Management safety observations", type: "number" },
+        { key: "observationForms", label: "H&S observation forms received", type: "number" },
+        { key: "ppeIssued", label: "PPE issued", type: "number" },
+        { key: "ppeLost", label: "PPE lost", type: "number" },
+        { key: "ppeViolations", label: "Staff observed without proper PPE", type: "number" },
+        { key: "firstAidKits", label: "First aid kits checked / refilled", type: "text" },
+        { key: "fireEquipment", label: "Fire equipment checked / serviced", type: "text" }
+      ] },
+    { id: "clinic", label: "5.2 Site Clinic Activities", hint: "Consultations, notifiable conditions, referrals, campaigns and outbreak response",
+      fields: [
+        { key: "consultations", label: "Consultations", type: "number" },
+        { key: "malaria", label: "Malaria cases", type: "number" },
+        { key: "referrals", label: "Referrals to health facility", type: "number" },
+        { key: "campaigns", label: "Health campaigns / sensitisations", type: "number" },
+        { key: "clinicLicence", label: "Clinic licence status", type: "text", placeholder: "Licensed / renewal due" }
+      ] },
+    { id: "security", label: "6.0 Security, Emergency Response & Incident Management", hint: "Security incidents and severity, drills and exercises, VPSHR training, emergency contacts",
+      fields: [
+        { key: "securityIncidents", label: "Security incidents", type: "number" },
+        { key: "drills", label: "Drills / exercises conducted", type: "number" },
+        { key: "drillAttendees", label: "Drill attendees", type: "number" },
+        { key: "guards", label: "Security personnel deployed", type: "number" },
+        { key: "vpshr", label: "VPSHR / human rights training (attendees)", type: "number" }
+      ] },
+    { id: "labour-mgmt", label: "7.0 Labour Force Management", hint: "Recruitment, contracts, workers' representatives, worker grievance mechanism",
+      fields: [
+        { key: "recruited", label: "Workers recruited", type: "number" },
+        { key: "separations", label: "Separations / terminations", type: "number" },
+        { key: "workerMeetings", label: "Workers' representative meetings", type: "number" },
+        { key: "workerGrievances", label: "Worker grievances received", type: "number" },
+        { key: "workerGrievancesClosed", label: "Worker grievances closed", type: "number" }
+      ] },
+    { id: "accommodation", label: "8.0 Workers' Accommodation Management", hint: "Camp inspections against IFC/EBRD accommodation standards, findings and close-out",
+      fields: [
+        { key: "camps", label: "Camps in use", type: "number" },
+        { key: "occupancy", label: "Total occupancy", type: "number" },
+        { key: "inspections", label: "Inspections conducted", type: "number" },
+        { key: "findingsOpen", label: "Findings open at month end", type: "number" }
+      ] },
+    { id: "traffic", label: "9.0 Traffic Management", hint: "Road safety on project and community roads, driver training, signage, flag personnel",
+      fields: [
+        { key: "trafficIncidents", label: "Traffic incidents", type: "number" },
+        { key: "kmDriven", label: "Distance driven", type: "number", unit: "km" },
+        { key: "driversTrained", label: "Drivers / operators trained", type: "number" },
+        { key: "vehicleInspections", label: "Vehicle inspections", type: "number" },
+        { key: "speedViolations", label: "Speed violations recorded", type: "number" }
+      ] },
+    { id: "water-energy", label: "10.0 Water & Energy Consumption", hint: "Abstraction by source and activity, drinking water, energy use and emission rate",
+      fields: [
+        { key: "waterMonth", label: "Water abstracted (month)", type: "number", unit: "m³" },
+        { key: "waterAccum", label: "Water abstracted (cumulative)", type: "number", unit: "m³" },
+        { key: "drinkingWater", label: "Drinking water consumed", type: "number", unit: "litres" },
+        { key: "abstractionPermit", label: "Abstraction permit no. / daily limit", type: "text" },
+        { key: "energyKwh", label: "Energy consumption (month)", type: "number", unit: "kWh" },
+        { key: "co2PerDay", label: "Average CO₂ emission", type: "number", unit: "kg/day" },
+        { key: "dieselLitres", label: "Diesel consumed", type: "number", unit: "litres" }
+      ] },
+    { id: "community-hs", label: "11.0 Community Health & Safety", hint: "Noise and vibration against limits, dust/air quality, community sensitisation",
+      fields: [
+        { key: "noiseReadings", label: "Noise measurements taken", type: "number" },
+        { key: "noiseExceed", label: "Noise readings above limit", type: "number" },
+        { key: "vibrationReadings", label: "Vibration measurements taken", type: "number" },
+        { key: "vibrationExceed", label: "Vibration readings above limit", type: "number" },
+        { key: "pm25", label: "PM2.5 (average)", type: "number", unit: "µg/m³" },
+        { key: "communitySensitisations", label: "Community sensitisations held", type: "number" }
+      ] },
+    { id: "waste", label: "12.0 Waste Management", hint: "Quantities generated by stream, handling route and waste transfer notes",
+      fields: [
+        { key: "recyclable", label: "Recyclable waste", type: "number", unit: "m³" },
+        { key: "biodegradable", label: "Biodegradable waste", type: "number", unit: "m³" },
+        { key: "hazardous", label: "Hazardous waste & contaminated soil", type: "number", unit: "m³" },
+        { key: "medical", label: "Medical waste", type: "number", unit: "m³" },
+        { key: "sewage", label: "Sewage removed", type: "number", unit: "m³" },
+        { key: "usedOil", label: "Used oil", type: "number", unit: "drums" },
+        { key: "wtn", label: "Waste transfer notes issued", type: "number" },
+        { key: "wasteHandler", label: "Licensed waste handler", type: "text" }
+      ] },
+    { id: "wastewater", label: "13.0 Wastewater & Storm Water Management", hint: "Effluent quality against standards, drainage, erosion and sediment control",
+      fields: [
+        { key: "effluentTests", label: "Effluent samples tested", type: "number" },
+        { key: "effluentExceed", label: "Results outside standard", type: "number" },
+        { key: "drainageMaintained", label: "Drainage maintained", type: "number", unit: "m" },
+        { key: "erosionControls", label: "Erosion control measures installed", type: "number" },
+        { key: "oilWaterSeparators", label: "Oil-water separators serviced", type: "number" }
+      ] },
+    { id: "biodiversity", label: "14.0 Biodiversity Management", hint: "Habitat and species encounters, clearance control, invasive species, offsets",
+      fields: [
+        { key: "speciesEncounters", label: "Protected species encounters", type: "number" },
+        { key: "areaCleared", label: "New area cleared", type: "number", unit: "ha" },
+        { key: "treesPlanted", label: "Trees planted", type: "number" },
+        { key: "invasiveControl", label: "Invasive species control (area)", type: "number", unit: "ha" }
+      ] },
+    { id: "restoration", label: "15.0 Restoration & Re-instatement", hint: "Borrow areas, quarry and camp restoration progress against the restoration programme",
+      fields: [
+        { key: "areasUnderRestoration", label: "Areas under restoration", type: "number" },
+        { key: "areaRestored", label: "Area restored to date", type: "number", unit: "ha" },
+        { key: "topsoilReinstated", label: "Topsoil re-instated", type: "number", unit: "m³" },
+        { key: "restorationProgress", label: "Restoration programme progress", type: "number", unit: "%" }
+      ] },
+    { id: "community-dev", label: "16.0 Community Development & Engagement", hint: "CCC meetings, local authority interaction, CSR delivery, grievance monitoring",
+      fields: [
+        { key: "meetings", label: "Community meetings held", type: "number" },
+        { key: "participants", label: "Participants", type: "number" },
+        { key: "authorityVisits", label: "Local authority interactions / visits", type: "number" },
+        { key: "csrActivities", label: "CSR activities delivered", type: "number" },
+        { key: "grievancesReceived", label: "Community grievances received", type: "number" },
+        { key: "grievancesClosed", label: "Community grievances closed", type: "number" },
+        { key: "grievancesOpen", label: "Grievances open at month end", type: "number" }
+      ] },
+    { id: "cultural", label: "17.0 Cultural Heritage Management", hint: "Chance finds procedure, mapping of sites, graves and relocation, authority interaction",
+      fields: [
+        { key: "chanceFinds", label: "Chance finds this month", type: "number" },
+        { key: "sitesMapped", label: "Sites mapped / demarcated", type: "number" },
+        { key: "gravesRelocated", label: "Graves relocated (cumulative)", type: "number" },
+        { key: "authorityInteractions", label: "Interactions with cultural authorities / museums", type: "number" }
+      ] },
+    { id: "stakeholder", label: "18.0 Contractor's Stakeholder Engagement", hint: "Engagement activities against the stakeholder engagement plan, disclosure and feedback",
+      fields: [
+        { key: "engagements", label: "Engagement activities", type: "number" },
+        { key: "stakeholders", label: "Stakeholders engaged", type: "number" },
+        { key: "disclosures", label: "Disclosures / notices issued", type: "number" },
+        { key: "radioSpots", label: "Radio / notice board announcements", type: "number" }
+      ] },
+    { id: "influx", label: "19.0 Influx Management", hint: "Access control, local recruitment and procurement, accommodation, skills transfer, legacy",
+      fields: [
+        { key: "localRecruitment", label: "Local recruitment share", type: "number", unit: "%" },
+        { key: "localProcurement", label: "Local goods & services procured", type: "number", unit: "value" },
+        { key: "skillsTransfer", label: "Workers in skills transfer / training", type: "number" },
+        { key: "influxIndicators", label: "Influx indicators monitored", type: "text" }
+      ] },
+    { id: "demob", label: "20.0 Project Demobilisation", hint: "Demobilisation planning, asset disposal, workforce release and site handover",
+      fields: [
+        { key: "demobProgress", label: "Demobilisation progress", type: "number", unit: "%" },
+        { key: "workersDemobilised", label: "Workers demobilised", type: "number" },
+        { key: "assetsDisposed", label: "Assets disposed / transferred", type: "number" },
+        { key: "areasHandedOver", label: "Areas handed over", type: "number" }
+      ] },
+    { id: "permits", label: "21.0 Status of Statutory Requirements & Permits", hint: "Permit register: issuing authority, status, compliance, programme impact, remedy",
+      fields: [
+        { key: "permitsRequired", label: "Permits / approvals required", type: "number" },
+        { key: "permitsAcquired", label: "Acquired and valid", type: "number" },
+        { key: "permitsPending", label: "Applied for / pending", type: "number" },
+        { key: "permitsExpiring", label: "Expiring within 90 days", type: "number" },
+        { key: "nonCompliances", label: "Open non-compliances", type: "number" }
+      ] },
+    { id: "appendices", label: "Appendices", hint: "Workers' representative minutes, health workshops, air/noise/water monitoring, SOPs, camp management, CCC meeting, internal audit, non-compliances, restoration map",
+      fields: [
+        { key: "appendixList", label: "Appendices attached", type: "text", placeholder: "A – Workers' representative minutes; B – Health awareness workshop; C – Air, noise & water monitoring; …" },
+        { key: "appendixCount", label: "Number of appendices", type: "number" }
+      ] }
   ],
 
   // Which frameworks a periodic report can be built against.
   reportStandards: [
     { id: "verda", name: "Verda Reporting — modular segments", shortName: "Verda", title: "VERDA REPORTING", segmentsKey: "reportSegments" },
     { id: "ifc", name: "IFC Performance Standards — PS1 to PS8", shortName: "IFC PS", title: "IFC PERFORMANCE STANDARDS REPORT", segmentsKey: "ifcStandards" },
-    { id: "sbc", name: "SBC — Social & Behaviour Change programme report", shortName: "SBC", title: "SOCIAL & BEHAVIOUR CHANGE (SBC) PROGRAMME REPORT", segmentsKey: "sbcSections" }
+    { id: "essr", name: "ESSR — Environmental & Social Self-Monitoring Report (monthly)", shortName: "ESSR", title: "ENVIRONMENTAL & SOCIAL SELF-MONITORING REPORT", segmentsKey: "essrSections",
+      blocks: [
+        { key: "updates", label: "Monthly updates" },
+        { key: "kpi", label: "KPI reporting — cumulative information" },
+        { key: "comment", label: "Management comment" }
+      ],
+      headerFields: [
+        { key: "docNo", label: "Document no.", placeholder: "e.g. ABC/707/ESAP/ESSR/080" },
+        { key: "version", label: "Version", placeholder: "e.g. 1.3" },
+        { key: "project", label: "Project / contract", placeholder: "e.g. Hoima International Airport" },
+        { key: "distribution", label: "Distribution", placeholder: "Lender; IESC; Employer; Engineer" }
+      ] }
   ],
 
   // ---- ToR / ESIA structure ---------------------------------------------

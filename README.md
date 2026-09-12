@@ -82,11 +82,26 @@ sub-sections in the sidebar:
   (Safety, Security, Environment, GHG, Community, Permitting); the
   **IFC Performance Standards** (PS1–PS8), the framework lenders and
   international clients most often require alongside national reporting;
-  or the **SBC (Social & Behaviour Change) programme structure** for
-  community awareness and behaviour-change programmes, which pairs with
-  the IEC materials in the app. Whichever is chosen, each segment can be
-  added or omitted per report; "Generate with AI Assist" drafts the
-  narrative and the report downloads as a real file.
+  or the full **ESSR** (Environmental & Social Self-Monitoring Report), the
+  23-section monthly format a contractor submits to its lender, the
+  independent E&S consultant, the Employer and the Engineer — labour
+  statistics, H&S statistics, site clinic, security, accommodation,
+  traffic, water and energy, community health & safety, waste, wastewater,
+  biodiversity, restoration, community development, cultural heritage,
+  stakeholder engagement, influx, demobilisation and the statutory permit
+  register. Whichever is chosen, each section can be added or omitted per
+  report; "Generate with AI Assist" drafts the narrative and the report
+  downloads as a real file.
+
+  ESSR sections take **structured input, not just prose**: each one asks for
+  the figures its KPI table actually needs (man-hours, LTIs, toolbox talks,
+  PPE issued, m³ of water abstracted, kWh and kg/day CO₂, waste by stream,
+  grievances received and closed, permits acquired vs. pending — 119 fields
+  in all) alongside three narrative boxes the format requires: monthly
+  updates, cumulative KPI reporting, and a management comment. The draft
+  prints the returns as an aligned block above each narrative, and follows
+  the ESSR convention of reporting "no change" explicitly rather than
+  leaving a section blank.
 - **ToR & ESIA Reporting** — structured input following the standard
   ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
   for EEIS processing" step.
