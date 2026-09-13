@@ -133,7 +133,7 @@ a { color: var(--brand-1); }
 .solution-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
 /* ---- Wide tables scroll in their own container, never the page body ---- */
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; min-width: 0; }
 .table-scroll .table { min-width: 640px; }
 .table-scroll input { min-width: 84px; }
 
@@ -197,8 +197,8 @@ a { color: var(--brand-1); }
 /* ---- Charts ----
    Categorical slot 1 and the fixed status palette from the validated
    reference palette; dark steps applied under the Slate theme. */
-:root { --chart-1: #2a78d6; --chart-good: #0ca30c; --chart-warning: #fab219; --chart-serious: #ec835a; --chart-critical: #d03b3b; }
-:root[data-theme="slate"] { --chart-1: #3987e5; }
+:root { --chart-1: #2a78d6; --chart-2: #eb6834; --chart-3: #1baf7a; --chart-good: #0ca30c; --chart-warning: #fab219; --chart-serious: #ec835a; --chart-critical: #d03b3b; }
+:root[data-theme="slate"] { --chart-1: #3987e5; --chart-2: #d95926; --chart-3: #199e70; }
 /* max-width keeps type at a sane size when a chart sits in a full-width card */
 .chart { width: 100%; max-width: 560px; height: auto; display: block; margin-top: 6px; }
 .chart-axis { stroke: var(--border); stroke-width: 1; }
@@ -206,6 +206,80 @@ a { color: var(--brand-1); }
 .chart-label { font-size: 12px; text-anchor: middle; fill: var(--muted); }
 .chart-table { margin-top: 8px; }
 .chart-table summary { cursor: pointer; font-size: .82rem; color: var(--muted); }
+
+/* ---- Chart figure: title, legend, data table ----
+   A single series needs no legend (the title names it); two or more always
+   carry one, and every bar is directly value-labelled, so identity and
+   magnitude are never colour-alone. */
+.chart-figure { margin: 0; }
+.chart-title { font-weight: 700; font-size: .88rem; margin: 12px 0 2px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin: 2px 0 6px; }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-empty { margin: 8px 0 0; font-style: italic; }
+.chart-slot { margin-top: 10px; }
+
+/* ---- Four-step "how to" card ---- */
+.steps { margin: 6px 0 14px; padding-left: 22px; }
+.steps li { margin: 7px 0; font-size: .88rem; line-height: 1.5; }
+.switch { display: flex; align-items: center; gap: 9px; margin: 0; font-size: .85rem; color: var(--text); font-weight: 600; }
+.switch input { width: auto; margin: 0; }
+
+/* ---- Section pickers ---- */
+.seg-toggle-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+.seg-toggle {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 9px; align-items: start;
+  padding: 7px 9px; border-radius: 9px; border: 1px solid transparent; margin: 2px 0;
+}
+.seg-toggle:hover { background: var(--brand-3); }
+.seg-toggle input { grid-row: span 2; margin-top: 2px; }
+.seg-toggle-label { font-weight: 600; }
+.seg-toggle .small { grid-column: 2; }
+.seg-filled { border-color: var(--brand-2); background: var(--brand-3); }
+
+/* ---- Guided mode help ---- */
+.guide-box {
+  border-left: 4px solid var(--brand-2); background: var(--brand-3);
+  border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 10px 0 16px;
+}
+.guide-box p { margin: 4px 0; font-size: .86rem; }
+.guide-box summary { cursor: pointer; font-size: .84rem; font-weight: 600; color: var(--brand-1); margin-top: 6px; }
+.guide-example { font-style: italic; }
+
+/* ---- Data-entry tables ---- */
+.seg-form { margin-bottom: 22px; }
+.seg-form h5 { margin: 18px 0 4px; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.report-table { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin: 10px 0 16px; background: var(--bg); }
+.report-table-head h5 { margin: 0 0 2px; text-transform: none; letter-spacing: 0; font-size: .92rem; color: var(--text); }
+.entry-table { min-width: 640px; }
+.entry-table th, .entry-table td { padding: 5px 6px; vertical-align: middle; }
+.entry-table input, .entry-table select { margin: 0; padding: 6px 8px; font-size: .84rem; min-width: 92px; }
+.entry-table input[type="number"] { min-width: 76px; }
+.entry-table tbody tr:hover { background: transparent; }
+.row-actions { white-space: nowrap; }
+.row-actions .btn { padding: 4px 9px; }
+
+/* ---- Photo drop zone ---- */
+.dropzone {
+  border: 2px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center;
+  cursor: pointer; transition: border-color .15s ease, background-color .15s ease; background: var(--bg);
+}
+.dropzone:hover, .dropzone:focus-visible { border-color: var(--brand-2); background: var(--brand-3); outline: none; }
+.dropzone-active { border-color: var(--brand-1); background: var(--brand-3); }
+.dropzone p { margin: 2px 0; font-size: .86rem; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+.photo-card { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+.photo-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 7px; display: block; }
+.photo-card figcaption { font-size: .78rem; color: var(--muted); margin-top: 5px; }
+.photo-caption { margin-top: 6px; padding: 5px 8px; font-size: .8rem; }
+
+/* ---- Generated report preview ---- */
+.report-preview { max-height: 620px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; background: var(--bg); }
+.report-doc h1 { font-size: 1.35rem; margin: 0 0 12px; }
+.report-section h3 { margin: 26px 0 6px; border-bottom: 2px solid var(--border); padding-bottom: 5px; }
+.report-section h4 { margin: 14px 0 3px; font-size: .92rem; }
+.kv-table th { width: 34%; color: var(--muted); font-weight: 600; }
+.report-photos .photo-card img { height: 150px; }
 
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
@@ -267,7 +341,22 @@ a { color: var(--brand-1); }
 .nav-item.active { background: var(--solid-1); color: #fff; font-weight: 700; border-left-color: var(--accent); box-shadow: var(--shadow-sm); }
 .nav-item.active .icon { opacity: 1; }
 
-#main { flex: 1; padding: 26px 30px; max-width: 1120px; }
+/* min-width:0 is required: #main is a flex item, so without it the item
+   refuses to shrink below the min-content width of its widest descendant —
+   a wide data-entry table then stretches the whole page instead of scrolling
+   inside its own container. */
+#main { flex: 1; min-width: 0; padding: 26px 30px; max-width: 1120px; }
+
+/* ---- Narrow screens ----
+   Signed in, the top bar carries a credits pill, two selects, a user name and
+   a logout button: at phone width that row has to wrap rather than push the
+   page sideways. */
+@media (max-width: 620px) {
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .topbar-right { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+  #main { padding: 18px 16px; }
+  .hero { padding: 24px 18px; }
+}
 
 /* ---- Hero ---- */
 .hero {
@@ -355,10 +444,10 @@ textarea { min-height: 74px; resize: vertical; }
 .table tbody tr:last-child { border-bottom: none; }
 
 /* ---- Segments / checklists ---- */
-.segments { border: none; padding: 0; margin: 12px 0; }
-.seg-toggle { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-weight: 500; }
-.seg-toggle input { width: auto; margin: 0; }
-.seg-form { border-left: 3px solid var(--brand-2); padding: 10px 14px; margin: 12px 0; background: var(--brand-3); border-radius: 0 10px 10px 0; }
+/* Report sections render as cards (see the reporting block above); the old
+   tinted-strip styling is gone, only the checklist inputs stay generic. */
+.checklist-group { border: none; padding: 0; margin: 12px 0; }
+.seg-toggle input { width: auto; }
 .checklist { list-style: none; padding: 0; }
 .checklist li { padding: 7px 0; border-bottom: 1px dashed var(--border); }
 .checklist label { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 500; margin: 0; }

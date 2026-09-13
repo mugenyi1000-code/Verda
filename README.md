@@ -93,7 +93,25 @@ sub-sections in the sidebar:
   report; "Generate with AI Assist" drafts the narrative and the report
   downloads as a real file.
 
-  ESSR sections take **structured input, not just prose**: each one asks for
+  **Every section of every format takes structured input — tables, figures,
+  charts and photographs, not just prose.** 51 data tables across the three
+  formats (267 columns) with add/remove rows and starter rows where the format
+  expects fixed line items; numeric columns plot automatically as inline SVG
+  bar charts with a legend, direct value labels and a data-table view under
+  each; and each section has a drag-and-drop photo area (drop, click or paste;
+  images are downscaled in the browser and never leave the device). Reports
+  download two ways: `.txt` with the tables rendered as fixed-width text, or a
+  standalone `.html` file carrying the tables, charts and photographs, styled
+  to print cleanly.
+
+  **Guided mode**, on by default, explains in plain English what each section
+  is for, how to fill it, and shows example wording — enough that someone who
+  has never written a compliance report can work through one. A four-step
+  card explains the flow, a progress line tracks how many selected sections
+  have content, and the example wording is guidance to read, never text the
+  app inserts on your behalf.
+
+  ESSR sections also take summary figures: each one asks for
   the figures its KPI table actually needs (man-hours, LTIs, toolbox talks,
   PPE issued, m³ of water abstracted, kWh and kg/day CO₂, waste by stream,
   grievances received and closed, permits acquired vs. pending — 119 fields

@@ -14,50 +14,12 @@
 
 const VerdaAI = (() => {
 
-  function bulletList(items) {
-    return items.filter(Boolean).map(i => `  • ${i}`).join("\n");
-  }
-
-  function narrativeForSegment(seg, data, label) {
-    const d = data || {};
-    switch (seg) {
-      case "safety":
-        return `SAFETY\n` +
-          `During the reporting period, ${d.incidents || "0"} incident(s) and ${d.nearMisses || "0"} near-miss event(s) were recorded. ` +
-          `PPE compliance was observed at ${d.ppeCompliance || "N/A"}. ${d.trainingNote || "Routine safety briefings were conducted."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "security":
-        return `SECURITY\n` +
-          `${d.securityIncidents || "0"} security-related incident(s) were logged this period. Access control and site perimeter checks were carried out ${d.accessChecks || "as scheduled"}.\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "environment":
-        return `ENVIRONMENT\n` +
-          `Effluent and air monitoring were carried out ${d.monitoringFreq || "as scheduled"}. ${d.wasteNote || "Waste was segregated and handed to a licensed transporter."} ` +
-          `${d.spillNote || "No uncontrolled spills were recorded."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "ghg":
-        return `GHG\n` +
-          `Estimated fuel/energy use for the period: ${d.energyUse || "not yet tracked"}. ${d.reductionActions || "No specific reduction actions logged this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "community":
-        return `COMMUNITY\n` +
-          `${d.grievances || "0"} grievance(s) were logged, of which ${d.grievancesClosed || "0"} were closed out. ${d.engagementNote || "No community engagement activities were scheduled this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "permitting":
-        return `PERMITTING\n` +
-          `Current permit status: ${d.permitStatus || "valid"}. Next renewal due: ${d.renewalDate || "not set"}. ${d.submissionNote || "No new submissions were made this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      default:
-        // Any framework segment without a bespoke template — the IFC
-        // Performance Standards, or an ESSR section — is rendered from its
-        // own label, its numeric returns and whichever narrative blocks the
-        // framework declares.
-        return `${label || seg}\n` +
-          ((d.notes && d.notes.trim())
-            ? d.notes.trim()
-            : "Status not yet recorded for this period. Add site data, monitoring results and any corrective actions before this report is issued.") + "\n";
-    }
-  }
+  /* Every framework's sections are now rendered from structured input —
+     the tables, numeric returns and narrative blocks the user actually filled
+     in. There are deliberately no per-segment prose templates: a template
+     that prints "0 incidents, PPE compliance N/A" from fields nobody filled
+     is inventing a compliance position, which is the one thing a report of
+     this kind must never do. */
 
   // Renders one section's numeric/text returns as an aligned KPI block, so
   // the figures a reviewer checks first sit above the narrative.
@@ -71,29 +33,60 @@ const VerdaAI = (() => {
     return rows.map(r => `  ${r.label.padEnd(w)} : ${r.value}`).join("\n") + "\n";
   }
 
+  // Renders one data table as fixed-width text, so the plain-text report
+  // carries the same rows as the HTML one (a text report is what gets pasted
+  // into an email or a regulator's portal).
+  function textTable(tableDef, rows) {
+    const cols = tableDef.columns.filter(c => rows.some(r => String(r[c.key] ?? "").trim()));
+    if (!cols.length) return "";
+    const header = cols.map(c => c.label + (c.unit ? ` (${c.unit})` : ""));
+    const body = rows.map(r => cols.map(c => String(r[c.key] ?? "").replace(/\s+/g, " ").trim()));
+    const w = header.map((hd, i) => Math.min(34, Math.max(hd.length, ...body.map(b => b[i].length))));
+    const line = (cells) => "  " + cells.map((v, i) =>
+      (v.length > w[i] ? v.slice(0, w[i] - 1) + "…" : v).padEnd(w[i])).join("  ").replace(/\s+$/, "");
+    return `\n  ${tableDef.title}\n${line(header)}\n  ${w.map(n => "-".repeat(n)).join("  ")}\n` +
+      body.map(line).join("\n") + "\n";
+  }
+
+  function tablesBlock(tables, tableDefs) {
+    if (!tables || !tableDefs) return "";
+    return tableDefs.map(t => {
+      const rows = tables[t.id];
+      return (rows && rows.length) ? textTable(t, rows) : "";
+    }).join("");
+  }
+
   // A section under a framework that declares its own narrative blocks
   // (e.g. ESSR: monthly updates / cumulative KPI / management comment).
-  function sectionWithBlocks(def, data, blocks) {
+  function sectionWithBlocks(def, data, blocks, tableDefs) {
     const d = data || {};
     let out = `${def.label}\n${"-".repeat(Math.min(def.label.length, 71))}\n`;
     const returns = returnsBlock(d.inputs, def.fields);
     if (returns) out += `Returns for the period:\n${returns}`;
+    const tables = tablesBlock(d.tables, tableDefs);
+    if (tables) out += tables;
+    const photos = (d.photos || []).length;
     let anyNarrative = false;
     blocks.forEach(b => {
       const text = (d[b.key] || "").trim();
       if (text) { anyNarrative = true; out += `\n${b.label}:\n${text}\n`; }
     });
-    if (!anyNarrative) {
+    if (!anyNarrative && !tables) {
       // The ESSR convention: where nothing has changed since the previous
       // period, that is reported explicitly rather than left blank.
-      out += returns
-        ? `\n${blocks[blocks.length - 1].label}: No change to report for this period beyond the returns above.\n`
-        : `\nNo change to report for this period. Confirm before issue — a section left blank is a finding at review.\n`;
+      if (returns) {
+        out += `\n${blocks[blocks.length - 1].label}: No change to report for this period beyond the returns above.\n`;
+      } else if (photos) {
+        out += `\nPhotographs are attached for this section but no narrative has been written. Describe what they show before this report is issued.\n`;
+      } else {
+        out += `\nNo change to report for this period. Confirm before issue — a section left blank is a finding at review.\n`;
+      }
     }
+    if (photos) out += `\n  [${photos} photograph(s) attached to this section — see the full report.]\n`;
     return out;
   }
 
-  function generateAIDraft({ clientName, period, segments, segmentData, standardTitle, segmentDefs, blocks, header, headerDefs }) {
+  function generateAIDraft({ clientName, period, segments, segmentData, standardTitle, segmentDefs, blocks, header, headerDefs, tableDefs }) {
     const defs = segmentDefs || [];
     const defFor = (id) => defs.find((x) => x.id === id) || { id, label: id[0].toUpperCase() + id.slice(1) };
     const labelFor = (id) => defFor(id).label;
@@ -116,10 +109,11 @@ Generated: ${new Date().toISOString().slice(0, 10)}
 
     // A framework that declares narrative blocks gets the structured
     // section renderer; the modular segments keep their bespoke templates.
+    const tablesFor = (id) => (tableDefs || {})[id] || null;
     const useBlocks = Array.isArray(blocks) && blocks.length > 1;
     const body = segments.map(id => useBlocks
-      ? sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks)
-      : narrativeForSegment(id, segmentData[id] || {}, labelFor(id))
+      ? sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks, tablesFor(id))
+      : sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks || [{ key: "notes", label: "Notes" }], tablesFor(id))
     ).join("\n");
 
     const summary =

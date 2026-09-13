@@ -604,154 +604,678 @@
   }
 
   /* ============================ VERDA REPORTING ============================ */
+
+  // Categorical series colours, in fixed order (never cycled). Slots 1-3 of the
+  // validated palette; a table asking for more than three series is capped.
+  const SERIES_VARS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
+
+  // Grouped bar chart, 1-3 series. Single series needs no legend (the title
+  // names it); two or more always carry one, plus direct value labels, so
+  // identity is never colour-alone.
+  function groupedBarChart(rows, seriesDefs, title, valueLabel) {
+    const series = seriesDefs.slice(0, 3);
+    if (!rows.length || !series.length) return "";
+    const W = 560, H = 230, padL = 16, padR = 12, padT = 28, padB = 46;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const max = Math.max(1, ...rows.flatMap(r => series.map(s => Number(r.values[s.key]) || 0)));
+    const slot = plotW / rows.length;
+    const groupW = Math.min(58 * series.length, slot * 0.68);
+    const barW = Math.max(4, (groupW - 2 * (series.length - 1)) / series.length); // 2px surface gap
+    const body = rows.map((r, i) => {
+      const gx = padL + slot * i + (slot - groupW) / 2;
+      return series.map((s, j) => {
+        const v = Number(r.values[s.key]) || 0;
+        const hgt = Math.round((v / max) * plotH);
+        const x = gx + j * (barW + 2);
+        const y = padT + plotH - hgt;
+        const rad = Math.min(4, hgt, barW / 2);
+        const d = hgt <= 0 ? "" :
+          `M${x} ${y + hgt} V${y + rad} q0 -${rad} ${rad} -${rad} h${barW - 2 * rad} q${rad} 0 ${rad} ${rad} V${y + hgt} Z`;
+        // A single-series chart may colour each bar by its own category
+        // (the reserved status palette); multi-series colours by series.
+        const fill = (series.length === 1 && r.color) ? r.color : (s.color || SERIES_VARS[j]);
+        return `<g><title>${esc(r.label)} — ${esc(s.label)}: ${esc(String(v))}</title>` +
+          (hgt > 0 ? `<path d="${d}" style="fill:${fill}"/>` : "") +
+          `<text x="${x + barW / 2}" y="${y - 6}" class="chart-value">${esc(String(v))}</text></g>`;
+      }).join("") +
+        `<text x="${gx + groupW / 2}" y="${padT + plotH + 17}" class="chart-label">${esc(shortLabel(r.label))}</text>`;
+    }).join("");
+    const legend = series.length > 1
+      ? `<div class="chart-legend">${series.map((s, j) =>
+          `<span class="legend-item"><i style="background:${s.color || SERIES_VARS[j]}"></i>${esc(s.label)}</span>`).join("")}</div>`
+      : "";
+    const table = `<details class="chart-table"><summary>View data table</summary>
+      <div class="table-scroll"><table class="table"><thead><tr><th>${esc(title)}</th>
+      ${series.map(s => `<th>${esc(s.label)}${valueLabel ? ` (${esc(valueLabel)})` : ""}</th>`).join("")}</tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${esc(r.label)}</td>${series.map(s => `<td>${esc(String(r.values[s.key] ?? "—"))}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div></details>`;
+    return `<figure class="chart-figure"><figcaption class="chart-title">${esc(title)}</figcaption>
+      <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">
+      <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" class="chart-axis"/>
+      ${body}</svg>${legend}${table}</figure>`;
+  }
+
+  function shortLabel(s) {
+    s = String(s || "");
+    return s.length > 16 ? s.slice(0, 15) + "…" : s;
+  }
+
+  // Build chart rows from a table's live data. Returns null when there is
+  // nothing numeric to plot yet — an empty chart frame is worse than none.
+  function chartFromTable(tableDef, rows) {
+    const spec = tableDef.chart;
+    if (!spec || !rows || !rows.length) return null;
+    if (spec.count) {
+      // Count rows per category (e.g. grievances by status).
+      const counts = new Map();
+      rows.forEach(r => {
+        const k = (r[spec.labelKey] || "").trim();
+        if (k) counts.set(k, (counts.get(k) || 0) + 1);
+      });
+      if (!counts.size) return null;
+      const palette = spec.status ? statusColorFor : null;
+      return {
+        rows: Array.from(counts, ([label, n]) => ({ label, values: { count: n }, color: palette ? palette(label) : null })),
+        series: [{ key: "count", label: spec.valueLabel || "Count" }],
+        title: spec.title, valueLabel: spec.valueLabel,
+        perRowColor: !!palette
+      };
+    }
+    const keys = spec.valueKeys.slice(0, 3);
+    const out = rows
+      .filter(r => (r[spec.labelKey] || "").trim() && keys.some(k => String(r[k] ?? "").trim() !== ""))
+      .map(r => ({ label: r[spec.labelKey], values: Object.fromEntries(keys.map(k => [k, Number(r[k]) || 0])) }));
+    if (!out.length) return null;
+    const colFor = (k) => (tableDef.columns.find(c => c.key === k) || {}).label || k;
+    return {
+      rows: out,
+      series: keys.map(k => ({ key: k, label: colFor(k) })),
+      title: spec.title, valueLabel: spec.valueLabel
+    };
+  }
+
+  // Status words map to the reserved status palette, so "Above limit" is never
+  // the same colour as a neutral series.
+  function statusColorFor(label) {
+    const t = String(label).toLowerCase();
+    if (/open|above|non-?compliant|expired|not paid|disputed|major|not obtained|not implemented|destroyed/.test(t)) return "var(--chart-critical)";
+    if (/investigat|partial|part paid|applied|in progress|pending|minor|under |await/.test(t)) return "var(--chart-warning)";
+    if (/closed|resolved|valid|within|compliant|paid|effective|delivered|obtained|protected/.test(t)) return "var(--chart-good)";
+    return "var(--chart-1)";
+  }
+
+  function renderChartBlock(tableDef, rows) {
+    const c = chartFromTable(tableDef, rows);
+    if (!c) return `<p class="muted small chart-empty">Add rows with numbers and a chart appears here.</p>`;
+    // Status charts carry a colour per row (the reserved status palette);
+    // every bar is directly labelled with its category either way.
+    return groupedBarChart(c.rows, c.series, c.title, c.valueLabel);
+  }
+
+  // Downscale a dropped photo before it is stored: site photos off a phone are
+  // several MB each and localStorage is a few MB in total.
+  function compressImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("not an image"));
+        img.onload = () => {
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const hh = Math.max(1, Math.round(img.height * scale));
+          const cv = document.createElement("canvas");
+          cv.width = w; cv.height = hh;
+          cv.getContext("2d").drawImage(img, 0, 0, w, hh);
+          resolve(cv.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const MAX_PHOTOS_PER_SECTION = 6;
+
   function renderReporting(main) {
-    // Which framework the report is built against: EEIS's own modular
-    // segments, or the eight IFC Performance Standards.
     let standard = VERDA_SEED.reportStandards[0];
     const segsFor = (std) => VERDA_SEED[std.segmentsKey];
     let segs = segsFor(standard);
+    let guided = state.reportGuided !== false;   // on by default — most users are new to this
+
+    // Live form model, kept outside the DOM so adding a table row or a photo
+    // never discards what is already typed.
+    let model = {};                              // sectionId -> { blocks, inputs, tables, photos }
+    function sectionModel(id) {
+      if (!model[id]) model[id] = { blocks: {}, inputs: {}, tables: {}, photos: [] };
+      return model[id];
+    }
+    function tableRows(sectionId, tableDef) {
+      const m = sectionModel(sectionId);
+      if (!m.tables[tableDef.id]) {
+        const starters = (tableDef.starterRows || []).map(r => Object.assign({}, r));
+        m.tables[tableDef.id] = starters.length ? starters : [{}];
+      }
+      return m.tables[tableDef.id];
+    }
+    const tablesFor = (id) => VERDA_SEED.sectionTables[id] || [];
+
+    // Starter rows pre-fill a label column so the expected rows are visible.
+    // A row carrying nothing but that scaffolding is not data, and must not be
+    // reported as if the user had filled it in.
+    function rowHasContent(tableDef, row) {
+      const starterKeys = new Set((tableDef.starterRows || []).flatMap(r => Object.keys(r)));
+      return Object.entries(row).some(([k, v]) =>
+        String(v ?? "").trim() && !starterKeys.has(k));
+    }
+    function filledRows(sectionId, tableDef) {
+      return (sectionModel(sectionId).tables[tableDef.id] || []).filter(r => rowHasContent(tableDef, r));
+    }
 
     main.appendChild(h(`
       <section>
-        <h1>Verda Reporting</h1>
-        <p class="muted">Build a periodic report from modular sections — include only what's relevant to this client. Report against Verda's own segments, the IFC Performance Standards, or the full monthly ESSR self-monitoring format used on lender-financed construction contracts.</p>
-        <div class="card">
-          <label>Reporting standard
-            <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
-          </label>
-          <label>Client
-            <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
-          </label>
-          <label>Reporting period<input id="rep-period" placeholder="e.g. Q3 2026 / September 2026" /></label>
-          <div id="rep-header-fields" class="field-grid"></div>
-          <fieldset class="segments">
-            <legend>Segments to include</legend>
-            <div id="seg-toggles"></div>
-          </fieldset>
-          <div id="seg-forms"></div>
-          <div class="modal-actions">
-            <button class="btn btn-primary" id="gen-report">Generate with AI Assist (${VERDA_SEED.creditCosts.aiDraft} credits)</button>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Verda Reporting</h1>
+            <p class="muted">Fill in the tables, add your photos, and Verda assembles the report. Every section is optional — include only what applies to this client.</p>
           </div>
         </div>
+
+        <div class="card notice-card" id="how-to">
+          <h3>How to build a report — four steps</h3>
+          <ol class="steps">
+            <li><strong>Pick the format and the client.</strong> Verda's own segments for a straightforward monthly report, the IFC Performance Standards where a lender requires them, or the full ESSR where your contract demands it.</li>
+            <li><strong>Tick the sections that apply.</strong> Untick anything that doesn't — you are not expected to fill all of them.</li>
+            <li><strong>Fill the tables and drop in photos.</strong> Each table says what belongs in it. Numbers become charts automatically. Leave a figure blank if you don't have it; enter <strong>0</strong> if it genuinely is zero — those mean different things.</li>
+            <li><strong>Generate, read it, then download.</strong> The draft is a starting point, not a finished submission. Read every line before it leaves your hands.</li>
+          </ol>
+          <label class="switch"><input type="checkbox" id="guided-toggle" ${guided ? "checked" : ""} />
+            <span>Guided mode — show what each section is for, with example wording</span></label>
+        </div>
+
+        <div class="card">
+          <div class="form-row">
+            <label>Reporting format
+              <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</select>
+            </label>
+            <label>Client
+              <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
+            </label>
+            <label>Reporting period<input id="rep-period" placeholder="e.g. October 2026 / Q3 2026" /></label>
+          </div>
+          <div id="rep-header-fields" class="field-grid"></div>
+        </div>
+
+        <div class="card">
+          <h3>Sections to include</h3>
+          <p class="muted small" id="seg-progress"></p>
+          <div class="seg-toggle-actions">
+            <button class="btn btn-ghost btn-sm" id="seg-all">Select all</button>
+            <button class="btn btn-ghost btn-sm" id="seg-none">Clear all</button>
+          </div>
+          <div id="seg-toggles"></div>
+        </div>
+
+        <div id="seg-forms"></div>
+
+        <div class="card">
+          <button class="btn btn-primary" id="gen-report">Generate report with AI Assist (${VERDA_SEED.creditCosts.aiDraft} credits)</button>
+          <p class="muted small">Drafts the narrative from what you entered. It cannot invent data it wasn't given — blank stays blank.</p>
+        </div>
         <div id="report-output"></div>
+
         <div class="card">
           <h3>Past reports</h3>
-          <table class="table"><thead><tr><th>Client</th><th>Standard</th><th>Period</th><th>Segments</th><th>Generated</th><th></th></tr></thead>
-          <tbody id="reports-list"></tbody></table>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Client</th><th>Format</th><th>Period</th><th>Sections</th><th>Photos</th><th>Generated</th><th></th></tr></thead>
+            <tbody id="reports-list"></tbody></table>
+          </div>
         </div>
       </section>
     `));
 
-    // The report header fields a framework asks for (ESSR carries a document
-    // number, version and distribution list; the others need none).
+    /* ---- header fields (format-specific, e.g. ESSR document number) ---- */
     function renderHeaderFields() {
       const box = main.querySelector("#rep-header-fields");
-      const hf = standard.headerFields || [];
-      box.innerHTML = hf.map(f =>
+      box.innerHTML = (standard.headerFields || []).map(f =>
         `<label>${esc(f.label)}<input data-header="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
       ).join("");
     }
 
-    function renderSegForms() {
-      const checked = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
-      const container = main.querySelector("#seg-forms");
+    /* ---- one table ---- */
+    function tableHtml(sectionId, t) {
+      const rows = tableRows(sectionId, t);
+      const head = t.columns.map(c =>
+        `<th>${esc(c.label)}${c.unit ? ` <span class="muted">(${esc(c.unit)})</span>` : ""}</th>`).join("");
+      const body = rows.map((row, ri) => `<tr>${t.columns.map(c => {
+        const v = row[c.key] == null ? "" : String(row[c.key]);
+        if (c.type === "select") {
+          return `<td><select data-cell="${esc(c.key)}" data-row="${ri}">
+            <option value="">—</option>
+            ${c.options.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
+        }
+        const type = c.type === "number" ? "number" : c.type === "date" ? "date" : "text";
+        return `<td><input type="${type}" data-cell="${esc(c.key)}" data-row="${ri}" value="${esc(v)}" /></td>`;
+      }).join("")}<td class="row-actions"><button class="btn btn-ghost btn-sm" data-delrow="${ri}" title="Remove this row" aria-label="Remove row ${ri + 1}">✕</button></td></tr>`).join("");
+      return `<div class="report-table" data-table="${esc(t.id)}">
+        <div class="report-table-head">
+          <h5>${esc(t.title)}</h5>
+          ${t.hint ? `<p class="muted small">${esc(t.hint)}</p>` : ""}
+        </div>
+        <div class="table-scroll"><table class="table entry-table"><thead><tr>${head}<th></th></tr></thead>
+        <tbody>${body}</tbody></table></div>
+        <button class="btn btn-ghost btn-sm" data-addrow="${esc(t.id)}">+ Add row</button>
+        <div class="chart-slot" data-chart="${esc(t.id)}">${t.chart ? renderChartBlock(t, rows) : ""}</div>
+      </div>`;
+    }
+
+    /* ---- one section ---- */
+    function sectionHtml(sec) {
       const blocks = standard.blocks || DEFAULT_BLOCKS;
-      const noun = SEG_NOUN[standard.id] || "segment";
-      container.innerHTML = checked.map(id => {
-        const sec = segs.find(x => x.id === id);
-        // Numeric/text returns this section's KPI tables actually ask for.
-        const fields = (sec.fields || []).map(f =>
-          `<label class="field-sm">${esc(f.label)}${f.unit ? ` <span class="muted">(${esc(f.unit)})</span>` : ""}
-            <input type="${f.type === "number" ? "number" : "text"}" data-input="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
-        ).join("");
-        const narrative = blocks.map(b =>
-          `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" placeholder="${esc(b.label)} for this ${noun} this period..."></textarea></label>`
-        ).join("");
-        return `<div class="seg-form" data-seg="${esc(id)}">
-          <h4>${esc(sec.label)}</h4>
-          ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
-          ${fields ? `<div class="field-grid">${fields}</div>` : ""}
-          ${narrative}
-        </div>`;
-      }).join("") || `<p class="muted">Select at least one section above.</p>`;
+      const m = sectionModel(sec.id);
+      const guide = VERDA_SEED.sectionGuide[sec.id];
+      const guideHtml = (guided && guide) ? `<div class="guide-box">
+        <p><strong>What this section is for.</strong> ${esc(guide.what)}</p>
+        <p><strong>How to fill it.</strong> ${esc(guide.how)}</p>
+        <details><summary>Example wording</summary>
+          <p class="guide-example">${esc(guide.example)}</p>
+          <p class="muted small">Guidance only — describe what actually happened on your site.</p>
+        </details>
+      </div>` : "";
+      const fields = (sec.fields || []).map(f =>
+        `<label class="field-sm">${esc(f.label)}${f.unit ? ` <span class="muted">(${esc(f.unit)})</span>` : ""}
+          <input type="${f.type === "number" ? "number" : "text"}" data-input="${esc(f.key)}"
+            value="${esc(m.inputs[f.key] || "")}" placeholder="${esc(f.placeholder || "")}" /></label>`).join("");
+      const tables = tablesFor(sec.id).map(t => tableHtml(sec.id, t)).join("");
+      const narrative = blocks.map(b =>
+        `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" rows="3"
+          placeholder="${esc(b.label)} — in your own words.">${esc(m.blocks[b.key] || "")}</textarea></label>`).join("");
+      return `<div class="card seg-form" data-seg="${esc(sec.id)}">
+        <h4>${esc(sec.label)}</h4>
+        ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
+        ${guideHtml}
+        ${fields ? `<h5>Summary figures</h5><div class="field-grid">${fields}</div>` : ""}
+        ${tables}
+        <h5>Narrative</h5>
+        ${narrative}
+        <h5>Photographs</h5>
+        <div class="dropzone" data-drop="${esc(sec.id)}" tabindex="0" role="button"
+             aria-label="Add photographs for ${esc(sec.label)}">
+          <p><strong>Drag photos here</strong> — or click to choose, or paste from your clipboard.</p>
+          <p class="muted small">Up to ${MAX_PHOTOS_PER_SECTION} per section. Photos are resized in your browser and stored on this device only.</p>
+          <input type="file" accept="image/*" multiple hidden data-file="${esc(sec.id)}" />
+        </div>
+        <div class="photo-grid" data-photos="${esc(sec.id)}"></div>
+      </div>`;
+    }
+
+    /* ---- photos ---- */
+    function renderPhotos(sectionId) {
+      const grid = main.querySelector(`[data-photos="${sectionId}"]`);
+      if (!grid) return;
+      const photos = sectionModel(sectionId).photos;
+      grid.innerHTML = photos.map((p, i) => `<figure class="photo-card">
+        <img src="${p.src}" alt="${esc(p.caption || "Site photograph")}" />
+        <input class="photo-caption" data-caption="${i}" value="${esc(p.caption || "")}" placeholder="Caption — what this shows" />
+        <button class="btn btn-ghost btn-sm" data-delphoto="${i}">Remove</button>
+      </figure>`).join("");
+      grid.querySelectorAll("[data-caption]").forEach(inp => inp.addEventListener("input", () => {
+        photos[Number(inp.dataset.caption)].caption = inp.value;
+      }));
+      grid.querySelectorAll("[data-delphoto]").forEach(btn => btn.addEventListener("click", () => {
+        photos.splice(Number(btn.dataset.delphoto), 1);
+        renderPhotos(sectionId);
+      }));
+    }
+
+    async function addFiles(sectionId, files) {
+      const m = sectionModel(sectionId);
+      const list = Array.from(files).filter(f => f.type.startsWith("image/"));
+      if (!list.length) { alert("That doesn't look like an image file. Photos can be JPG, PNG, HEIC-converted or WebP."); return; }
+      const room = MAX_PHOTOS_PER_SECTION - m.photos.length;
+      if (room <= 0) { alert(`This section already has ${MAX_PHOTOS_PER_SECTION} photos. Remove one before adding another.`); return; }
+      for (const f of list.slice(0, room)) {
+        try {
+          m.photos.push({ src: await compressImage(f, 1100, 0.72), caption: f.name.replace(/\.[^.]+$/, "") });
+        } catch (e) { alert(`Couldn't read "${f.name}". Try saving it as a JPG or PNG first.`); }
+      }
+      if (list.length > room) alert(`Added ${room} photo(s) — this section is now full at ${MAX_PHOTOS_PER_SECTION}.`);
+      renderPhotos(sectionId);
+    }
+
+    /* ---- wiring for a rendered section ---- */
+    function wireSection(sec) {
+      const form = main.querySelector(`.seg-form[data-seg="${sec.id}"]`);
+      if (!form) return;
+      const m = sectionModel(sec.id);
+
+      form.querySelectorAll("[data-input]").forEach(el =>
+        el.addEventListener("input", () => { m.inputs[el.dataset.input] = el.value; updateProgress(); }));
+      form.querySelectorAll("[data-field]").forEach(el =>
+        el.addEventListener("input", () => { m.blocks[el.dataset.field] = el.value; updateProgress(); }));
+
+      tablesFor(sec.id).forEach(t => {
+        const wrap = form.querySelector(`[data-table="${t.id}"]`);
+        const rows = tableRows(sec.id, t);
+        wrap.querySelectorAll("[data-cell]").forEach(el => {
+          el.addEventListener("input", () => {
+            rows[Number(el.dataset.row)][el.dataset.cell] = el.value;
+            updateProgress();
+          });
+          // Charts refresh on commit (blur / select change), not per keystroke.
+          el.addEventListener("change", () => refreshChart(sec.id, t));
+        });
+        wrap.querySelector("[data-addrow]").addEventListener("click", () => {
+          rows.push({});
+          rerenderTable(sec, t);
+        });
+        wrap.querySelectorAll("[data-delrow]").forEach(btn => btn.addEventListener("click", () => {
+          rows.splice(Number(btn.dataset.delrow), 1);
+          if (!rows.length) rows.push({});
+          rerenderTable(sec, t);
+        }));
+      });
+
+      const dz = form.querySelector("[data-drop]");
+      const picker = form.querySelector("[data-file]");
+      dz.addEventListener("click", () => picker.click());
+      dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); picker.click(); } });
+      picker.addEventListener("change", () => { addFiles(sec.id, picker.files); picker.value = ""; });
+      ["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, (e) => {
+        e.preventDefault(); e.stopPropagation(); dz.classList.add("dropzone-active");
+      }));
+      ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, (e) => {
+        e.preventDefault(); e.stopPropagation(); dz.classList.remove("dropzone-active");
+      }));
+      dz.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(sec.id, e.dataTransfer.files); });
+      dz.addEventListener("paste", (e) => {
+        const items = (e.clipboardData && e.clipboardData.files) || [];
+        if (items.length) { e.preventDefault(); addFiles(sec.id, items); }
+      });
+      renderPhotos(sec.id);
+    }
+
+    function refreshChart(sectionId, t) {
+      const slot = main.querySelector(`.seg-form[data-seg="${sectionId}"] [data-chart="${t.id}"]`);
+      if (slot && t.chart) slot.innerHTML = renderChartBlock(t, tableRows(sectionId, t));
+    }
+
+    function rerenderTable(sec, t) {
+      const wrap = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
+      if (!wrap) return;
+      wrap.outerHTML = tableHtml(sec.id, t);
+      // Re-wire just this table.
+      const fresh = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
+      const rows = tableRows(sec.id, t);
+      fresh.querySelectorAll("[data-cell]").forEach(el => {
+        el.addEventListener("input", () => { rows[Number(el.dataset.row)][el.dataset.cell] = el.value; updateProgress(); });
+        el.addEventListener("change", () => refreshChart(sec.id, t));
+      });
+      fresh.querySelector("[data-addrow]").addEventListener("click", () => { rows.push({}); rerenderTable(sec, t); });
+      fresh.querySelectorAll("[data-delrow]").forEach(btn => btn.addEventListener("click", () => {
+        rows.splice(Number(btn.dataset.delrow), 1);
+        if (!rows.length) rows.push({});
+        rerenderTable(sec, t);
+      }));
+      updateProgress();
+    }
+
+    /* ---- section list ---- */
+    function checkedIds() {
+      return Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
+    }
+
+    function sectionHasData(id) {
+      const m = model[id];
+      if (!m) return false;
+      if (Object.values(m.blocks).some(v => (v || "").trim())) return true;
+      if (Object.values(m.inputs).some(v => (v || "").trim())) return true;
+      if (m.photos.length) return true;
+      return tablesFor(id).some(t => filledRows(id, t).length > 0);
+    }
+
+    function updateProgress() {
+      const ids = checkedIds();
+      const done = ids.filter(sectionHasData).length;
+      const el = main.querySelector("#seg-progress");
+      if (!el) return;
+      el.textContent = ids.length
+        ? `${done} of ${ids.length} selected section(s) have something in them. Empty sections are reported as "no change" — that is allowed, but say so deliberately.`
+        : "No sections selected yet — tick the ones that apply to this client.";
+      main.querySelectorAll(".seg-toggle").forEach(lab => {
+        const id = lab.querySelector(".seg-check").value;
+        lab.classList.toggle("seg-filled", sectionHasData(id));
+      });
+    }
+
+    function renderSegForms() {
+      const ids = checkedIds();
+      const container = main.querySelector("#seg-forms");
+      const chosen = segs.filter(s => ids.includes(s.id));
+      container.innerHTML = chosen.length
+        ? chosen.map(sectionHtml).join("")
+        : `<p class="muted">Tick a section above and its tables appear here.</p>`;
+      chosen.forEach(wireSection);
+      updateProgress();
     }
 
     function renderSegToggles() {
       main.querySelector("#seg-toggles").innerHTML = segs.map(s =>
-        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${s.id}" checked /> ${s.label} <span class="muted small">— ${s.hint}</span></label>`
-      ).join("");
+        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${esc(s.id)}" checked />
+          <span class="seg-toggle-label">${esc(s.label)}</span>
+          <span class="muted small">${esc(s.hint || "")}</span></label>`).join("");
       main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderSegForms));
       renderSegForms();
     }
+
+    main.querySelector("#seg-all").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = true; });
+      renderSegForms();
+    });
+    main.querySelector("#seg-none").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = false; });
+      renderSegForms();
+    });
+    main.querySelector("#guided-toggle").addEventListener("change", (e) => {
+      guided = e.target.checked;
+      state.reportGuided = guided;
+      save();
+      renderSegForms();
+    });
+
     renderHeaderFields();
     renderSegToggles();
 
     main.querySelector("#rep-standard").addEventListener("change", (e) => {
       standard = VERDA_SEED.reportStandards.find(s => s.id === e.target.value);
       segs = segsFor(standard);
+      model = {};                 // a different format asks different questions
       renderHeaderFields();
       renderSegToggles();
     });
 
+    /* ---- past reports ---- */
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
-        <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
-        <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
-        `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
+        <tr><td>${esc(r.clientName)}</td>
+        <td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
+        <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.photoCount || 0}</td><td>${r.date.slice(0, 10)}</td>
+        <td class="row-actions">
+          <button class="btn btn-ghost btn-sm" data-dl="${esc(r.id)}">.txt</button>
+          <button class="btn btn-ghost btn-sm" data-dlhtml="${esc(r.id)}">Full report</button>
+        </td></tr>`).join("") ||
+        `<tr><td colspan="7" class="muted">No reports generated yet.</td></tr>`;
+      const base = (r) => `${REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting"}-${r.clientName.replace(/\s+/g, "_")}-${String(r.period).replace(/\s+/g, "_")}`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
-        const prefix = REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting";
-        downloadText(`${prefix}-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
+        downloadText(`${base(r)}.txt`, r.text);
+      }));
+      main.querySelectorAll("[data-dlhtml]").forEach(btn => btn.addEventListener("click", () => {
+        const r = state.reports.find(x => x.id === btn.dataset.dlhtml);
+        if (!r.full) { alert("This report was generated before tables and photos were stored. Generate it again to get the full version."); return; }
+        downloadHtml(`${base(r)}.html`, buildReportHtml(r));
       }));
     }
     refreshList();
 
+    /* ---- generate ---- */
     main.querySelector("#gen-report").addEventListener("click", () => {
-      const clientId = main.querySelector("#rep-client").value;
-      const client = state.clients.find(c => c.id === clientId);
+      const client = state.clients.find(c => c.id === main.querySelector("#rep-client").value);
       const period = main.querySelector("#rep-period").value.trim() || "Current period";
-      const segments = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
-      if (!segments.length) { alert("Select at least one segment."); return; }
+      const segments = checkedIds();
+      if (!segments.length) { alert("Tick at least one section to include."); return; }
       if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "Verda Reporting AI draft")) return;
-      // Collect every narrative box and every numeric return per section.
+
       const blocks = standard.blocks || DEFAULT_BLOCKS;
       const segmentData = {};
+      let photoCount = 0;
       segments.forEach(id => {
-        const form = main.querySelector(`.seg-form[data-seg="${id}"]`);
-        const entry = { inputs: {} };
-        blocks.forEach(b => {
-          const el = form.querySelector(`[data-field="${b.key}"]`);
-          entry[b.key] = el ? el.value : "";
+        const m = sectionModel(id);
+        const tables = {};
+        tablesFor(id).forEach(t => {
+          const rows = filledRows(id, t);
+          if (rows.length) tables[t.id] = rows;
         });
-        form.querySelectorAll("[data-input]").forEach(el => {
-          if (el.value.trim()) entry.inputs[el.dataset.input] = el.value.trim();
-        });
-        segmentData[id] = entry;
+        photoCount += m.photos.length;
+        segmentData[id] = Object.assign({}, m.blocks, { inputs: m.inputs, tables, photos: m.photos });
       });
       const header = {};
       main.querySelectorAll("#rep-header-fields [data-header]").forEach(el => {
         if (el.value.trim()) header[el.dataset.header] = el.value.trim();
       });
+
       const text = VerdaAI.generateAIDraft({
         clientName: client.name, period, segments, segmentData,
         standardTitle: standard.title, segmentDefs: segs,
-        blocks, header, headerDefs: standard.headerFields || []
+        blocks, header, headerDefs: standard.headerFields || [],
+        tableDefs: VERDA_SEED.sectionTables
       });
+
       const rec = {
         id: uid("rep"), clientName: client.name, period, segments, text,
         standard: standard.id, standardName: standard.shortName,
-        date: new Date().toISOString()
+        date: new Date().toISOString(), photoCount,
+        full: { standardTitle: standard.title, header, headerDefs: standard.headerFields || [], blocks, segmentData,
+                sectionLabels: Object.fromEntries(segs.map(s => [s.id, s.label])) }
       };
       state.reports.push(rec);
-      save();
-      main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${esc(text)}</pre>
-        <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
-      main.querySelector("#dl-now").addEventListener("click", () =>
-        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Photos are the only thing big enough to fill localStorage. Keep the
+        // report, drop the stored copies, and say so rather than failing quietly.
+        rec.full.segmentData = Object.fromEntries(Object.entries(rec.full.segmentData)
+          .map(([k, v]) => [k, Object.assign({}, v, { photos: [] })]));
+        save();
+        alert("The report was generated and the download below includes your photos. Browser storage was full, so the saved copy in 'Past reports' keeps the tables and narrative but not the images.");
+      }
+
+      const preview = main.querySelector("#report-output");
+      preview.innerHTML = card("Generated report", `
+        <p class="muted small">Read it through before it leaves your hands. "Full report" keeps the tables, charts and photographs; ".txt" is the plain-text version.</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="dl-html">Download full report (.html)</button>
+          <button class="btn btn-ghost" id="dl-now">Download .txt</button>
+        </div>
+        <div class="report-preview">${buildReportHtml(rec, true)}</div>`);
+      preview.querySelector("#dl-now").addEventListener("click", () =>
+        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g, "_")}.txt`, text));
+      preview.querySelector("#dl-html").addEventListener("click", () =>
+        downloadHtml(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g, "_")}.html`,
+          buildReportHtml(rec)));
+      preview.scrollIntoView({ behavior: "smooth", block: "start" });
       renderTopbar();
       refreshList();
+      updateProgress();
     });
+  }
+
+  // The report as a document: narrative, the tables as tables, the charts as
+  // charts, and the photographs. Used for the on-screen preview (inline) and
+  // for the downloadable standalone file.
+  function buildReportHtml(rec, inline) {
+    const f = rec.full;
+    if (!f) return `<pre class="report-pre">${esc(rec.text)}</pre>`;
+    const defsFor = (id) => VERDA_SEED.sectionTables[id] || [];
+    const body = rec.segments.map(id => {
+      const d = f.segmentData[id] || {};
+      const label = (f.sectionLabels || {})[id] || id;
+      const figures = Object.entries(d.inputs || {}).filter(([, v]) => String(v).trim());
+      const tables = defsFor(id).map(t => {
+        const rows = (d.tables || {})[t.id];
+        if (!rows || !rows.length) return "";
+        const head = t.columns.map(c => `<th>${esc(c.label)}${c.unit ? ` (${esc(c.unit)})` : ""}</th>`).join("");
+        const tb = rows.map(r => `<tr>${t.columns.map(c => `<td>${esc(r[c.key] == null ? "" : String(r[c.key]))}</td>`).join("")}</tr>`).join("");
+        return `<h4>${esc(t.title)}</h4>
+          <div class="table-scroll"><table class="table"><thead><tr>${head}</tr></thead><tbody>${tb}</tbody></table></div>
+          ${t.chart ? renderChartBlock(t, rows) : ""}`;
+      }).join("");
+      const narrative = (f.blocks || DEFAULT_BLOCKS).map(b => {
+        const v = (d[b.key] || "").trim();
+        return v ? `<h4>${esc(b.label)}</h4><p>${esc(v).replace(/\n/g, "<br/>")}</p>` : "";
+      }).join("") || `<p class="muted">No change to report for this period.</p>`;
+      const photos = (d.photos || []).length ? `<h4>Photographs</h4><div class="photo-grid report-photos">
+        ${d.photos.map(p => `<figure class="photo-card"><img src="${p.src}" alt="${esc(p.caption || "Site photograph")}"/>
+          <figcaption>${esc(p.caption || "")}</figcaption></figure>`).join("")}</div>` : "";
+      return `<section class="report-section"><h3>${esc(label)}</h3>
+        ${figures.length ? `<table class="table kv-table"><tbody>${figures.map(([k, v]) =>
+          `<tr><th>${esc(labelForInput(id, k))}</th><td>${esc(String(v))}</td></tr>`).join("")}</tbody></table>` : ""}
+        ${tables}${narrative}${photos}</section>`;
+    }).join("");
+    const extra = (f.headerDefs || []).filter(x => (f.header || {})[x.key])
+      .map(x => `<tr><th>${esc(x.label)}</th><td>${esc(f.header[x.key])}</td></tr>`).join("");
+    const doc = `<header class="report-head">
+        <h1>${esc(f.standardTitle)}</h1>
+        <table class="table kv-table"><tbody>
+          ${extra}
+          <tr><th>Client</th><td>${esc(rec.clientName)}</td></tr>
+          <tr><th>Reporting period</th><td>${esc(rec.period)}</td></tr>
+          <tr><th>Generated</th><td>${rec.date.slice(0, 10)}</td></tr>
+        </tbody></table>
+      </header>${body}`;
+    return inline ? `<div class="report-doc">${doc}</div>` : doc;
+  }
+
+  function labelForInput(sectionId, key) {
+    const all = [...VERDA_SEED.reportSegments, ...VERDA_SEED.ifcStandards, ...VERDA_SEED.essrSections];
+    const sec = all.find(s => s.id === sectionId);
+    const f = sec && (sec.fields || []).find(x => x.key === key);
+    return f ? f.label + (f.unit ? ` (${f.unit})` : "") : key;
+  }
+
+  // Standalone HTML file: the report plus just enough CSS to print cleanly.
+  function downloadHtml(filename, inner) {
+    const css = `
+      body{font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#16241c;max-width:900px;margin:0 auto;padding:32px 24px}
+      h1{font-size:1.5rem;margin:0 0 16px}h3{margin:32px 0 6px;border-bottom:2px solid #dde7e0;padding-bottom:6px}
+      h4{margin:18px 0 4px;font-size:.95rem}h5{margin:10px 0 4px}
+      table{width:100%;border-collapse:collapse;margin:8px 0 14px}
+      th,td{text-align:left;padding:7px 9px;font-size:.85rem;border-bottom:1px solid #e6ece8;vertical-align:top}
+      thead th{background:#f4f7f4;font-size:.74rem;text-transform:uppercase;letter-spacing:.03em}
+      .kv-table th{width:34%}.muted{color:#5b6b61}.small{font-size:.82rem}
+      .table-scroll{overflow-x:auto}
+      .chart{width:100%;max-width:560px;height:auto;display:block;margin:6px 0}
+      .chart-axis{stroke:#dde7e0}.chart-value{font-size:13px;font-weight:700;text-anchor:middle;fill:#16241c}
+      .chart-label{font-size:12px;text-anchor:middle;fill:#5b6b61}
+      .chart-title{font-weight:700;font-size:.88rem;margin:12px 0 2px}
+      .chart-figure{margin:0}.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#5b6b61;margin:2px 0 6px}
+      .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+      .chart-table summary{cursor:pointer;font-size:.82rem;color:#5b6b61}
+      .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+      .photo-card{margin:0}.photo-card img{width:100%;border-radius:8px;display:block}
+      .photo-card figcaption{font-size:.8rem;color:#5b6b61;margin-top:4px}
+      :root{--chart-1:#2a78d6;--chart-2:#eb6834;--chart-3:#1baf7a;--chart-good:#0ca30c;--chart-warning:#fab219;--chart-serious:#ec835a;--chart-critical:#d03b3b}
+      @media print{body{max-width:none}h3{page-break-after:avoid}.report-section{page-break-inside:avoid}}`;
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width,initial-scale=1"/>
+      <title>${esc(filename.replace(/\.html$/, ""))}</title><style>${css}</style></head><body>${inner}</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
   /* ============================ ToR & ESIA ============================ */

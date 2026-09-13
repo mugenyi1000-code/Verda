@@ -865,6 +865,2728 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   ],
 
   // ---- Credit costs for AI/paid actions --------------------------------
+  // ---- Report tables --------------------------------------------------------
+  // Table structures per report section, keyed by section id (ids are unique
+  // across all three frameworks). A column with chart:true can be plotted; a
+  // table's `chart` block says how. `starterRows` pre-fill the label column so
+  // a first-time user sees the expected rows rather than an empty grid.
+  sectionTables: {
+    "safety": [
+      {
+        "id": "incidents",
+        "title": "Incident & near-miss log",
+        "hint": "One row per event this period. Leave empty if there were none — an empty table reports zero.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Near-miss",
+              "First aid case",
+              "Medical treatment",
+              "Lost time injury",
+              "Property damage",
+              "Vehicle incident"
+            ]
+          },
+          {
+            "key": "desc",
+            "label": "What happened",
+            "type": "text"
+          },
+          {
+            "key": "daysLost",
+            "label": "Days lost",
+            "type": "number"
+          },
+          {
+            "key": "action",
+            "label": "Corrective action",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "In progress",
+              "Closed"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "type",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Events by type",
+          "valueLabel": "Events",
+          "count": true
+        }
+      },
+      {
+        "id": "training",
+        "title": "Safety training delivered",
+        "hint": "Courses, toolbox talks and briefings run this period.",
+        "columns": [
+          {
+            "key": "course",
+            "label": "Course / topic",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "trainer",
+            "label": "Delivered by",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "course",
+          "valueKeys": [
+            "attendees"
+          ],
+          "title": "Attendees by course",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "security": [
+      {
+        "id": "sec-incidents",
+        "title": "Security incident log",
+        "hint": "Date, incident, location, how it was managed, outcome, lessons learnt and action required.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "incident",
+            "label": "Security incident",
+            "type": "text"
+          },
+          {
+            "key": "location",
+            "label": "Location",
+            "type": "text"
+          },
+          {
+            "key": "management",
+            "label": "Management of the incident",
+            "type": "text"
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome",
+            "type": "text"
+          },
+          {
+            "key": "lessons",
+            "label": "Lessons learnt",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action required",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "drills",
+        "title": "Drills & exercises conducted",
+        "hint": "Emergency drills, access-control and VPSHR training.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "subject",
+            "label": "Subject",
+            "type": "text"
+          },
+          {
+            "key": "group",
+            "label": "Targeted group",
+            "type": "text"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "subject",
+          "valueKeys": [
+            "attendees"
+          ],
+          "title": "Attendance by drill / training",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "environment": [
+      {
+        "id": "monitoring",
+        "title": "Monitoring results vs limit",
+        "hint": "Each sample: what you measured, the result, and the permit or national standard it is judged against.",
+        "columns": [
+          {
+            "key": "point",
+            "label": "Sample point",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "text"
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "limit",
+            "label": "Limit",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Sampled",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Within limit",
+              "Above limit",
+              "Awaiting lab"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "parameter",
+          "valueKeys": [
+            "result",
+            "limit"
+          ],
+          "title": "Result against limit",
+          "valueLabel": "Value"
+        }
+      },
+      {
+        "id": "waste",
+        "title": "Waste removed",
+        "hint": "Quantity by stream, who took it, and the transfer note reference.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Waste stream",
+            "type": "select",
+            "options": [
+              "General",
+              "Recyclable",
+              "Biodegradable",
+              "Hazardous",
+              "Medical",
+              "Used oil",
+              "Sewage",
+              "Contaminated soil"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "Quantity",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "select",
+            "options": [
+              "m³",
+              "kg",
+              "tonnes",
+              "drums",
+              "litres"
+            ]
+          },
+          {
+            "key": "handler",
+            "label": "Licensed handler",
+            "type": "text"
+          },
+          {
+            "key": "wtn",
+            "label": "Transfer note ref",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "qty"
+          ],
+          "title": "Quantity by waste stream",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "ghg": [
+      {
+        "id": "energy",
+        "title": "Energy & fuel use",
+        "hint": "Every source you paid for this period. The emission factor converts it to CO₂e — leave blank if you don't have one yet.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Source",
+            "type": "select",
+            "options": [
+              "Grid electricity",
+              "Diesel — generators",
+              "Diesel — vehicles",
+              "Petrol",
+              "LPG",
+              "Fuel oil",
+              "Charcoal / biomass",
+              "Solar (generated)"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "Quantity",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "select",
+            "options": [
+              "kWh",
+              "litres",
+              "kg",
+              "tonnes",
+              "m³"
+            ]
+          },
+          {
+            "key": "factor",
+            "label": "Emission factor (kg CO₂e/unit)",
+            "type": "number"
+          },
+          {
+            "key": "co2e",
+            "label": "CO₂e",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "co2e"
+          ],
+          "title": "CO₂e by source",
+          "valueLabel": "kg CO₂e"
+        }
+      },
+      {
+        "id": "reduction",
+        "title": "Reduction actions",
+        "hint": "What you did to cut consumption, and the saving if you measured it.",
+        "columns": [
+          {
+            "key": "action",
+            "label": "Action",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "saving",
+            "label": "Estimated saving",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Planned",
+              "In progress",
+              "Complete"
+            ]
+          }
+        ]
+      }
+    ],
+    "community": [
+      {
+        "id": "grievances",
+        "title": "Grievance register",
+        "hint": "Every complaint received, whether or not you agreed with it. Open grievances are what reviewers count.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date received",
+            "type": "date"
+          },
+          {
+            "key": "source",
+            "label": "From",
+            "type": "text"
+          },
+          {
+            "key": "issue",
+            "label": "Issue raised",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "engagement",
+        "title": "Engagement & CSR activities",
+        "hint": "Meetings, sensitisations and community support delivered.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "activity",
+            "label": "Activity",
+            "type": "text"
+          },
+          {
+            "key": "location",
+            "label": "Village / location",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome / commitments made",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "activity",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by activity",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "permitting": [
+      {
+        "id": "permit-register",
+        "title": "Permit & licence register",
+        "hint": "Every permit the site relies on. Anything expiring inside 90 days belongs in your management comment.",
+        "columns": [
+          {
+            "key": "permit",
+            "label": "Permit / licence",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Issuing authority",
+            "type": "text"
+          },
+          {
+            "key": "ref",
+            "label": "Certificate no.",
+            "type": "text"
+          },
+          {
+            "key": "issued",
+            "label": "Issued",
+            "type": "date"
+          },
+          {
+            "key": "expiry",
+            "label": "Expiry",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Valid",
+              "Renewal applied",
+              "Expired",
+              "Not yet applied",
+              "Not applicable"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Permits by status",
+          "valueLabel": "Permits",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps1": [
+      {
+        "id": "ps1-risks",
+        "title": "Risk & impact register with management measures",
+        "hint": "Each identified E&S risk, the measure managing it, who owns it and whether it is working.",
+        "columns": [
+          {
+            "key": "risk",
+            "label": "Risk / impact",
+            "type": "text"
+          },
+          {
+            "key": "measure",
+            "label": "Management measure",
+            "type": "text"
+          },
+          {
+            "key": "owner",
+            "label": "Owner",
+            "type": "text"
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Effective",
+              "Partially effective",
+              "Not implemented",
+              "Under review"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Management measures by status",
+          "valueLabel": "Measures",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps2": [
+      {
+        "id": "ps2-labour",
+        "title": "Workforce & working conditions",
+        "hint": "Split by category so contracted and supply-chain workers are visible, as PS2 requires.",
+        "columns": [
+          {
+            "key": "category",
+            "label": "Worker category",
+            "type": "select",
+            "options": [
+              "Direct employees",
+              "Contracted workers",
+              "Supply-chain workers",
+              "Migrant workers"
+            ]
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number"
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number"
+          },
+          {
+            "key": "grievances",
+            "label": "Grievances received",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "closed",
+            "label": "Grievances closed",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "category",
+          "valueKeys": [
+            "total",
+            "grievances"
+          ],
+          "title": "Workforce and grievances by category",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "ps3": [
+      {
+        "id": "ps3-resource",
+        "title": "Resource use, emissions and waste",
+        "hint": "Quantities for the period with the prior period alongside, so the trend is visible.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Resource / stream",
+            "type": "select",
+            "options": [
+              "Electricity",
+              "Fuel",
+              "Water abstracted",
+              "Effluent discharged",
+              "Air emissions",
+              "Hazardous waste",
+              "Non-hazardous waste",
+              "GHG (CO₂e)"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "This period",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "prior",
+            "label": "Prior period",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "qty",
+            "prior"
+          ],
+          "title": "This period against prior period",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "ps4": [
+      {
+        "id": "ps4-community",
+        "title": "Community exposure, emergency preparedness and security conduct",
+        "hint": "Hazards reaching people outside the fence, plus drills and any security-personnel conduct issue.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Hazard / activity",
+            "type": "text"
+          },
+          {
+            "key": "exposure",
+            "label": "Who is exposed",
+            "type": "text"
+          },
+          {
+            "key": "control",
+            "label": "Control in place",
+            "type": "text"
+          },
+          {
+            "key": "drills",
+            "label": "Drills held",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "incidents",
+            "label": "Incidents",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "drills",
+            "incidents"
+          ],
+          "title": "Drills and incidents",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "ps5": [
+      {
+        "id": "ps5-land",
+        "title": "Land acquisition, compensation and livelihood restoration",
+        "hint": "Household-level status. Outstanding compensation is the first thing a lender checks.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Household / plot ref",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Displacement",
+            "type": "select",
+            "options": [
+              "Physical",
+              "Economic",
+              "Both",
+              "None"
+            ]
+          },
+          {
+            "key": "entitlement",
+            "label": "Entitlement",
+            "type": "text"
+          },
+          {
+            "key": "paid",
+            "label": "Compensation paid",
+            "type": "select",
+            "options": [
+              "Paid in full",
+              "Part paid",
+              "Not paid",
+              "Disputed"
+            ]
+          },
+          {
+            "key": "livelihood",
+            "label": "Livelihood restoration status",
+            "type": "text"
+          },
+          {
+            "key": "grievance",
+            "label": "Grievance open",
+            "type": "select",
+            "options": [
+              "No",
+              "Yes"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "paid",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Households by compensation status",
+          "valueLabel": "Households",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps6": [
+      {
+        "id": "ps6-bio",
+        "title": "Biodiversity values, impacts and actions",
+        "hint": "Habitats and species affected, and what is being done. Include ecosystem services communities depend on.",
+        "columns": [
+          {
+            "key": "feature",
+            "label": "Habitat / species / service",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Conservation status",
+            "type": "text"
+          },
+          {
+            "key": "impact",
+            "label": "Impact",
+            "type": "text"
+          },
+          {
+            "key": "area",
+            "label": "Area affected (ha)",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "action",
+            "label": "Mitigation / offset action",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "feature",
+          "valueKeys": [
+            "area"
+          ],
+          "title": "Area affected by feature",
+          "valueLabel": "Hectares"
+        }
+      }
+    ],
+    "ps7": [
+      {
+        "id": "ps7-ip",
+        "title": "Indigenous Peoples — consultation and consent",
+        "hint": "Only applicable where Indigenous Peoples are present. Record consultation and, where required, FPIC status.",
+        "columns": [
+          {
+            "key": "group",
+            "label": "Group / community",
+            "type": "text"
+          },
+          {
+            "key": "impact",
+            "label": "Impact on lands, resources or culture",
+            "type": "text"
+          },
+          {
+            "key": "consultation",
+            "label": "Consultation undertaken",
+            "type": "text"
+          },
+          {
+            "key": "fpic",
+            "label": "FPIC required / status",
+            "type": "select",
+            "options": [
+              "Not required",
+              "Required — in process",
+              "Required — obtained",
+              "Required — not obtained"
+            ]
+          },
+          {
+            "key": "agreement",
+            "label": "Agreement / benefit-sharing",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "ps8": [
+      {
+        "id": "ps8-heritage",
+        "title": "Cultural heritage register & chance finds",
+        "hint": "Tangible and intangible heritage, plus every chance find and how the procedure was applied.",
+        "columns": [
+          {
+            "key": "site",
+            "label": "Site / feature",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Archaeological",
+              "Burial / grave",
+              "Sacred site",
+              "Built heritage",
+              "Intangible heritage",
+              "Chance find"
+            ]
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Protected in situ",
+              "Demarcated",
+              "Relocated",
+              "Under assessment",
+              "Destroyed"
+            ]
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Authority notified",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "intro": [
+      {
+        "id": "distribution",
+        "title": "Distribution list",
+        "hint": "Everyone this report is submitted to, and in what capacity.",
+        "columns": [
+          {
+            "key": "recipient",
+            "label": "Recipient",
+            "type": "text"
+          },
+          {
+            "key": "role",
+            "label": "Role",
+            "type": "select",
+            "options": [
+              "Lender",
+              "Independent E&S Consultant (IESC)",
+              "Employer",
+              "Engineer",
+              "Regulator",
+              "Internal"
+            ]
+          },
+          {
+            "key": "submitted",
+            "label": "Date submitted",
+            "type": "date"
+          }
+        ]
+      }
+    ],
+    "activities": [
+      {
+        "id": "progress",
+        "title": "Work elements and percentage complete",
+        "hint": "Every active work front with its completion figure — the same list the Engineer tracks.",
+        "columns": [
+          {
+            "key": "element",
+            "label": "Work element",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "remarks",
+            "label": "Remarks",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "element",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Completion by work element",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "labour-stats": [
+      {
+        "id": "direct",
+        "title": "Direct employment",
+        "hint": "Your own payroll, split as the format requires.",
+        "columns": [
+          {
+            "key": "category",
+            "label": "Category / trade",
+            "type": "text"
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "local",
+            "label": "Host district",
+            "type": "number"
+          },
+          {
+            "key": "outside",
+            "label": "Outside district",
+            "type": "number"
+          },
+          {
+            "key": "expat",
+            "label": "Expatriate",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "category",
+          "valueKeys": [
+            "male",
+            "female"
+          ],
+          "title": "Direct employment by sex",
+          "valueLabel": "Workers"
+        }
+      },
+      {
+        "id": "indirect",
+        "title": "Indirect employment (sub-contractors)",
+        "hint": "One row per sub-contractor, including those currently at zero.",
+        "columns": [
+          {
+            "key": "subcontractor",
+            "label": "Sub-contractor",
+            "type": "text"
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number"
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number"
+          },
+          {
+            "key": "local",
+            "label": "Host district",
+            "type": "number"
+          },
+          {
+            "key": "expat",
+            "label": "Expatriate",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "subcontractor",
+          "valueKeys": [
+            "total"
+          ],
+          "title": "Workforce by sub-contractor",
+          "valueLabel": "Workers"
+        }
+      }
+    ],
+    "ehs-org": [
+      {
+        "id": "org",
+        "title": "EHS establishment",
+        "hint": "Each EHS role, who holds it, and whether it is filled.",
+        "columns": [
+          {
+            "key": "role",
+            "label": "Role",
+            "type": "text"
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Filled",
+              "Vacant",
+              "Joined this month",
+              "Left this month"
+            ]
+          },
+          {
+            "key": "reportsTo",
+            "label": "Reports to",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "hs-stats": [
+      {
+        "id": "accidents",
+        "title": "Accidents & incidents",
+        "hint": "One row per event. If there were none, write \"None\" in the first row — that is how the format reports zero.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "key": "function",
+            "label": "Function & section",
+            "type": "text"
+          },
+          {
+            "key": "injury",
+            "label": "Injury & body part",
+            "type": "text"
+          },
+          {
+            "key": "daysLost",
+            "label": "Days lost",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "prevention",
+            "label": "Preventive action",
+            "type": "text"
+          },
+          {
+            "key": "implemented",
+            "label": "Implemented",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No",
+              "In progress"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "interactions",
+        "title": "Health & safety interactions",
+        "hint": "Month figure and the running total — reviewers read the two together.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Interaction",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "During month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "H&S interactions this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "H&S inductions conducted"
+          },
+          {
+            "item": "Toolbox talks"
+          },
+          {
+            "item": "First-aid training (staff)"
+          },
+          {
+            "item": "Fire-fighting training (staff)"
+          },
+          {
+            "item": "Management safety observations"
+          },
+          {
+            "item": "Near-miss cards received"
+          },
+          {
+            "item": "H&S observation forms received"
+          }
+        ]
+      },
+      {
+        "id": "ppe",
+        "title": "PPE penetration",
+        "hint": "Issued, lost, and people seen without the right PPE.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Item",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "During month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "PPE activity this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "PPE issued"
+          },
+          {
+            "item": "PPE lost"
+          },
+          {
+            "item": "Staff observed without proper PPE"
+          },
+          {
+            "item": "First-aid kits checked / refilled"
+          },
+          {
+            "item": "Fire equipment checked / serviced"
+          }
+        ]
+      },
+      {
+        "id": "trainings",
+        "title": "Specific trainings",
+        "hint": "Each course run this month, with attendance.",
+        "columns": [
+          {
+            "key": "training",
+            "label": "Training",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "conductedBy",
+            "label": "Conducted by",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "training",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by training",
+          "valueLabel": "People"
+        }
+      },
+      {
+        "id": "subcontractor-hs",
+        "title": "Sub-contractor safety statistics",
+        "hint": "The same few measures for every sub-contractor on site.",
+        "columns": [
+          {
+            "key": "subcontractor",
+            "label": "Sub-contractor",
+            "type": "text"
+          },
+          {
+            "key": "toolbox",
+            "label": "Toolbox talks",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "incidents",
+            "label": "Incidents",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "nearMiss",
+            "label": "Near misses",
+            "type": "number"
+          },
+          {
+            "key": "ppe",
+            "label": "PPE issued",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "subcontractor",
+          "valueKeys": [
+            "toolbox",
+            "incidents"
+          ],
+          "title": "Toolbox talks and incidents by sub-contractor",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "clinic": [
+      {
+        "id": "clinic-cases",
+        "title": "Clinic attendance by condition",
+        "hint": "Cases seen this month and the running total; flag anything notifiable.",
+        "columns": [
+          {
+            "key": "condition",
+            "label": "Condition",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Cases this month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "referrals",
+            "label": "Referrals",
+            "type": "number"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "condition",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Cases by condition",
+          "valueLabel": "Cases"
+        },
+        "starterRows": [
+          {
+            "condition": "Malaria"
+          },
+          {
+            "condition": "Respiratory infection"
+          },
+          {
+            "condition": "Gastro-intestinal"
+          },
+          {
+            "condition": "Minor injury / first aid"
+          },
+          {
+            "condition": "Other"
+          }
+        ]
+      }
+    ],
+    "labour-mgmt": [
+      {
+        "id": "worker-grievances",
+        "title": "Worker grievance register",
+        "hint": "Worker complaints are tracked separately from community ones.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "issue",
+            "label": "Issue",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Worker grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "worker-meetings",
+        "title": "Workers' representative meetings",
+        "hint": "Meeting number, date and attendance — minutes go in the appendices.",
+        "columns": [
+          {
+            "key": "meetingNo",
+            "label": "Meeting no.",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "topics",
+            "label": "Main topics",
+            "type": "text"
+          },
+          {
+            "key": "actions",
+            "label": "Actions agreed",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "accommodation": [
+      {
+        "id": "camp-inspections",
+        "title": "Camp inspections",
+        "hint": "Each camp inspected, findings raised and whether they are closed.",
+        "columns": [
+          {
+            "key": "camp",
+            "label": "Camp",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Inspection date",
+            "type": "date"
+          },
+          {
+            "key": "occupancy",
+            "label": "Occupancy",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "findings",
+            "label": "Findings raised",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "closed",
+            "label": "Findings closed",
+            "type": "number"
+          },
+          {
+            "key": "status",
+            "label": "Overall",
+            "type": "select",
+            "options": [
+              "Compliant",
+              "Minor findings",
+              "Major findings"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "camp",
+          "valueKeys": [
+            "occupancy",
+            "findings"
+          ],
+          "title": "Occupancy and findings by camp",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "traffic": [
+      {
+        "id": "traffic-hazards",
+        "title": "Road and junction risk register",
+        "hint": "Each road or junction, the hazard, and the control in place.",
+        "columns": [
+          {
+            "key": "location",
+            "label": "Road / junction",
+            "type": "text"
+          },
+          {
+            "key": "hazard",
+            "label": "Hazard",
+            "type": "text"
+          },
+          {
+            "key": "control",
+            "label": "Control measure",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "In place",
+              "Partially in place",
+              "Planned"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "traffic-incidents",
+        "title": "Traffic incidents & driver training",
+        "hint": "Incidents this month and the training response.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Item",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "This month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Traffic measures this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "Traffic incidents"
+          },
+          {
+            "item": "Drivers / operators trained"
+          },
+          {
+            "item": "Vehicle inspections"
+          },
+          {
+            "item": "Speed violations recorded"
+          }
+        ]
+      }
+    ],
+    "water-energy": [
+      {
+        "id": "water",
+        "title": "Water abstraction by source and activity",
+        "hint": "Month and cumulative for every source, as the permit conditions require.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Water source",
+            "type": "text"
+          },
+          {
+            "key": "activity",
+            "label": "Section / activity",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "unit": "m³",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number",
+            "unit": "m³"
+          },
+          {
+            "key": "permit",
+            "label": "Permit ref / daily limit",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Abstraction this month by source",
+          "valueLabel": "m³"
+        }
+      },
+      {
+        "id": "energy",
+        "title": "Energy consumption and emission rate",
+        "hint": "Each energy source converted to kWh equivalent, with the CO₂ it implies.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Energy source",
+            "type": "text"
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated (eq kWh)",
+            "type": "number"
+          },
+          {
+            "key": "co2",
+            "label": "CO₂",
+            "type": "number",
+            "unit": "kg/day"
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Consumption this month by source",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "community-hs": [
+      {
+        "id": "monitoring",
+        "title": "Noise, vibration and air quality against limits",
+        "hint": "Every reading with the limit beside it — a reading without its limit cannot be assessed.",
+        "columns": [
+          {
+            "key": "location",
+            "label": "Location",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "select",
+            "options": [
+              "Noise — day",
+              "Noise — night",
+              "Vibration (PPV)",
+              "PM2.5",
+              "PM10",
+              "Dust deposition"
+            ]
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "limit",
+            "label": "Limit",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Within limit",
+              "Above limit",
+              "Awaiting result"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "location",
+          "valueKeys": [
+            "result",
+            "limit"
+          ],
+          "title": "Reading against limit by location",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "waste": [
+      {
+        "id": "waste-streams",
+        "title": "Waste generated, handled and transferred",
+        "hint": "Month and cumulative by stream, with the waste transfer note reference.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Waste stream",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "unit": "m³",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number",
+            "unit": "m³"
+          },
+          {
+            "key": "handling",
+            "label": "Handling / disposal route",
+            "type": "text"
+          },
+          {
+            "key": "handler",
+            "label": "Licensed handler",
+            "type": "text"
+          },
+          {
+            "key": "wtn",
+            "label": "WTN ref",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Quantity this month by stream",
+          "valueLabel": "m³"
+        },
+        "starterRows": [
+          {
+            "stream": "Recyclable (paper, plastic, glass, wood, scrap metal)"
+          },
+          {
+            "stream": "Biodegradable"
+          },
+          {
+            "stream": "Hazardous & contaminated soil"
+          },
+          {
+            "stream": "Medical"
+          },
+          {
+            "stream": "Sewage"
+          },
+          {
+            "stream": "Used oil"
+          },
+          {
+            "stream": "Used batteries"
+          },
+          {
+            "stream": "Used tyres"
+          }
+        ]
+      }
+    ],
+    "wastewater": [
+      {
+        "id": "effluent",
+        "title": "Effluent and storm water results",
+        "hint": "Sample point, parameter, result and the standard it is judged against.",
+        "columns": [
+          {
+            "key": "point",
+            "label": "Sample point",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "text"
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "standard",
+            "label": "Standard",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Compliant",
+              "Non-compliant",
+              "Awaiting lab"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "point",
+          "valueKeys": [
+            "result",
+            "standard"
+          ],
+          "title": "Result against standard by sample point",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "biodiversity": [
+      {
+        "id": "bio",
+        "title": "Species, habitat and clearance record",
+        "hint": "Encounters, clearance and the action taken — including anything protected.",
+        "columns": [
+          {
+            "key": "feature",
+            "label": "Species / habitat",
+            "type": "text"
+          },
+          {
+            "key": "observation",
+            "label": "Observation",
+            "type": "text"
+          },
+          {
+            "key": "area",
+            "label": "Area affected (ha)",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "No further action",
+              "Under monitoring",
+              "Relocated",
+              "Escalated to authority"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "feature",
+          "valueKeys": [
+            "area"
+          ],
+          "title": "Area affected by feature",
+          "valueLabel": "Hectares"
+        }
+      }
+    ],
+    "restoration": [
+      {
+        "id": "restoration-areas",
+        "title": "Restoration progress by area",
+        "hint": "Borrow areas, quarry and camps against the restoration programme.",
+        "columns": [
+          {
+            "key": "area",
+            "label": "Area",
+            "type": "text"
+          },
+          {
+            "key": "activity",
+            "label": "Restoration activity",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "target",
+            "label": "Target date",
+            "type": "date"
+          },
+          {
+            "key": "remarks",
+            "label": "Remarks",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "area",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Restoration progress by area",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "community-dev": [
+      {
+        "id": "engagements",
+        "title": "Community meetings & CSR delivered",
+        "hint": "Date, village, participants and what was agreed.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "activity",
+            "label": "Activity",
+            "type": "text"
+          },
+          {
+            "key": "village",
+            "label": "Village / location",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome / commitment",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "activity",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by activity",
+          "valueLabel": "People"
+        }
+      },
+      {
+        "id": "grievances",
+        "title": "Community grievance register",
+        "hint": "Every grievance, its status, and the date it closed. Open items carry forward.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date received",
+            "type": "date"
+          },
+          {
+            "key": "village",
+            "label": "Village",
+            "type": "text"
+          },
+          {
+            "key": "issue",
+            "label": "Issue",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed",
+              "Referred"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "authorities",
+        "title": "Local authority interaction",
+        "hint": "Visits and meetings with district and sub-county officials.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "authority",
+            "label": "Authority / office",
+            "type": "text"
+          },
+          {
+            "key": "purpose",
+            "label": "Purpose",
+            "type": "text"
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "cultural": [
+      {
+        "id": "heritage",
+        "title": "Cultural heritage sites and chance finds",
+        "hint": "Mapped sites, graves, and every chance find with the authority notified.",
+        "columns": [
+          {
+            "key": "site",
+            "label": "Site / find",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Chance find",
+              "Grave",
+              "Archaeological site",
+              "Sacred site",
+              "Intangible heritage"
+            ]
+          },
+          {
+            "key": "coordinates",
+            "label": "Coordinates",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Marked & protected",
+              "Under assessment",
+              "Relocated",
+              "Exhumed",
+              "Awaiting authority guidance"
+            ]
+          },
+          {
+            "key": "authority",
+            "label": "Authority notified",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "stakeholder": [
+      {
+        "id": "engagement-log",
+        "title": "Stakeholder engagement log",
+        "hint": "Against the stakeholder engagement plan: who, what, and what you committed to.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "stakeholder",
+            "label": "Stakeholder",
+            "type": "text"
+          },
+          {
+            "key": "method",
+            "label": "Method",
+            "type": "select",
+            "options": [
+              "Meeting",
+              "Site visit",
+              "Radio announcement",
+              "Notice board",
+              "Written correspondence",
+              "Focus group"
+            ]
+          },
+          {
+            "key": "topic",
+            "label": "Topic",
+            "type": "text"
+          },
+          {
+            "key": "feedback",
+            "label": "Feedback received",
+            "type": "text"
+          },
+          {
+            "key": "commitment",
+            "label": "Commitment made",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Commitment status",
+            "type": "select",
+            "options": [
+              "Open",
+              "In progress",
+              "Delivered"
+            ]
+          }
+        ]
+      }
+    ],
+    "influx": [
+      {
+        "id": "influx-indicators",
+        "title": "Influx indicators",
+        "hint": "What you monitor to detect in-migration pressure, with the baseline beside it.",
+        "columns": [
+          {
+            "key": "indicator",
+            "label": "Indicator",
+            "type": "text"
+          },
+          {
+            "key": "baseline",
+            "label": "Baseline",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "current",
+            "label": "Current",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "trend",
+            "label": "Trend",
+            "type": "select",
+            "options": [
+              "Stable",
+              "Increasing",
+              "Decreasing"
+            ]
+          },
+          {
+            "key": "action",
+            "label": "Action / mitigation",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "indicator",
+          "valueKeys": [
+            "baseline",
+            "current"
+          ],
+          "title": "Current against baseline",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "demob": [
+      {
+        "id": "demob-items",
+        "title": "Demobilisation register",
+        "hint": "Each camp, plant item and area, with its disposal or handover route.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Asset / area",
+            "type": "text"
+          },
+          {
+            "key": "plan",
+            "label": "Plan",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "handover",
+            "label": "Handover to",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Not started",
+              "In progress",
+              "Complete"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Demobilisation progress",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "permits": [
+      {
+        "id": "permit-register",
+        "title": "Statutory requirements & permit register",
+        "hint": "The format's own columns: authority, priority, status, compliance, programme impact and remedy.",
+        "columns": [
+          {
+            "key": "permit",
+            "label": "Statutory requirement (permit, licence, approval)",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Issuing authority",
+            "type": "text"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "select",
+            "options": [
+              "Before construction",
+              "During construction",
+              "Before handover"
+            ]
+          },
+          {
+            "key": "status",
+            "label": "Status as at month end",
+            "type": "text"
+          },
+          {
+            "key": "compliant",
+            "label": "Compliant",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No",
+              "Partial",
+              "Not applicable"
+            ]
+          },
+          {
+            "key": "impact",
+            "label": "Potential impact on programme",
+            "type": "text"
+          },
+          {
+            "key": "remedy",
+            "label": "Mitigation / remedy implemented",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "compliant",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Permits by compliance status",
+          "valueLabel": "Permits",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "appendices": [
+      {
+        "id": "appendix-list",
+        "title": "Appendices attached",
+        "hint": "Each appendix with its letter, title and whether it is attached this month.",
+        "columns": [
+          {
+            "key": "letter",
+            "label": "Appendix",
+            "type": "text"
+          },
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text"
+          },
+          {
+            "key": "attached",
+            "label": "Attached",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No — not applicable this month"
+            ]
+          }
+        ],
+        "starterRows": [
+          {
+            "letter": "A",
+            "title": "Workers' representative meeting minutes"
+          },
+          {
+            "letter": "B",
+            "title": "Community health awareness workshop"
+          },
+          {
+            "letter": "C",
+            "title": "Air, noise & water monitoring report"
+          },
+          {
+            "letter": "D",
+            "title": "Outbreak SOP implementation at site"
+          },
+          {
+            "letter": "E",
+            "title": "Workers' camp management"
+          },
+          {
+            "letter": "F",
+            "title": "Community consultative committee meeting"
+          },
+          {
+            "letter": "G",
+            "title": "Sub-contractors' monthly internal audit"
+          },
+          {
+            "letter": "H",
+            "title": "Non-compliances during internal audit"
+          },
+          {
+            "letter": "I",
+            "title": "Restoration programme map"
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---- Plain-English section guidance ---------------------------------------
+  // Shown in Guided mode: what a section is for, how to fill it, and example
+  // wording. The example is guidance to read, never text the app inserts —
+  // a compliance report must say what actually happened on the user's site.
+  sectionGuide: {
+    "safety": {
+      "what": "Shows whether people are getting hurt and what you did about it.",
+      "how": "Log every incident and near-miss, even ones with no injury. Fill the training table from your attendance sheets. If nothing happened, leave the log empty — that reports zero, it doesn't look like you forgot.",
+      "example": "Two near-misses were recorded and both investigated within 48 hours. PPE spot-checks found 3 non-compliances, each closed the same day. 42 workers attended the revised lockout/tagout briefing."
+    },
+    "security": {
+      "what": "Security incidents, drills and the conduct of security personnel.",
+      "how": "Use the format's own columns — management of the incident, outcome, lessons learnt, action required. Drills and VPSHR training belong in the second table.",
+      "example": "One incident of vandalism to site sanitation was reported to police and remains under investigation. Patrol frequency was increased and an access-control briefing was delivered to five guards."
+    },
+    "environment": {
+      "what": "Your monitoring results against the limits in your permit.",
+      "how": "A result without its limit can't be assessed, so fill both. Use the status column honestly — 'Above limit' with an action beside it reads far better than a missing row.",
+      "example": "Effluent BOD measured 28 mg/l against a 50 mg/l permit limit. Dust deposition at the northern boundary exceeded the limit once; water bowser frequency was doubled and the repeat reading was compliant."
+    },
+    "ghg": {
+      "what": "Your energy and fuel use, converted to carbon.",
+      "how": "Take quantities from invoices and fuel logs — not estimates. If you don't have an emission factor yet, leave CO₂e blank; the quantity alone is still useful and shows a baseline.",
+      "example": "Grid electricity 25,656 kWh and 14,200 litres of diesel. Generator hours fell 18% after the grid connection at the main camp. No reduction target is set yet; a baseline year is being established."
+    },
+    "community": {
+      "what": "What the people around your site said, and what you did about it.",
+      "how": "Log every grievance, including ones you disagree with — unlogged complaints are the single most common audit finding. Record the closure date, not just the status.",
+      "example": "Four grievances were received: three about dust on the access road and one about water scarcity. Three closed within the 14-day commitment; the water grievance was referred to the district and remains open."
+    },
+    "permitting": {
+      "what": "Proof that you are legally allowed to operate.",
+      "how": "List every permit the site depends on, with its certificate number and expiry. Anything expiring within 90 days belongs in your management comment with a named owner.",
+      "example": "All seven permits are valid. The effluent discharge permit expires in 74 days; the renewal application was lodged on the 8th and acknowledgement received."
+    },
+    "ps1": {
+      "what": "PS1 is the umbrella: can you identify your E&S risks and manage them?",
+      "how": "List risks and the measure managing each one, with an owner. Reviewers check whether measures are actually effective, so use 'Partially effective' where that is the truth.",
+      "example": "The ESMS was reviewed in month. Of 14 management measures, 11 are effective, 2 partially effective (dust suppression at the crusher, sub-contractor induction tracking) and 1 not yet implemented."
+    },
+    "ps2": {
+      "what": "Working conditions for everyone on site, including people you don't employ directly.",
+      "how": "Contracted and supply-chain workers must appear separately — that is the part most reports miss. Include the worker grievance mechanism numbers.",
+      "example": "498 workers: 134 direct, 364 contracted. Nine worker grievances received, seven closed. Two sub-contractors were found paying below the agreed rate and have rectified with back-pay verified."
+    },
+    "ps3": {
+      "what": "Resource efficiency and pollution prevention — what you consume and what you release.",
+      "how": "Put the prior period beside this one so the trend is visible. That comparison is what makes the section useful rather than a list.",
+      "example": "Water abstraction fell from 1,820 to 1,353 m³ after the access road was sealed. Hazardous waste rose to 4.2 m³ following a workshop clean-out; all transferred to a licensed handler with transfer notes retained."
+    },
+    "ps4": {
+      "what": "Risks your operations create for people outside the fence.",
+      "how": "Think traffic, dust, noise, blasting, water, and the conduct of your security personnel. Record drills — emergency preparedness is half of PS4.",
+      "example": "Two community drills were held with the sub-county. No community injuries occurred. Security personnel completed VPSHR refresher training; no conduct complaints were received."
+    },
+    "ps5": {
+      "what": "Land taken for the project, and whether people are economically whole again.",
+      "how": "Track it per household. Outstanding compensation and open disputes are what a lender looks for first, so do not summarise them away.",
+      "example": "Of 46 affected households, 44 are paid in full, 1 part-paid pending a boundary survey and 1 disputed and under mediation. Livelihood restoration training reached 38 households."
+    },
+    "ps6": {
+      "what": "Habitats and species, and the ecosystem services communities rely on.",
+      "how": "Record encounters with protected species and every hectare cleared. If a survey is outstanding, say so rather than leaving the section empty.",
+      "example": "No protected species were encountered. 2.4 ha was cleared within the approved footprint. 1,200 indigenous seedlings were planted in the riparian buffer; survival monitoring begins next quarter."
+    },
+    "ps7": {
+      "what": "Only applies where Indigenous Peoples are present — consultation, and consent where required.",
+      "how": "If PS7 does not apply to your project, say that explicitly in the management comment rather than leaving it blank.",
+      "example": "PS7 is not triggered for this project; no Indigenous Peoples as defined by PS7 are present in the area of influence. This was confirmed in the ESIA and re-verified with the district."
+    },
+    "ps8": {
+      "what": "Archaeology, graves, sacred sites, and what you do when something is found.",
+      "how": "The chance-finds procedure is the heart of this section. Record every find, the authority notified, and the date work resumed.",
+      "example": "One chance find (iron-smelting debris) was reported. Work stopped within the 20 m exclusion zone, the Department of Museums was notified in writing, and the site was marked pending guidance."
+    },
+    "intro": {
+      "what": "Sets out who receives this report and on what basis.",
+      "how": "This is boilerplate you write once and reuse each month. Note the convention: where monitoring is less frequent than monthly, report 'no change' rather than leaving the section blank.",
+      "example": "This ESSR is submitted monthly to the lender's environmental monitoring unit, the Independent E&S Consultant, the Employer and the Engineer, and presents results of monitoring described in the Monitoring Plan and the ESMP portfolio."
+    },
+    "activities": {
+      "what": "What construction actually did this month — the context for every other section.",
+      "how": "Take percentages from the Engineer's progress figures so your report and theirs agree. Photos of each active front belong here.",
+      "example": "Runway grooving progressed to 100%. Cargo building reached 96.4% and the ARFF building 92.6%. Cabling chambers and ducts remain the critical path at 33%."
+    },
+    "labour-stats": {
+      "what": "How many people are on site, and who they are.",
+      "how": "Split direct from sub-contractor labour, and local from non-local — local employment is usually a contract commitment someone is checking. The sexes must sum to the total.",
+      "example": "Direct employment stands at 134 (117 male, 18 female), of whom 21 are from the host district and 5 are expatriates. Sub-contractors account for a further 89 workers."
+    },
+    "ehs-org": {
+      "what": "Who is responsible for EHS, and whether those posts are actually filled.",
+      "how": "A vacant EHS post is worth stating plainly with the recruitment date — hiding it reads worse than reporting it.",
+      "example": "The EHS establishment is 9 posts, 8 filled. The Environment Officer post became vacant on the 14th; recruitment is in progress with a start date expected next month."
+    },
+    "hs-stats": {
+      "what": "The numbers that show whether your safety system works.",
+      "how": "Fill the month column from your own registers and keep the accumulated column running from the previous report. Zero is a valid and good answer — enter 0, don't leave it blank.",
+      "example": "No lost-time injuries were recorded; 186,400 man-hours were worked. Eight toolbox talks and 76 visitor inductions were delivered. Two workers were observed without correct PPE and were re-briefed."
+    },
+    "clinic": {
+      "what": "What the site clinic treated, and anything with public-health significance.",
+      "how": "Record conditions, not names — this report goes to external parties. Flag notifiable conditions and outbreak response in the narrative.",
+      "example": "The clinic recorded 118 consultations, of which 31 were malaria. Four cases were referred to the health centre. Mosquito net distribution continued and the clinic licence was renewed for one year."
+    },
+    "labour-mgmt": {
+      "what": "Recruitment, contracts, and whether workers can raise problems safely.",
+      "how": "The workers' grievance register and representative meetings are the evidence that a mechanism exists. Minutes go in the appendices.",
+      "example": "Twelve workers were recruited and four separated. Workers' representative meeting no. 78 was held with 14 attendees. Three grievances were raised on transport timing; two were closed in month."
+    },
+    "accommodation": {
+      "what": "Living conditions in camps — inspected against the accommodation standard.",
+      "how": "Inspect every camp and record findings honestly with closure status. Photographs of sanitation and kitchen areas are expected.",
+      "example": "All three camps were inspected. Camp B raised four minor findings on ablution maintenance, three closed in month. Occupancy across camps is 412 against a capacity of 480."
+    },
+    "traffic": {
+      "what": "Vehicle and road risk, on your roads and on community ones.",
+      "how": "Record the hazard and the control, not just the incident count. Community road safety is usually where the real risk sits.",
+      "example": "No traffic incidents occurred over 84,300 km driven. 38 drivers completed defensive driving refresher training. Two additional speed humps were installed at the quarry junction after community feedback."
+    },
+    "water-energy": {
+      "what": "What you abstract and what you burn — with permit compliance.",
+      "how": "Month and cumulative for each source, and the permit reference with its daily limit. Exceeding a permitted abstraction rate is a serious finding.",
+      "example": "1,353 m³ was abstracted this month, all from borehole 2, within the 200 m³/day permitted limit. Energy consumption was 25,656 kWh with an average emission rate of 1,034 kg CO₂/day."
+    },
+    "community-hs": {
+      "what": "Noise, vibration and dust as experienced by people outside the site.",
+      "how": "Every reading needs its limit beside it. Measure at the receptor — a reading at your fence line does not answer the question.",
+      "example": "Twelve noise readings were taken at four receptors; one night-time reading at Nyamasoga exceeded the limit and night haulage was rescheduled. PM2.5 averaged 31 µg/m³."
+    },
+    "waste": {
+      "what": "Everything leaving site as waste, and where it legally went.",
+      "how": "Quantity by stream, the licensed handler, and the waste transfer note reference. A quantity without a transfer note is an unverifiable claim.",
+      "example": "1.44 m³ of biodegradable waste and 0.014 m³ of medical waste were generated. All hazardous waste was transferred to a licensed handler under four transfer notes, retained on file."
+    },
+    "wastewater": {
+      "what": "Effluent and storm water quality, plus drainage and erosion control.",
+      "how": "Results against the discharge standard, per sample point. Record drainage maintenance — erosion is the impact reviewers see on site.",
+      "example": "All six effluent samples were compliant with national discharge standards. 420 m of drainage was desilted ahead of the rains and two silt traps were installed at the borrow area outfall."
+    },
+    "biodiversity": {
+      "what": "Habitats, species and clearance — and what you did when you found something.",
+      "how": "Record protected-species encounters and every hectare cleared against the approved footprint. Clearing outside the footprint is a major finding.",
+      "example": "No protected species were encountered. Clearance remained within the approved footprint. Invasive Lantana camara was controlled over 0.8 ha along the access road."
+    },
+    "restoration": {
+      "what": "Putting back what construction disturbed.",
+      "how": "Progress per area against the restoration programme. Include borrow areas, quarry and camps, and photograph each.",
+      "example": "Borrow area 7 reached 85% restoration with topsoil re-instated and grass established. Quarry benching is complete; planting is scheduled for the next rains."
+    },
+    "community-dev": {
+      "what": "What you gave back, and whether people think it helped.",
+      "how": "Separate engagement from CSR delivery, and keep the grievance register current. Commitments made in meetings must appear somewhere you can track them.",
+      "example": "Two community consultative committee meetings were held with 64 participants. A borehole was handed over at Kijumba. Four grievances were received and three closed within the commitment period."
+    },
+    "cultural": {
+      "what": "Graves, archaeology and sacred sites — and the chance-finds procedure.",
+      "how": "No finds is a perfectly good answer, but say so explicitly and confirm the procedure is still briefed to earthworks crews.",
+      "example": "No chance finds were identified. A follow-up visit confirmed the previously reported iron-smelting site remains marked and undisturbed. The earthworks team was re-briefed on the procedure."
+    },
+    "stakeholder": {
+      "what": "Who you talked to, what they said, and what you promised.",
+      "how": "Record the commitment and its status — an engagement log without commitments tracked is where trust is lost.",
+      "example": "Eleven engagements were held, including the district joint stakeholder meeting. Two commitments were made on access road dust control, both delivered in month. Radio announcements ran weekly."
+    },
+    "influx": {
+      "what": "Whether the project is pulling people into the area faster than services can cope.",
+      "how": "Pick a few indicators you can actually measure and keep the baseline beside them. Local recruitment and procurement are the levers you control.",
+      "example": "Local recruitment stands at 78% of unskilled posts. Trading centre stall counts at Nyamasoga rose from 34 at baseline to 61, and sanitation pressure was raised with the sub-county."
+    },
+    "demob": {
+      "what": "Handing the site back without leaving problems behind.",
+      "how": "Only relevant as the contract closes. Record what happens to each camp, plant item and borrow area, and who receives it.",
+      "example": "Demobilisation planning is 40% complete. Camp C ablutions will be handed to the sub-county; plant disposal will follow the approved inventory. No demobilisation activity occurred this month."
+    },
+    "permits": {
+      "what": "The permit register — the section reviewers turn to first.",
+      "how": "Use the format's columns: authority, status, compliance, programme impact, remedy. Anything non-compliant needs a remedy with a date, not an explanation.",
+      "example": "Of 14 statutory requirements, 12 are acquired and valid, 1 renewal is applied for and 1 is pending an Employer action. The EIA certificate held in the Employer's name expired and the Employer has been formally alerted."
+    },
+    "appendices": {
+      "what": "The evidence behind the report.",
+      "how": "Attach what you reference. An appendix listed but not attached is worse than one marked 'not applicable this month'.",
+      "example": "Appendices A–C and G–I are attached. Appendix D is not applicable this month as no outbreak SOP activity was required."
+    }
+  },
+
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100
 };

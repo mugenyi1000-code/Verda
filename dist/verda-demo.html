@@ -135,7 +135,7 @@ a { color: var(--brand-1); }
 .solution-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
 /* ---- Wide tables scroll in their own container, never the page body ---- */
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; min-width: 0; }
 .table-scroll .table { min-width: 640px; }
 .table-scroll input { min-width: 84px; }
 
@@ -199,8 +199,8 @@ a { color: var(--brand-1); }
 /* ---- Charts ----
    Categorical slot 1 and the fixed status palette from the validated
    reference palette; dark steps applied under the Slate theme. */
-:root { --chart-1: #2a78d6; --chart-good: #0ca30c; --chart-warning: #fab219; --chart-serious: #ec835a; --chart-critical: #d03b3b; }
-:root[data-theme="slate"] { --chart-1: #3987e5; }
+:root { --chart-1: #2a78d6; --chart-2: #eb6834; --chart-3: #1baf7a; --chart-good: #0ca30c; --chart-warning: #fab219; --chart-serious: #ec835a; --chart-critical: #d03b3b; }
+:root[data-theme="slate"] { --chart-1: #3987e5; --chart-2: #d95926; --chart-3: #199e70; }
 /* max-width keeps type at a sane size when a chart sits in a full-width card */
 .chart { width: 100%; max-width: 560px; height: auto; display: block; margin-top: 6px; }
 .chart-axis { stroke: var(--border); stroke-width: 1; }
@@ -208,6 +208,80 @@ a { color: var(--brand-1); }
 .chart-label { font-size: 12px; text-anchor: middle; fill: var(--muted); }
 .chart-table { margin-top: 8px; }
 .chart-table summary { cursor: pointer; font-size: .82rem; color: var(--muted); }
+
+/* ---- Chart figure: title, legend, data table ----
+   A single series needs no legend (the title names it); two or more always
+   carry one, and every bar is directly value-labelled, so identity and
+   magnitude are never colour-alone. */
+.chart-figure { margin: 0; }
+.chart-title { font-weight: 700; font-size: .88rem; margin: 12px 0 2px; }
+.chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin: 2px 0 6px; }
+.chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.chart-empty { margin: 8px 0 0; font-style: italic; }
+.chart-slot { margin-top: 10px; }
+
+/* ---- Four-step "how to" card ---- */
+.steps { margin: 6px 0 14px; padding-left: 22px; }
+.steps li { margin: 7px 0; font-size: .88rem; line-height: 1.5; }
+.switch { display: flex; align-items: center; gap: 9px; margin: 0; font-size: .85rem; color: var(--text); font-weight: 600; }
+.switch input { width: auto; margin: 0; }
+
+/* ---- Section pickers ---- */
+.seg-toggle-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+.seg-toggle {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 9px; align-items: start;
+  padding: 7px 9px; border-radius: 9px; border: 1px solid transparent; margin: 2px 0;
+}
+.seg-toggle:hover { background: var(--brand-3); }
+.seg-toggle input { grid-row: span 2; margin-top: 2px; }
+.seg-toggle-label { font-weight: 600; }
+.seg-toggle .small { grid-column: 2; }
+.seg-filled { border-color: var(--brand-2); background: var(--brand-3); }
+
+/* ---- Guided mode help ---- */
+.guide-box {
+  border-left: 4px solid var(--brand-2); background: var(--brand-3);
+  border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 10px 0 16px;
+}
+.guide-box p { margin: 4px 0; font-size: .86rem; }
+.guide-box summary { cursor: pointer; font-size: .84rem; font-weight: 600; color: var(--brand-1); margin-top: 6px; }
+.guide-example { font-style: italic; }
+
+/* ---- Data-entry tables ---- */
+.seg-form { margin-bottom: 22px; }
+.seg-form h5 { margin: 18px 0 4px; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.report-table { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin: 10px 0 16px; background: var(--bg); }
+.report-table-head h5 { margin: 0 0 2px; text-transform: none; letter-spacing: 0; font-size: .92rem; color: var(--text); }
+.entry-table { min-width: 640px; }
+.entry-table th, .entry-table td { padding: 5px 6px; vertical-align: middle; }
+.entry-table input, .entry-table select { margin: 0; padding: 6px 8px; font-size: .84rem; min-width: 92px; }
+.entry-table input[type="number"] { min-width: 76px; }
+.entry-table tbody tr:hover { background: transparent; }
+.row-actions { white-space: nowrap; }
+.row-actions .btn { padding: 4px 9px; }
+
+/* ---- Photo drop zone ---- */
+.dropzone {
+  border: 2px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center;
+  cursor: pointer; transition: border-color .15s ease, background-color .15s ease; background: var(--bg);
+}
+.dropzone:hover, .dropzone:focus-visible { border-color: var(--brand-2); background: var(--brand-3); outline: none; }
+.dropzone-active { border-color: var(--brand-1); background: var(--brand-3); }
+.dropzone p { margin: 2px 0; font-size: .86rem; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin-top: 12px; }
+.photo-card { margin: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+.photo-card img { width: 100%; height: 130px; object-fit: cover; border-radius: 7px; display: block; }
+.photo-card figcaption { font-size: .78rem; color: var(--muted); margin-top: 5px; }
+.photo-caption { margin-top: 6px; padding: 5px 8px; font-size: .8rem; }
+
+/* ---- Generated report preview ---- */
+.report-preview { max-height: 620px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; background: var(--bg); }
+.report-doc h1 { font-size: 1.35rem; margin: 0 0 12px; }
+.report-section h3 { margin: 26px 0 6px; border-bottom: 2px solid var(--border); padding-bottom: 5px; }
+.report-section h4 { margin: 14px 0 3px; font-size: .92rem; }
+.kv-table th { width: 34%; color: var(--muted); font-weight: 600; }
+.report-photos .photo-card img { height: 150px; }
 
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
@@ -269,7 +343,22 @@ a { color: var(--brand-1); }
 .nav-item.active { background: var(--solid-1); color: #fff; font-weight: 700; border-left-color: var(--accent); box-shadow: var(--shadow-sm); }
 .nav-item.active .icon { opacity: 1; }
 
-#main { flex: 1; padding: 26px 30px; max-width: 1120px; }
+/* min-width:0 is required: #main is a flex item, so without it the item
+   refuses to shrink below the min-content width of its widest descendant —
+   a wide data-entry table then stretches the whole page instead of scrolling
+   inside its own container. */
+#main { flex: 1; min-width: 0; padding: 26px 30px; max-width: 1120px; }
+
+/* ---- Narrow screens ----
+   Signed in, the top bar carries a credits pill, two selects, a user name and
+   a logout button: at phone width that row has to wrap rather than push the
+   page sideways. */
+@media (max-width: 620px) {
+  .topbar { flex-wrap: wrap; gap: 8px; padding: 10px 14px; }
+  .topbar-right { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+  #main { padding: 18px 16px; }
+  .hero { padding: 24px 18px; }
+}
 
 /* ---- Hero ---- */
 .hero {
@@ -357,10 +446,10 @@ textarea { min-height: 74px; resize: vertical; }
 .table tbody tr:last-child { border-bottom: none; }
 
 /* ---- Segments / checklists ---- */
-.segments { border: none; padding: 0; margin: 12px 0; }
-.seg-toggle { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-weight: 500; }
-.seg-toggle input { width: auto; margin: 0; }
-.seg-form { border-left: 3px solid var(--brand-2); padding: 10px 14px; margin: 12px 0; background: var(--brand-3); border-radius: 0 10px 10px 0; }
+/* Report sections render as cards (see the reporting block above); the old
+   tinted-strip styling is gone, only the checklist inputs stay generic. */
+.checklist-group { border: none; padding: 0; margin: 12px 0; }
+.seg-toggle input { width: auto; }
 .checklist { list-style: none; padding: 0; }
 .checklist li { padding: 7px 0; border-bottom: 1px dashed var(--border); }
 .checklist label { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 500; margin: 0; }
@@ -1318,6 +1407,2728 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   ],
 
   // ---- Credit costs for AI/paid actions --------------------------------
+  // ---- Report tables --------------------------------------------------------
+  // Table structures per report section, keyed by section id (ids are unique
+  // across all three frameworks). A column with chart:true can be plotted; a
+  // table's `chart` block says how. `starterRows` pre-fill the label column so
+  // a first-time user sees the expected rows rather than an empty grid.
+  sectionTables: {
+    "safety": [
+      {
+        "id": "incidents",
+        "title": "Incident & near-miss log",
+        "hint": "One row per event this period. Leave empty if there were none — an empty table reports zero.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Near-miss",
+              "First aid case",
+              "Medical treatment",
+              "Lost time injury",
+              "Property damage",
+              "Vehicle incident"
+            ]
+          },
+          {
+            "key": "desc",
+            "label": "What happened",
+            "type": "text"
+          },
+          {
+            "key": "daysLost",
+            "label": "Days lost",
+            "type": "number"
+          },
+          {
+            "key": "action",
+            "label": "Corrective action",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "In progress",
+              "Closed"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "type",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Events by type",
+          "valueLabel": "Events",
+          "count": true
+        }
+      },
+      {
+        "id": "training",
+        "title": "Safety training delivered",
+        "hint": "Courses, toolbox talks and briefings run this period.",
+        "columns": [
+          {
+            "key": "course",
+            "label": "Course / topic",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "trainer",
+            "label": "Delivered by",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "course",
+          "valueKeys": [
+            "attendees"
+          ],
+          "title": "Attendees by course",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "security": [
+      {
+        "id": "sec-incidents",
+        "title": "Security incident log",
+        "hint": "Date, incident, location, how it was managed, outcome, lessons learnt and action required.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "incident",
+            "label": "Security incident",
+            "type": "text"
+          },
+          {
+            "key": "location",
+            "label": "Location",
+            "type": "text"
+          },
+          {
+            "key": "management",
+            "label": "Management of the incident",
+            "type": "text"
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome",
+            "type": "text"
+          },
+          {
+            "key": "lessons",
+            "label": "Lessons learnt",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action required",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "id": "drills",
+        "title": "Drills & exercises conducted",
+        "hint": "Emergency drills, access-control and VPSHR training.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "subject",
+            "label": "Subject",
+            "type": "text"
+          },
+          {
+            "key": "group",
+            "label": "Targeted group",
+            "type": "text"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "subject",
+          "valueKeys": [
+            "attendees"
+          ],
+          "title": "Attendance by drill / training",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "environment": [
+      {
+        "id": "monitoring",
+        "title": "Monitoring results vs limit",
+        "hint": "Each sample: what you measured, the result, and the permit or national standard it is judged against.",
+        "columns": [
+          {
+            "key": "point",
+            "label": "Sample point",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "text"
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "limit",
+            "label": "Limit",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Sampled",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Within limit",
+              "Above limit",
+              "Awaiting lab"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "parameter",
+          "valueKeys": [
+            "result",
+            "limit"
+          ],
+          "title": "Result against limit",
+          "valueLabel": "Value"
+        }
+      },
+      {
+        "id": "waste",
+        "title": "Waste removed",
+        "hint": "Quantity by stream, who took it, and the transfer note reference.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Waste stream",
+            "type": "select",
+            "options": [
+              "General",
+              "Recyclable",
+              "Biodegradable",
+              "Hazardous",
+              "Medical",
+              "Used oil",
+              "Sewage",
+              "Contaminated soil"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "Quantity",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "select",
+            "options": [
+              "m³",
+              "kg",
+              "tonnes",
+              "drums",
+              "litres"
+            ]
+          },
+          {
+            "key": "handler",
+            "label": "Licensed handler",
+            "type": "text"
+          },
+          {
+            "key": "wtn",
+            "label": "Transfer note ref",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "qty"
+          ],
+          "title": "Quantity by waste stream",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "ghg": [
+      {
+        "id": "energy",
+        "title": "Energy & fuel use",
+        "hint": "Every source you paid for this period. The emission factor converts it to CO₂e — leave blank if you don't have one yet.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Source",
+            "type": "select",
+            "options": [
+              "Grid electricity",
+              "Diesel — generators",
+              "Diesel — vehicles",
+              "Petrol",
+              "LPG",
+              "Fuel oil",
+              "Charcoal / biomass",
+              "Solar (generated)"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "Quantity",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "select",
+            "options": [
+              "kWh",
+              "litres",
+              "kg",
+              "tonnes",
+              "m³"
+            ]
+          },
+          {
+            "key": "factor",
+            "label": "Emission factor (kg CO₂e/unit)",
+            "type": "number"
+          },
+          {
+            "key": "co2e",
+            "label": "CO₂e",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "co2e"
+          ],
+          "title": "CO₂e by source",
+          "valueLabel": "kg CO₂e"
+        }
+      },
+      {
+        "id": "reduction",
+        "title": "Reduction actions",
+        "hint": "What you did to cut consumption, and the saving if you measured it.",
+        "columns": [
+          {
+            "key": "action",
+            "label": "Action",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "saving",
+            "label": "Estimated saving",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Planned",
+              "In progress",
+              "Complete"
+            ]
+          }
+        ]
+      }
+    ],
+    "community": [
+      {
+        "id": "grievances",
+        "title": "Grievance register",
+        "hint": "Every complaint received, whether or not you agreed with it. Open grievances are what reviewers count.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date received",
+            "type": "date"
+          },
+          {
+            "key": "source",
+            "label": "From",
+            "type": "text"
+          },
+          {
+            "key": "issue",
+            "label": "Issue raised",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "engagement",
+        "title": "Engagement & CSR activities",
+        "hint": "Meetings, sensitisations and community support delivered.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "activity",
+            "label": "Activity",
+            "type": "text"
+          },
+          {
+            "key": "location",
+            "label": "Village / location",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome / commitments made",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "activity",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by activity",
+          "valueLabel": "People"
+        }
+      }
+    ],
+    "permitting": [
+      {
+        "id": "permit-register",
+        "title": "Permit & licence register",
+        "hint": "Every permit the site relies on. Anything expiring inside 90 days belongs in your management comment.",
+        "columns": [
+          {
+            "key": "permit",
+            "label": "Permit / licence",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Issuing authority",
+            "type": "text"
+          },
+          {
+            "key": "ref",
+            "label": "Certificate no.",
+            "type": "text"
+          },
+          {
+            "key": "issued",
+            "label": "Issued",
+            "type": "date"
+          },
+          {
+            "key": "expiry",
+            "label": "Expiry",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Valid",
+              "Renewal applied",
+              "Expired",
+              "Not yet applied",
+              "Not applicable"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Permits by status",
+          "valueLabel": "Permits",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps1": [
+      {
+        "id": "ps1-risks",
+        "title": "Risk & impact register with management measures",
+        "hint": "Each identified E&S risk, the measure managing it, who owns it and whether it is working.",
+        "columns": [
+          {
+            "key": "risk",
+            "label": "Risk / impact",
+            "type": "text"
+          },
+          {
+            "key": "measure",
+            "label": "Management measure",
+            "type": "text"
+          },
+          {
+            "key": "owner",
+            "label": "Owner",
+            "type": "text"
+          },
+          {
+            "key": "due",
+            "label": "Due",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Effective",
+              "Partially effective",
+              "Not implemented",
+              "Under review"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Management measures by status",
+          "valueLabel": "Measures",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps2": [
+      {
+        "id": "ps2-labour",
+        "title": "Workforce & working conditions",
+        "hint": "Split by category so contracted and supply-chain workers are visible, as PS2 requires.",
+        "columns": [
+          {
+            "key": "category",
+            "label": "Worker category",
+            "type": "select",
+            "options": [
+              "Direct employees",
+              "Contracted workers",
+              "Supply-chain workers",
+              "Migrant workers"
+            ]
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number"
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number"
+          },
+          {
+            "key": "grievances",
+            "label": "Grievances received",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "closed",
+            "label": "Grievances closed",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "category",
+          "valueKeys": [
+            "total",
+            "grievances"
+          ],
+          "title": "Workforce and grievances by category",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "ps3": [
+      {
+        "id": "ps3-resource",
+        "title": "Resource use, emissions and waste",
+        "hint": "Quantities for the period with the prior period alongside, so the trend is visible.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Resource / stream",
+            "type": "select",
+            "options": [
+              "Electricity",
+              "Fuel",
+              "Water abstracted",
+              "Effluent discharged",
+              "Air emissions",
+              "Hazardous waste",
+              "Non-hazardous waste",
+              "GHG (CO₂e)"
+            ]
+          },
+          {
+            "key": "qty",
+            "label": "This period",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "prior",
+            "label": "Prior period",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "qty",
+            "prior"
+          ],
+          "title": "This period against prior period",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "ps4": [
+      {
+        "id": "ps4-community",
+        "title": "Community exposure, emergency preparedness and security conduct",
+        "hint": "Hazards reaching people outside the fence, plus drills and any security-personnel conduct issue.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Hazard / activity",
+            "type": "text"
+          },
+          {
+            "key": "exposure",
+            "label": "Who is exposed",
+            "type": "text"
+          },
+          {
+            "key": "control",
+            "label": "Control in place",
+            "type": "text"
+          },
+          {
+            "key": "drills",
+            "label": "Drills held",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "incidents",
+            "label": "Incidents",
+            "type": "number",
+            "chart": true
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "drills",
+            "incidents"
+          ],
+          "title": "Drills and incidents",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "ps5": [
+      {
+        "id": "ps5-land",
+        "title": "Land acquisition, compensation and livelihood restoration",
+        "hint": "Household-level status. Outstanding compensation is the first thing a lender checks.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Household / plot ref",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Displacement",
+            "type": "select",
+            "options": [
+              "Physical",
+              "Economic",
+              "Both",
+              "None"
+            ]
+          },
+          {
+            "key": "entitlement",
+            "label": "Entitlement",
+            "type": "text"
+          },
+          {
+            "key": "paid",
+            "label": "Compensation paid",
+            "type": "select",
+            "options": [
+              "Paid in full",
+              "Part paid",
+              "Not paid",
+              "Disputed"
+            ]
+          },
+          {
+            "key": "livelihood",
+            "label": "Livelihood restoration status",
+            "type": "text"
+          },
+          {
+            "key": "grievance",
+            "label": "Grievance open",
+            "type": "select",
+            "options": [
+              "No",
+              "Yes"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "paid",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Households by compensation status",
+          "valueLabel": "Households",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "ps6": [
+      {
+        "id": "ps6-bio",
+        "title": "Biodiversity values, impacts and actions",
+        "hint": "Habitats and species affected, and what is being done. Include ecosystem services communities depend on.",
+        "columns": [
+          {
+            "key": "feature",
+            "label": "Habitat / species / service",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Conservation status",
+            "type": "text"
+          },
+          {
+            "key": "impact",
+            "label": "Impact",
+            "type": "text"
+          },
+          {
+            "key": "area",
+            "label": "Area affected (ha)",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "action",
+            "label": "Mitigation / offset action",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "feature",
+          "valueKeys": [
+            "area"
+          ],
+          "title": "Area affected by feature",
+          "valueLabel": "Hectares"
+        }
+      }
+    ],
+    "ps7": [
+      {
+        "id": "ps7-ip",
+        "title": "Indigenous Peoples — consultation and consent",
+        "hint": "Only applicable where Indigenous Peoples are present. Record consultation and, where required, FPIC status.",
+        "columns": [
+          {
+            "key": "group",
+            "label": "Group / community",
+            "type": "text"
+          },
+          {
+            "key": "impact",
+            "label": "Impact on lands, resources or culture",
+            "type": "text"
+          },
+          {
+            "key": "consultation",
+            "label": "Consultation undertaken",
+            "type": "text"
+          },
+          {
+            "key": "fpic",
+            "label": "FPIC required / status",
+            "type": "select",
+            "options": [
+              "Not required",
+              "Required — in process",
+              "Required — obtained",
+              "Required — not obtained"
+            ]
+          },
+          {
+            "key": "agreement",
+            "label": "Agreement / benefit-sharing",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "ps8": [
+      {
+        "id": "ps8-heritage",
+        "title": "Cultural heritage register & chance finds",
+        "hint": "Tangible and intangible heritage, plus every chance find and how the procedure was applied.",
+        "columns": [
+          {
+            "key": "site",
+            "label": "Site / feature",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Archaeological",
+              "Burial / grave",
+              "Sacred site",
+              "Built heritage",
+              "Intangible heritage",
+              "Chance find"
+            ]
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Protected in situ",
+              "Demarcated",
+              "Relocated",
+              "Under assessment",
+              "Destroyed"
+            ]
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Authority notified",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "intro": [
+      {
+        "id": "distribution",
+        "title": "Distribution list",
+        "hint": "Everyone this report is submitted to, and in what capacity.",
+        "columns": [
+          {
+            "key": "recipient",
+            "label": "Recipient",
+            "type": "text"
+          },
+          {
+            "key": "role",
+            "label": "Role",
+            "type": "select",
+            "options": [
+              "Lender",
+              "Independent E&S Consultant (IESC)",
+              "Employer",
+              "Engineer",
+              "Regulator",
+              "Internal"
+            ]
+          },
+          {
+            "key": "submitted",
+            "label": "Date submitted",
+            "type": "date"
+          }
+        ]
+      }
+    ],
+    "activities": [
+      {
+        "id": "progress",
+        "title": "Work elements and percentage complete",
+        "hint": "Every active work front with its completion figure — the same list the Engineer tracks.",
+        "columns": [
+          {
+            "key": "element",
+            "label": "Work element",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "remarks",
+            "label": "Remarks",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "element",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Completion by work element",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "labour-stats": [
+      {
+        "id": "direct",
+        "title": "Direct employment",
+        "hint": "Your own payroll, split as the format requires.",
+        "columns": [
+          {
+            "key": "category",
+            "label": "Category / trade",
+            "type": "text"
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "local",
+            "label": "Host district",
+            "type": "number"
+          },
+          {
+            "key": "outside",
+            "label": "Outside district",
+            "type": "number"
+          },
+          {
+            "key": "expat",
+            "label": "Expatriate",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "category",
+          "valueKeys": [
+            "male",
+            "female"
+          ],
+          "title": "Direct employment by sex",
+          "valueLabel": "Workers"
+        }
+      },
+      {
+        "id": "indirect",
+        "title": "Indirect employment (sub-contractors)",
+        "hint": "One row per sub-contractor, including those currently at zero.",
+        "columns": [
+          {
+            "key": "subcontractor",
+            "label": "Sub-contractor",
+            "type": "text"
+          },
+          {
+            "key": "total",
+            "label": "Total",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "male",
+            "label": "Male",
+            "type": "number"
+          },
+          {
+            "key": "female",
+            "label": "Female",
+            "type": "number"
+          },
+          {
+            "key": "local",
+            "label": "Host district",
+            "type": "number"
+          },
+          {
+            "key": "expat",
+            "label": "Expatriate",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "subcontractor",
+          "valueKeys": [
+            "total"
+          ],
+          "title": "Workforce by sub-contractor",
+          "valueLabel": "Workers"
+        }
+      }
+    ],
+    "ehs-org": [
+      {
+        "id": "org",
+        "title": "EHS establishment",
+        "hint": "Each EHS role, who holds it, and whether it is filled.",
+        "columns": [
+          {
+            "key": "role",
+            "label": "Role",
+            "type": "text"
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Filled",
+              "Vacant",
+              "Joined this month",
+              "Left this month"
+            ]
+          },
+          {
+            "key": "reportsTo",
+            "label": "Reports to",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "hs-stats": [
+      {
+        "id": "accidents",
+        "title": "Accidents & incidents",
+        "hint": "One row per event. If there were none, write \"None\" in the first row — that is how the format reports zero.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "type": "text"
+          },
+          {
+            "key": "function",
+            "label": "Function & section",
+            "type": "text"
+          },
+          {
+            "key": "injury",
+            "label": "Injury & body part",
+            "type": "text"
+          },
+          {
+            "key": "daysLost",
+            "label": "Days lost",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "prevention",
+            "label": "Preventive action",
+            "type": "text"
+          },
+          {
+            "key": "implemented",
+            "label": "Implemented",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No",
+              "In progress"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "interactions",
+        "title": "Health & safety interactions",
+        "hint": "Month figure and the running total — reviewers read the two together.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Interaction",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "During month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "H&S interactions this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "H&S inductions conducted"
+          },
+          {
+            "item": "Toolbox talks"
+          },
+          {
+            "item": "First-aid training (staff)"
+          },
+          {
+            "item": "Fire-fighting training (staff)"
+          },
+          {
+            "item": "Management safety observations"
+          },
+          {
+            "item": "Near-miss cards received"
+          },
+          {
+            "item": "H&S observation forms received"
+          }
+        ]
+      },
+      {
+        "id": "ppe",
+        "title": "PPE penetration",
+        "hint": "Issued, lost, and people seen without the right PPE.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Item",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "During month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "comments",
+            "label": "Comments",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "PPE activity this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "PPE issued"
+          },
+          {
+            "item": "PPE lost"
+          },
+          {
+            "item": "Staff observed without proper PPE"
+          },
+          {
+            "item": "First-aid kits checked / refilled"
+          },
+          {
+            "item": "Fire equipment checked / serviced"
+          }
+        ]
+      },
+      {
+        "id": "trainings",
+        "title": "Specific trainings",
+        "hint": "Each course run this month, with attendance.",
+        "columns": [
+          {
+            "key": "training",
+            "label": "Training",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "conductedBy",
+            "label": "Conducted by",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "training",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by training",
+          "valueLabel": "People"
+        }
+      },
+      {
+        "id": "subcontractor-hs",
+        "title": "Sub-contractor safety statistics",
+        "hint": "The same few measures for every sub-contractor on site.",
+        "columns": [
+          {
+            "key": "subcontractor",
+            "label": "Sub-contractor",
+            "type": "text"
+          },
+          {
+            "key": "toolbox",
+            "label": "Toolbox talks",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "incidents",
+            "label": "Incidents",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "nearMiss",
+            "label": "Near misses",
+            "type": "number"
+          },
+          {
+            "key": "ppe",
+            "label": "PPE issued",
+            "type": "number"
+          }
+        ],
+        "chart": {
+          "labelKey": "subcontractor",
+          "valueKeys": [
+            "toolbox",
+            "incidents"
+          ],
+          "title": "Toolbox talks and incidents by sub-contractor",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "clinic": [
+      {
+        "id": "clinic-cases",
+        "title": "Clinic attendance by condition",
+        "hint": "Cases seen this month and the running total; flag anything notifiable.",
+        "columns": [
+          {
+            "key": "condition",
+            "label": "Condition",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Cases this month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "referrals",
+            "label": "Referrals",
+            "type": "number"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "condition",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Cases by condition",
+          "valueLabel": "Cases"
+        },
+        "starterRows": [
+          {
+            "condition": "Malaria"
+          },
+          {
+            "condition": "Respiratory infection"
+          },
+          {
+            "condition": "Gastro-intestinal"
+          },
+          {
+            "condition": "Minor injury / first aid"
+          },
+          {
+            "condition": "Other"
+          }
+        ]
+      }
+    ],
+    "labour-mgmt": [
+      {
+        "id": "worker-grievances",
+        "title": "Worker grievance register",
+        "hint": "Worker complaints are tracked separately from community ones.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "issue",
+            "label": "Issue",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Worker grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "worker-meetings",
+        "title": "Workers' representative meetings",
+        "hint": "Meeting number, date and attendance — minutes go in the appendices.",
+        "columns": [
+          {
+            "key": "meetingNo",
+            "label": "Meeting no.",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "attendees",
+            "label": "Attendees",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "topics",
+            "label": "Main topics",
+            "type": "text"
+          },
+          {
+            "key": "actions",
+            "label": "Actions agreed",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "accommodation": [
+      {
+        "id": "camp-inspections",
+        "title": "Camp inspections",
+        "hint": "Each camp inspected, findings raised and whether they are closed.",
+        "columns": [
+          {
+            "key": "camp",
+            "label": "Camp",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Inspection date",
+            "type": "date"
+          },
+          {
+            "key": "occupancy",
+            "label": "Occupancy",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "findings",
+            "label": "Findings raised",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "closed",
+            "label": "Findings closed",
+            "type": "number"
+          },
+          {
+            "key": "status",
+            "label": "Overall",
+            "type": "select",
+            "options": [
+              "Compliant",
+              "Minor findings",
+              "Major findings"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "camp",
+          "valueKeys": [
+            "occupancy",
+            "findings"
+          ],
+          "title": "Occupancy and findings by camp",
+          "valueLabel": "Count"
+        }
+      }
+    ],
+    "traffic": [
+      {
+        "id": "traffic-hazards",
+        "title": "Road and junction risk register",
+        "hint": "Each road or junction, the hazard, and the control in place.",
+        "columns": [
+          {
+            "key": "location",
+            "label": "Road / junction",
+            "type": "text"
+          },
+          {
+            "key": "hazard",
+            "label": "Hazard",
+            "type": "text"
+          },
+          {
+            "key": "control",
+            "label": "Control measure",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "In place",
+              "Partially in place",
+              "Planned"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "traffic-incidents",
+        "title": "Traffic incidents & driver training",
+        "hint": "Incidents this month and the training response.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Item",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "This month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number"
+          },
+          {
+            "key": "notes",
+            "label": "Notes",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Traffic measures this month",
+          "valueLabel": "Count"
+        },
+        "starterRows": [
+          {
+            "item": "Traffic incidents"
+          },
+          {
+            "item": "Drivers / operators trained"
+          },
+          {
+            "item": "Vehicle inspections"
+          },
+          {
+            "item": "Speed violations recorded"
+          }
+        ]
+      }
+    ],
+    "water-energy": [
+      {
+        "id": "water",
+        "title": "Water abstraction by source and activity",
+        "hint": "Month and cumulative for every source, as the permit conditions require.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Water source",
+            "type": "text"
+          },
+          {
+            "key": "activity",
+            "label": "Section / activity",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "unit": "m³",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number",
+            "unit": "m³"
+          },
+          {
+            "key": "permit",
+            "label": "Permit ref / daily limit",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Abstraction this month by source",
+          "valueLabel": "m³"
+        }
+      },
+      {
+        "id": "energy",
+        "title": "Energy consumption and emission rate",
+        "hint": "Each energy source converted to kWh equivalent, with the CO₂ it implies.",
+        "columns": [
+          {
+            "key": "source",
+            "label": "Energy source",
+            "type": "text"
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated (eq kWh)",
+            "type": "number"
+          },
+          {
+            "key": "co2",
+            "label": "CO₂",
+            "type": "number",
+            "unit": "kg/day"
+          }
+        ],
+        "chart": {
+          "labelKey": "source",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Consumption this month by source",
+          "valueLabel": "Quantity"
+        }
+      }
+    ],
+    "community-hs": [
+      {
+        "id": "monitoring",
+        "title": "Noise, vibration and air quality against limits",
+        "hint": "Every reading with the limit beside it — a reading without its limit cannot be assessed.",
+        "columns": [
+          {
+            "key": "location",
+            "label": "Location",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "select",
+            "options": [
+              "Noise — day",
+              "Noise — night",
+              "Vibration (PPV)",
+              "PM2.5",
+              "PM10",
+              "Dust deposition"
+            ]
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "limit",
+            "label": "Limit",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Within limit",
+              "Above limit",
+              "Awaiting result"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "location",
+          "valueKeys": [
+            "result",
+            "limit"
+          ],
+          "title": "Reading against limit by location",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "waste": [
+      {
+        "id": "waste-streams",
+        "title": "Waste generated, handled and transferred",
+        "hint": "Month and cumulative by stream, with the waste transfer note reference.",
+        "columns": [
+          {
+            "key": "stream",
+            "label": "Waste stream",
+            "type": "text"
+          },
+          {
+            "key": "month",
+            "label": "Month",
+            "type": "number",
+            "unit": "m³",
+            "chart": true
+          },
+          {
+            "key": "accumulated",
+            "label": "Accumulated",
+            "type": "number",
+            "unit": "m³"
+          },
+          {
+            "key": "handling",
+            "label": "Handling / disposal route",
+            "type": "text"
+          },
+          {
+            "key": "handler",
+            "label": "Licensed handler",
+            "type": "text"
+          },
+          {
+            "key": "wtn",
+            "label": "WTN ref",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "stream",
+          "valueKeys": [
+            "month"
+          ],
+          "title": "Quantity this month by stream",
+          "valueLabel": "m³"
+        },
+        "starterRows": [
+          {
+            "stream": "Recyclable (paper, plastic, glass, wood, scrap metal)"
+          },
+          {
+            "stream": "Biodegradable"
+          },
+          {
+            "stream": "Hazardous & contaminated soil"
+          },
+          {
+            "stream": "Medical"
+          },
+          {
+            "stream": "Sewage"
+          },
+          {
+            "stream": "Used oil"
+          },
+          {
+            "stream": "Used batteries"
+          },
+          {
+            "stream": "Used tyres"
+          }
+        ]
+      }
+    ],
+    "wastewater": [
+      {
+        "id": "effluent",
+        "title": "Effluent and storm water results",
+        "hint": "Sample point, parameter, result and the standard it is judged against.",
+        "columns": [
+          {
+            "key": "point",
+            "label": "Sample point",
+            "type": "text"
+          },
+          {
+            "key": "parameter",
+            "label": "Parameter",
+            "type": "text"
+          },
+          {
+            "key": "result",
+            "label": "Result",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "standard",
+            "label": "Standard",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "unit",
+            "label": "Unit",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Compliant",
+              "Non-compliant",
+              "Awaiting lab"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "point",
+          "valueKeys": [
+            "result",
+            "standard"
+          ],
+          "title": "Result against standard by sample point",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "biodiversity": [
+      {
+        "id": "bio",
+        "title": "Species, habitat and clearance record",
+        "hint": "Encounters, clearance and the action taken — including anything protected.",
+        "columns": [
+          {
+            "key": "feature",
+            "label": "Species / habitat",
+            "type": "text"
+          },
+          {
+            "key": "observation",
+            "label": "Observation",
+            "type": "text"
+          },
+          {
+            "key": "area",
+            "label": "Area affected (ha)",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "No further action",
+              "Under monitoring",
+              "Relocated",
+              "Escalated to authority"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "feature",
+          "valueKeys": [
+            "area"
+          ],
+          "title": "Area affected by feature",
+          "valueLabel": "Hectares"
+        }
+      }
+    ],
+    "restoration": [
+      {
+        "id": "restoration-areas",
+        "title": "Restoration progress by area",
+        "hint": "Borrow areas, quarry and camps against the restoration programme.",
+        "columns": [
+          {
+            "key": "area",
+            "label": "Area",
+            "type": "text"
+          },
+          {
+            "key": "activity",
+            "label": "Restoration activity",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "target",
+            "label": "Target date",
+            "type": "date"
+          },
+          {
+            "key": "remarks",
+            "label": "Remarks",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "area",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Restoration progress by area",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "community-dev": [
+      {
+        "id": "engagements",
+        "title": "Community meetings & CSR delivered",
+        "hint": "Date, village, participants and what was agreed.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "activity",
+            "label": "Activity",
+            "type": "text"
+          },
+          {
+            "key": "village",
+            "label": "Village / location",
+            "type": "text"
+          },
+          {
+            "key": "participants",
+            "label": "Participants",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome / commitment",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "activity",
+          "valueKeys": [
+            "participants"
+          ],
+          "title": "Participants by activity",
+          "valueLabel": "People"
+        }
+      },
+      {
+        "id": "grievances",
+        "title": "Community grievance register",
+        "hint": "Every grievance, its status, and the date it closed. Open items carry forward.",
+        "columns": [
+          {
+            "key": "ref",
+            "label": "Ref",
+            "type": "text"
+          },
+          {
+            "key": "date",
+            "label": "Date received",
+            "type": "date"
+          },
+          {
+            "key": "village",
+            "label": "Village",
+            "type": "text"
+          },
+          {
+            "key": "issue",
+            "label": "Issue",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Open",
+              "Under investigation",
+              "Resolved",
+              "Closed",
+              "Referred"
+            ]
+          },
+          {
+            "key": "closed",
+            "label": "Date closed",
+            "type": "date"
+          }
+        ],
+        "chart": {
+          "labelKey": "status",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Grievances by status",
+          "valueLabel": "Grievances",
+          "count": true,
+          "status": true
+        }
+      },
+      {
+        "id": "authorities",
+        "title": "Local authority interaction",
+        "hint": "Visits and meetings with district and sub-county officials.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "authority",
+            "label": "Authority / office",
+            "type": "text"
+          },
+          {
+            "key": "purpose",
+            "label": "Purpose",
+            "type": "text"
+          },
+          {
+            "key": "outcome",
+            "label": "Outcome",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "cultural": [
+      {
+        "id": "heritage",
+        "title": "Cultural heritage sites and chance finds",
+        "hint": "Mapped sites, graves, and every chance find with the authority notified.",
+        "columns": [
+          {
+            "key": "site",
+            "label": "Site / find",
+            "type": "text"
+          },
+          {
+            "key": "type",
+            "label": "Type",
+            "type": "select",
+            "options": [
+              "Chance find",
+              "Grave",
+              "Archaeological site",
+              "Sacred site",
+              "Intangible heritage"
+            ]
+          },
+          {
+            "key": "coordinates",
+            "label": "Coordinates",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Marked & protected",
+              "Under assessment",
+              "Relocated",
+              "Exhumed",
+              "Awaiting authority guidance"
+            ]
+          },
+          {
+            "key": "authority",
+            "label": "Authority notified",
+            "type": "text"
+          },
+          {
+            "key": "action",
+            "label": "Action taken",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "stakeholder": [
+      {
+        "id": "engagement-log",
+        "title": "Stakeholder engagement log",
+        "hint": "Against the stakeholder engagement plan: who, what, and what you committed to.",
+        "columns": [
+          {
+            "key": "date",
+            "label": "Date",
+            "type": "date"
+          },
+          {
+            "key": "stakeholder",
+            "label": "Stakeholder",
+            "type": "text"
+          },
+          {
+            "key": "method",
+            "label": "Method",
+            "type": "select",
+            "options": [
+              "Meeting",
+              "Site visit",
+              "Radio announcement",
+              "Notice board",
+              "Written correspondence",
+              "Focus group"
+            ]
+          },
+          {
+            "key": "topic",
+            "label": "Topic",
+            "type": "text"
+          },
+          {
+            "key": "feedback",
+            "label": "Feedback received",
+            "type": "text"
+          },
+          {
+            "key": "commitment",
+            "label": "Commitment made",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Commitment status",
+            "type": "select",
+            "options": [
+              "Open",
+              "In progress",
+              "Delivered"
+            ]
+          }
+        ]
+      }
+    ],
+    "influx": [
+      {
+        "id": "influx-indicators",
+        "title": "Influx indicators",
+        "hint": "What you monitor to detect in-migration pressure, with the baseline beside it.",
+        "columns": [
+          {
+            "key": "indicator",
+            "label": "Indicator",
+            "type": "text"
+          },
+          {
+            "key": "baseline",
+            "label": "Baseline",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "current",
+            "label": "Current",
+            "type": "number",
+            "chart": true
+          },
+          {
+            "key": "trend",
+            "label": "Trend",
+            "type": "select",
+            "options": [
+              "Stable",
+              "Increasing",
+              "Decreasing"
+            ]
+          },
+          {
+            "key": "action",
+            "label": "Action / mitigation",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "indicator",
+          "valueKeys": [
+            "baseline",
+            "current"
+          ],
+          "title": "Current against baseline",
+          "valueLabel": "Value"
+        }
+      }
+    ],
+    "demob": [
+      {
+        "id": "demob-items",
+        "title": "Demobilisation register",
+        "hint": "Each camp, plant item and area, with its disposal or handover route.",
+        "columns": [
+          {
+            "key": "item",
+            "label": "Asset / area",
+            "type": "text"
+          },
+          {
+            "key": "plan",
+            "label": "Plan",
+            "type": "text"
+          },
+          {
+            "key": "percent",
+            "label": "Complete",
+            "type": "number",
+            "unit": "%",
+            "chart": true
+          },
+          {
+            "key": "handover",
+            "label": "Handover to",
+            "type": "text"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "type": "select",
+            "options": [
+              "Not started",
+              "In progress",
+              "Complete"
+            ]
+          }
+        ],
+        "chart": {
+          "labelKey": "item",
+          "valueKeys": [
+            "percent"
+          ],
+          "title": "Demobilisation progress",
+          "valueLabel": "% complete"
+        }
+      }
+    ],
+    "permits": [
+      {
+        "id": "permit-register",
+        "title": "Statutory requirements & permit register",
+        "hint": "The format's own columns: authority, priority, status, compliance, programme impact and remedy.",
+        "columns": [
+          {
+            "key": "permit",
+            "label": "Statutory requirement (permit, licence, approval)",
+            "type": "text"
+          },
+          {
+            "key": "authority",
+            "label": "Issuing authority",
+            "type": "text"
+          },
+          {
+            "key": "priority",
+            "label": "Priority",
+            "type": "select",
+            "options": [
+              "Before construction",
+              "During construction",
+              "Before handover"
+            ]
+          },
+          {
+            "key": "status",
+            "label": "Status as at month end",
+            "type": "text"
+          },
+          {
+            "key": "compliant",
+            "label": "Compliant",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No",
+              "Partial",
+              "Not applicable"
+            ]
+          },
+          {
+            "key": "impact",
+            "label": "Potential impact on programme",
+            "type": "text"
+          },
+          {
+            "key": "remedy",
+            "label": "Mitigation / remedy implemented",
+            "type": "text"
+          }
+        ],
+        "chart": {
+          "labelKey": "compliant",
+          "valueKeys": [
+            "count"
+          ],
+          "title": "Permits by compliance status",
+          "valueLabel": "Permits",
+          "count": true,
+          "status": true
+        }
+      }
+    ],
+    "appendices": [
+      {
+        "id": "appendix-list",
+        "title": "Appendices attached",
+        "hint": "Each appendix with its letter, title and whether it is attached this month.",
+        "columns": [
+          {
+            "key": "letter",
+            "label": "Appendix",
+            "type": "text"
+          },
+          {
+            "key": "title",
+            "label": "Title",
+            "type": "text"
+          },
+          {
+            "key": "attached",
+            "label": "Attached",
+            "type": "select",
+            "options": [
+              "Yes",
+              "No — not applicable this month"
+            ]
+          }
+        ],
+        "starterRows": [
+          {
+            "letter": "A",
+            "title": "Workers' representative meeting minutes"
+          },
+          {
+            "letter": "B",
+            "title": "Community health awareness workshop"
+          },
+          {
+            "letter": "C",
+            "title": "Air, noise & water monitoring report"
+          },
+          {
+            "letter": "D",
+            "title": "Outbreak SOP implementation at site"
+          },
+          {
+            "letter": "E",
+            "title": "Workers' camp management"
+          },
+          {
+            "letter": "F",
+            "title": "Community consultative committee meeting"
+          },
+          {
+            "letter": "G",
+            "title": "Sub-contractors' monthly internal audit"
+          },
+          {
+            "letter": "H",
+            "title": "Non-compliances during internal audit"
+          },
+          {
+            "letter": "I",
+            "title": "Restoration programme map"
+          }
+        ]
+      }
+    ]
+  },
+
+  // ---- Plain-English section guidance ---------------------------------------
+  // Shown in Guided mode: what a section is for, how to fill it, and example
+  // wording. The example is guidance to read, never text the app inserts —
+  // a compliance report must say what actually happened on the user's site.
+  sectionGuide: {
+    "safety": {
+      "what": "Shows whether people are getting hurt and what you did about it.",
+      "how": "Log every incident and near-miss, even ones with no injury. Fill the training table from your attendance sheets. If nothing happened, leave the log empty — that reports zero, it doesn't look like you forgot.",
+      "example": "Two near-misses were recorded and both investigated within 48 hours. PPE spot-checks found 3 non-compliances, each closed the same day. 42 workers attended the revised lockout/tagout briefing."
+    },
+    "security": {
+      "what": "Security incidents, drills and the conduct of security personnel.",
+      "how": "Use the format's own columns — management of the incident, outcome, lessons learnt, action required. Drills and VPSHR training belong in the second table.",
+      "example": "One incident of vandalism to site sanitation was reported to police and remains under investigation. Patrol frequency was increased and an access-control briefing was delivered to five guards."
+    },
+    "environment": {
+      "what": "Your monitoring results against the limits in your permit.",
+      "how": "A result without its limit can't be assessed, so fill both. Use the status column honestly — 'Above limit' with an action beside it reads far better than a missing row.",
+      "example": "Effluent BOD measured 28 mg/l against a 50 mg/l permit limit. Dust deposition at the northern boundary exceeded the limit once; water bowser frequency was doubled and the repeat reading was compliant."
+    },
+    "ghg": {
+      "what": "Your energy and fuel use, converted to carbon.",
+      "how": "Take quantities from invoices and fuel logs — not estimates. If you don't have an emission factor yet, leave CO₂e blank; the quantity alone is still useful and shows a baseline.",
+      "example": "Grid electricity 25,656 kWh and 14,200 litres of diesel. Generator hours fell 18% after the grid connection at the main camp. No reduction target is set yet; a baseline year is being established."
+    },
+    "community": {
+      "what": "What the people around your site said, and what you did about it.",
+      "how": "Log every grievance, including ones you disagree with — unlogged complaints are the single most common audit finding. Record the closure date, not just the status.",
+      "example": "Four grievances were received: three about dust on the access road and one about water scarcity. Three closed within the 14-day commitment; the water grievance was referred to the district and remains open."
+    },
+    "permitting": {
+      "what": "Proof that you are legally allowed to operate.",
+      "how": "List every permit the site depends on, with its certificate number and expiry. Anything expiring within 90 days belongs in your management comment with a named owner.",
+      "example": "All seven permits are valid. The effluent discharge permit expires in 74 days; the renewal application was lodged on the 8th and acknowledgement received."
+    },
+    "ps1": {
+      "what": "PS1 is the umbrella: can you identify your E&S risks and manage them?",
+      "how": "List risks and the measure managing each one, with an owner. Reviewers check whether measures are actually effective, so use 'Partially effective' where that is the truth.",
+      "example": "The ESMS was reviewed in month. Of 14 management measures, 11 are effective, 2 partially effective (dust suppression at the crusher, sub-contractor induction tracking) and 1 not yet implemented."
+    },
+    "ps2": {
+      "what": "Working conditions for everyone on site, including people you don't employ directly.",
+      "how": "Contracted and supply-chain workers must appear separately — that is the part most reports miss. Include the worker grievance mechanism numbers.",
+      "example": "498 workers: 134 direct, 364 contracted. Nine worker grievances received, seven closed. Two sub-contractors were found paying below the agreed rate and have rectified with back-pay verified."
+    },
+    "ps3": {
+      "what": "Resource efficiency and pollution prevention — what you consume and what you release.",
+      "how": "Put the prior period beside this one so the trend is visible. That comparison is what makes the section useful rather than a list.",
+      "example": "Water abstraction fell from 1,820 to 1,353 m³ after the access road was sealed. Hazardous waste rose to 4.2 m³ following a workshop clean-out; all transferred to a licensed handler with transfer notes retained."
+    },
+    "ps4": {
+      "what": "Risks your operations create for people outside the fence.",
+      "how": "Think traffic, dust, noise, blasting, water, and the conduct of your security personnel. Record drills — emergency preparedness is half of PS4.",
+      "example": "Two community drills were held with the sub-county. No community injuries occurred. Security personnel completed VPSHR refresher training; no conduct complaints were received."
+    },
+    "ps5": {
+      "what": "Land taken for the project, and whether people are economically whole again.",
+      "how": "Track it per household. Outstanding compensation and open disputes are what a lender looks for first, so do not summarise them away.",
+      "example": "Of 46 affected households, 44 are paid in full, 1 part-paid pending a boundary survey and 1 disputed and under mediation. Livelihood restoration training reached 38 households."
+    },
+    "ps6": {
+      "what": "Habitats and species, and the ecosystem services communities rely on.",
+      "how": "Record encounters with protected species and every hectare cleared. If a survey is outstanding, say so rather than leaving the section empty.",
+      "example": "No protected species were encountered. 2.4 ha was cleared within the approved footprint. 1,200 indigenous seedlings were planted in the riparian buffer; survival monitoring begins next quarter."
+    },
+    "ps7": {
+      "what": "Only applies where Indigenous Peoples are present — consultation, and consent where required.",
+      "how": "If PS7 does not apply to your project, say that explicitly in the management comment rather than leaving it blank.",
+      "example": "PS7 is not triggered for this project; no Indigenous Peoples as defined by PS7 are present in the area of influence. This was confirmed in the ESIA and re-verified with the district."
+    },
+    "ps8": {
+      "what": "Archaeology, graves, sacred sites, and what you do when something is found.",
+      "how": "The chance-finds procedure is the heart of this section. Record every find, the authority notified, and the date work resumed.",
+      "example": "One chance find (iron-smelting debris) was reported. Work stopped within the 20 m exclusion zone, the Department of Museums was notified in writing, and the site was marked pending guidance."
+    },
+    "intro": {
+      "what": "Sets out who receives this report and on what basis.",
+      "how": "This is boilerplate you write once and reuse each month. Note the convention: where monitoring is less frequent than monthly, report 'no change' rather than leaving the section blank.",
+      "example": "This ESSR is submitted monthly to the lender's environmental monitoring unit, the Independent E&S Consultant, the Employer and the Engineer, and presents results of monitoring described in the Monitoring Plan and the ESMP portfolio."
+    },
+    "activities": {
+      "what": "What construction actually did this month — the context for every other section.",
+      "how": "Take percentages from the Engineer's progress figures so your report and theirs agree. Photos of each active front belong here.",
+      "example": "Runway grooving progressed to 100%. Cargo building reached 96.4% and the ARFF building 92.6%. Cabling chambers and ducts remain the critical path at 33%."
+    },
+    "labour-stats": {
+      "what": "How many people are on site, and who they are.",
+      "how": "Split direct from sub-contractor labour, and local from non-local — local employment is usually a contract commitment someone is checking. The sexes must sum to the total.",
+      "example": "Direct employment stands at 134 (117 male, 18 female), of whom 21 are from the host district and 5 are expatriates. Sub-contractors account for a further 89 workers."
+    },
+    "ehs-org": {
+      "what": "Who is responsible for EHS, and whether those posts are actually filled.",
+      "how": "A vacant EHS post is worth stating plainly with the recruitment date — hiding it reads worse than reporting it.",
+      "example": "The EHS establishment is 9 posts, 8 filled. The Environment Officer post became vacant on the 14th; recruitment is in progress with a start date expected next month."
+    },
+    "hs-stats": {
+      "what": "The numbers that show whether your safety system works.",
+      "how": "Fill the month column from your own registers and keep the accumulated column running from the previous report. Zero is a valid and good answer — enter 0, don't leave it blank.",
+      "example": "No lost-time injuries were recorded; 186,400 man-hours were worked. Eight toolbox talks and 76 visitor inductions were delivered. Two workers were observed without correct PPE and were re-briefed."
+    },
+    "clinic": {
+      "what": "What the site clinic treated, and anything with public-health significance.",
+      "how": "Record conditions, not names — this report goes to external parties. Flag notifiable conditions and outbreak response in the narrative.",
+      "example": "The clinic recorded 118 consultations, of which 31 were malaria. Four cases were referred to the health centre. Mosquito net distribution continued and the clinic licence was renewed for one year."
+    },
+    "labour-mgmt": {
+      "what": "Recruitment, contracts, and whether workers can raise problems safely.",
+      "how": "The workers' grievance register and representative meetings are the evidence that a mechanism exists. Minutes go in the appendices.",
+      "example": "Twelve workers were recruited and four separated. Workers' representative meeting no. 78 was held with 14 attendees. Three grievances were raised on transport timing; two were closed in month."
+    },
+    "accommodation": {
+      "what": "Living conditions in camps — inspected against the accommodation standard.",
+      "how": "Inspect every camp and record findings honestly with closure status. Photographs of sanitation and kitchen areas are expected.",
+      "example": "All three camps were inspected. Camp B raised four minor findings on ablution maintenance, three closed in month. Occupancy across camps is 412 against a capacity of 480."
+    },
+    "traffic": {
+      "what": "Vehicle and road risk, on your roads and on community ones.",
+      "how": "Record the hazard and the control, not just the incident count. Community road safety is usually where the real risk sits.",
+      "example": "No traffic incidents occurred over 84,300 km driven. 38 drivers completed defensive driving refresher training. Two additional speed humps were installed at the quarry junction after community feedback."
+    },
+    "water-energy": {
+      "what": "What you abstract and what you burn — with permit compliance.",
+      "how": "Month and cumulative for each source, and the permit reference with its daily limit. Exceeding a permitted abstraction rate is a serious finding.",
+      "example": "1,353 m³ was abstracted this month, all from borehole 2, within the 200 m³/day permitted limit. Energy consumption was 25,656 kWh with an average emission rate of 1,034 kg CO₂/day."
+    },
+    "community-hs": {
+      "what": "Noise, vibration and dust as experienced by people outside the site.",
+      "how": "Every reading needs its limit beside it. Measure at the receptor — a reading at your fence line does not answer the question.",
+      "example": "Twelve noise readings were taken at four receptors; one night-time reading at Nyamasoga exceeded the limit and night haulage was rescheduled. PM2.5 averaged 31 µg/m³."
+    },
+    "waste": {
+      "what": "Everything leaving site as waste, and where it legally went.",
+      "how": "Quantity by stream, the licensed handler, and the waste transfer note reference. A quantity without a transfer note is an unverifiable claim.",
+      "example": "1.44 m³ of biodegradable waste and 0.014 m³ of medical waste were generated. All hazardous waste was transferred to a licensed handler under four transfer notes, retained on file."
+    },
+    "wastewater": {
+      "what": "Effluent and storm water quality, plus drainage and erosion control.",
+      "how": "Results against the discharge standard, per sample point. Record drainage maintenance — erosion is the impact reviewers see on site.",
+      "example": "All six effluent samples were compliant with national discharge standards. 420 m of drainage was desilted ahead of the rains and two silt traps were installed at the borrow area outfall."
+    },
+    "biodiversity": {
+      "what": "Habitats, species and clearance — and what you did when you found something.",
+      "how": "Record protected-species encounters and every hectare cleared against the approved footprint. Clearing outside the footprint is a major finding.",
+      "example": "No protected species were encountered. Clearance remained within the approved footprint. Invasive Lantana camara was controlled over 0.8 ha along the access road."
+    },
+    "restoration": {
+      "what": "Putting back what construction disturbed.",
+      "how": "Progress per area against the restoration programme. Include borrow areas, quarry and camps, and photograph each.",
+      "example": "Borrow area 7 reached 85% restoration with topsoil re-instated and grass established. Quarry benching is complete; planting is scheduled for the next rains."
+    },
+    "community-dev": {
+      "what": "What you gave back, and whether people think it helped.",
+      "how": "Separate engagement from CSR delivery, and keep the grievance register current. Commitments made in meetings must appear somewhere you can track them.",
+      "example": "Two community consultative committee meetings were held with 64 participants. A borehole was handed over at Kijumba. Four grievances were received and three closed within the commitment period."
+    },
+    "cultural": {
+      "what": "Graves, archaeology and sacred sites — and the chance-finds procedure.",
+      "how": "No finds is a perfectly good answer, but say so explicitly and confirm the procedure is still briefed to earthworks crews.",
+      "example": "No chance finds were identified. A follow-up visit confirmed the previously reported iron-smelting site remains marked and undisturbed. The earthworks team was re-briefed on the procedure."
+    },
+    "stakeholder": {
+      "what": "Who you talked to, what they said, and what you promised.",
+      "how": "Record the commitment and its status — an engagement log without commitments tracked is where trust is lost.",
+      "example": "Eleven engagements were held, including the district joint stakeholder meeting. Two commitments were made on access road dust control, both delivered in month. Radio announcements ran weekly."
+    },
+    "influx": {
+      "what": "Whether the project is pulling people into the area faster than services can cope.",
+      "how": "Pick a few indicators you can actually measure and keep the baseline beside them. Local recruitment and procurement are the levers you control.",
+      "example": "Local recruitment stands at 78% of unskilled posts. Trading centre stall counts at Nyamasoga rose from 34 at baseline to 61, and sanitation pressure was raised with the sub-county."
+    },
+    "demob": {
+      "what": "Handing the site back without leaving problems behind.",
+      "how": "Only relevant as the contract closes. Record what happens to each camp, plant item and borrow area, and who receives it.",
+      "example": "Demobilisation planning is 40% complete. Camp C ablutions will be handed to the sub-county; plant disposal will follow the approved inventory. No demobilisation activity occurred this month."
+    },
+    "permits": {
+      "what": "The permit register — the section reviewers turn to first.",
+      "how": "Use the format's columns: authority, status, compliance, programme impact, remedy. Anything non-compliant needs a remedy with a date, not an explanation.",
+      "example": "Of 14 statutory requirements, 12 are acquired and valid, 1 renewal is applied for and 1 is pending an Employer action. The EIA certificate held in the Employer's name expired and the Employer has been formally alerted."
+    },
+    "appendices": {
+      "what": "The evidence behind the report.",
+      "how": "Attach what you reference. An appendix listed but not attached is worse than one marked 'not applicable this month'.",
+      "example": "Appendices A–C and G–I are attached. Appendix D is not applicable this month as no outbreak SOP activity was required."
+    }
+  },
+
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100
 };
@@ -1340,50 +4151,12 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
 
 const VerdaAI = (() => {
 
-  function bulletList(items) {
-    return items.filter(Boolean).map(i => `  • ${i}`).join("\n");
-  }
-
-  function narrativeForSegment(seg, data, label) {
-    const d = data || {};
-    switch (seg) {
-      case "safety":
-        return `SAFETY\n` +
-          `During the reporting period, ${d.incidents || "0"} incident(s) and ${d.nearMisses || "0"} near-miss event(s) were recorded. ` +
-          `PPE compliance was observed at ${d.ppeCompliance || "N/A"}. ${d.trainingNote || "Routine safety briefings were conducted."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "security":
-        return `SECURITY\n` +
-          `${d.securityIncidents || "0"} security-related incident(s) were logged this period. Access control and site perimeter checks were carried out ${d.accessChecks || "as scheduled"}.\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "environment":
-        return `ENVIRONMENT\n` +
-          `Effluent and air monitoring were carried out ${d.monitoringFreq || "as scheduled"}. ${d.wasteNote || "Waste was segregated and handed to a licensed transporter."} ` +
-          `${d.spillNote || "No uncontrolled spills were recorded."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "ghg":
-        return `GHG\n` +
-          `Estimated fuel/energy use for the period: ${d.energyUse || "not yet tracked"}. ${d.reductionActions || "No specific reduction actions logged this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "community":
-        return `COMMUNITY\n` +
-          `${d.grievances || "0"} grievance(s) were logged, of which ${d.grievancesClosed || "0"} were closed out. ${d.engagementNote || "No community engagement activities were scheduled this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      case "permitting":
-        return `PERMITTING\n` +
-          `Current permit status: ${d.permitStatus || "valid"}. Next renewal due: ${d.renewalDate || "not set"}. ${d.submissionNote || "No new submissions were made this period."}\n` +
-          (d.notes ? `Notes: ${d.notes}\n` : "");
-      default:
-        // Any framework segment without a bespoke template — the IFC
-        // Performance Standards, or an ESSR section — is rendered from its
-        // own label, its numeric returns and whichever narrative blocks the
-        // framework declares.
-        return `${label || seg}\n` +
-          ((d.notes && d.notes.trim())
-            ? d.notes.trim()
-            : "Status not yet recorded for this period. Add site data, monitoring results and any corrective actions before this report is issued.") + "\n";
-    }
-  }
+  /* Every framework's sections are now rendered from structured input —
+     the tables, numeric returns and narrative blocks the user actually filled
+     in. There are deliberately no per-segment prose templates: a template
+     that prints "0 incidents, PPE compliance N/A" from fields nobody filled
+     is inventing a compliance position, which is the one thing a report of
+     this kind must never do. */
 
   // Renders one section's numeric/text returns as an aligned KPI block, so
   // the figures a reviewer checks first sit above the narrative.
@@ -1397,29 +4170,60 @@ const VerdaAI = (() => {
     return rows.map(r => `  ${r.label.padEnd(w)} : ${r.value}`).join("\n") + "\n";
   }
 
+  // Renders one data table as fixed-width text, so the plain-text report
+  // carries the same rows as the HTML one (a text report is what gets pasted
+  // into an email or a regulator's portal).
+  function textTable(tableDef, rows) {
+    const cols = tableDef.columns.filter(c => rows.some(r => String(r[c.key] ?? "").trim()));
+    if (!cols.length) return "";
+    const header = cols.map(c => c.label + (c.unit ? ` (${c.unit})` : ""));
+    const body = rows.map(r => cols.map(c => String(r[c.key] ?? "").replace(/\s+/g, " ").trim()));
+    const w = header.map((hd, i) => Math.min(34, Math.max(hd.length, ...body.map(b => b[i].length))));
+    const line = (cells) => "  " + cells.map((v, i) =>
+      (v.length > w[i] ? v.slice(0, w[i] - 1) + "…" : v).padEnd(w[i])).join("  ").replace(/\s+$/, "");
+    return `\n  ${tableDef.title}\n${line(header)}\n  ${w.map(n => "-".repeat(n)).join("  ")}\n` +
+      body.map(line).join("\n") + "\n";
+  }
+
+  function tablesBlock(tables, tableDefs) {
+    if (!tables || !tableDefs) return "";
+    return tableDefs.map(t => {
+      const rows = tables[t.id];
+      return (rows && rows.length) ? textTable(t, rows) : "";
+    }).join("");
+  }
+
   // A section under a framework that declares its own narrative blocks
   // (e.g. ESSR: monthly updates / cumulative KPI / management comment).
-  function sectionWithBlocks(def, data, blocks) {
+  function sectionWithBlocks(def, data, blocks, tableDefs) {
     const d = data || {};
     let out = `${def.label}\n${"-".repeat(Math.min(def.label.length, 71))}\n`;
     const returns = returnsBlock(d.inputs, def.fields);
     if (returns) out += `Returns for the period:\n${returns}`;
+    const tables = tablesBlock(d.tables, tableDefs);
+    if (tables) out += tables;
+    const photos = (d.photos || []).length;
     let anyNarrative = false;
     blocks.forEach(b => {
       const text = (d[b.key] || "").trim();
       if (text) { anyNarrative = true; out += `\n${b.label}:\n${text}\n`; }
     });
-    if (!anyNarrative) {
+    if (!anyNarrative && !tables) {
       // The ESSR convention: where nothing has changed since the previous
       // period, that is reported explicitly rather than left blank.
-      out += returns
-        ? `\n${blocks[blocks.length - 1].label}: No change to report for this period beyond the returns above.\n`
-        : `\nNo change to report for this period. Confirm before issue — a section left blank is a finding at review.\n`;
+      if (returns) {
+        out += `\n${blocks[blocks.length - 1].label}: No change to report for this period beyond the returns above.\n`;
+      } else if (photos) {
+        out += `\nPhotographs are attached for this section but no narrative has been written. Describe what they show before this report is issued.\n`;
+      } else {
+        out += `\nNo change to report for this period. Confirm before issue — a section left blank is a finding at review.\n`;
+      }
     }
+    if (photos) out += `\n  [${photos} photograph(s) attached to this section — see the full report.]\n`;
     return out;
   }
 
-  function generateAIDraft({ clientName, period, segments, segmentData, standardTitle, segmentDefs, blocks, header, headerDefs }) {
+  function generateAIDraft({ clientName, period, segments, segmentData, standardTitle, segmentDefs, blocks, header, headerDefs, tableDefs }) {
     const defs = segmentDefs || [];
     const defFor = (id) => defs.find((x) => x.id === id) || { id, label: id[0].toUpperCase() + id.slice(1) };
     const labelFor = (id) => defFor(id).label;
@@ -1442,10 +4246,11 @@ Generated: ${new Date().toISOString().slice(0, 10)}
 
     // A framework that declares narrative blocks gets the structured
     // section renderer; the modular segments keep their bespoke templates.
+    const tablesFor = (id) => (tableDefs || {})[id] || null;
     const useBlocks = Array.isArray(blocks) && blocks.length > 1;
     const body = segments.map(id => useBlocks
-      ? sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks)
-      : narrativeForSegment(id, segmentData[id] || {}, labelFor(id))
+      ? sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks, tablesFor(id))
+      : sectionWithBlocks(defFor(id), segmentData[id] || {}, blocks || [{ key: "notes", label: "Notes" }], tablesFor(id))
     ).join("\n");
 
     const summary =
@@ -2187,154 +4992,678 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
   }
 
   /* ============================ VERDA REPORTING ============================ */
+
+  // Categorical series colours, in fixed order (never cycled). Slots 1-3 of the
+  // validated palette; a table asking for more than three series is capped.
+  const SERIES_VARS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)"];
+
+  // Grouped bar chart, 1-3 series. Single series needs no legend (the title
+  // names it); two or more always carry one, plus direct value labels, so
+  // identity is never colour-alone.
+  function groupedBarChart(rows, seriesDefs, title, valueLabel) {
+    const series = seriesDefs.slice(0, 3);
+    if (!rows.length || !series.length) return "";
+    const W = 560, H = 230, padL = 16, padR = 12, padT = 28, padB = 46;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const max = Math.max(1, ...rows.flatMap(r => series.map(s => Number(r.values[s.key]) || 0)));
+    const slot = plotW / rows.length;
+    const groupW = Math.min(58 * series.length, slot * 0.68);
+    const barW = Math.max(4, (groupW - 2 * (series.length - 1)) / series.length); // 2px surface gap
+    const body = rows.map((r, i) => {
+      const gx = padL + slot * i + (slot - groupW) / 2;
+      return series.map((s, j) => {
+        const v = Number(r.values[s.key]) || 0;
+        const hgt = Math.round((v / max) * plotH);
+        const x = gx + j * (barW + 2);
+        const y = padT + plotH - hgt;
+        const rad = Math.min(4, hgt, barW / 2);
+        const d = hgt <= 0 ? "" :
+          `M${x} ${y + hgt} V${y + rad} q0 -${rad} ${rad} -${rad} h${barW - 2 * rad} q${rad} 0 ${rad} ${rad} V${y + hgt} Z`;
+        // A single-series chart may colour each bar by its own category
+        // (the reserved status palette); multi-series colours by series.
+        const fill = (series.length === 1 && r.color) ? r.color : (s.color || SERIES_VARS[j]);
+        return `<g><title>${esc(r.label)} — ${esc(s.label)}: ${esc(String(v))}</title>` +
+          (hgt > 0 ? `<path d="${d}" style="fill:${fill}"/>` : "") +
+          `<text x="${x + barW / 2}" y="${y - 6}" class="chart-value">${esc(String(v))}</text></g>`;
+      }).join("") +
+        `<text x="${gx + groupW / 2}" y="${padT + plotH + 17}" class="chart-label">${esc(shortLabel(r.label))}</text>`;
+    }).join("");
+    const legend = series.length > 1
+      ? `<div class="chart-legend">${series.map((s, j) =>
+          `<span class="legend-item"><i style="background:${s.color || SERIES_VARS[j]}"></i>${esc(s.label)}</span>`).join("")}</div>`
+      : "";
+    const table = `<details class="chart-table"><summary>View data table</summary>
+      <div class="table-scroll"><table class="table"><thead><tr><th>${esc(title)}</th>
+      ${series.map(s => `<th>${esc(s.label)}${valueLabel ? ` (${esc(valueLabel)})` : ""}</th>`).join("")}</tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${esc(r.label)}</td>${series.map(s => `<td>${esc(String(r.values[s.key] ?? "—"))}</td>`).join("")}</tr>`).join("")}
+      </tbody></table></div></details>`;
+    return `<figure class="chart-figure"><figcaption class="chart-title">${esc(title)}</figcaption>
+      <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">
+      <line x1="${padL}" y1="${padT + plotH}" x2="${W - padR}" y2="${padT + plotH}" class="chart-axis"/>
+      ${body}</svg>${legend}${table}</figure>`;
+  }
+
+  function shortLabel(s) {
+    s = String(s || "");
+    return s.length > 16 ? s.slice(0, 15) + "…" : s;
+  }
+
+  // Build chart rows from a table's live data. Returns null when there is
+  // nothing numeric to plot yet — an empty chart frame is worse than none.
+  function chartFromTable(tableDef, rows) {
+    const spec = tableDef.chart;
+    if (!spec || !rows || !rows.length) return null;
+    if (spec.count) {
+      // Count rows per category (e.g. grievances by status).
+      const counts = new Map();
+      rows.forEach(r => {
+        const k = (r[spec.labelKey] || "").trim();
+        if (k) counts.set(k, (counts.get(k) || 0) + 1);
+      });
+      if (!counts.size) return null;
+      const palette = spec.status ? statusColorFor : null;
+      return {
+        rows: Array.from(counts, ([label, n]) => ({ label, values: { count: n }, color: palette ? palette(label) : null })),
+        series: [{ key: "count", label: spec.valueLabel || "Count" }],
+        title: spec.title, valueLabel: spec.valueLabel,
+        perRowColor: !!palette
+      };
+    }
+    const keys = spec.valueKeys.slice(0, 3);
+    const out = rows
+      .filter(r => (r[spec.labelKey] || "").trim() && keys.some(k => String(r[k] ?? "").trim() !== ""))
+      .map(r => ({ label: r[spec.labelKey], values: Object.fromEntries(keys.map(k => [k, Number(r[k]) || 0])) }));
+    if (!out.length) return null;
+    const colFor = (k) => (tableDef.columns.find(c => c.key === k) || {}).label || k;
+    return {
+      rows: out,
+      series: keys.map(k => ({ key: k, label: colFor(k) })),
+      title: spec.title, valueLabel: spec.valueLabel
+    };
+  }
+
+  // Status words map to the reserved status palette, so "Above limit" is never
+  // the same colour as a neutral series.
+  function statusColorFor(label) {
+    const t = String(label).toLowerCase();
+    if (/open|above|non-?compliant|expired|not paid|disputed|major|not obtained|not implemented|destroyed/.test(t)) return "var(--chart-critical)";
+    if (/investigat|partial|part paid|applied|in progress|pending|minor|under |await/.test(t)) return "var(--chart-warning)";
+    if (/closed|resolved|valid|within|compliant|paid|effective|delivered|obtained|protected/.test(t)) return "var(--chart-good)";
+    return "var(--chart-1)";
+  }
+
+  function renderChartBlock(tableDef, rows) {
+    const c = chartFromTable(tableDef, rows);
+    if (!c) return `<p class="muted small chart-empty">Add rows with numbers and a chart appears here.</p>`;
+    // Status charts carry a colour per row (the reserved status palette);
+    // every bar is directly labelled with its category either way.
+    return groupedBarChart(c.rows, c.series, c.title, c.valueLabel);
+  }
+
+  // Downscale a dropped photo before it is stored: site photos off a phone are
+  // several MB each and localStorage is a few MB in total.
+  function compressImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("not an image"));
+        img.onload = () => {
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const hh = Math.max(1, Math.round(img.height * scale));
+          const cv = document.createElement("canvas");
+          cv.width = w; cv.height = hh;
+          cv.getContext("2d").drawImage(img, 0, 0, w, hh);
+          resolve(cv.toDataURL("image/jpeg", quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const MAX_PHOTOS_PER_SECTION = 6;
+
   function renderReporting(main) {
-    // Which framework the report is built against: EEIS's own modular
-    // segments, or the eight IFC Performance Standards.
     let standard = VERDA_SEED.reportStandards[0];
     const segsFor = (std) => VERDA_SEED[std.segmentsKey];
     let segs = segsFor(standard);
+    let guided = state.reportGuided !== false;   // on by default — most users are new to this
+
+    // Live form model, kept outside the DOM so adding a table row or a photo
+    // never discards what is already typed.
+    let model = {};                              // sectionId -> { blocks, inputs, tables, photos }
+    function sectionModel(id) {
+      if (!model[id]) model[id] = { blocks: {}, inputs: {}, tables: {}, photos: [] };
+      return model[id];
+    }
+    function tableRows(sectionId, tableDef) {
+      const m = sectionModel(sectionId);
+      if (!m.tables[tableDef.id]) {
+        const starters = (tableDef.starterRows || []).map(r => Object.assign({}, r));
+        m.tables[tableDef.id] = starters.length ? starters : [{}];
+      }
+      return m.tables[tableDef.id];
+    }
+    const tablesFor = (id) => VERDA_SEED.sectionTables[id] || [];
+
+    // Starter rows pre-fill a label column so the expected rows are visible.
+    // A row carrying nothing but that scaffolding is not data, and must not be
+    // reported as if the user had filled it in.
+    function rowHasContent(tableDef, row) {
+      const starterKeys = new Set((tableDef.starterRows || []).flatMap(r => Object.keys(r)));
+      return Object.entries(row).some(([k, v]) =>
+        String(v ?? "").trim() && !starterKeys.has(k));
+    }
+    function filledRows(sectionId, tableDef) {
+      return (sectionModel(sectionId).tables[tableDef.id] || []).filter(r => rowHasContent(tableDef, r));
+    }
 
     main.appendChild(h(`
       <section>
-        <h1>Verda Reporting</h1>
-        <p class="muted">Build a periodic report from modular sections — include only what's relevant to this client. Report against Verda's own segments, the IFC Performance Standards, or the full monthly ESSR self-monitoring format used on lender-financed construction contracts.</p>
-        <div class="card">
-          <label>Reporting standard
-            <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
-          </label>
-          <label>Client
-            <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
-          </label>
-          <label>Reporting period<input id="rep-period" placeholder="e.g. Q3 2026 / September 2026" /></label>
-          <div id="rep-header-fields" class="field-grid"></div>
-          <fieldset class="segments">
-            <legend>Segments to include</legend>
-            <div id="seg-toggles"></div>
-          </fieldset>
-          <div id="seg-forms"></div>
-          <div class="modal-actions">
-            <button class="btn btn-primary" id="gen-report">Generate with AI Assist (${VERDA_SEED.creditCosts.aiDraft} credits)</button>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Verda Reporting</h1>
+            <p class="muted">Fill in the tables, add your photos, and Verda assembles the report. Every section is optional — include only what applies to this client.</p>
           </div>
         </div>
+
+        <div class="card notice-card" id="how-to">
+          <h3>How to build a report — four steps</h3>
+          <ol class="steps">
+            <li><strong>Pick the format and the client.</strong> Verda's own segments for a straightforward monthly report, the IFC Performance Standards where a lender requires them, or the full ESSR where your contract demands it.</li>
+            <li><strong>Tick the sections that apply.</strong> Untick anything that doesn't — you are not expected to fill all of them.</li>
+            <li><strong>Fill the tables and drop in photos.</strong> Each table says what belongs in it. Numbers become charts automatically. Leave a figure blank if you don't have it; enter <strong>0</strong> if it genuinely is zero — those mean different things.</li>
+            <li><strong>Generate, read it, then download.</strong> The draft is a starting point, not a finished submission. Read every line before it leaves your hands.</li>
+          </ol>
+          <label class="switch"><input type="checkbox" id="guided-toggle" ${guided ? "checked" : ""} />
+            <span>Guided mode — show what each section is for, with example wording</span></label>
+        </div>
+
+        <div class="card">
+          <div class="form-row">
+            <label>Reporting format
+              <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</select>
+            </label>
+            <label>Client
+              <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
+            </label>
+            <label>Reporting period<input id="rep-period" placeholder="e.g. October 2026 / Q3 2026" /></label>
+          </div>
+          <div id="rep-header-fields" class="field-grid"></div>
+        </div>
+
+        <div class="card">
+          <h3>Sections to include</h3>
+          <p class="muted small" id="seg-progress"></p>
+          <div class="seg-toggle-actions">
+            <button class="btn btn-ghost btn-sm" id="seg-all">Select all</button>
+            <button class="btn btn-ghost btn-sm" id="seg-none">Clear all</button>
+          </div>
+          <div id="seg-toggles"></div>
+        </div>
+
+        <div id="seg-forms"></div>
+
+        <div class="card">
+          <button class="btn btn-primary" id="gen-report">Generate report with AI Assist (${VERDA_SEED.creditCosts.aiDraft} credits)</button>
+          <p class="muted small">Drafts the narrative from what you entered. It cannot invent data it wasn't given — blank stays blank.</p>
+        </div>
         <div id="report-output"></div>
+
         <div class="card">
           <h3>Past reports</h3>
-          <table class="table"><thead><tr><th>Client</th><th>Standard</th><th>Period</th><th>Segments</th><th>Generated</th><th></th></tr></thead>
-          <tbody id="reports-list"></tbody></table>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Client</th><th>Format</th><th>Period</th><th>Sections</th><th>Photos</th><th>Generated</th><th></th></tr></thead>
+            <tbody id="reports-list"></tbody></table>
+          </div>
         </div>
       </section>
     `));
 
-    // The report header fields a framework asks for (ESSR carries a document
-    // number, version and distribution list; the others need none).
+    /* ---- header fields (format-specific, e.g. ESSR document number) ---- */
     function renderHeaderFields() {
       const box = main.querySelector("#rep-header-fields");
-      const hf = standard.headerFields || [];
-      box.innerHTML = hf.map(f =>
+      box.innerHTML = (standard.headerFields || []).map(f =>
         `<label>${esc(f.label)}<input data-header="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
       ).join("");
     }
 
-    function renderSegForms() {
-      const checked = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
-      const container = main.querySelector("#seg-forms");
+    /* ---- one table ---- */
+    function tableHtml(sectionId, t) {
+      const rows = tableRows(sectionId, t);
+      const head = t.columns.map(c =>
+        `<th>${esc(c.label)}${c.unit ? ` <span class="muted">(${esc(c.unit)})</span>` : ""}</th>`).join("");
+      const body = rows.map((row, ri) => `<tr>${t.columns.map(c => {
+        const v = row[c.key] == null ? "" : String(row[c.key]);
+        if (c.type === "select") {
+          return `<td><select data-cell="${esc(c.key)}" data-row="${ri}">
+            <option value="">—</option>
+            ${c.options.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
+        }
+        const type = c.type === "number" ? "number" : c.type === "date" ? "date" : "text";
+        return `<td><input type="${type}" data-cell="${esc(c.key)}" data-row="${ri}" value="${esc(v)}" /></td>`;
+      }).join("")}<td class="row-actions"><button class="btn btn-ghost btn-sm" data-delrow="${ri}" title="Remove this row" aria-label="Remove row ${ri + 1}">✕</button></td></tr>`).join("");
+      return `<div class="report-table" data-table="${esc(t.id)}">
+        <div class="report-table-head">
+          <h5>${esc(t.title)}</h5>
+          ${t.hint ? `<p class="muted small">${esc(t.hint)}</p>` : ""}
+        </div>
+        <div class="table-scroll"><table class="table entry-table"><thead><tr>${head}<th></th></tr></thead>
+        <tbody>${body}</tbody></table></div>
+        <button class="btn btn-ghost btn-sm" data-addrow="${esc(t.id)}">+ Add row</button>
+        <div class="chart-slot" data-chart="${esc(t.id)}">${t.chart ? renderChartBlock(t, rows) : ""}</div>
+      </div>`;
+    }
+
+    /* ---- one section ---- */
+    function sectionHtml(sec) {
       const blocks = standard.blocks || DEFAULT_BLOCKS;
-      const noun = SEG_NOUN[standard.id] || "segment";
-      container.innerHTML = checked.map(id => {
-        const sec = segs.find(x => x.id === id);
-        // Numeric/text returns this section's KPI tables actually ask for.
-        const fields = (sec.fields || []).map(f =>
-          `<label class="field-sm">${esc(f.label)}${f.unit ? ` <span class="muted">(${esc(f.unit)})</span>` : ""}
-            <input type="${f.type === "number" ? "number" : "text"}" data-input="${esc(f.key)}" placeholder="${esc(f.placeholder || "")}" /></label>`
-        ).join("");
-        const narrative = blocks.map(b =>
-          `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" placeholder="${esc(b.label)} for this ${noun} this period..."></textarea></label>`
-        ).join("");
-        return `<div class="seg-form" data-seg="${esc(id)}">
-          <h4>${esc(sec.label)}</h4>
-          ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
-          ${fields ? `<div class="field-grid">${fields}</div>` : ""}
-          ${narrative}
-        </div>`;
-      }).join("") || `<p class="muted">Select at least one section above.</p>`;
+      const m = sectionModel(sec.id);
+      const guide = VERDA_SEED.sectionGuide[sec.id];
+      const guideHtml = (guided && guide) ? `<div class="guide-box">
+        <p><strong>What this section is for.</strong> ${esc(guide.what)}</p>
+        <p><strong>How to fill it.</strong> ${esc(guide.how)}</p>
+        <details><summary>Example wording</summary>
+          <p class="guide-example">${esc(guide.example)}</p>
+          <p class="muted small">Guidance only — describe what actually happened on your site.</p>
+        </details>
+      </div>` : "";
+      const fields = (sec.fields || []).map(f =>
+        `<label class="field-sm">${esc(f.label)}${f.unit ? ` <span class="muted">(${esc(f.unit)})</span>` : ""}
+          <input type="${f.type === "number" ? "number" : "text"}" data-input="${esc(f.key)}"
+            value="${esc(m.inputs[f.key] || "")}" placeholder="${esc(f.placeholder || "")}" /></label>`).join("");
+      const tables = tablesFor(sec.id).map(t => tableHtml(sec.id, t)).join("");
+      const narrative = blocks.map(b =>
+        `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" rows="3"
+          placeholder="${esc(b.label)} — in your own words.">${esc(m.blocks[b.key] || "")}</textarea></label>`).join("");
+      return `<div class="card seg-form" data-seg="${esc(sec.id)}">
+        <h4>${esc(sec.label)}</h4>
+        ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
+        ${guideHtml}
+        ${fields ? `<h5>Summary figures</h5><div class="field-grid">${fields}</div>` : ""}
+        ${tables}
+        <h5>Narrative</h5>
+        ${narrative}
+        <h5>Photographs</h5>
+        <div class="dropzone" data-drop="${esc(sec.id)}" tabindex="0" role="button"
+             aria-label="Add photographs for ${esc(sec.label)}">
+          <p><strong>Drag photos here</strong> — or click to choose, or paste from your clipboard.</p>
+          <p class="muted small">Up to ${MAX_PHOTOS_PER_SECTION} per section. Photos are resized in your browser and stored on this device only.</p>
+          <input type="file" accept="image/*" multiple hidden data-file="${esc(sec.id)}" />
+        </div>
+        <div class="photo-grid" data-photos="${esc(sec.id)}"></div>
+      </div>`;
+    }
+
+    /* ---- photos ---- */
+    function renderPhotos(sectionId) {
+      const grid = main.querySelector(`[data-photos="${sectionId}"]`);
+      if (!grid) return;
+      const photos = sectionModel(sectionId).photos;
+      grid.innerHTML = photos.map((p, i) => `<figure class="photo-card">
+        <img src="${p.src}" alt="${esc(p.caption || "Site photograph")}" />
+        <input class="photo-caption" data-caption="${i}" value="${esc(p.caption || "")}" placeholder="Caption — what this shows" />
+        <button class="btn btn-ghost btn-sm" data-delphoto="${i}">Remove</button>
+      </figure>`).join("");
+      grid.querySelectorAll("[data-caption]").forEach(inp => inp.addEventListener("input", () => {
+        photos[Number(inp.dataset.caption)].caption = inp.value;
+      }));
+      grid.querySelectorAll("[data-delphoto]").forEach(btn => btn.addEventListener("click", () => {
+        photos.splice(Number(btn.dataset.delphoto), 1);
+        renderPhotos(sectionId);
+      }));
+    }
+
+    async function addFiles(sectionId, files) {
+      const m = sectionModel(sectionId);
+      const list = Array.from(files).filter(f => f.type.startsWith("image/"));
+      if (!list.length) { alert("That doesn't look like an image file. Photos can be JPG, PNG, HEIC-converted or WebP."); return; }
+      const room = MAX_PHOTOS_PER_SECTION - m.photos.length;
+      if (room <= 0) { alert(`This section already has ${MAX_PHOTOS_PER_SECTION} photos. Remove one before adding another.`); return; }
+      for (const f of list.slice(0, room)) {
+        try {
+          m.photos.push({ src: await compressImage(f, 1100, 0.72), caption: f.name.replace(/\.[^.]+$/, "") });
+        } catch (e) { alert(`Couldn't read "${f.name}". Try saving it as a JPG or PNG first.`); }
+      }
+      if (list.length > room) alert(`Added ${room} photo(s) — this section is now full at ${MAX_PHOTOS_PER_SECTION}.`);
+      renderPhotos(sectionId);
+    }
+
+    /* ---- wiring for a rendered section ---- */
+    function wireSection(sec) {
+      const form = main.querySelector(`.seg-form[data-seg="${sec.id}"]`);
+      if (!form) return;
+      const m = sectionModel(sec.id);
+
+      form.querySelectorAll("[data-input]").forEach(el =>
+        el.addEventListener("input", () => { m.inputs[el.dataset.input] = el.value; updateProgress(); }));
+      form.querySelectorAll("[data-field]").forEach(el =>
+        el.addEventListener("input", () => { m.blocks[el.dataset.field] = el.value; updateProgress(); }));
+
+      tablesFor(sec.id).forEach(t => {
+        const wrap = form.querySelector(`[data-table="${t.id}"]`);
+        const rows = tableRows(sec.id, t);
+        wrap.querySelectorAll("[data-cell]").forEach(el => {
+          el.addEventListener("input", () => {
+            rows[Number(el.dataset.row)][el.dataset.cell] = el.value;
+            updateProgress();
+          });
+          // Charts refresh on commit (blur / select change), not per keystroke.
+          el.addEventListener("change", () => refreshChart(sec.id, t));
+        });
+        wrap.querySelector("[data-addrow]").addEventListener("click", () => {
+          rows.push({});
+          rerenderTable(sec, t);
+        });
+        wrap.querySelectorAll("[data-delrow]").forEach(btn => btn.addEventListener("click", () => {
+          rows.splice(Number(btn.dataset.delrow), 1);
+          if (!rows.length) rows.push({});
+          rerenderTable(sec, t);
+        }));
+      });
+
+      const dz = form.querySelector("[data-drop]");
+      const picker = form.querySelector("[data-file]");
+      dz.addEventListener("click", () => picker.click());
+      dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); picker.click(); } });
+      picker.addEventListener("change", () => { addFiles(sec.id, picker.files); picker.value = ""; });
+      ["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, (e) => {
+        e.preventDefault(); e.stopPropagation(); dz.classList.add("dropzone-active");
+      }));
+      ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, (e) => {
+        e.preventDefault(); e.stopPropagation(); dz.classList.remove("dropzone-active");
+      }));
+      dz.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(sec.id, e.dataTransfer.files); });
+      dz.addEventListener("paste", (e) => {
+        const items = (e.clipboardData && e.clipboardData.files) || [];
+        if (items.length) { e.preventDefault(); addFiles(sec.id, items); }
+      });
+      renderPhotos(sec.id);
+    }
+
+    function refreshChart(sectionId, t) {
+      const slot = main.querySelector(`.seg-form[data-seg="${sectionId}"] [data-chart="${t.id}"]`);
+      if (slot && t.chart) slot.innerHTML = renderChartBlock(t, tableRows(sectionId, t));
+    }
+
+    function rerenderTable(sec, t) {
+      const wrap = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
+      if (!wrap) return;
+      wrap.outerHTML = tableHtml(sec.id, t);
+      // Re-wire just this table.
+      const fresh = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
+      const rows = tableRows(sec.id, t);
+      fresh.querySelectorAll("[data-cell]").forEach(el => {
+        el.addEventListener("input", () => { rows[Number(el.dataset.row)][el.dataset.cell] = el.value; updateProgress(); });
+        el.addEventListener("change", () => refreshChart(sec.id, t));
+      });
+      fresh.querySelector("[data-addrow]").addEventListener("click", () => { rows.push({}); rerenderTable(sec, t); });
+      fresh.querySelectorAll("[data-delrow]").forEach(btn => btn.addEventListener("click", () => {
+        rows.splice(Number(btn.dataset.delrow), 1);
+        if (!rows.length) rows.push({});
+        rerenderTable(sec, t);
+      }));
+      updateProgress();
+    }
+
+    /* ---- section list ---- */
+    function checkedIds() {
+      return Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
+    }
+
+    function sectionHasData(id) {
+      const m = model[id];
+      if (!m) return false;
+      if (Object.values(m.blocks).some(v => (v || "").trim())) return true;
+      if (Object.values(m.inputs).some(v => (v || "").trim())) return true;
+      if (m.photos.length) return true;
+      return tablesFor(id).some(t => filledRows(id, t).length > 0);
+    }
+
+    function updateProgress() {
+      const ids = checkedIds();
+      const done = ids.filter(sectionHasData).length;
+      const el = main.querySelector("#seg-progress");
+      if (!el) return;
+      el.textContent = ids.length
+        ? `${done} of ${ids.length} selected section(s) have something in them. Empty sections are reported as "no change" — that is allowed, but say so deliberately.`
+        : "No sections selected yet — tick the ones that apply to this client.";
+      main.querySelectorAll(".seg-toggle").forEach(lab => {
+        const id = lab.querySelector(".seg-check").value;
+        lab.classList.toggle("seg-filled", sectionHasData(id));
+      });
+    }
+
+    function renderSegForms() {
+      const ids = checkedIds();
+      const container = main.querySelector("#seg-forms");
+      const chosen = segs.filter(s => ids.includes(s.id));
+      container.innerHTML = chosen.length
+        ? chosen.map(sectionHtml).join("")
+        : `<p class="muted">Tick a section above and its tables appear here.</p>`;
+      chosen.forEach(wireSection);
+      updateProgress();
     }
 
     function renderSegToggles() {
       main.querySelector("#seg-toggles").innerHTML = segs.map(s =>
-        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${s.id}" checked /> ${s.label} <span class="muted small">— ${s.hint}</span></label>`
-      ).join("");
+        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${esc(s.id)}" checked />
+          <span class="seg-toggle-label">${esc(s.label)}</span>
+          <span class="muted small">${esc(s.hint || "")}</span></label>`).join("");
       main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderSegForms));
       renderSegForms();
     }
+
+    main.querySelector("#seg-all").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = true; });
+      renderSegForms();
+    });
+    main.querySelector("#seg-none").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = false; });
+      renderSegForms();
+    });
+    main.querySelector("#guided-toggle").addEventListener("change", (e) => {
+      guided = e.target.checked;
+      state.reportGuided = guided;
+      save();
+      renderSegForms();
+    });
+
     renderHeaderFields();
     renderSegToggles();
 
     main.querySelector("#rep-standard").addEventListener("change", (e) => {
       standard = VERDA_SEED.reportStandards.find(s => s.id === e.target.value);
       segs = segsFor(standard);
+      model = {};                 // a different format asks different questions
       renderHeaderFields();
       renderSegToggles();
     });
 
+    /* ---- past reports ---- */
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${esc(r.clientName)}</td><td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
-        <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.date.slice(0,10)}</td>
-        <td><button class="btn btn-ghost btn-sm" data-dl="${r.id}">Download</button></td></tr>`).join("") ||
-        `<tr><td colspan="6" class="muted">No reports generated yet.</td></tr>`;
+        <tr><td>${esc(r.clientName)}</td>
+        <td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
+        <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.photoCount || 0}</td><td>${r.date.slice(0, 10)}</td>
+        <td class="row-actions">
+          <button class="btn btn-ghost btn-sm" data-dl="${esc(r.id)}">.txt</button>
+          <button class="btn btn-ghost btn-sm" data-dlhtml="${esc(r.id)}">Full report</button>
+        </td></tr>`).join("") ||
+        `<tr><td colspan="7" class="muted">No reports generated yet.</td></tr>`;
+      const base = (r) => `${REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting"}-${r.clientName.replace(/\s+/g, "_")}-${String(r.period).replace(/\s+/g, "_")}`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
-        const prefix = REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting";
-        downloadText(`${prefix}-${r.clientName.replace(/\s+/g,"_")}-${r.period.replace(/\s+/g,"_")}.txt`, r.text);
+        downloadText(`${base(r)}.txt`, r.text);
+      }));
+      main.querySelectorAll("[data-dlhtml]").forEach(btn => btn.addEventListener("click", () => {
+        const r = state.reports.find(x => x.id === btn.dataset.dlhtml);
+        if (!r.full) { alert("This report was generated before tables and photos were stored. Generate it again to get the full version."); return; }
+        downloadHtml(`${base(r)}.html`, buildReportHtml(r));
       }));
     }
     refreshList();
 
+    /* ---- generate ---- */
     main.querySelector("#gen-report").addEventListener("click", () => {
-      const clientId = main.querySelector("#rep-client").value;
-      const client = state.clients.find(c => c.id === clientId);
+      const client = state.clients.find(c => c.id === main.querySelector("#rep-client").value);
       const period = main.querySelector("#rep-period").value.trim() || "Current period";
-      const segments = Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
-      if (!segments.length) { alert("Select at least one segment."); return; }
+      const segments = checkedIds();
+      if (!segments.length) { alert("Tick at least one section to include."); return; }
       if (!spendCredits(VERDA_SEED.creditCosts.aiDraft, "Verda Reporting AI draft")) return;
-      // Collect every narrative box and every numeric return per section.
+
       const blocks = standard.blocks || DEFAULT_BLOCKS;
       const segmentData = {};
+      let photoCount = 0;
       segments.forEach(id => {
-        const form = main.querySelector(`.seg-form[data-seg="${id}"]`);
-        const entry = { inputs: {} };
-        blocks.forEach(b => {
-          const el = form.querySelector(`[data-field="${b.key}"]`);
-          entry[b.key] = el ? el.value : "";
+        const m = sectionModel(id);
+        const tables = {};
+        tablesFor(id).forEach(t => {
+          const rows = filledRows(id, t);
+          if (rows.length) tables[t.id] = rows;
         });
-        form.querySelectorAll("[data-input]").forEach(el => {
-          if (el.value.trim()) entry.inputs[el.dataset.input] = el.value.trim();
-        });
-        segmentData[id] = entry;
+        photoCount += m.photos.length;
+        segmentData[id] = Object.assign({}, m.blocks, { inputs: m.inputs, tables, photos: m.photos });
       });
       const header = {};
       main.querySelectorAll("#rep-header-fields [data-header]").forEach(el => {
         if (el.value.trim()) header[el.dataset.header] = el.value.trim();
       });
+
       const text = VerdaAI.generateAIDraft({
         clientName: client.name, period, segments, segmentData,
         standardTitle: standard.title, segmentDefs: segs,
-        blocks, header, headerDefs: standard.headerFields || []
+        blocks, header, headerDefs: standard.headerFields || [],
+        tableDefs: VERDA_SEED.sectionTables
       });
+
       const rec = {
         id: uid("rep"), clientName: client.name, period, segments, text,
         standard: standard.id, standardName: standard.shortName,
-        date: new Date().toISOString()
+        date: new Date().toISOString(), photoCount,
+        full: { standardTitle: standard.title, header, headerDefs: standard.headerFields || [], blocks, segmentData,
+                sectionLabels: Object.fromEntries(segs.map(s => [s.id, s.label])) }
       };
       state.reports.push(rec);
-      save();
-      main.querySelector("#report-output").innerHTML = card("Generated report (preview)", `<pre class="report-pre">${esc(text)}</pre>
-        <div class="modal-actions"><button class="btn btn-primary" id="dl-now">Download .txt</button></div>`);
-      main.querySelector("#dl-now").addEventListener("click", () =>
-        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g,"_")}.txt`, text));
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      } catch (e) {
+        // Photos are the only thing big enough to fill localStorage. Keep the
+        // report, drop the stored copies, and say so rather than failing quietly.
+        rec.full.segmentData = Object.fromEntries(Object.entries(rec.full.segmentData)
+          .map(([k, v]) => [k, Object.assign({}, v, { photos: [] })]));
+        save();
+        alert("The report was generated and the download below includes your photos. Browser storage was full, so the saved copy in 'Past reports' keeps the tables and narrative but not the images.");
+      }
+
+      const preview = main.querySelector("#report-output");
+      preview.innerHTML = card("Generated report", `
+        <p class="muted small">Read it through before it leaves your hands. "Full report" keeps the tables, charts and photographs; ".txt" is the plain-text version.</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="dl-html">Download full report (.html)</button>
+          <button class="btn btn-ghost" id="dl-now">Download .txt</button>
+        </div>
+        <div class="report-preview">${buildReportHtml(rec, true)}</div>`);
+      preview.querySelector("#dl-now").addEventListener("click", () =>
+        downloadText(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g, "_")}.txt`, text));
+      preview.querySelector("#dl-html").addEventListener("click", () =>
+        downloadHtml(`${REPORT_FILE_PREFIX[standard.id] || "Verda-Reporting"}-${client.name.replace(/\s+/g, "_")}.html`,
+          buildReportHtml(rec)));
+      preview.scrollIntoView({ behavior: "smooth", block: "start" });
       renderTopbar();
       refreshList();
+      updateProgress();
     });
+  }
+
+  // The report as a document: narrative, the tables as tables, the charts as
+  // charts, and the photographs. Used for the on-screen preview (inline) and
+  // for the downloadable standalone file.
+  function buildReportHtml(rec, inline) {
+    const f = rec.full;
+    if (!f) return `<pre class="report-pre">${esc(rec.text)}</pre>`;
+    const defsFor = (id) => VERDA_SEED.sectionTables[id] || [];
+    const body = rec.segments.map(id => {
+      const d = f.segmentData[id] || {};
+      const label = (f.sectionLabels || {})[id] || id;
+      const figures = Object.entries(d.inputs || {}).filter(([, v]) => String(v).trim());
+      const tables = defsFor(id).map(t => {
+        const rows = (d.tables || {})[t.id];
+        if (!rows || !rows.length) return "";
+        const head = t.columns.map(c => `<th>${esc(c.label)}${c.unit ? ` (${esc(c.unit)})` : ""}</th>`).join("");
+        const tb = rows.map(r => `<tr>${t.columns.map(c => `<td>${esc(r[c.key] == null ? "" : String(r[c.key]))}</td>`).join("")}</tr>`).join("");
+        return `<h4>${esc(t.title)}</h4>
+          <div class="table-scroll"><table class="table"><thead><tr>${head}</tr></thead><tbody>${tb}</tbody></table></div>
+          ${t.chart ? renderChartBlock(t, rows) : ""}`;
+      }).join("");
+      const narrative = (f.blocks || DEFAULT_BLOCKS).map(b => {
+        const v = (d[b.key] || "").trim();
+        return v ? `<h4>${esc(b.label)}</h4><p>${esc(v).replace(/\n/g, "<br/>")}</p>` : "";
+      }).join("") || `<p class="muted">No change to report for this period.</p>`;
+      const photos = (d.photos || []).length ? `<h4>Photographs</h4><div class="photo-grid report-photos">
+        ${d.photos.map(p => `<figure class="photo-card"><img src="${p.src}" alt="${esc(p.caption || "Site photograph")}"/>
+          <figcaption>${esc(p.caption || "")}</figcaption></figure>`).join("")}</div>` : "";
+      return `<section class="report-section"><h3>${esc(label)}</h3>
+        ${figures.length ? `<table class="table kv-table"><tbody>${figures.map(([k, v]) =>
+          `<tr><th>${esc(labelForInput(id, k))}</th><td>${esc(String(v))}</td></tr>`).join("")}</tbody></table>` : ""}
+        ${tables}${narrative}${photos}</section>`;
+    }).join("");
+    const extra = (f.headerDefs || []).filter(x => (f.header || {})[x.key])
+      .map(x => `<tr><th>${esc(x.label)}</th><td>${esc(f.header[x.key])}</td></tr>`).join("");
+    const doc = `<header class="report-head">
+        <h1>${esc(f.standardTitle)}</h1>
+        <table class="table kv-table"><tbody>
+          ${extra}
+          <tr><th>Client</th><td>${esc(rec.clientName)}</td></tr>
+          <tr><th>Reporting period</th><td>${esc(rec.period)}</td></tr>
+          <tr><th>Generated</th><td>${rec.date.slice(0, 10)}</td></tr>
+        </tbody></table>
+      </header>${body}`;
+    return inline ? `<div class="report-doc">${doc}</div>` : doc;
+  }
+
+  function labelForInput(sectionId, key) {
+    const all = [...VERDA_SEED.reportSegments, ...VERDA_SEED.ifcStandards, ...VERDA_SEED.essrSections];
+    const sec = all.find(s => s.id === sectionId);
+    const f = sec && (sec.fields || []).find(x => x.key === key);
+    return f ? f.label + (f.unit ? ` (${f.unit})` : "") : key;
+  }
+
+  // Standalone HTML file: the report plus just enough CSS to print cleanly.
+  function downloadHtml(filename, inner) {
+    const css = `
+      body{font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:#16241c;max-width:900px;margin:0 auto;padding:32px 24px}
+      h1{font-size:1.5rem;margin:0 0 16px}h3{margin:32px 0 6px;border-bottom:2px solid #dde7e0;padding-bottom:6px}
+      h4{margin:18px 0 4px;font-size:.95rem}h5{margin:10px 0 4px}
+      table{width:100%;border-collapse:collapse;margin:8px 0 14px}
+      th,td{text-align:left;padding:7px 9px;font-size:.85rem;border-bottom:1px solid #e6ece8;vertical-align:top}
+      thead th{background:#f4f7f4;font-size:.74rem;text-transform:uppercase;letter-spacing:.03em}
+      .kv-table th{width:34%}.muted{color:#5b6b61}.small{font-size:.82rem}
+      .table-scroll{overflow-x:auto}
+      .chart{width:100%;max-width:560px;height:auto;display:block;margin:6px 0}
+      .chart-axis{stroke:#dde7e0}.chart-value{font-size:13px;font-weight:700;text-anchor:middle;fill:#16241c}
+      .chart-label{font-size:12px;text-anchor:middle;fill:#5b6b61}
+      .chart-title{font-weight:700;font-size:.88rem;margin:12px 0 2px}
+      .chart-figure{margin:0}.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:#5b6b61;margin:2px 0 6px}
+      .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+      .chart-table summary{cursor:pointer;font-size:.82rem;color:#5b6b61}
+      .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+      .photo-card{margin:0}.photo-card img{width:100%;border-radius:8px;display:block}
+      .photo-card figcaption{font-size:.8rem;color:#5b6b61;margin-top:4px}
+      :root{--chart-1:#2a78d6;--chart-2:#eb6834;--chart-3:#1baf7a;--chart-good:#0ca30c;--chart-warning:#fab219;--chart-serious:#ec835a;--chart-critical:#d03b3b}
+      @media print{body{max-width:none}h3{page-break-after:avoid}.report-section{page-break-inside:avoid}}`;
+    const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width,initial-scale=1"/>
+      <title>${esc(filename.replace(/\.html$/, ""))}</title><style>${css}</style></head><body>${inner}</body></html>`;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
   /* ============================ ToR & ESIA ============================ */
