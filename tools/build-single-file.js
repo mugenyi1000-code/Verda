@@ -106,35 +106,37 @@ const seedScript = `
 })();
 `;
 
-const body = `
-  <header class="topbar">
-    <div class="brand"><span class="logo">V</span> Verda <span class="muted small">by EEIS</span></div>
-    <div class="topbar-right">
-      <span id="topbar-credits"></span>
-      <select id="lang-select" title="Language">
-        <option value="en">English</option>
-        <option value="sw">Kiswahili</option>
-        <option value="fr">Français</option>
-        <option value="pt">Português</option>
-        <option value="zh">中文</option>
-      </select>
-      <select id="theme-select" title="Colour theme">
-        <option value="forest">Forest</option>
-        <option value="ocean">Ocean</option>
-        <option value="amber">Amber</option>
-        <option value="slate">Slate</option>
-      </select>
-      <div id="topbar-auth"></div>
-    </div>
-  </header>
+// The page shell is EXTRACTED from app/index.html rather than duplicated here.
+// A second copy is how the single-file build silently drifts from the real app:
+// a control added to index.html but missing from the bundle makes init() throw
+// on a null element and the whole page renders blank.
+const indexHtml = read("index.html");
+const bodyMatch = indexHtml.match(/<body>([\s\S]*?)<\/body>/);
+if (!bodyMatch) {
+  console.error("build: could not find <body> in app/index.html");
+  process.exit(1);
+}
+const body = bodyMatch[1]
+  // Scripts are inlined further down, so drop the tags that load them.
+  .replace(/\n?\s*<script\b[\s\S]*?<\/script>/g, "")
+  // Single-file builds have no origin, so the preview footer says so.
+  .replace(
+    "Prototype build: AI drafting, payments and multi-user auth are simulated in-browser pending backend integration.",
+    "Preview build: example records are pre-loaded and marked \u201CExample:\u201D; AI drafting, payments and multi-user sign-in are simulated in the browser pending backend integration."
+  );
 
-  <div class="layout">
-    <nav id="sidebar"></nav>
-    <main id="main"></main>
-  </div>
+// Guard against the drift this extraction is meant to prevent: every element
+// init() looks up must exist in the shell we are about to ship. Only init() is
+// checked — everything else is rendered into the page at runtime, so its ids
+// are not expected in the static shell.
+const initBody = appJs.slice(appJs.indexOf("function init() {"));
+const requiredIds = [...initBody.matchAll(/getElementById\("([\w-]+)"\)/g)].map((m) => m[1]);
+const missing = [...new Set(requiredIds)].filter((id) => !body.includes(`id="${id}"`));
+if (missing.length) {
+  console.error("build: app.js looks up ids that the page shell does not contain:", missing.join(", "));
+  process.exit(1);
+}
 
-  <footer class="app-footer">Verda — a compliance monitoring platform by EEIS. Preview build: example records are pre-loaded and marked “Example:”; AI drafting, payments and multi-user sign-in are simulated in the browser pending backend integration.</footer>
-`;
 
 const html = `<title>Verda EHS Platform</title>
 <style>

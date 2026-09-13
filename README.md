@@ -24,6 +24,8 @@ client relationship in-house.
 - **`docs/service-scope-checklist.md`** — what a quarterly visit actually covers (effluent/air sampling, waste audit, permit tracking) so delivery stays consistent and billable.
 - **`docs/compliance-care-plan-agreement-template.md`** — a short-form service agreement to get a signature fast (not a substitute for legal review).
 - **`docs/outreach-emails/`** — personalized pitch emails for the five warm leads already scoped (Abubaker Technical, Cosmic Investments, Kaletex Ventures, Lusango Real Uganda, Crested Crane Timber).
+- **`tools/build-single-file.js`** — bundles `app/` into `dist/verda-demo.html`, one self-contained file. It extracts the page shell from `app/index.html` rather than keeping its own copy, and fails the build if `init()` looks up an element the shell does not contain.
+- **`tools/check-build.js`** — smoke-tests the *built* file in a headless browser: that it renders at all, every section, all five jurisdictions, and the reporting screen. Run it after every build — passing against `app/` is not evidence the bundle works.
 - **`app/`** — **Verda**, a static (no-backend) web app that runs the whole compliance care plan offer day-to-day. Open `app/index.html` in a browser. See below for what it does.
 
 ## Fastest path to first invoice

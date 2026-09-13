@@ -2750,25 +2750,31 @@
   }
 
   /* ============================ BOOTSTRAP ============================ */
+
+  // Wire one top-bar control. A control missing from the page shell must never
+  // take the whole app down with it: the single-file build keeps its own copy
+  // of the shell, and a blank page is a far worse failure than one missing
+  // switch. Returns false so the caller can log what was skipped.
+  function wireControl(id, value, onChange) {
+    const el = document.getElementById(id);
+    if (!el) { console.warn(`Verda: control #${id} is not in this page shell — skipping.`); return false; }
+    if (value !== undefined && value !== null) el.value = value;
+    el.addEventListener("change", onChange);
+    return true;
+  }
+
   function init() {
     document.documentElement.setAttribute("data-theme", state.theme);
-    document.getElementById("lang-select").value = state.lang;
-    document.getElementById("theme-select").value = state.theme;
-    document.getElementById("country-select").value = state.country || "ug";
+
+    wireControl("lang-select", state.lang, (e) => { state.lang = e.target.value; save(); buildNav(); route(); });
+    wireControl("theme-select", state.theme, (e) => { applyTheme(e.target.value); buildNav(); route(); });
+    wireControl("country-select", state.country || "ug", (e) => { state.country = e.target.value; save(); route(); });
+
     buildNav();
     renderTopbar();
     route();
 
     window.addEventListener("hashchange", () => { window.__verdaMapActive = false; buildNav(); route(); });
-    document.getElementById("lang-select").addEventListener("change", (e) => {
-      state.lang = e.target.value; save(); buildNav(); route();
-    });
-    document.getElementById("theme-select").addEventListener("change", (e) => {
-      applyTheme(e.target.value); buildNav(); route();
-    });
-    document.getElementById("country-select").addEventListener("change", (e) => {
-      state.country = e.target.value; save(); route();
-    });
 
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./sw.js").catch(() => { /* offline support best-effort */ });
