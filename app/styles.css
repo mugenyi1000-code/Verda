@@ -324,6 +324,11 @@ th.num { text-align: right; }
 .calc-note { margin: 8px 0 0; border-top: 1px solid var(--border); padding-top: 8px; }
 .field-grid select { margin-bottom: 4px; }
 
+.site-filter { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.site-filter label { margin: 0; min-width: 260px; }
+.site-filter p { margin: 22px 0 0; flex: 1; min-width: 240px; }
+.calc-invalid { color: var(--warn); font-size: .86rem; font-weight: 600; margin: 8px 0 0; }
+
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
 .risk-matrix th { font-size: .75rem; color: var(--muted); font-weight: 700; width: 16%; text-align: center; }

@@ -12,6 +12,27 @@
   // The jurisdiction currently in force. Requirements differ by country, so
   // nothing that cites a regulator or a permit should be rendered without it.
   const COUNTRY = () => VERDA_SEED.countries.find(c => c.id === state.country) || VERDA_SEED.countries[0];
+  /* Everything in Verda is per-site, but each screen used to open with its
+     client selector defaulting to whichever client happened to be first in the
+     list. That silently files an incident, a training record or a report
+     against the wrong site — a mistake nobody notices until an auditor does.
+     Verda now remembers the site you are working on and defaults every
+     selector to it. */
+  function currentClient() {
+    const byId = state.clients.find(c => c.id === state.ui.clientId);
+    return byId || state.clients[0] || null;
+  }
+  function setCurrentClient(nameOrId) {
+    const c = state.clients.find(x => x.id === nameOrId || x.name === nameOrId);
+    if (c && state.ui.clientId !== c.id) { state.ui.clientId = c.id; save(); }
+  }
+  // Options for a client picker, with the site in context pre-selected.
+  function clientOptions() {
+    const cur = currentClient();
+    return state.clients.map(c =>
+      `<option value="${esc(c.name)}" ${cur && c.name === cur.name ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+  }
+
   const countryName = (id) => {
     const c = VERDA_SEED.countries.find(x => x.id === id);
     return c ? c.name : "—";
@@ -59,13 +80,14 @@
       risks: [],
       actions: [],
       training: [],
-      ui: { checklistIndustry: null },
+      ui: { checklistIndustry: null, clientId: null, kpiClient: "" },
       platformRevenue: null
     };
   }
 
   let state = load();
   // Saved states from before these registers existed must not crash on load.
+  if (!state.ui || typeof state.ui !== "object") state.ui = {};
   ["subcontractors", "workforce", "equipment"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
@@ -772,6 +794,14 @@
 
   const MAX_PHOTOS_PER_SECTION = 6;
 
+  // Binary floating point makes 188.4 + 2.8 come out as 191.20000000000002.
+  // Quantities in a compliance report are reported to at most a few decimals,
+  // so round at the point the figure is produced rather than showing the user
+  // an artefact of how the number is stored.
+  function roundQty(n) {
+    return Math.round((Number(n) + Number.EPSILON) * 1e6) / 1e6;
+  }
+
   /* ---- Carry-forward of cumulative figures -------------------------------
      Lender-facing reports ask for two numbers on every line: this period, and
      the running total to date. Re-typing the running total each period is how
@@ -870,7 +900,8 @@
               <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</select>
             </label>
             <label>Client
-              <select id="rep-client">${state.clients.map(c => `<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("")}</select>
+              <select id="rep-client">${state.clients.map(c =>
+                `<option value="${esc(c.id)}" ${currentClient() && c.id === currentClient().id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
             </label>
             <label>Reporting period<input id="rep-period" placeholder="e.g. October 2026 / Q3 2026" /></label>
           </div>
@@ -931,7 +962,7 @@
         if (t.carryForward && c.key === t.carryForward.cumulativeKey) {
           const opening = priorCumulative(prior, sectionId, t, row[t.carryForward.labelKey]);
           if (opening !== null) {
-            const total = opening + (Number(row[t.carryForward.periodKey]) || 0);
+            const total = roundQty(opening + (Number(row[t.carryForward.periodKey]) || 0));
             row[c.key] = String(total);
             return `<td><input type="number" class="cell-computed" data-cell="${esc(c.key)}" data-row="${ri}"
               value="${total}" readonly
@@ -1089,7 +1120,7 @@
       const rows = tableRows(sectionId, t);
       const opening = priorCumulative(prior, sectionId, t, rows[ri][cf.labelKey]);
       if (opening === null) return;
-      const total = opening + (Number(rows[ri][cf.periodKey]) || 0);
+      const total = roundQty(opening + (Number(rows[ri][cf.periodKey]) || 0));
       rows[ri][cf.cumulativeKey] = String(total);
       const cell = wrap.querySelector(`[data-cell="${cf.cumulativeKey}"][data-row="${ri}"]`);
       if (cell) cell.value = String(total);
@@ -1190,7 +1221,9 @@
     refreshPrior();
     renderHeaderFields();
     renderSegToggles();
-    main.querySelector("#rep-client").addEventListener("change", () => {
+    main.querySelector("#rep-client").addEventListener("change", (e) => {
+      const c = state.clients.find(x => x.id === e.target.value);
+      if (c) setCurrentClient(c.id);
       refreshPrior();
       renderSegForms();
     });
@@ -1631,7 +1664,7 @@
                 `<optgroup label="${esc(c)}">${S.inspectionRegimes.map((r, i) => r.category === c
                   ? `<option value="${i}">${esc(r.item)} — ${esc(r.inspection)}</option>` : "").join("")}</optgroup>`).join("")}</select></label>
             <label>Asset ID / description<input id="eq-id" placeholder="e.g. CRN-02 Liebherr 40t" /></label>
-            <label>Client / site<select id="eq-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Client / site<select id="eq-client">${clientOptions()}</select></label>
           </div>
           <div class="form-row">
             <label>Owned by<select id="eq-owner">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
@@ -1813,6 +1846,15 @@
           if (missing.length) {
             card.querySelector("[data-out]").innerHTML =
               `<p class="muted small">Enter ${missing.map(m => esc(m.label.toLowerCase())).join(" and ")} to calculate.</p>`;
+            return;
+          }
+          // A negative quantity, headcount or duration is not a small number —
+          // it is a typo. Computing from it produces a confident wrong answer,
+          // which is the worst thing a compliance calculator can do.
+          const negative = c.inputs.filter(inp => vars[inp.key] < 0);
+          if (negative.length) {
+            card.querySelector("[data-out]").innerHTML =
+              `<p class="calc-invalid">${esc(negative.map(m => m.label).join(" and "))} cannot be negative — check the figure you entered.</p>`;
             return;
           }
           card.querySelector("[data-out]").innerHTML = c.outputs.map(o => {
@@ -2074,7 +2116,7 @@
           <h3>Register a sub-contractor</h3>
           <div class="form-row">
             <input id="sc-name" placeholder="Sub-contractor name" />
-            <select id="sc-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select>
+            <select id="sc-client">${clientOptions()}</select>
             <input id="sc-scope" placeholder="Scope of work" />
             <select id="sc-status">
               <option>Pre-qualification in progress</option><option>Approved</option>
@@ -2152,7 +2194,7 @@
           <h3>Record a period</h3>
           <div class="form-row">
             <label>Period<input id="wf-period" placeholder="e.g. October 2026" /></label>
-            <label>Client / site<select id="wf-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Client / site<select id="wf-client">${clientOptions()}</select></label>
             <label>Employer type<select id="wf-type">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
             <label>Employer name<input id="wf-employer" placeholder="Own workforce or sub-contractor" list="wf-employer-options" /></label>
           </div>
@@ -2732,7 +2774,7 @@
           <h3>Report an incident</h3>
           <div class="form-row">
             <label>Date<input id="inc-date" type="date" value="${today()}" /></label>
-            <label>Site / client<select id="inc-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Site / client<select id="inc-client">${clientOptions()}</select></label>
             <label>Type<select id="inc-type">${S.incidentTypes.map(t => `<option>${t}</option>`).join("")}</select></label>
             <label>Severity<select id="inc-sev">${S.incidentSeverities.map(t => `<option>${t}</option>`).join("")}</select></label>
           </div>
@@ -2793,6 +2835,7 @@
     }
     refresh();
 
+    main.querySelector("#inc-client").addEventListener("change", (e) => setCurrentClient(e.target.value));
     main.querySelector("#inc-add").addEventListener("click", () => {
       const desc = main.querySelector("#inc-desc").value.trim();
       if (!desc) { alert("Describe what happened."); return; }
@@ -3008,7 +3051,7 @@
           <h3>Record training</h3>
           <div class="form-row">
             <label>Person<input id="tr-person" placeholder="Full name" /></label>
-            <label>Site / client<select id="tr-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Site / client<select id="tr-client">${clientOptions()}</select></label>
             <label>Role<select id="tr-role">${S.jobRoles.map(r => `<option>${esc(r)}</option>`).join("")}</select></label>
             <label>Employer<select id="tr-employer-type">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
           </div>
@@ -3041,6 +3084,7 @@
     }
     refresh();
 
+    main.querySelector("#tr-client").addEventListener("change", (e) => setCurrentClient(e.target.value));
     main.querySelector("#tr-add").addEventListener("click", () => {
       const person = main.querySelector("#tr-person").value.trim();
       if (!person) { alert("Enter the person's name."); return; }
@@ -3478,10 +3522,17 @@
       color: `var(--chart-${b.status})`
     }));
 
-    /* ---- Auto KPIs, computed from the registers ---- */
-    const all = computeKpis(null);
-    const direct = computeKpis((x) => (x.employerType || EMPLOYER_DIRECT) === EMPLOYER_DIRECT);
-    const subs = computeKpis((x) => x.employerType && x.employerType !== EMPLOYER_DIRECT);
+    /* ---- Auto KPIs, computed from the registers ----
+       Filtered to one site by default. A single rate blended across every
+       client a consultant serves describes no site that exists — and a
+       regulator or lender only ever asks about theirs. */
+    const siteFilter = state.ui.kpiClient || "";
+    const onSite = (x) => !siteFilter || x.client === siteFilter;
+    const withEmployer = (fn) => (x) => onSite(x) && fn(x);
+
+    const all = computeKpis(onSite);
+    const direct = computeKpis(withEmployer((x) => (x.employerType || EMPLOYER_DIRECT) === EMPLOYER_DIRECT));
+    const subs = computeKpis(withEmployer((x) => x.employerType && x.employerType !== EMPLOYER_DIRECT));
     const base = VERDA_SEED.kpiExposureBase.toLocaleString();
     const noHours = !all.hours;
 
@@ -3492,6 +3543,17 @@
         <td class="num">${fmtRate(subs[key])}</td></tr>`;
 
     const kpiSection = `
+      <div class="card site-filter">
+        <label>Site
+          <select id="kpi-client">
+            <option value="">All sites combined</option>
+            ${state.clients.map(c => `<option value="${esc(c.name)}" ${c.name === siteFilter ? "selected" : ""}>${esc(c.name)}</option>`).join("")}
+          </select>
+        </label>
+        <p class="muted small">${siteFilter
+          ? `Showing <strong>${esc(siteFilter)}</strong> only. Rates below cover this site's hours and incidents.`
+          : `Showing <strong>every site combined</strong>. A blended rate across different sites describes none of them — pick one before quoting a figure to a client or a regulator.`}</p>
+      </div>
       ${noHours ? `<div class="card notice-card">
         <h3>Frequency rates need hours</h3>
         <p>No exposure hours have been recorded, so every rate below shows a dash rather than a zero.
@@ -3543,11 +3605,12 @@
       </div>`;
 
     // Incidents by classification, and by employer type — both from the register.
+    const siteIncidents = state.incidents.filter(onSite);
     const classRows = VERDA_SEED.injuryClassifications
-      .map(c => ({ label: c.code, values: { n: state.incidents.filter(i => i.classification === c.code).length } }))
+      .map(c => ({ label: c.code, values: { n: siteIncidents.filter(i => i.classification === c.code).length } }))
       .filter(r => r.values.n > 0);
     const empRows = VERDA_SEED.employerTypes
-      .map(t => ({ label: t, values: { n: state.incidents.filter(i => (i.employerType || EMPLOYER_DIRECT) === t).length } }))
+      .map(t => ({ label: t, values: { n: siteIncidents.filter(i => (i.employerType || EMPLOYER_DIRECT) === t).length } }))
       .filter(r => r.values.n > 0);
 
     main.appendChild(h(`
@@ -3580,6 +3643,13 @@
         </div>
         <div class="card"><h3>Risk profile</h3>${barChart(riskRows, "Hazards by risk band")}</div>
       </section>`));
+
+    main.querySelector("#kpi-client").addEventListener("change", (e) => {
+      state.ui.kpiClient = e.target.value;
+      if (e.target.value) setCurrentClient(e.target.value);
+      save();
+      route();
+    });
   }
 
   /* ============================ BOOTSTRAP ============================ */

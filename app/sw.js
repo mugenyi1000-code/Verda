@@ -30,6 +30,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  // Only same-origin requests are ours to cache. A third-party CDN request
+  // (the map library, a font) must go straight to the network: intercepting
+  // it only lets us turn its failure into a different failure, and the 504 we
+  // would return is console noise that hides real errors.
+  if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     fetch(event.request)
       .then((res) => {
