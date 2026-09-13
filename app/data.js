@@ -6,259 +6,1344 @@ const VERDA_SEED = {
 
   // ---- Clients (warm leads already scoped by EEIS) -------------------------
   clients: [
-    { id: "c1", name: "Abubaker Technical", industry: "Manufacturing", site: "Kampala Industrial Area", plan: "Quarterly", nextVisit: "2026-10-15", permitExpiry: "2027-03-01", status: "Active" },
-    { id: "c2", name: "Cosmic Investments", industry: "Quarrying & Mining", site: "Mukono Quarry Site", plan: "Quarterly", nextVisit: "2026-09-28", permitExpiry: "2026-12-20", status: "Active" },
-    { id: "c3", name: "Kaletex Ventures", industry: "Manufacturing", site: "Namanve Industrial Park", plan: "Monthly", nextVisit: "2026-09-20", permitExpiry: "2027-01-10", status: "Active" },
-    { id: "c4", name: "Lusango Real Uganda", industry: "Construction & Contracting", site: "Multiple project sites", plan: "Quarterly", nextVisit: "2026-11-05", permitExpiry: "2026-10-30", status: "Active" },
-    { id: "c5", name: "Crested Crane Timber", industry: "Timber & Wood Processing", site: "Jinja Processing Yard", plan: "Monthly", nextVisit: "2026-09-25", permitExpiry: "2027-02-14", status: "Active" }
+    { id: "c1", name: "Abubaker Technical", industry: "Manufacturing / Factories", country: "ug", site: "Kampala Industrial Area", plan: "Quarterly", nextVisit: "2026-10-15", permitExpiry: "2027-03-01", status: "Active" },
+    { id: "c2", name: "Cosmic Investments", industry: "Quarrying & Aggregates", country: "ug", site: "Mukono Quarry Site", plan: "Quarterly", nextVisit: "2026-09-28", permitExpiry: "2026-12-20", status: "Active" },
+    { id: "c3", name: "Kaletex Ventures", industry: "Textiles & Apparel", country: "ug", site: "Namanve Industrial Park", plan: "Monthly", nextVisit: "2026-09-20", permitExpiry: "2027-01-10", status: "Active" },
+    { id: "c4", name: "Lusango Real Uganda", industry: "Construction & Contracting", country: "ug", site: "Multiple project sites", plan: "Quarterly", nextVisit: "2026-11-05", permitExpiry: "2026-10-30", status: "Active" },
+    { id: "c5", name: "Crested Crane Timber", industry: "Timber & Wood Processing", country: "ug", site: "Jinja Processing Yard", plan: "Monthly", nextVisit: "2026-09-25", permitExpiry: "2027-02-14", status: "Active" },
+    { id: "c6", name: "Example: Rift Valley Aggregates", industry: "Quarrying & Aggregates", country: "ke", site: "Machakos County", plan: "Quarterly", nextVisit: "2026-10-08", permitExpiry: "2027-04-30", status: "Active" },
+    { id: "c7", name: "Example: Lake Zone Gold", industry: "Mining — Large Scale (Open Pit & Underground)", country: "tz", site: "Geita Region", plan: "Monthly", nextVisit: "2026-09-30", permitExpiry: "2027-06-15", status: "Active" },
+    { id: "c8", name: "Example: Katanga Cobalt Cooperative", industry: "Artisanal & Small-Scale Mining (ASM)", country: "cd", site: "Kolwezi, Lualaba", plan: "Monthly", nextVisit: "2026-10-02", permitExpiry: "2026-11-28", status: "Active" },
+    { id: "c9", name: "Example: Copperbelt Smelting", industry: "Mineral Processing, Smelting & Refining", country: "zm", site: "Kitwe, Copperbelt", plan: "Monthly", nextVisit: "2026-10-12", permitExpiry: "2027-02-01", status: "Active" }
+  ],
+
+  // ---- Country / jurisdiction register ------------------------------------
+  // The regulators, principal instruments and permits that apply in each
+  // country Verda covers. This is a STARTING REGISTER compiled from publicly
+  // known regulatory structure — it is not legal advice and it goes stale.
+  // Every entry must be verified against the current consolidated text and
+  // the regulator's own guidance before it is relied on; `contentReview`
+  // below records when this register was last written and who should check
+  // it. Amendments, statutory instruments and fee schedules change often.
+  contentReview: { compiled: "2026-09", verifyBy: "2027-03", owner: "EHS content lead",
+    note: "Verify every instrument, permit and authority against the current law of the jurisdiction before relying on it. Where a client operates across borders, the stricter requirement governs unless a local legal opinion says otherwise." },
+
+  countries: [
+    {
+      "id": "ug",
+      "name": "Uganda",
+      "languages": [
+        "English",
+        "Swahili"
+      ],
+      "currency": "UGX",
+      "reportingLanguage": "English",
+      "regulators": [
+        {
+          "name": "National Environment Management Authority",
+          "abbr": "NEMA",
+          "remit": "ESIA approval, environmental audits, waste, noise, air"
+        },
+        {
+          "name": "Directorate of Water Resources Management (Ministry of Water & Environment)",
+          "abbr": "DWRM",
+          "remit": "Water abstraction and wastewater discharge permits"
+        },
+        {
+          "name": "Department of Occupational Safety and Health (Ministry of Gender, Labour & Social Development)",
+          "abbr": "OSH",
+          "remit": "Workplace registration, statutory inspections, plant examination"
+        },
+        {
+          "name": "Directorate of Geological Survey and Mines (Ministry of Energy & Mineral Development)",
+          "abbr": "DGSM",
+          "remit": "Mineral rights, mine inspection"
+        },
+        {
+          "name": "Uganda Wildlife Authority",
+          "abbr": "UWA",
+          "remit": "Operations in or near protected areas"
+        },
+        {
+          "name": "National Forestry Authority",
+          "abbr": "NFA",
+          "remit": "Forest reserves, timber movement"
+        },
+        {
+          "name": "Uganda Police Fire Brigade",
+          "abbr": "—",
+          "remit": "Fire safety certification"
+        },
+        {
+          "name": "Atomic Energy Council",
+          "abbr": "AEC",
+          "remit": "Radiation sources and gauges"
+        },
+        {
+          "name": "Uganda National Bureau of Standards",
+          "abbr": "UNBS",
+          "remit": "Product and effluent standards"
+        }
+      ],
+      "laws": [
+        {
+          "title": "National Environment Act",
+          "instrument": "No. 5 of 2019",
+          "covers": "Framework environmental law, ESIA, audits, penalties"
+        },
+        {
+          "title": "National Environment (Environmental and Social Assessment) Regulations",
+          "instrument": "2020",
+          "covers": "Screening, scoping, ESIA and project brief procedure"
+        },
+        {
+          "title": "National Environment (Waste Management) Regulations",
+          "instrument": "2020",
+          "covers": "Segregation, licensed transporters, transfer records"
+        },
+        {
+          "title": "National Environment (Noise Standards and Control) Regulations",
+          "instrument": "2003",
+          "covers": "Day/night noise limits by receptor"
+        },
+        {
+          "title": "Occupational Safety and Health Act",
+          "instrument": "2006",
+          "covers": "Duties of employers, workplace registration, reporting"
+        },
+        {
+          "title": "Water Act and subsidiary Water (Waste Discharge) / (Abstraction) Regulations",
+          "instrument": "Cap 152",
+          "covers": "Abstraction and discharge permitting"
+        },
+        {
+          "title": "Mining and Minerals Act",
+          "instrument": "2022",
+          "covers": "Mineral rights, ASM formalisation, closure obligations"
+        },
+        {
+          "title": "Employment Act",
+          "instrument": "2006 (as amended)",
+          "covers": "Contracts, hours, child labour, termination"
+        },
+        {
+          "title": "Workers' Compensation Act",
+          "instrument": "Cap 225",
+          "covers": "Compensation for occupational injury"
+        }
+      ],
+      "permits": [
+        {
+          "permit": "ESIA Certificate of Approval",
+          "authority": "NEMA",
+          "when": "Before project implementation"
+        },
+        {
+          "permit": "Project Brief approval (smaller projects)",
+          "authority": "NEMA",
+          "when": "Before implementation where full ESIA not required"
+        },
+        {
+          "permit": "Annual environmental audit submission",
+          "authority": "NEMA",
+          "when": "Annually once operational"
+        },
+        {
+          "permit": "Water abstraction permit",
+          "authority": "DWRM",
+          "when": "Before abstracting surface or ground water"
+        },
+        {
+          "permit": "Wastewater discharge permit",
+          "authority": "DWRM / NEMA",
+          "when": "Before discharging effluent"
+        },
+        {
+          "permit": "Waste transporter / handler licence (your contractor's)",
+          "authority": "NEMA",
+          "when": "Verify before every transfer"
+        },
+        {
+          "permit": "Workplace registration certificate",
+          "authority": "OSH Department",
+          "when": "Before operating a workplace"
+        },
+        {
+          "permit": "Fire safety certificate",
+          "authority": "Police Fire Brigade",
+          "when": "Annually"
+        },
+        {
+          "permit": "Mineral right (exploration / retention / mining / location licence)",
+          "authority": "DGSM",
+          "when": "Before any mineral operation"
+        },
+        {
+          "permit": "Radiation source licence",
+          "authority": "Atomic Energy Council",
+          "when": "Where gauges or sources are used"
+        }
+      ]
+    },
+    {
+      "id": "ke",
+      "name": "Kenya",
+      "languages": [
+        "English",
+        "Swahili"
+      ],
+      "currency": "KES",
+      "reportingLanguage": "English",
+      "regulators": [
+        {
+          "name": "National Environment Management Authority",
+          "abbr": "NEMA",
+          "remit": "EIA licensing, annual environmental audits, effluent licensing"
+        },
+        {
+          "name": "Directorate of Occupational Safety and Health Services",
+          "abbr": "DOSHS",
+          "remit": "Workplace registration, statutory examinations, OSH audits"
+        },
+        {
+          "name": "Water Resources Authority",
+          "abbr": "WRA",
+          "remit": "Water abstraction permits, catchment protection"
+        },
+        {
+          "name": "State Department for Mining / Mining Licensing Committee",
+          "abbr": "—",
+          "remit": "Mineral rights under the Mining Act"
+        },
+        {
+          "name": "National Construction Authority",
+          "abbr": "NCA",
+          "remit": "Contractor registration, site compliance"
+        },
+        {
+          "name": "Kenya Bureau of Standards",
+          "abbr": "KEBS",
+          "remit": "Product and discharge standards"
+        },
+        {
+          "name": "Kenya Nuclear Regulatory Authority",
+          "abbr": "KNRA",
+          "remit": "Radiation sources"
+        },
+        {
+          "name": "County governments",
+          "abbr": "—",
+          "remit": "Single business permits, local waste and nuisance control"
+        }
+      ],
+      "laws": [
+        {
+          "title": "Environmental Management and Co-ordination Act (EMCA)",
+          "instrument": "No. 8 of 1999 (amended 2015)",
+          "covers": "Framework environmental law"
+        },
+        {
+          "title": "Environmental (Impact Assessment and Audit) Regulations",
+          "instrument": "2003 (amended 2019)",
+          "covers": "EIA licensing and annual audit duty"
+        },
+        {
+          "title": "Water Quality Regulations",
+          "instrument": "2006",
+          "covers": "Effluent standards and discharge licensing"
+        },
+        {
+          "title": "Waste Management Regulations 2006 / Sustainable Waste Management Act 2022",
+          "instrument": "—",
+          "covers": "Segregation, licensed handlers, extended producer responsibility"
+        },
+        {
+          "title": "Noise and Excessive Vibration Pollution (Control) Regulations",
+          "instrument": "2009",
+          "covers": "Noise and vibration limits, permits for noisy works"
+        },
+        {
+          "title": "Air Quality Regulations",
+          "instrument": "2014",
+          "covers": "Emission standards and stack monitoring"
+        },
+        {
+          "title": "Occupational Safety and Health Act",
+          "instrument": "No. 15 of 2007",
+          "covers": "Employer duties, safety committees, OSH audits"
+        },
+        {
+          "title": "Work Injury Benefits Act",
+          "instrument": "No. 13 of 2007",
+          "covers": "Injury compensation and insurance"
+        },
+        {
+          "title": "Mining Act",
+          "instrument": "No. 12 of 2016",
+          "covers": "Mineral rights, local content, community development agreements"
+        },
+        {
+          "title": "Climate Change Act",
+          "instrument": "2016 (amended 2023)",
+          "covers": "Carbon reporting and carbon market participation"
+        }
+      ],
+      "permits": [
+        {
+          "permit": "EIA Licence",
+          "authority": "NEMA",
+          "when": "Before project implementation"
+        },
+        {
+          "permit": "Annual environmental audit report",
+          "authority": "NEMA",
+          "when": "Within 12 months of commencement, then annually"
+        },
+        {
+          "permit": "Effluent discharge licence",
+          "authority": "NEMA",
+          "when": "Before discharging to environment or sewer"
+        },
+        {
+          "permit": "Water abstraction permit",
+          "authority": "WRA",
+          "when": "Before abstraction"
+        },
+        {
+          "permit": "Waste handler / transporter licence (your contractor's)",
+          "authority": "NEMA",
+          "when": "Verify before every transfer"
+        },
+        {
+          "permit": "Workplace registration certificate",
+          "authority": "DOSHS",
+          "when": "Before occupation of premises"
+        },
+        {
+          "permit": "Statutory OSH audit (annual) and fire safety audit",
+          "authority": "DOSHS-approved auditor",
+          "when": "Annually"
+        },
+        {
+          "permit": "Noise permit for works outside permitted hours",
+          "authority": "NEMA",
+          "when": "Before the works"
+        },
+        {
+          "permit": "Mineral right / mining licence",
+          "authority": "Mining Licensing Committee",
+          "when": "Before any mineral operation"
+        },
+        {
+          "permit": "Single business permit",
+          "authority": "County government",
+          "when": "Annually"
+        }
+      ]
+    },
+    {
+      "id": "tz",
+      "name": "Tanzania",
+      "languages": [
+        "Swahili",
+        "English"
+      ],
+      "currency": "TZS",
+      "reportingLanguage": "English / Swahili",
+      "regulators": [
+        {
+          "name": "National Environment Management Council",
+          "abbr": "NEMC",
+          "remit": "EIA certification, environmental audit, inspections"
+        },
+        {
+          "name": "Vice President's Office – Division of Environment",
+          "abbr": "VPO-DoE",
+          "remit": "Policy, appeals, approvals"
+        },
+        {
+          "name": "Occupational Safety and Health Authority",
+          "abbr": "OSHA Tanzania",
+          "remit": "Workplace registration, compliance licence, statutory examinations"
+        },
+        {
+          "name": "Mining Commission (Tume ya Madini)",
+          "abbr": "—",
+          "remit": "Mineral rights, mine inspection, ASM licensing"
+        },
+        {
+          "name": "Basin Water Boards (Ministry of Water)",
+          "abbr": "—",
+          "remit": "Water use and discharge permits"
+        },
+        {
+          "name": "Fire and Rescue Force",
+          "abbr": "—",
+          "remit": "Fire safety certification"
+        },
+        {
+          "name": "Tanzania Atomic Energy Commission",
+          "abbr": "TAEC",
+          "remit": "Radiation sources"
+        },
+        {
+          "name": "Tanzania Bureau of Standards",
+          "abbr": "TBS",
+          "remit": "Standards and product certification"
+        }
+      ],
+      "laws": [
+        {
+          "title": "Environmental Management Act",
+          "instrument": "Cap 191 (No. 20 of 2004)",
+          "covers": "Framework environmental law"
+        },
+        {
+          "title": "Environmental Impact Assessment and Audit Regulations",
+          "instrument": "2005 (as amended)",
+          "covers": "EIA certificate procedure and audit duty"
+        },
+        {
+          "title": "EM (Air Quality Standards) Regulations 2007 / (Water Quality Standards) Regulations 2007",
+          "instrument": "—",
+          "covers": "Ambient and emission standards"
+        },
+        {
+          "title": "EM (Solid Waste Management) Regulations 2009 / (Hazardous Waste Control) Regulations",
+          "instrument": "—",
+          "covers": "Waste handling and transboundary movement"
+        },
+        {
+          "title": "Occupational Health and Safety Act",
+          "instrument": "No. 5 of 2003",
+          "covers": "Employer duties, registration, notification of accidents"
+        },
+        {
+          "title": "Workers Compensation Act",
+          "instrument": "No. 20 of 2008",
+          "covers": "Injury compensation via WCF"
+        },
+        {
+          "title": "Employment and Labour Relations Act",
+          "instrument": "No. 6 of 2004",
+          "covers": "Employment standards"
+        },
+        {
+          "title": "Mining Act",
+          "instrument": "No. 14 of 2010 (as amended 2017)",
+          "covers": "Mineral rights, local content, integrity of ASM licensing"
+        },
+        {
+          "title": "Water Resources Management Act",
+          "instrument": "No. 11 of 2009",
+          "covers": "Abstraction and discharge control"
+        }
+      ],
+      "permits": [
+        {
+          "permit": "EIA Certificate",
+          "authority": "NEMC / VPO",
+          "when": "Before project implementation"
+        },
+        {
+          "permit": "Environmental audit (annual / as directed)",
+          "authority": "NEMC",
+          "when": "Once operational"
+        },
+        {
+          "permit": "Water use permit",
+          "authority": "Basin Water Board",
+          "when": "Before abstraction"
+        },
+        {
+          "permit": "Discharge permit",
+          "authority": "Basin Water Board / NEMC",
+          "when": "Before discharging effluent"
+        },
+        {
+          "permit": "OSHA compliance licence and workplace registration",
+          "authority": "OSHA Tanzania",
+          "when": "Before operating; renewed annually"
+        },
+        {
+          "permit": "Fire safety certificate",
+          "authority": "Fire and Rescue Force",
+          "when": "Annually"
+        },
+        {
+          "permit": "Mineral right (PL / ML / SML / PML)",
+          "authority": "Mining Commission",
+          "when": "Before any mineral operation"
+        },
+        {
+          "permit": "Hazardous waste permit",
+          "authority": "NEMC",
+          "when": "Where hazardous waste is generated or moved"
+        },
+        {
+          "permit": "Radiation licence",
+          "authority": "TAEC",
+          "when": "Where sources are used"
+        }
+      ]
+    },
+    {
+      "id": "cd",
+      "name": "DR Congo",
+      "languages": [
+        "French",
+        "Lingala",
+        "Swahili"
+      ],
+      "currency": "CDF",
+      "reportingLanguage": "French — submissions to authorities are made in French",
+      "regulators": [
+        {
+          "name": "Agence Congolaise de l'Environnement",
+          "abbr": "ACE",
+          "remit": "Approval of EIES and PGES outside the mining sector"
+        },
+        {
+          "name": "Ministère de l'Environnement et Développement Durable",
+          "abbr": "MEDD",
+          "remit": "Environmental policy and enforcement"
+        },
+        {
+          "name": "Direction de Protection de l'Environnement Minier",
+          "abbr": "DPEM",
+          "remit": "Environmental approval and inspection for mining projects"
+        },
+        {
+          "name": "Cadastre Minier",
+          "abbr": "CAMI",
+          "remit": "Mining titles and perimeters"
+        },
+        {
+          "name": "Service d'Assistance et d'Encadrement de l'Exploitation Minière Artisanale et à Petite Échelle",
+          "abbr": "SAEMAPE",
+          "remit": "Artisanal and small-scale mining oversight"
+        },
+        {
+          "name": "Inspection Générale du Travail",
+          "abbr": "IGT",
+          "remit": "Labour inspection and workplace conditions"
+        },
+        {
+          "name": "Caisse Nationale de Sécurité Sociale",
+          "abbr": "CNSS",
+          "remit": "Social security and occupational injury"
+        }
+      ],
+      "laws": [
+        {
+          "title": "Loi portant principes fondamentaux relatifs à la protection de l'environnement",
+          "instrument": "Loi n° 11/009 du 9 juillet 2011",
+          "covers": "Framework environmental law"
+        },
+        {
+          "title": "Décret fixant les règles de fonctionnement des mécanismes procéduraux de la protection de l'environnement",
+          "instrument": "Décret n° 14/019 de 2014",
+          "covers": "EIES, PGES, audit and public consultation procedure"
+        },
+        {
+          "title": "Code Minier",
+          "instrument": "Loi n° 007/2002, révisée par la Loi n° 18/001 du 9 mars 2018",
+          "covers": "Mining rights, environmental obligations, community development (dotation 0.3%)"
+        },
+        {
+          "title": "Règlement Minier",
+          "instrument": "Décret n° 038/2003, révisé par Décret n° 18/024",
+          "covers": "Detailed mining environmental procedure: EIES, PGES, PAR, closure"
+        },
+        {
+          "title": "Code du Travail",
+          "instrument": "Loi n° 015/2002 (modifiée par la Loi n° 16/010 de 2016)",
+          "covers": "Employment, child labour prohibition, workplace safety"
+        },
+        {
+          "title": "OECD Due Diligence Guidance for Responsible Supply Chains of Minerals",
+          "instrument": "OECD, 3rd edition",
+          "covers": "Applies to 3TG and cobalt from conflict-affected and high-risk areas"
+        }
+      ],
+      "permits": [
+        {
+          "permit": "Étude d'Impact Environnemental et Social (EIES) approval",
+          "authority": "ACE (or DPEM for mining)",
+          "when": "Before project implementation"
+        },
+        {
+          "permit": "Plan de Gestion Environnementale du Projet (PGEP/PGES) approval",
+          "authority": "ACE / DPEM",
+          "when": "With the EIES"
+        },
+        {
+          "permit": "Plan d'Atténuation et de Réhabilitation (PAR)",
+          "authority": "DPEM",
+          "when": "For small-scale mining operations"
+        },
+        {
+          "permit": "Sûreté financière de réhabilitation (rehabilitation financial guarantee)",
+          "authority": "DPEM",
+          "when": "Before mining operations begin"
+        },
+        {
+          "permit": "Titre minier (permis de recherche / permis d'exploitation)",
+          "authority": "CAMI",
+          "when": "Before any mineral operation"
+        },
+        {
+          "permit": "Carte d'exploitant artisanal / ZEA registration",
+          "authority": "SAEMAPE",
+          "when": "For artisanal operators and zones"
+        },
+        {
+          "permit": "Autorisation de rejet d'effluents",
+          "authority": "ACE",
+          "when": "Before discharging effluent"
+        },
+        {
+          "permit": "Déclaration d'établissement to labour inspectorate",
+          "authority": "IGT",
+          "when": "On establishing a workplace"
+        }
+      ]
+    },
+    {
+      "id": "zm",
+      "name": "Zambia",
+      "languages": [
+        "English"
+      ],
+      "currency": "ZMW",
+      "reportingLanguage": "English",
+      "regulators": [
+        {
+          "name": "Zambia Environmental Management Agency",
+          "abbr": "ZEMA",
+          "remit": "EIA/EPB decisions, licensing of emissions, effluent and waste"
+        },
+        {
+          "name": "Mine Safety Department (Ministry of Mines and Minerals Development)",
+          "abbr": "MSD",
+          "remit": "Mine safety inspection, statutory mine regulations"
+        },
+        {
+          "name": "Mining Cadastre Department",
+          "abbr": "—",
+          "remit": "Mining rights and licences"
+        },
+        {
+          "name": "Water Resources Management Authority",
+          "abbr": "WARMA",
+          "remit": "Water abstraction and use permits"
+        },
+        {
+          "name": "Occupational Health and Safety Institute / Ministry of Labour",
+          "abbr": "OHSI",
+          "remit": "Workplace health surveillance and OSH enforcement"
+        },
+        {
+          "name": "Workers' Compensation Fund Control Board",
+          "abbr": "WCFCB",
+          "remit": "Occupational injury compensation"
+        },
+        {
+          "name": "Zambia Bureau of Standards",
+          "abbr": "ZABS",
+          "remit": "Standards"
+        },
+        {
+          "name": "Radiation Protection Authority",
+          "abbr": "RPA",
+          "remit": "Radiation sources"
+        }
+      ],
+      "laws": [
+        {
+          "title": "Environmental Management Act",
+          "instrument": "No. 12 of 2011",
+          "covers": "Framework environmental law, polluter-pays, licensing"
+        },
+        {
+          "title": "Environmental Impact Assessment Regulations",
+          "instrument": "SI No. 28 of 1997",
+          "covers": "EPB and EIS procedure"
+        },
+        {
+          "title": "EMA (Licensing) Regulations",
+          "instrument": "SI No. 112 of 2013",
+          "covers": "Emission, effluent, waste and pesticide licences"
+        },
+        {
+          "title": "Hazardous Waste Management Regulations",
+          "instrument": "SI No. 125 of 2001",
+          "covers": "Hazardous waste handling and movement"
+        },
+        {
+          "title": "Mines and Minerals Development Act",
+          "instrument": "No. 11 of 2015",
+          "covers": "Mineral rights, environmental protection fund, closure"
+        },
+        {
+          "title": "Occupational Health and Safety Act",
+          "instrument": "No. 36 of 2010",
+          "covers": "Employer duties, health and safety committees"
+        },
+        {
+          "title": "Factories Act",
+          "instrument": "Cap 441",
+          "covers": "Registration of factories, plant examination, welfare"
+        },
+        {
+          "title": "Workers' Compensation Act",
+          "instrument": "No. 10 of 1999",
+          "covers": "Injury compensation"
+        },
+        {
+          "title": "Water Resources Management Act",
+          "instrument": "No. 21 of 2011",
+          "covers": "Abstraction, discharge and catchment protection"
+        }
+      ],
+      "permits": [
+        {
+          "permit": "Environmental Project Brief (EPB) or Environmental Impact Statement (EIS) decision letter",
+          "authority": "ZEMA",
+          "when": "Before project implementation"
+        },
+        {
+          "permit": "Emission licence (air)",
+          "authority": "ZEMA",
+          "when": "Where emissions to air occur"
+        },
+        {
+          "permit": "Effluent / water pollution control licence",
+          "authority": "ZEMA",
+          "when": "Before discharging effluent"
+        },
+        {
+          "permit": "Waste management licence (generator / transporter / disposer)",
+          "authority": "ZEMA",
+          "when": "Verify your contractor's before every transfer"
+        },
+        {
+          "permit": "Hazardous waste licence",
+          "authority": "ZEMA",
+          "when": "Where hazardous waste is generated or moved"
+        },
+        {
+          "permit": "Water abstraction / use permit",
+          "authority": "WARMA",
+          "when": "Before abstraction"
+        },
+        {
+          "permit": "Factory registration certificate",
+          "authority": "Factories Inspectorate",
+          "when": "Before operating a factory"
+        },
+        {
+          "permit": "Mining right / licence",
+          "authority": "Mining Cadastre Department",
+          "when": "Before any mineral operation"
+        },
+        {
+          "permit": "Environmental Protection Fund (EPF) contribution and approved rehabilitation plan",
+          "authority": "EPF / MSD",
+          "when": "Before mining operations; reviewed periodically"
+        },
+        {
+          "permit": "Radiation licence",
+          "authority": "Radiation Protection Authority",
+          "when": "Where sources are used"
+        }
+      ]
+    }
   ],
 
   // ---- Industries + baseline compliance checklists --------------------------
+  // ---- Industries + baseline compliance checklists --------------------------
+  // Checklists are a starting position for a competent practitioner, not a
+  // statement of law. `countryNotes` flag where a jurisdiction diverges.
   industries: [
     {
-      id: "manufacturing", group: "Industrial & Manufacturing", name: "Manufacturing / Factories",
-      checklist: [
-        "Valid NEMA (or national regulator) EIA certificate displayed on site",
-        "Effluent discharge permit current and monitoring log up to date",
-        "Air emission points identified and last emissions test on file",
-        "SDS/MSDS available and current for all hazardous chemicals in use",
-        "Waste segregation in place; licensed waste transporter records kept",
-        "Fire safety equipment inspected, tagged, and within service date",
-        "PPE issued, logged, and matched to task-specific hazard assessment",
-        "Machine guarding and lockout/tagout procedures in place",
-        "First aid kits stocked and accessible; trained first aiders on shift",
-        "Incident/near-miss register maintained and reviewed monthly"
+      "id": "manufacturing",
+      "group": "Industrial & Manufacturing",
+      "name": "Manufacturing / Factories",
+      "checklist": [
+        "Environmental approval (ESIA certificate, EIA licence or project brief decision) current and displayed",
+        "Annual environmental audit submitted to the regulator where the jurisdiction requires it",
+        "Workplace / factory registration certificate current",
+        "Effluent discharge permit current, with sampling at the permitted frequency",
+        "Effluent treatment plant operating to design; results trended against limits",
+        "Air emission points inventoried; stack testing current and within limits",
+        "Chemical inventory complete, with a current SDS available at point of use",
+        "Chemical storage: segregation by compatibility, bunding, ventilation, spill kits",
+        "Waste segregated at source; licensed transporter verified and transfer notes retained",
+        "Hazardous waste stored under cover on impermeable bunded hardstanding",
+        "Machine guarding in place on all nip, shear and rotating points",
+        "Lockout/tagout procedure in place, with personal locks issued and training records",
+        "Pressure vessels, boilers, compressors and lifting equipment statutorily examined",
+        "Electrical installation inspection and portable appliance testing current",
+        "Fire detection and suppression serviced; extinguishers tagged and in date",
+        "Fire exits unobstructed; evacuation drill held at the required frequency with a record",
+        "Noise survey completed; hearing protection zones signed and enforced",
+        "Local exhaust ventilation tested at the statutory interval where fume or dust is generated",
+        "Occupational health surveillance matched to the exposures actually present",
+        "PPE issued against a task-based hazard assessment, with issue records",
+        "First aid provision and trained first aiders on every shift",
+        "Contractor control: induction, permit to work, and EHS pre-qualification on file",
+        "Incident and near-miss register maintained and reviewed by management monthly",
+        "Energy and water consumption metered and tracked against a baseline"
       ]
     },
     {
-      id: "quarrying", group: "Energy, Resources & Construction", name: "Quarrying & Mining",
-      checklist: [
-        "Valid environmental/mining licence and EIA certificate on site",
-        "Blast management plan and licensed blaster records (if applicable)",
-        "Dust suppression measures in operation and logged",
-        "Noise and vibration monitoring records current",
-        "Rehabilitation/restoration plan on file with progress tracked",
-        "Water abstraction permit (if applicable) current",
-        "PPE (hearing, respiratory, eye, foot protection) issued and enforced",
-        "Slope stability and pit-edge inspections logged",
-        "Community grievance log maintained and reviewed",
-        "Heavy equipment operator certifications on file"
-      ]
-    },
-    {
-      id: "timber", group: "Industrial & Manufacturing", name: "Timber & Wood Processing",
-      checklist: [
-        "Valid forestry/timber processing licence and EIA certificate on site",
-        "Chain-of-custody / sourcing documentation for timber inputs",
-        "Sawdust and wood-waste management plan in place",
-        "Fire risk assessment current (high fuel-load environment)",
-        "Machine guarding on saws, planers, and processing equipment",
-        "Hearing and respiratory PPE issued for high-dust/noise tasks",
-        "Effluent from treatment chemicals (if used) permitted and monitored",
-        "Reforestation/offset commitments tracked (if part of licence)",
-        "Incident/near-miss register maintained",
-        "Community and worker grievance mechanism in place"
-      ]
-    },
-    {
-      id: "construction", group: "Energy, Resources & Construction", name: "Construction & Contracting",
-      checklist: [
-        "Project-level EIA certificate or environmental screening on file",
-        "Site-specific ESMP available and briefed to workers",
-        "Fall protection and scaffolding inspections current",
-        "Excavation/trenching safety controls in place",
-        "Dust, noise, and stormwater runoff controls on site",
-        "Waste and debris management plan implemented",
-        "PPE compliance enforced at site entry",
-        "Sub-contractor EHS pre-qualification on file",
-        "Community liaison / grievance log maintained",
-        "Incident/near-miss register maintained and reviewed"
-      ]
-    },
-    {
-      id: "oilgas", group: "Energy, Resources & Construction", name: "Oil & Gas",
-      checklist: [
-        "Valid environmental and operating licences on site",
-        "Spill prevention and emergency response plan current",
-        "Tank/pipeline integrity inspection records on file",
-        "Air emissions and flaring monitoring records current",
-        "Hazardous materials storage and permits compliant",
-        "PPE and gas detection equipment calibrated and issued",
-        "Journey management / driving safety plan in place",
-        "Community and stakeholder engagement log maintained",
-        "Emergency drills conducted and logged",
-        "Incident/near-miss register maintained"
-      ]
-    },
-    {
-      id: "agriculture", group: "Public, Health & Agriculture", name: "Agriculture & Agro-processing",
-      checklist: [
-        "Environmental approval/EIA certificate on file (where required)",
-        "Agrochemical storage, handling, and SDS availability compliant",
-        "Wastewater/effluent from processing permitted and monitored",
-        "Worker PPE for spraying/handling agrochemicals issued",
-        "Buffer zones and water source protection measures in place",
-        "Waste (organic and packaging) management plan implemented",
-        "Labour and community grievance mechanism in place",
-        "Fire safety provisions for storage/processing areas",
-        "Incident/near-miss register maintained",
-        "Traceability/records for chemical application maintained"
-      ]
-    },
-    {
-      id: "foodbev", group: "Industrial & Manufacturing", name: "Food & Beverage Processing",
-      checklist: [
+      "id": "foodbev",
+      "group": "Industrial & Manufacturing",
+      "name": "Food & Beverage Processing",
+      "checklist": [
         "Food safety / public health licence current and displayed",
-        "Cold chain and temperature monitoring records maintained",
-        "Wastewater from processing permitted and monitored",
-        "Cleaning chemicals stored with SDS available",
-        "Pest control programme in place and logged",
-        "Worker health screening and hygiene training records on file",
-        "Packaging and organic waste segregation implemented",
-        "Incident/near-miss register maintained"
+        "Environmental approval and effluent discharge permit current",
+        "HACCP or equivalent food safety plan documented, with verification records",
+        "Cold chain temperature monitoring with alarms and corrective action records",
+        "Potable water quality tested at the required frequency",
+        "Cleaning and sanitation chemicals: SDS available, segregated from product",
+        "CIP system validated; rinse verification records retained",
+        "High-strength effluent (BOD/COD/FOG) pre-treated before discharge; results trended",
+        "Grease traps and interceptors serviced on schedule",
+        "Ammonia or CO₂ refrigeration: leak detection, alarms, emergency procedure, competent operators",
+        "Confined space entry procedure for tanks, silos and vessels",
+        "Pest control programme with a current map, bait station records and trend review",
+        "Worker health screening, exclusion policy for illness, and hygiene training records",
+        "Allergen control and label verification where applicable",
+        "Machine guarding and lockout/tagout on fillers, conveyors and mixers",
+        "Slip and fall control on wet floors — drainage, footwear, matting",
+        "Packaging and organic waste segregation; food waste diversion route",
+        "Boiler and steam system statutory examination current",
+        "Fire detection, suppression and evacuation drills recorded",
+        "Incident and near-miss register maintained and reviewed"
       ]
     },
     {
-      id: "textiles", group: "Industrial & Manufacturing", name: "Textiles & Apparel",
-      checklist: [
-        "Environmental approval on file for dyeing/finishing operations",
-        "Effluent discharge permit current with treatment records",
-        "Chemical inventory and SDS available for all dyes and finishes",
-        "Machine guarding on cutting, spinning and pressing equipment",
-        "Dust and noise exposure controls in place",
-        "Fire detection, exits and drills current (high fuel-load environment)",
-        "Working hours and labour standards records maintained",
-        "Incident/near-miss register maintained"
+      "id": "textiles",
+      "group": "Industrial & Manufacturing",
+      "name": "Textiles & Apparel",
+      "checklist": [
+        "Environmental approval current for dyeing, printing and finishing operations",
+        "Effluent discharge permit current; colour, pH, COD and heavy metals monitored",
+        "Effluent treatment plant operating to design, with sludge disposal under licence",
+        "Chemical inventory with current SDS; restricted substances list applied to inputs",
+        "Chemical storage segregated, bunded and ventilated; decanting controlled",
+        "Boiler and steam distribution statutorily examined; condensate return maintained",
+        "Machine guarding on cutting, spinning, knitting and pressing equipment",
+        "Needle guards and finger guards on sewing machines; needle control procedure",
+        "Lockout/tagout during threading, cleaning and maintenance",
+        "Cotton dust and fibre exposure assessed; extraction and respiratory protection provided",
+        "Noise survey in weaving and spinning halls; hearing protection enforced",
+        "Heat stress assessment in pressing and dyeing areas with rest and hydration measures",
+        "Fire detection, sprinklers and hydrants serviced in a high fuel-load environment",
+        "Fire exits unobstructed and unlocked during working hours; drills recorded",
+        "Building structural integrity assessment where multi-storey production is used",
+        "Working hours, overtime and wage records compliant with the labour code",
+        "Freedom of association respected; functioning worker grievance mechanism",
+        "Child labour and age verification controls at recruitment",
+        "Ergonomic assessment for repetitive sewing and cutting tasks",
+        "Incident and near-miss register maintained and reviewed"
       ]
     },
     {
-      id: "energy", group: "Energy, Resources & Construction", name: "Energy & Utilities",
-      checklist: [
-        "Generation/distribution licence and environmental approvals current",
-        "High-voltage work permits and lockout/tagout procedures in place",
-        "Arc-flash risk assessment completed and PPE matched to it",
-        "Emissions and effluent monitoring records current (thermal plant)",
-        "Vegetation and right-of-way management logged",
-        "Emergency and outage response plan tested",
-        "Community notification process for planned outages",
-        "Incident/near-miss register maintained"
+      "id": "timber",
+      "group": "Industrial & Manufacturing",
+      "name": "Timber & Wood Processing",
+      "checklist": [
+        "Forestry / timber processing licence and environmental approval current",
+        "Chain-of-custody documentation for every timber input; legality of source verifiable",
+        "Timber movement permits held for transported product where required",
+        "Reforestation or offset commitments tracked against the licence condition",
+        "Wood dust: extraction at source, exposure assessment, and respiratory protection",
+        "Wood dust explosion risk assessed — ductwork, collectors, ignition control",
+        "Fire risk assessment current for a high fuel-load environment; hot work permit system in use",
+        "Fire detection, hydrants and extinguishers serviced and accessible",
+        "Machine guarding on saws, planers, moulders and chippers; push sticks and jigs provided",
+        "Circular and band saw blade condition, tensioning and change procedure",
+        "Lockout/tagout applied during blade changes and jam clearing",
+        "Noise survey completed; hearing protection enforced in mill areas",
+        "Hand-arm vibration exposure assessed for chainsaw and sander operators",
+        "Timber treatment chemicals (e.g. CCA, boron): storage, SDS, drip trays, effluent control",
+        "Treatment effluent permitted and monitored where discharged",
+        "Sawdust and offcut handling, storage and disposal or beneficial use",
+        "Manual handling and lifting aids for heavy sections",
+        "Mobile plant and forklift operator certification and pre-use checks",
+        "First aid provision matched to amputation and laceration risk; trauma kit available",
+        "Incident and near-miss register maintained; community and worker grievance route in place"
       ]
     },
     {
-      id: "water", group: "Energy, Resources & Construction", name: "Water, Sanitation & Waste",
-      checklist: [
-        "Abstraction, discharge and waste-handling licences current",
-        "Treatment process monitoring and lab results on file",
-        "Confined space entry procedure and trained attendants in place",
-        "Biological/chemical exposure controls and vaccinations current",
-        "Sludge and residual waste disposal records maintained",
-        "Odour and vector control measures implemented",
-        "Community grievance log maintained",
-        "Incident/near-miss register maintained"
+      "id": "mining-lsm",
+      "group": "Mining & Minerals",
+      "name": "Mining — Large Scale (Open Pit & Underground)",
+      "checklist": [
+        "Mineral right / mining licence current, and operations within the licensed perimeter",
+        "ESIA / EIS approval and the environmental management plan current for the mine plan in force",
+        "Mine closure and rehabilitation plan approved, costed, and reviewed at the required interval",
+        "Rehabilitation financial assurance in place and at the current required value (e.g. Zambia's Environmental Protection Fund; a bond or guarantee elsewhere)",
+        "Progressive rehabilitation carried out as areas come out of use, not deferred to closure",
+        "Tailings storage facility: Engineer of Record appointed in writing and currently engaged",
+        "TSF dam safety review at the required frequency, with actions tracked to closure",
+        "TSF deposition plan, water balance and freeboard monitored against design limits",
+        "TSF instrumentation (piezometers, survey monuments) read on schedule and trending reviewed",
+        "TSF emergency preparedness and response plan tested, with downstream communities informed",
+        "Conformance position against the Global Industry Standard on Tailings Management documented",
+        "Acid rock drainage / metal leaching characterisation completed and management measures in place",
+        "Waste rock dump design, stability monitoring and encapsulation of reactive material",
+        "Pit slope geotechnical review current; slope monitoring system operating with trigger levels",
+        "Underground: ventilation survey current, airflow at each working face verified against plan",
+        "Underground: gas monitoring, ground support standard, refuge chambers and escape routes verified",
+        "Shaft, hoisting and winding plant statutory examinations current",
+        "Mine rescue team trained, equipped and available at the required strength",
+        "Blasting: licensed blaster, explosives magazine licence, and blast design records",
+        "Blast vibration and airblast monitored at nearest receptors against limits; community notified before each blast",
+        "Haul road design, speed control, berms, and traffic management plan enforced",
+        "Occupational hygiene monitoring: respirable crystalline silica, DPM, noise, whole-body vibration, heat",
+        "Medical surveillance programme matched to exposures, with exit medicals on separation",
+        "Cyanide management aligned to the International Cyanide Management Code (gold operations)",
+        "Reagent storage and handling: acids, bunding, secondary containment, emergency showers",
+        "NORM (naturally occurring radioactive material) assessed where the orebody warrants it",
+        "Water: dewatering authorised, discharge quality monitored, site-wide water balance maintained",
+        "Resettlement and compensation obligations tracked per household where displacement occurred",
+        "Community development agreement / local content obligations tracked against commitments",
+        "Security personnel trained on the Voluntary Principles on Security and Human Rights",
+        "Artisanal mining interface: encroachment policy, engagement record, no forced eviction",
+        "Grievance mechanism operating, with time-bound closure and no retaliation",
+        "Emergency response: TSF breach, underground fire, chemical release, mass casualty — drilled",
+        "Incident and near-miss register maintained; high-potential incidents investigated to root cause"
+      ],
+      "countryNotes": {
+        "zm": "Environmental Protection Fund contribution and Mine Safety Department inspections are the two Zambian requirements most often missed.",
+        "cd": "Mining projects are approved through DPEM rather than ACE, and all submissions are made in French.",
+        "tz": "Mining Commission licensing plus NEMC environmental certification are separate obligations — holding one does not satisfy the other."
+      }
+    },
+    {
+      "id": "mining-asm",
+      "group": "Mining & Minerals",
+      "name": "Artisanal & Small-Scale Mining (ASM)",
+      "checklist": [
+        "Formalisation status recorded: licence, permit, cooperative membership or designated zone",
+        "Site boundaries known and not encroaching on a large-scale concession or protected area",
+        "Child labour prohibited: age verification at site entry and a documented remediation route if found",
+        "Forced labour and debt bondage checks, including for transported and migrant workers",
+        "Pit and shaft safety: depth limits, shoring, ladder condition, no undercutting",
+        "Ventilation and gas checks before entry to any shaft or adit",
+        "Dewatering arrangements and control of inrush risk",
+        "PPE available, fitted and actually worn — helmet, boots, eye, respiratory, gloves",
+        "Mercury: use recorded, retorts or alternatives promoted, Minamata Convention obligations understood",
+        "Cyanide or acid use (where present) controlled, stored and disposed of safely",
+        "Dust and silica exposure controls — wet drilling, wetting of ore, respiratory protection",
+        "Potable water, sanitation and washing facilities at the site",
+        "Occupational health: silicosis awareness, malaria and HIV programmes, first aid provision",
+        "Gender-based violence prevention; safe participation of women in mining",
+        "Traceability and due diligence: OECD Due Diligence Guidance applied; CAHRA assessment documented",
+        "Chain-of-custody scheme participation recorded where applicable (e.g. ITSCI, RMI) for 3TG and cobalt",
+        "Buyer and exporter records retained, with production volumes reconciled",
+        "Riverbank, siltation and land degradation controls; rehabilitation of worked-out pits",
+        "Community engagement record and a route for complaints to be raised safely",
+        "Revenue sharing and local benefit arrangements documented where they exist"
+      ],
+      "countryNotes": {
+        "cd": "OECD due diligence and cobalt/3TG chain-of-custody are the defining compliance issues for Congolese ASM; SAEMAPE registration and ZEA status are the formalisation anchors.",
+        "tz": "Primary Mining Licence (PML) holders fall under the Mining Commission with specific ASM environmental regulations.",
+        "ug": "ASM is formalised under the Mining and Minerals Act 2022 — check location licence status."
+      }
+    },
+    {
+      "id": "mineral-processing",
+      "group": "Mining & Minerals",
+      "name": "Mineral Processing, Smelting & Refining",
+      "checklist": [
+        "Operating and environmental licences current for the processing route in use",
+        "Stack emission monitoring (SO₂, particulates, metals) against licence limits, with calibration records",
+        "Ambient air monitoring at the fence line and nearest community receptor",
+        "Acid plant operation, conversion efficiency and emergency shutdown procedures",
+        "Slag, residue and process waste characterised, stored and disposed of under licence",
+        "Tailings and process effluent quality monitored; closed-circuit water use maximised",
+        "Solvent extraction / electrowinning: solvent inventory, fire risk, vapour control",
+        "Reagent handling: sulphuric acid, caustic, flocculants — bunding, PPE, emergency showers",
+        "Molten metal and hot work: PPE to standard, splash protection, exclusion zones",
+        "Process safety: HAZOP or equivalent completed, recommendations closed, management of change applied",
+        "Pressure vessels, boilers and lifting equipment statutorily examined and certified",
+        "Occupational hygiene: metal fume, acid mist, noise, heat stress — monitored and controlled",
+        "Biological monitoring where lead, cadmium, arsenic or manganese exposure is credible",
+        "Energy intensity and GHG emissions tracked per tonne of product",
+        "Product stewardship: safety data sheets issued, concentrate transport classified and placarded",
+        "Emergency response for chemical release, acid spill and fire — drilled with the local authority",
+        "Community complaints on dust, odour and emissions logged and closed out",
+        "Incident and near-miss register maintained and reviewed by management monthly"
       ]
     },
     {
-      id: "transport", group: "Services & Commerce", name: "Transport & Logistics",
-      checklist: [
-        "Operating licences and vehicle roadworthiness certificates current",
-        "Driver licences, hours-of-service and fatigue management records",
-        "Journey management and defensive driving training completed",
-        "Dangerous goods classification, placarding and documentation correct",
-        "Fuel storage and spill response provisions on site",
-        "Load securing and manual handling procedures in place",
-        "Vehicle emissions and maintenance records maintained",
-        "Incident/near-miss register maintained"
+      "id": "quarrying",
+      "group": "Mining & Minerals",
+      "name": "Quarrying & Aggregates",
+      "checklist": [
+        "Quarry licence / mineral right and environmental approval current and on site",
+        "Approved quarry development plan followed; extraction within the permitted boundary and depth",
+        "Blast management plan; licensed blaster and explosives magazine licence current",
+        "Blast vibration and airblast monitored at nearest structures against limits",
+        "Pre-blast condition surveys of nearby structures held on file",
+        "Community pre-blast notification procedure operating and evidenced",
+        "Face and bench geometry inspected; no overhangs or undercut faces",
+        "Edge protection, bunding and exclusion zones at pit edges and tips",
+        "Dust suppression on haul roads, crushers and stockpiles, operating and logged",
+        "Respirable crystalline silica exposure assessed with controls and health surveillance",
+        "Noise monitoring against limits at the nearest receptor",
+        "Crusher and screen guarding, isolation and lockout/tagout procedure",
+        "Conveyor guarding, emergency stop pull-cords tested",
+        "Mobile plant: operator certification, daily pre-use inspection, seatbelt and proximity controls",
+        "Haul road design, speed limits, signage and traffic management enforced",
+        "Water abstraction permit and settlement/silt control before any discharge",
+        "Fuel and oil storage bunded, with a spill kit and trained responders",
+        "Progressive rehabilitation and the restoration plan tracked with photographic evidence",
+        "Rehabilitation financial assurance in place where the licence requires it",
+        "Community grievance log maintained and reviewed"
       ]
     },
     {
-      id: "hospitality", group: "Services & Commerce", name: "Hospitality & Tourism",
-      checklist: [
-        "Operating and food service licences current",
-        "Fire detection, extinguishers, exits and evacuation plan verified",
-        "Kitchen hygiene, temperature and pest control records maintained",
-        "Pool/spa water quality testing logged (where applicable)",
-        "Laundry and cleaning chemical SDS available to staff",
-        "Waste segregation and licensed collection in place",
-        "Guest and staff incident register maintained",
-        "Water and energy consumption tracked"
+      "id": "construction",
+      "group": "Energy, Resources & Construction",
+      "name": "Construction & Contracting",
+      "checklist": [
+        "Project environmental approval or screening decision on file for the works as built",
+        "Site-specific ESMP available, briefed to the workforce and updated as works change",
+        "Construction permit and approved drawings held on site",
+        "Contractor registration current where the jurisdiction requires it",
+        "Site induction for every worker and visitor, with records",
+        "Fall protection: edge protection, harness inspection, anchor point certification",
+        "Scaffolding erected by a competent person, tagged, and inspected weekly",
+        "Excavation: support design, inspection before each shift, access ladders, spoil setback",
+        "Underground and overhead services located and controlled before breaking ground",
+        "Lifting operations: appointed person, lift plan, crane and tackle certification",
+        "Mobile plant: operator certification, banksman, pedestrian segregation",
+        "Temporary electrical installation inspected; RCD protection and cable management",
+        "Hot work permit system in operation with fire watch",
+        "Confined space entry procedure with rescue arrangements",
+        "Dust, noise and vibration controls at the site boundary, monitored against limits",
+        "Stormwater runoff, silt traps and watercourse protection in place",
+        "Waste and debris segregated; licensed disposal with transfer records",
+        "Fuel and chemical storage bunded with spill response equipment",
+        "Sanitation, drinking water and welfare facilities for the workforce",
+        "Worker accommodation inspected against the accommodation standard where provided",
+        "Sub-contractor EHS pre-qualification and monthly performance review on file",
+        "Community liaison, advance notice of disruptive works, and a grievance log",
+        "Traffic management plan for site and public road interfaces",
+        "Emergency response plan with assembly points, drills and a nominated hospital",
+        "Incident and near-miss register maintained and reviewed monthly"
       ]
     },
     {
-      id: "retail", group: "Services & Commerce", name: "Retail & Wholesale",
-      checklist: [
+      "id": "oilgas",
+      "group": "Energy, Resources & Construction",
+      "name": "Oil & Gas",
+      "checklist": [
+        "Environmental approval and operating licences current for the facility in use",
+        "Process safety management system documented, with HAZOP recommendations closed",
+        "Safety case or major accident hazard assessment current where required",
+        "Tank and pipeline integrity inspection programme current, with anomalies tracked",
+        "Cathodic protection and corrosion monitoring records",
+        "Pressure safety valve testing and certification current",
+        "Flaring and venting recorded; emissions monitored and reported",
+        "Fugitive emission / LDAR programme operating with a repair backlog under control",
+        "Produced water and drilling fluid handling permitted and monitored",
+        "Spill prevention and response plan current, with equipment staged and drilled",
+        "Hazardous area classification current; electrical equipment certified for zone",
+        "Hot work, confined space and isolation permit systems with cross-references",
+        "Gas detection and fire & gas system functional testing on schedule",
+        "Emergency shutdown system tested at the required interval",
+        "H₂S risk assessed where present, with detection, escape sets and drills",
+        "Journey management and defensive driving programme for all road movements",
+        "Contractor management: bridging document with each major contractor",
+        "Naturally occurring radioactive material (NORM) assessed and managed",
+        "Waste streams characterised; hazardous waste licensed end-to-end",
+        "Decommissioning and abandonment liability assessed and funded",
+        "Community and stakeholder engagement log maintained; grievance mechanism operating",
+        "Security personnel trained on the Voluntary Principles on Security and Human Rights",
+        "Emergency drills — spill, fire, medevac, well control — conducted and reviewed",
+        "Incident and near-miss register maintained; high-potential events investigated to root cause"
+      ]
+    },
+    {
+      "id": "energy",
+      "group": "Energy, Resources & Construction",
+      "name": "Energy & Utilities",
+      "checklist": [
+        "Generation, transmission or distribution licence and environmental approvals current",
+        "High-voltage work: permit to work, isolation, earthing and competent person register",
+        "Arc-flash study completed; PPE matched to incident energy and labelling in place",
+        "Approach boundaries and live working policy defined and enforced",
+        "Substation access control, interlocking and anti-climb protection",
+        "Transformer oil: PCB status confirmed, containment bunding, spill response",
+        "SF₆ inventory and leak accounting where gas-insulated switchgear is used",
+        "Thermal plant: emissions monitoring, ash handling and water discharge under permit",
+        "Hydropower: environmental flow releases, fish passage and reservoir management per licence",
+        "Solar/wind: panel and blade waste route, avian and bat monitoring where required",
+        "Working at height on towers and poles: rescue plan and competent climbers",
+        "Vegetation management and right-of-way clearance logged",
+        "Public safety: line clearances, warning signage, response to reported hazards",
+        "Outage and emergency response plan tested with the system operator",
+        "Community notification process for planned outages and construction",
+        "Wayleave, easement and resettlement obligations tracked",
+        "Grid-connection and metering compliance records",
+        "Incident and near-miss register maintained; electrical contact incidents investigated fully"
+      ]
+    },
+    {
+      "id": "water",
+      "group": "Energy, Resources & Construction",
+      "name": "Water, Sanitation & Waste",
+      "checklist": [
+        "Abstraction, discharge and waste-handling licences current for every site",
+        "Treatment process monitoring with accredited laboratory results on file",
+        "Drinking water quality compliance reported at the required frequency",
+        "Chlorine or ozone handling: storage, detection, emergency procedure, escape sets",
+        "Confined space entry: permit, gas testing, tripod rescue and trained attendants",
+        "Biological hazard controls, vaccination programme and hand hygiene facilities",
+        "Sludge characterisation, storage, and disposal or reuse under licence",
+        "Landfill or disposal site: cell design, leachate collection, gas management, cover",
+        "Leachate quality monitored against the permit; groundwater boreholes sampled",
+        "Waste acceptance procedure with rejection criteria and records",
+        "Weighbridge and waste transfer note reconciliation",
+        "Odour and vector control measures implemented and complaint-tracked",
+        "Vehicle and plant movements segregated from pedestrians at tipping areas",
+        "Scavenging and unauthorised access controlled humanely and lawfully",
+        "Fire prevention and response for waste stockpiles and landfill gas",
+        "Community grievance log maintained and reviewed",
+        "Worker health surveillance matched to biological and chemical exposures",
+        "Incident and near-miss register maintained and reviewed"
+      ]
+    },
+    {
+      "id": "transport",
+      "group": "Services & Commerce",
+      "name": "Transport & Logistics",
+      "checklist": [
+        "Operating licences and vehicle roadworthiness certificates current for the whole fleet",
+        "Driver licences, medical fitness and endorsements verified and diarised",
+        "Hours-of-service and fatigue management policy with monitoring evidence",
+        "Journey management plan for long-distance and high-risk routes",
+        "Defensive driving training completed and refreshed at the set interval",
+        "In-vehicle monitoring or telematics reviewed, with over-speed follow-up",
+        "Pre-use vehicle inspection records completed daily",
+        "Planned preventive maintenance schedule adhered to, with records",
+        "Dangerous goods: classification, packaging, placarding, documentation and driver training",
+        "Emergency response information carried for every dangerous load",
+        "Load securing procedure and axle-load compliance",
+        "Manual handling assessment and mechanical aids at loading points",
+        "Warehouse racking inspection, forklift certification and pedestrian segregation",
+        "Fuel storage bunded with spill kits at every depot",
+        "Vehicle emissions and fuel consumption tracked per vehicle",
+        "Third-party and sub-contracted hauliers held to the same standard, with audits",
+        "Road traffic incident investigation to root cause, not just driver blame",
+        "Incident and near-miss register maintained and reviewed"
+      ]
+    },
+    {
+      "id": "hospitality",
+      "group": "Services & Commerce",
+      "name": "Hospitality & Tourism",
+      "checklist": [
+        "Operating, food service and liquor licences current",
+        "Fire detection, alarm, emergency lighting and extinguisher servicing current",
+        "Evacuation plan posted, drills held, and guest-facing procedures in place",
+        "Kitchen hygiene, temperature control and pest control records maintained",
+        "Food handler health screening and training certificates",
+        "Gas installation (LPG) inspection, leak detection and emergency shut-off",
+        "Deep fat fryer and kitchen extraction cleaning schedule",
+        "Pool and spa water quality tested and logged; chemical storage controlled",
+        "Legionella risk assessment and water system management",
+        "Laundry and cleaning chemical SDS available; dosing systems controlled",
+        "Housekeeping ergonomics, sharps procedure and lone-working arrangements",
+        "Guest safety: balcony, window restrictor, hot water scald and slip controls",
+        "Security and guest privacy arrangements, including CCTV governance",
+        "Safeguarding policy covering child protection and prevention of exploitation",
+        "Waste segregation, food waste diversion and single-use plastic reduction",
+        "Water and energy consumption tracked per guest-night",
+        "Wildlife and protected-area rules observed where tourism operations touch them",
+        "Incident register covering guests, staff and contractors"
+      ]
+    },
+    {
+      "id": "retail",
+      "group": "Services & Commerce",
+      "name": "Retail & Wholesale",
+      "checklist": [
         "Trading licence and fire safety certificate current",
-        "Emergency exits clear and evacuation plan posted",
-        "Manual handling and racking/storage safety controls in place",
-        "Slip, trip and fall prevention programme active",
-        "Hazardous consumer products stored per SDS requirements",
-        "Packaging and e-waste take-back/recycling arrangements",
-        "Staff first aid provision and trained first aiders on shift",
-        "Incident/near-miss register maintained"
+        "Emergency exits clear, unlocked during trading hours, and evacuation plan posted",
+        "Fire equipment serviced; staff trained in first response and evacuation",
+        "Racking inspected by a competent person; load notices displayed",
+        "Forklift and pallet truck operator certification and pedestrian segregation",
+        "Manual handling assessment and mechanical aids for heavy or awkward stock",
+        "Slip, trip and fall prevention programme with spill response and cleaning records",
+        "Hazardous consumer products stored and displayed per SDS requirements",
+        "Cold chain monitoring for chilled and frozen goods",
+        "Food handling and hygiene standards where fresh food is sold",
+        "Cash handling and robbery prevention procedure; staff support after incidents",
+        "Lone working and late-trading risk assessment",
+        "Customer safety in car parks and delivery yards; vehicle-pedestrian controls",
+        "Waste segregation, packaging take-back and e-waste route through licensed handlers",
+        "Refrigerant management and leak checks",
+        "First aid provision and trained first aiders on every shift",
+        "Incident register covering customers and staff"
       ]
     },
     {
-      id: "telecom", group: "Services & Commerce", name: "Telecom & ICT",
-      checklist: [
-        "Site and tower construction approvals on file",
-        "Working at height rescue plan and competent climbers certified",
-        "RF exposure assessment and exclusion zones signposted",
-        "Generator fuel storage bunded with spill kit available",
-        "Battery and e-waste disposal through licensed handlers",
-        "Data centre fire suppression system serviced",
-        "Lone-worker and remote-site check-in procedure in place",
-        "Incident/near-miss register maintained"
+      "id": "telecom",
+      "group": "Services & Commerce",
+      "name": "Telecom & ICT",
+      "checklist": [
+        "Site and tower construction approvals and wayleaves on file",
+        "Structural integrity assessment of towers and masts at the set interval",
+        "Working at height: rescue plan, competent climbers, harness inspection records",
+        "Rooftop and tower access control, with permit to climb",
+        "RF exposure assessment completed; exclusion zones signed and enforced",
+        "Isolation procedure for transmitters before climbing work",
+        "Generator fuel storage bunded with spill kit; refuelling procedure",
+        "Battery rooms: ventilation, acid handling, eyewash, fire detection",
+        "Battery, panel and e-waste disposal through licensed handlers with records",
+        "Data centre fire suppression serviced; gas release safety procedure",
+        "Standby power and UPS testing on schedule",
+        "Lone-worker and remote-site check-in procedure with escalation",
+        "Journey management for remote site visits",
+        "Security arrangements at unmanned sites, including community relations",
+        "Land access agreements and community grievance route for tower sites",
+        "Energy consumption per site tracked; diesel displacement projects recorded",
+        "Incident and near-miss register maintained"
       ]
     },
     {
-      id: "finance", group: "Services & Commerce", name: "Financial & Professional Services",
-      checklist: [
-        "Occupational health & safety workplace registration current",
-        "Fire safety certificate, drills and marshals in place",
-        "Ergonomic/display screen assessments completed",
-        "First aid provision and trained first aiders available",
-        "Business continuity and emergency response plan tested",
-        "E-waste and confidential waste disposal through licensed handlers",
-        "Energy use and paper consumption tracked for ESG reporting",
-        "Incident register maintained"
+      "id": "finance",
+      "group": "Services & Commerce",
+      "name": "Financial & Professional Services",
+      "checklist": [
+        "Workplace occupational health & safety registration current",
+        "Fire safety certificate, alarm testing, drills and trained fire marshals",
+        "Emergency evacuation plan including provision for visitors and disabled occupants",
+        "First aid provision and trained first aiders per floor or headcount",
+        "Ergonomic / display screen equipment assessments completed and acted on",
+        "Electrical installation inspection and portable appliance testing current",
+        "Air conditioning servicing and indoor air quality complaints tracked",
+        "Business continuity and emergency response plan tested at least annually",
+        "Lone working, late working and travel security procedures",
+        "Staff wellbeing and mental health support arrangements",
+        "Contractor and cleaner management, including out-of-hours access control",
+        "Confidential waste and e-waste disposal through licensed handlers",
+        "Energy, water and paper consumption tracked for ESG reporting",
+        "Scope 3 and financed-emissions data collection where the institution reports them",
+        "Supplier ESG screening applied to material vendors",
+        "Incident register maintained, including near-misses and security events"
       ]
     },
     {
-      id: "healthcare", group: "Public, Health & Agriculture", name: "Healthcare & Medical",
-      checklist: [
+      "id": "agriculture",
+      "group": "Public, Health & Agriculture",
+      "name": "Agriculture & Agro-processing",
+      "checklist": [
+        "Environmental approval on file where the scale or activity requires it",
+        "Water abstraction permit current for irrigation and processing",
+        "Agrochemical store: locked, ventilated, bunded, with a current inventory and SDS",
+        "Only registered pesticides in use; banned and restricted products absent from stock",
+        "Spray operator training and certification; re-entry intervals posted and observed",
+        "Spray PPE issued, decontaminated and stored separately from other clothing",
+        "Cholinesterase or equivalent health monitoring for organophosphate applicators",
+        "Empty container triple-rinsing and licensed disposal route",
+        "Buffer zones to watercourses, homes and schools observed during application",
+        "Processing effluent permitted and monitored; wash-water managed",
+        "Organic waste, husk and pomace management or beneficial use",
+        "Farm machinery guarding (PTO shafts, augers, balers) and operator training",
+        "Tractor rollover protection and seatbelt use",
+        "Grain silo and confined space entry procedure with rescue arrangements",
+        "Child labour policy and age verification, including on outgrower and seasonal labour",
+        "Seasonal and migrant worker contracts, wages, housing and transport standards",
+        "Drinking water, sanitation and shade for field workers",
+        "Heat stress and snake/insect bite first aid arrangements",
+        "Land tenure and community access rights respected; grievance mechanism operating",
+        "Traceability records for chemical application and harvest lots",
+        "Incident and near-miss register maintained"
+      ]
+    },
+    {
+      "id": "healthcare",
+      "group": "Public, Health & Agriculture",
+      "name": "Healthcare & Medical",
+      "checklist": [
         "Facility operating licence and health authority approvals current",
-        "Healthcare waste segregation, storage and licensed disposal records",
-        "Sharps injury prevention and post-exposure procedure in place",
-        "Infection prevention and control programme documented",
-        "Radiation/X-ray source licence and dosimetry (where applicable)",
-        "Medical gas and chemical storage compliant with SDS",
-        "Staff immunisation and health surveillance records maintained",
-        "Incident/near-miss register maintained"
+        "Professional registration of clinical staff verified and diarised",
+        "Healthcare waste segregated at source into the correct colour-coded streams",
+        "Sharps containers compliant, not over-filled, and collected on schedule",
+        "Healthcare waste storage, transport and treatment through a licensed route with records",
+        "Sharps injury prevention programme and post-exposure prophylaxis available 24/7",
+        "Infection prevention and control programme with audit and surveillance data",
+        "Hand hygiene compliance monitored",
+        "Isolation and outbreak response procedure, with PPE stock verified",
+        "Sterilisation and autoclave validation records",
+        "Radiation: source licence, shielding survey, dosimetry and pregnancy declaration policy",
+        "Medical gases: storage, segregation, valve condition and pipeline testing",
+        "Chemical and cytotoxic drug handling with dedicated PPE and spill kits",
+        "Mercury-free thermometry and disposal of legacy devices",
+        "Staff immunisation and occupational health surveillance current",
+        "Violence and aggression prevention for clinical and reception staff",
+        "Manual handling of patients: equipment provided and training current",
+        "Backup power and water for critical care areas tested",
+        "Fire strategy accounting for dependent and non-ambulant patients; drills recorded",
+        "Wastewater from the facility monitored where the discharge permit requires it",
+        "Incident and near-miss register including clinical and non-clinical events"
       ]
     },
     {
-      id: "education", group: "Public, Health & Agriculture", name: "Education",
-      checklist: [
+      "id": "education",
+      "group": "Public, Health & Agriculture",
+      "name": "Education",
+      "checklist": [
         "Institution registration and building occupancy approvals current",
-        "Fire safety equipment, exits and evacuation drills logged",
-        "Laboratory chemical inventory with SDS and spill provisions",
-        "Playground, sports and workshop equipment inspections recorded",
-        "Safeguarding and student incident reporting procedure in place",
-        "Water quality and sanitation facilities monitored",
-        "Food service hygiene records maintained (where catering on site)",
-        "First aid provision and trained staff available"
+        "Fire detection, extinguishers, exits and evacuation drills logged each term",
+        "Evacuation plan accounting for young children and disabled students",
+        "Laboratory chemical inventory with SDS, segregated storage and spill provision",
+        "Fume cupboard testing and laboratory ventilation adequacy",
+        "Workshop machine guarding, supervision ratios and PPE for practical subjects",
+        "Playground and sports equipment inspection records",
+        "Safeguarding and child protection policy with vetted staff and a reporting route",
+        "Student incident reporting and parental notification procedure",
+        "Drinking water quality and adequate sanitation facilities by headcount and sex",
+        "Menstrual hygiene facilities available and maintained",
+        "Food service hygiene records where catering is on site",
+        "Transport safety: bus roadworthiness, driver vetting, seatbelts and supervision",
+        "Boarding accommodation: fire safety, supervision, and night-time evacuation plan",
+        "First aid provision, trained staff and a sick bay",
+        "Asbestos and lead paint status known for older buildings",
+        "Waste and e-waste disposal through licensed handlers",
+        "Emergency plan for medical, security and severe weather events"
       ]
     },
     {
-      id: "publicsector", group: "Public, Health & Agriculture", name: "Public Sector & NGOs",
-      checklist: [
-        "Programme/project environmental screening completed where required",
-        "Workplace OSH registration and fire safety provisions current",
-        "Field staff travel, security and lone-worker procedures in place",
-        "Community engagement and grievance mechanism operating",
-        "Donor/regulator safeguarding and reporting obligations tracked",
-        "Asset, fuel and generator management records maintained",
+      "id": "publicsector",
+      "group": "Public, Health & Agriculture",
+      "name": "Public Sector & NGOs",
+      "checklist": [
+        "Programme or project environmental and social screening completed where required",
+        "Donor safeguarding, environmental and social standards mapped to the programme",
+        "Workplace OSH registration and fire safety provisions current at every office",
+        "Field staff travel, security and lone-worker procedures with check-in protocol",
+        "Security risk assessment per operating area, refreshed on a schedule",
+        "Duty of care arrangements including medevac cover for field staff",
+        "Safeguarding policy covering beneficiaries, with a confidential reporting channel",
+        "Prevention of sexual exploitation and abuse training completed by all staff",
+        "Community engagement and grievance mechanism operating and publicised",
+        "Beneficiary data protection and consent procedures",
+        "Partner and sub-grantee due diligence, including EHS and safeguarding capacity",
+        "Asset, fuel and generator management records",
+        "Vehicle fleet safety: roadworthiness, driver training, journey management",
         "Waste and e-waste disposal through licensed handlers",
-        "Incident register maintained"
+        "Programme carbon footprint tracked where the donor requires reporting",
+        "Incident register covering staff, beneficiaries and partners"
       ]
     }
   ],
@@ -824,7 +1909,10 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   ],
   solutionsByIndustry: [
     { name: "Manufacturing", blurb: "Effluent, air emissions and waste-handling checklists built for factory floors, plus recurring compliance visits.", sections: ["checklists", "reporting", "audits"] },
-    { name: "Quarrying & Mining", blurb: "Blast management, dust and noise monitoring checklists, with site mapping for pit and rehabilitation tracking.", sections: ["checklists", "maps", "audits"] },
+    { name: "Mining — Large Scale", blurb: "Tailings governance, blast and slope monitoring, occupational hygiene and closure liability — with the running totals lenders ask for carried forward each month.", sections: ["reporting", "checklists", "risk", "maps"] },
+    { name: "Artisanal & Small-Scale Mining (ASM)", blurb: "Formalisation status, child-labour and mercury controls, and OECD due-diligence evidence for 3TG and cobalt supply chains.", sections: ["checklists", "records", "iec"] },
+    { name: "Mineral Processing & Smelting", blurb: "Stack and fence-line emissions against licence limits, reagent and molten-metal safety, process-safety actions tracked to closure.", sections: ["reporting", "audits", "actions"] },
+    { name: "Quarrying & Aggregates", blurb: "Blast management, vibration and dust monitoring, face inspection and progressive rehabilitation with photographic evidence.", sections: ["checklists", "maps", "audits"] },
     { name: "Timber & Wood Processing", blurb: "Chain-of-custody and fire-risk checklists alongside document templates for licensing and sourcing records.", sections: ["checklists", "documents"] },
     { name: "Construction & Contracting", blurb: "Site-specific ESMP drafting, sub-contractor pre-qualification workflows, and per-project checklists.", sections: ["esia", "workflows", "checklists"] },
     { name: "Oil & Gas", blurb: "Spill-response and emissions checklists, auto EHS audits, and gas-detection equipment in the supplies catalogue.", sections: ["checklists", "audits", "supplies"] },

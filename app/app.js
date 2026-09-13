@@ -9,6 +9,13 @@
 
   const STORE_KEY = "verda_state_v2";
   const T = () => VERDA_SEED.translations[state.lang] || VERDA_SEED.translations.en;
+  // The jurisdiction currently in force. Requirements differ by country, so
+  // nothing that cites a regulator or a permit should be rendered without it.
+  const COUNTRY = () => VERDA_SEED.countries.find(c => c.id === state.country) || VERDA_SEED.countries[0];
+  const countryName = (id) => {
+    const c = VERDA_SEED.countries.find(x => x.id === id);
+    return c ? c.name : "—";
+  };
 
   // Download filename prefix per reporting framework.
   const REPORT_FILE_PREFIX = {
@@ -26,6 +33,7 @@
     return {
       lang: "en",
       theme: "forest",
+      country: "ug",            // active jurisdiction — drives permits and the regulatory register
       user: null,
       users: [],
       clients: JSON.parse(JSON.stringify(VERDA_SEED.clients)),
@@ -107,6 +115,20 @@
 
   /* ---------------------------- ILLUSTRATIONS (original flat-style SVG art, no stock photos/hotlinking) ---------------------------- */
   const ILLUS_CONTENT = {
+    // An open pit stepped in benches, a headframe over the shaft, and a haul
+    // truck on the ramp — the three things that read as "mine" at 72px.
+    mining: `
+      <path d="M0 122 H200 V140 H0 Z" class="illus-fill-3"/>
+      <path d="M8 122 L34 122 L44 104 L70 104 L80 86 L120 86 L130 104 L156 104 L166 122 L192 122 Z" class="illus-fill-2"/>
+      <path d="M28 122 L44 122 L52 108 L74 108 L82 96 L118 96 L126 108 L148 108 L156 122 L172 122 Z" class="illus-fill-1"/>
+      <rect x="94" y="26" width="5" height="40" rx="2" class="illus-fill-muted"/>
+      <rect x="118" y="26" width="5" height="40" rx="2" class="illus-fill-muted"/>
+      <path d="M96 30 L121 66 M121 30 L96 66" stroke-width="3" class="illus-stroke-muted" fill="none"/>
+      <circle cx="109" cy="22" r="8" class="illus-fill-accent"/>
+      <rect x="36" y="70" width="30" height="14" rx="3" class="illus-fill-accent"/>
+      <rect x="30" y="76" width="10" height="8" rx="2" class="illus-fill-muted"/>
+      <circle cx="40" cy="86" r="5" class="illus-fill-muted"/>
+      <circle cx="60" cy="86" r="5" class="illus-fill-muted"/>`,
     environment: `
       <path d="M0 112 Q50 96 100 110 T200 104 V140 H0 Z" class="illus-fill-3"/>
       <circle cx="162" cy="32" r="15" class="illus-fill-accent"/>
@@ -322,6 +344,7 @@
   /* Picture for each sector family on the dashboard's coverage grid. */
   const SECTOR_GROUP_ILLUS = {
     "Industrial & Manufacturing": "industry",
+    "Mining & Minerals": "mining",
     "Energy, Resources & Construction": "energy",
     "Services & Commerce": "services",
     "Public, Health & Agriculture": "publichealth"
@@ -552,7 +575,9 @@
           <label>Full name<input required name="name" /></label>
           <label>Company<input name="company" /></label>
           <label>Industry
-            <select name="industry">${VERDA_SEED.industries.map(i => `<option value="${i.name}">${i.name}</option>`).join("")}</select>
+            <select name="industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g =>
+              `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i =>
+                `<option value="${esc(i.name)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
           </label>
           <label>Role
             <select name="role">${VERDA_SEED.solutionsByRole.map(r => `<option>${r.name}</option>`).join("")}</select>
@@ -1431,7 +1456,7 @@
       panel.innerHTML = `
         <div class="card">
           <label>Industry checklist
-            <select id="audit-industry">${VERDA_SEED.industries.map(i => `<option value="${i.id}">${i.name}</option>`).join("")}</select>
+            <select id="audit-industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g => `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
           </label>
           <div id="audit-items"></div>
           <div class="modal-actions">
@@ -1670,7 +1695,11 @@
           <h3>Add a client</h3>
           <div class="form-row">
             <input id="cl-name" placeholder="Client name" />
-            <select id="cl-industry">${VERDA_SEED.industries.map(i => `<option>${i.name}</option>`).join("")}</select>
+            <select id="cl-industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g =>
+              `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i =>
+                `<option>${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
+            <select id="cl-country">${VERDA_SEED.countries.map(c =>
+              `<option value="${esc(c.id)}" ${c.id === state.country ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
             <input id="cl-site" placeholder="Site" />
             <select id="cl-plan"><option>Monthly</option><option>Quarterly</option></select>
             <input id="cl-nextvisit" type="date" />
@@ -1679,14 +1708,16 @@
           </div>
         </div>
         <table class="table">
-          <thead><tr><th>Client</th><th>Industry</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th></tr></thead>
+          <thead><tr><th>Client</th><th>Industry</th><th>Country</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th></tr></thead>
           <tbody id="cl-rows"></tbody>
         </table>
       </section>
     `));
     function refresh() {
       main.querySelector("#cl-rows").innerHTML = state.clients.map(c => `
-        <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td><td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>
+        <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td>
+        <td>${esc(countryName(c.country))}</td>
+        <td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td><td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>
       `).join("");
     }
     refresh();
@@ -1694,7 +1725,8 @@
       const name = main.querySelector("#cl-name").value.trim();
       if (!name) { alert("Enter a client name."); return; }
       state.clients.push({
-        id: uid("c"), name, industry: main.querySelector("#cl-industry").value, site: main.querySelector("#cl-site").value,
+        id: uid("c"), name, industry: main.querySelector("#cl-industry").value,
+        country: main.querySelector("#cl-country").value, site: main.querySelector("#cl-site").value,
         plan: main.querySelector("#cl-plan").value, nextVisit: main.querySelector("#cl-nextvisit").value || "TBD",
         permitExpiry: main.querySelector("#cl-permit").value || "TBD", status: "Active"
       });
@@ -1732,46 +1764,132 @@
 
   /* ============================ CHECKLISTS ============================ */
   function renderChecklists(main) {
+    const groups = [...new Set(VERDA_SEED.industries.map(i => i.group))];
     main.appendChild(h(`
       <section>
-        <h1>Checklists</h1>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Checklists & Regulatory Register</h1>
+            <p class="muted">Sector checklists, the permits each jurisdiction requires, and who issues them.
+              Everything on this page follows the jurisdiction selected in the top bar —
+              currently <strong id="chk-country-name">${esc(COUNTRY().name)}</strong>.</p>
+          </div>
+        </div>
         <div class="tabs">
-          <button class="tab-btn active" data-tab="industry">By industry</button>
-          <button class="tab-btn" data-tab="permits">EHS permits (all industries)</button>
+          <button class="tab-btn active" data-tab="industry">By sector</button>
+          <button class="tab-btn" data-tab="permits">Permits &amp; approvals</button>
+          <button class="tab-btn" data-tab="register">Regulators &amp; law</button>
         </div>
         <div id="checklist-panel"></div>
+        <div class="card notice-card">
+          <h3>How current is this?</h3>
+          <p>Compiled ${esc(VERDA_SEED.contentReview.compiled)} · next review due ${esc(VERDA_SEED.contentReview.verifyBy)} · owner: ${esc(VERDA_SEED.contentReview.owner)}.</p>
+          <p class="small">${esc(VERDA_SEED.contentReview.note)}</p>
+        </div>
       </section>
     `));
     const panel = main.querySelector("#checklist-panel");
+
     function industryPanel() {
+      const c = COUNTRY();
       panel.innerHTML = `
-        <label>Industry<select id="chk-industry">${VERDA_SEED.industries.map(i =>
-          `<option value="${i.id}" ${state.ui && state.ui.checklistIndustry === i.id ? "selected" : ""}>${i.name}</option>`).join("")}</select></label>
-        <div id="chk-items"></div>
-        <button class="btn" id="chk-download">Download checklist</button>`;
+        <div class="card">
+          <label>Sector
+            <select id="chk-industry">${groups.map(g =>
+              `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i =>
+                `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
+          </label>
+          <p class="muted small" id="chk-count"></p>
+          <div id="chk-note"></div>
+          <div id="chk-items"></div>
+          <button class="btn" id="chk-download">Download checklist (.txt)</button>
+        </div>`;
       function load() {
         const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#chk-industry").value);
-        panel.querySelector("#chk-items").innerHTML = `<ul class="checklist">${ind.checklist.map(i => `<li><label><input type="checkbox"/> ${i}</label></li>`).join("")}</ul>`;
+        const note = ind.countryNotes && ind.countryNotes[c.id];
+        panel.querySelector("#chk-count").textContent =
+          `${ind.checklist.length} items · ${esc(c.name)}. Tick as you verify — nothing is saved, this is a working sheet.`;
+        panel.querySelector("#chk-note").innerHTML = note
+          ? `<div class="guide-box"><p><strong>${esc(c.name)}:</strong> ${esc(note)}</p></div>` : "";
+        panel.querySelector("#chk-items").innerHTML =
+          `<ul class="checklist">${ind.checklist.map(i =>
+            `<li><label><input type="checkbox"/> ${esc(i)}</label></li>`).join("")}</ul>`;
       }
       load();
       panel.querySelector("#chk-industry").addEventListener("change", load);
       panel.querySelector("#chk-download").addEventListener("click", () => {
         const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#chk-industry").value);
-        downloadText(`Checklist-${ind.name.replace(/\s+/g,"_")}.txt`, `${ind.name.toUpperCase()} COMPLIANCE CHECKLIST\n\n` + ind.checklist.map(i => `[ ] ${i}`).join("\n"));
+        const note = ind.countryNotes && ind.countryNotes[c.id];
+        downloadText(`Checklist-${ind.name.replace(/[^\w]+/g, "_")}-${c.id.toUpperCase()}.txt`,
+          `${ind.name.toUpperCase()} — COMPLIANCE CHECKLIST\nJurisdiction: ${c.name}\n` +
+          `Compiled ${VERDA_SEED.contentReview.compiled}; verify against current law before use.\n\n` +
+          (note ? `${c.name} note: ${note}\n\n` : "") +
+          ind.checklist.map(i => `[ ] ${i}`).join("\n"));
       });
     }
+
     function permitsPanel() {
-      panel.innerHTML = `<p class="muted small">Commonly required across industries — verify current requirements with your national regulator (e.g. NEMA).</p>
-        <ul class="checklist">${VERDA_SEED.permitsChecklist.map(p => `<li><label><input type="checkbox"/> ${p}</label></li>`).join("")}</ul>
-        <button class="btn" id="permits-download">Download permits checklist</button>`;
+      const c = COUNTRY();
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Permits and approvals — ${esc(c.name)}</h3>
+          <p class="muted small">Submissions are made in ${esc(c.reportingLanguage)}. Verify scope, fees and validity with the issuing authority: requirements turn on project type and scale.</p>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Permit / approval</th><th>Issuing authority</th><th>When it is needed</th></tr></thead>
+            <tbody>${c.permits.map(p =>
+              `<tr><td>${esc(p.permit)}</td><td>${esc(p.authority)}</td><td>${esc(p.when)}</td></tr>`).join("")}</tbody></table>
+          </div>
+          <button class="btn" id="permits-download">Download permit register (.txt)</button>
+        </div>
+        <div class="card">
+          <h3>Generic EHS permit checklist (any jurisdiction)</h3>
+          <p class="muted small">Use this where a country register has not been compiled yet — then map each line to the local authority.</p>
+          <ul class="checklist">${VERDA_SEED.permitsChecklist.map(p =>
+            `<li><label><input type="checkbox"/> ${esc(p)}</label></li>`).join("")}</ul>
+        </div>`;
       panel.querySelector("#permits-download").addEventListener("click", () =>
-        downloadText("EHS-Permits-Checklist.txt", "EHS PERMITS CHECKLIST (ALL INDUSTRIES)\n\n" + VERDA_SEED.permitsChecklist.map(p => `[ ] ${p}`).join("\n")));
+        downloadText(`Permit-Register-${c.id.toUpperCase()}.txt`,
+          `PERMITS AND APPROVALS — ${c.name.toUpperCase()}\n` +
+          `Submissions in ${c.reportingLanguage}\nCompiled ${VERDA_SEED.contentReview.compiled}; verify before relying on it.\n\n` +
+          c.permits.map(p => `[ ] ${p.permit}\n      Authority: ${p.authority}\n      When: ${p.when}`).join("\n\n")));
     }
+
+    function registerPanel() {
+      const c = COUNTRY();
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Regulators — ${esc(c.name)}</h3>
+          <p class="muted small">Official language(s): ${esc(c.languages.join(", "))} · currency ${esc(c.currency)} · regulatory submissions in ${esc(c.reportingLanguage)}.</p>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Body</th><th>Short</th><th>What it regulates</th></tr></thead>
+            <tbody>${c.regulators.map(r =>
+              `<tr><td>${esc(r.name)}</td><td>${esc(r.abbr)}</td><td>${esc(r.remit)}</td></tr>`).join("")}</tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Principal instruments</h3>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Instrument</th><th>Reference</th><th>What it covers</th></tr></thead>
+            <tbody>${c.laws.map(l =>
+              `<tr><td>${esc(l.title)}</td><td>${esc(l.instrument)}</td><td>${esc(l.covers)}</td></tr>`).join("")}</tbody></table>
+          </div>
+          <p class="muted small">References are to the principal Act or regulation as commonly cited. Amendments and statutory instruments are frequent — always work from the current consolidated text.</p>
+          <button class="btn" id="reg-download">Download register (.txt)</button>
+        </div>`;
+      panel.querySelector("#reg-download").addEventListener("click", () =>
+        downloadText(`Regulatory-Register-${c.id.toUpperCase()}.txt`,
+          `REGULATORY REGISTER — ${c.name.toUpperCase()}\nCompiled ${VERDA_SEED.contentReview.compiled}; review due ${VERDA_SEED.contentReview.verifyBy}\n\n` +
+          `REGULATORS\n` + c.regulators.map(r => `  ${r.abbr === "—" ? "" : r.abbr + " — "}${r.name}\n      ${r.remit}`).join("\n") +
+          `\n\nPRINCIPAL INSTRUMENTS\n` + c.laws.map(l => `  ${l.title} (${l.instrument})\n      ${l.covers}`).join("\n") +
+          `\n\n${VERDA_SEED.contentReview.note}\n`));
+    }
+
+    const panels = { industry: industryPanel, permits: permitsPanel, register: registerPanel };
     industryPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      btn.dataset.tab === "industry" ? industryPanel() : permitsPanel();
+      panels[btn.dataset.tab]();
     }));
   }
 
@@ -2636,6 +2754,7 @@
     document.documentElement.setAttribute("data-theme", state.theme);
     document.getElementById("lang-select").value = state.lang;
     document.getElementById("theme-select").value = state.theme;
+    document.getElementById("country-select").value = state.country || "ug";
     buildNav();
     renderTopbar();
     route();
@@ -2646,6 +2765,9 @@
     });
     document.getElementById("theme-select").addEventListener("change", (e) => {
       applyTheme(e.target.value); buildNav(); route();
+    });
+    document.getElementById("country-select").addEventListener("change", (e) => {
+      state.country = e.target.value; save(); route();
     });
 
     if ("serviceWorker" in navigator) {

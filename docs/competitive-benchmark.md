@@ -71,7 +71,7 @@ analytics layer that makes them worth having:
 
 The other gap was positioning. Verda's checklists covered six heavy-industry
 sectors, which reads as a consultancy tool rather than a platform. Coverage now
-spans **18 sectors across every part of the economy** — industrial, infrastructure
+spans **21 sectors across every part of the economy** — industrial, mining, infrastructure
 and energy, services, and public and social — each with its own compliance
 checklist, and grouped so a buyer in hospitality or healthcare sees themselves in
 the product as clearly as a quarry operator does.

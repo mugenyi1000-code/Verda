@@ -43,10 +43,30 @@ Reporting" document it produces. It's a single static app — open
 host. All data is stored locally in the browser (`localStorage`); there is
 no server yet.
 
-It covers **18 sectors across every part of the economy** — industrial,
-energy/resources/construction, services and commerce, and public/health/
-agriculture — each with its own compliance checklist. See
-`docs/competitive-benchmark.md` for how Verda's module coverage compares
+It covers **21 sectors across five groups** — industrial and manufacturing;
+**mining and minerals**; energy, resources and construction; services and
+commerce; and public, health and agriculture — each with its own compliance
+checklist, **423 checklist items in total**.
+
+Mining is covered in depth rather than as a footnote: **large-scale mining**
+(tailings governance and the Global Industry Standard on Tailings Management,
+acid rock drainage, pit slope and underground ventilation, blast vibration,
+occupational hygiene, closure liability and financial assurance),
+**artisanal and small-scale mining** (formalisation, child-labour controls,
+mercury and the Minamata Convention, OECD due diligence and chain-of-custody
+for 3TG and cobalt), **mineral processing, smelting and refining**, and
+**quarrying and aggregates**.
+
+**Five jurisdictions: Uganda, Kenya, Tanzania, DR Congo and Zambia.** A
+jurisdiction selector in the top bar drives a per-country regulatory register
+— the regulators and what each one actually regulates, the principal
+instruments with their citations, and the permits and approvals with their
+issuing authority and when they are needed. DR Congo is carried in French
+where submissions are made in French. Every entry carries a compiled date, a
+review-due date and an explicit instruction to verify against current law; it
+is a practitioner's starting register, not legal advice.
+
+See `docs/competitive-benchmark.md` for how Verda's module coverage compares
 with established EHS platforms and what is still on the roadmap.
 
 Organized into three groups (Monitor / Manage / Grow), each with its own
