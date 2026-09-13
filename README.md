@@ -102,6 +102,28 @@ sub-sections in the sidebar:
   hazard, and a live matrix heatmap.
 - **Audits** — Auto EHS Audit (per-sector checklist, AI-assisted findings
   summary) and ESIA Audit (against your own ESMP commitments).
+- **Inspections & Calculations** — an **equipment and machine register** whose
+  next-due date is calculated from the last inspection and the statutory
+  interval, sorted by what lapses first, with overdue examinations flagged
+  (a lapsed statutory examination usually means the item may not lawfully be
+  used). Backed by **91 inspection requirements** across lifting equipment,
+  pressure systems, electrical, fire safety, access and fall protection,
+  vehicles and mobile plant, machinery, monitoring and detection, welfare and
+  emergency, and mining and heavy industry — each with its interval, who must
+  do it, and the basis for the requirement.
+
+  Plus **15 live calculators**: quantity in, the figure a standard or permit
+  asks for out, updating as you type. Fuel and electricity to CO₂e, emissions
+  intensity, waste volume to mass and diversion rate, abstraction against a
+  permitted daily limit, water per person per day, any monitoring result
+  against its limit, daily noise exposure (LEX,8h with the 3 dB exchange
+  rate), welfare provision and first-aider numbers from headcount, PPE stock
+  from replacement rate, underground ventilation from diesel fleet power,
+  stockpile volume to wet and dry tonnes, and injury frequency rates. Every
+  factor is shown and editable, every calculator states its basis, and where
+  a factor depends on your permit, your grid or your national regulation
+  Verda asks for it rather than supplying a default that would look
+  authoritative and be wrong.
 - **Records** — PPE, Environment, Community and CSR records with a photo
   gallery.
 - **Maps & Site Visits** — client sites on a real ArcGIS/Esri basemap

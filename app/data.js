@@ -1729,7 +1729,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       revenue: "Revenue Planner",
       plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
-      audits: "Audits", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
+      audits: "Audits", inspections: "Inspections & Calculations", records: "Records", maps: "Maps & Site Visits", workflows: "Workflows",
       clients: "Clients & Compliance Care Plans", documents: "Documents Library", checklists: "Checklists",
       credits: "Credits & Billing", skills: "Skills Advisor",
       resources: "Resources Hub", supplies: "Supplies & Hire", iec: "IEC Materials", solutions: "Solutions",
@@ -1740,7 +1740,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       revenue: "Mpango wa Mapato",
       plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
-      audits: "Ukaguzi", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
+      audits: "Ukaguzi", inspections: "Ukaguzi na Hesabu", records: "Kumbukumbu", maps: "Ramani na Ziara za Tovuti", workflows: "Mtiririko wa Kazi",
       clients: "Wateja na Mipango ya Uzingatiaji", documents: "Maktaba ya Hati", checklists: "Orodha za Ukaguzi",
       credits: "Mikopo na Malipo", skills: "Mshauri wa Ujuzi",
       resources: "Kituo cha Rasilimali", supplies: "Vifaa na Ukodishaji", iec: "Nyenzo za IEC", solutions: "Suluhisho",
@@ -1751,7 +1751,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       revenue: "Planificateur de Revenus",
       plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
-      audits: "Audits", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
+      audits: "Audits", inspections: "Inspections et Calculs", records: "Registres", maps: "Cartes et Visites de Site", workflows: "Flux de Travail",
       clients: "Clients et Plans de Conformité", documents: "Bibliothèque de Documents", checklists: "Listes de Contrôle",
       credits: "Crédits et Facturation", skills: "Conseiller en Compétences",
       resources: "Centre de Ressources", supplies: "Fournitures et Location", iec: "Matériel IEC", solutions: "Solutions",
@@ -1762,7 +1762,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       revenue: "Planeador de Receitas",
       plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
-      audits: "Auditorias", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
+      audits: "Auditorias", inspections: "Inspeções e Cálculos", records: "Registos", maps: "Mapas e Visitas ao Local", workflows: "Fluxos de Trabalho",
       clients: "Clientes e Planos de Conformidade", documents: "Biblioteca de Documentos", checklists: "Listas de Verificação",
       credits: "Créditos e Faturação", skills: "Conselheiro de Competências",
       resources: "Centro de Recursos", supplies: "Suprimentos e Aluguer", iec: "Materiais IEC", solutions: "Soluções",
@@ -1773,7 +1773,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       revenue: "收入测算",
       plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
-      audits: "审核", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
+      audits: "审核", inspections: "检查与计算", records: "记录", maps: "地图与现场巡查", workflows: "工作流程",
       clients: "客户与合规服务计划", documents: "文档库", checklists: "检查表",
       credits: "积分与账单", skills: "技能顾问",
       resources: "资源中心", supplies: "用品与租赁", iec: "IEC 宣传材料", solutions: "解决方案",
@@ -6806,6 +6806,1498 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   // convention). US OSHA practice uses 200,000 hours; the multiplier is
   // shown with every rate so the two are never silently confused.
   kpiExposureBase: 1000000,
+
+  // ---- Equipment & machine inspection register ----------------------------
+  // Statutory and planned inspection requirements by equipment type. The
+  // interval is what Verda uses to calculate the next due date; `basis`
+  // says where the requirement comes from. Intervals are MAXIMUMS under
+  // most regimes and several jurisdictions are stricter — check the
+  // regulation that applies to your site before relying on any of them.
+  inspectionRegimes: [
+    {
+      "category": "Lifting equipment",
+      "item": "Mobile crane",
+      "inspection": "Thorough examination",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person (independent)",
+      "basis": "Lifting equipment regulations — 12 months for goods, 6 months where persons are lifted"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Crane used to lift persons",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person (independent)",
+      "basis": "Shortened interval because a failure is immediately life-threatening"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Overhead / gantry crane",
+      "inspection": "Thorough examination",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifting equipment regulations"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Chain block / lever hoist",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifting accessory"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Slings, shackles, eyebolts",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifting accessory — plus pre-use visual check"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Forklift truck",
+      "inspection": "Thorough examination",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifting equipment; 6 months if fitted with a work platform"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Mobile elevating work platform (MEWP)",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifts persons"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Passenger / goods hoist",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifts persons"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Vehicle lifting jack and axle stands",
+      "inspection": "Inspection",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Lifting equipment"
+    },
+    {
+      "category": "Lifting equipment",
+      "item": "Winch and wire rope",
+      "inspection": "Thorough examination",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Rope condition and termination"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Steam boiler",
+      "inspection": "Statutory external and internal examination",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person / insurer",
+      "basis": "Pressure systems written scheme of examination"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Air receiver",
+      "inspection": "Statutory examination",
+      "every": 26,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Written scheme of examination; interval set by the scheme"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Pressure vessel (process)",
+      "inspection": "Statutory examination",
+      "every": 24,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Written scheme of examination"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Safety / pressure relief valve",
+      "inspection": "Test and certification",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Set-pressure verification"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Autoclave / steriliser",
+      "inspection": "Statutory examination",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Pressure system; healthcare and laboratory use"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "Compressed gas cylinder",
+      "inspection": "Periodic inspection and test",
+      "every": 60,
+      "unit": "months",
+      "who": "Approved test house",
+      "basis": "Cylinder test interval varies by gas and standard"
+    },
+    {
+      "category": "Pressure systems",
+      "item": "LPG installation and pipework",
+      "inspection": "Inspection and tightness test",
+      "every": 12,
+      "unit": "months",
+      "who": "Registered gas technician",
+      "basis": "Gas safety"
+    },
+    {
+      "category": "Electrical",
+      "item": "Fixed electrical installation",
+      "inspection": "Periodic inspection and testing",
+      "every": 36,
+      "unit": "months",
+      "who": "Licensed electrician",
+      "basis": "Interval shortens to 12 months for construction, quarry and wet or corrosive environments"
+    },
+    {
+      "category": "Electrical",
+      "item": "Fixed installation — construction / quarry / wet area",
+      "inspection": "Periodic inspection and testing",
+      "every": 12,
+      "unit": "months",
+      "who": "Licensed electrician",
+      "basis": "Harsh environment interval"
+    },
+    {
+      "category": "Electrical",
+      "item": "Portable appliance (office)",
+      "inspection": "Portable appliance testing",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Risk-based interval"
+    },
+    {
+      "category": "Electrical",
+      "item": "Portable appliance (site / handheld tools)",
+      "inspection": "Portable appliance testing",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Harsh use — quarterly"
+    },
+    {
+      "category": "Electrical",
+      "item": "Residual current device (RCD)",
+      "inspection": "Trip test",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Plus user push-button test monthly"
+    },
+    {
+      "category": "Electrical",
+      "item": "Earthing and bonding system",
+      "inspection": "Continuity and resistance test",
+      "every": 12,
+      "unit": "months",
+      "who": "Licensed electrician",
+      "basis": "Earth electrode resistance"
+    },
+    {
+      "category": "Electrical",
+      "item": "Lightning protection system",
+      "inspection": "Inspection and test",
+      "every": 12,
+      "unit": "months",
+      "who": "Specialist contractor",
+      "basis": "Standard practice for exposed structures"
+    },
+    {
+      "category": "Electrical",
+      "item": "Standby generator",
+      "inspection": "Load test and service",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent technician",
+      "basis": "Monthly run under load; annual full service"
+    },
+    {
+      "category": "Electrical",
+      "item": "UPS and battery bank",
+      "inspection": "Inspection and discharge test",
+      "every": 12,
+      "unit": "months",
+      "who": "Specialist contractor",
+      "basis": "Battery condition and runtime"
+    },
+    {
+      "category": "Electrical",
+      "item": "High-voltage switchgear",
+      "inspection": "Inspection, thermography and maintenance",
+      "every": 12,
+      "unit": "months",
+      "who": "Authorised person",
+      "basis": "Plus thermographic survey"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Portable fire extinguisher",
+      "inspection": "Visual check",
+      "every": 1,
+      "unit": "months",
+      "who": "Site fire warden",
+      "basis": "Monthly visual; annual service by a competent person"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Portable fire extinguisher",
+      "inspection": "Service and certification",
+      "every": 12,
+      "unit": "months",
+      "who": "Certified service provider",
+      "basis": "Annual maintenance"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Fire hose reel and hydrant",
+      "inspection": "Inspection and flow test",
+      "every": 12,
+      "unit": "months",
+      "who": "Certified service provider",
+      "basis": "Pressure and flow verification"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Fire detection and alarm system",
+      "inspection": "Functional test",
+      "every": 1,
+      "unit": "months",
+      "who": "Site fire warden",
+      "basis": "Weekly call-point test; six-monthly service"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Fire detection and alarm system",
+      "inspection": "Service",
+      "every": 6,
+      "unit": "months",
+      "who": "Certified service provider",
+      "basis": "System service and certification"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Sprinkler system",
+      "inspection": "Inspection and test",
+      "every": 12,
+      "unit": "months",
+      "who": "Certified service provider",
+      "basis": "Plus weekly valve and gauge check"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Emergency lighting",
+      "inspection": "Function test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Monthly short-duration; annual full-duration test"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Emergency lighting",
+      "inspection": "Full-duration test",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Full rated duration"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Fire door",
+      "inspection": "Inspection",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Closure, seals and hardware"
+    },
+    {
+      "category": "Fire safety",
+      "item": "Fire pump",
+      "inspection": "Run test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Monthly run; annual performance test"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Scaffold",
+      "inspection": "Inspection",
+      "every": 7,
+      "unit": "days",
+      "who": "Competent scaffold inspector",
+      "basis": "After erection, alteration, adverse weather and at least every 7 days"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Ladder / stepladder",
+      "inspection": "Formal inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Plus pre-use check"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Full-body harness and lanyard",
+      "inspection": "Detailed inspection",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Plus pre-use check by the wearer"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Fall-arrest anchor point",
+      "inspection": "Load test / inspection",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Certification of anchor"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Safety net",
+      "inspection": "Inspection",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Plus after any arrest event"
+    },
+    {
+      "category": "Access & fall protection",
+      "item": "Edge protection and guardrail",
+      "inspection": "Inspection",
+      "every": 1,
+      "unit": "months",
+      "who": "Site supervisor",
+      "basis": "Plus after modification"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Light vehicle",
+      "inspection": "Roadworthiness inspection",
+      "every": 12,
+      "unit": "months",
+      "who": "Licensed inspection centre",
+      "basis": "Statutory roadworthiness certificate"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Heavy goods vehicle / tipper",
+      "inspection": "Roadworthiness inspection",
+      "every": 6,
+      "unit": "months",
+      "who": "Licensed inspection centre",
+      "basis": "Shorter interval for heavy commercial vehicles in most jurisdictions"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Passenger bus / staff transport",
+      "inspection": "Roadworthiness inspection",
+      "every": 6,
+      "unit": "months",
+      "who": "Licensed inspection centre",
+      "basis": "Passenger-carrying vehicle"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Excavator / loader / dozer",
+      "inspection": "Planned maintenance inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent mechanic",
+      "basis": "Manufacturer schedule; plus daily pre-use check"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Haul truck",
+      "inspection": "Planned maintenance inspection",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent mechanic",
+      "basis": "Plus daily pre-use check"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Any mobile plant",
+      "inspection": "Daily pre-use inspection",
+      "every": 1,
+      "unit": "days",
+      "who": "Operator",
+      "basis": "Recorded on a pre-use checklist"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Roll-over protective structure (ROPS/FOPS)",
+      "inspection": "Inspection and certification",
+      "every": 12,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Structure integrity; no unauthorised modification"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Seat belt and restraint",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Webbing, anchorage and buckle"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Reversing camera / proximity system",
+      "inspection": "Function test",
+      "every": 1,
+      "unit": "months",
+      "who": "Operator / workshop",
+      "basis": "Function verified"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "item": "Fuel bowser and dispensing equipment",
+      "inspection": "Inspection",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Hose, nozzle, bund and earth continuity"
+    },
+    {
+      "category": "Machinery",
+      "item": "Machine guard and interlock",
+      "inspection": "Function test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Interlock proven to stop hazardous motion"
+    },
+    {
+      "category": "Machinery",
+      "item": "Emergency stop and pull-cord",
+      "inspection": "Function test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Every device operated and verified"
+    },
+    {
+      "category": "Machinery",
+      "item": "Conveyor system",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Guards, pull-cords, rollers, alignment"
+    },
+    {
+      "category": "Machinery",
+      "item": "Crusher and screen",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Guards, structure, isolation points"
+    },
+    {
+      "category": "Machinery",
+      "item": "Lockout/tagout devices and locks",
+      "inspection": "Inspection and audit",
+      "every": 6,
+      "unit": "months",
+      "who": "EHS / maintenance",
+      "basis": "Device condition and procedure audit"
+    },
+    {
+      "category": "Machinery",
+      "item": "Abrasive wheel / bench grinder",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Rest gap, guard, wheel condition"
+    },
+    {
+      "category": "Machinery",
+      "item": "Welding set and cables",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Insulation, return path, flashback arrestors"
+    },
+    {
+      "category": "Machinery",
+      "item": "Local exhaust ventilation (LEV)",
+      "inspection": "Thorough examination and test",
+      "every": 14,
+      "unit": "months",
+      "who": "LEV competent examiner",
+      "basis": "Statutory in most jurisdictions where fume or dust is controlled"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Fixed gas detection system",
+      "inspection": "Calibration",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent technician",
+      "basis": "Plus functional bump test at the set frequency"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Portable gas detector",
+      "inspection": "Calibration",
+      "every": 6,
+      "unit": "months",
+      "who": "Competent technician",
+      "basis": "Bump test before each use"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Self-contained self-rescuer",
+      "inspection": "Inspection",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Seal integrity and indicator"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Breathing apparatus (SCBA)",
+      "inspection": "Inspection and test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Plus annual full service"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Noise dosimeter / sound level meter",
+      "inspection": "Calibration",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Traceable calibration certificate"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Air sampling pump",
+      "inspection": "Calibration",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Flow-rate calibration"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Effluent flow meter",
+      "inspection": "Calibration",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Permit condition in most jurisdictions"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Continuous emission monitoring system (CEMS)",
+      "inspection": "Calibration and QA",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited provider",
+      "basis": "Plus periodic zero and span checks"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Weighbridge",
+      "inspection": "Calibration and verification",
+      "every": 12,
+      "unit": "months",
+      "who": "Legal metrology authority",
+      "basis": "Waste and product reconciliation depends on it"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Laboratory balance and instruments",
+      "inspection": "Calibration",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Traceable calibration"
+    },
+    {
+      "category": "Monitoring & detection",
+      "item": "Thermometer / data logger (cold chain)",
+      "inspection": "Calibration",
+      "every": 12,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Food and medical cold chain"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "First aid kit",
+      "inspection": "Contents check and restock",
+      "every": 1,
+      "unit": "months",
+      "who": "Trained first aider",
+      "basis": "Expiry dates and completeness"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Emergency eyewash station",
+      "inspection": "Flush and function test",
+      "every": 7,
+      "unit": "days",
+      "who": "Site supervisor",
+      "basis": "Weekly activation to clear the line"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Emergency safety shower",
+      "inspection": "Function test",
+      "every": 7,
+      "unit": "days",
+      "who": "Site supervisor",
+      "basis": "Weekly activation; annual flow and temperature test"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Automated external defibrillator (AED)",
+      "inspection": "Status check",
+      "every": 1,
+      "unit": "months",
+      "who": "Trained first aider",
+      "basis": "Battery and pad expiry"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Spill response kit",
+      "inspection": "Contents check",
+      "every": 1,
+      "unit": "months",
+      "who": "Site supervisor",
+      "basis": "Completeness after any use"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Stretcher and rescue equipment",
+      "inspection": "Inspection",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Condition and availability"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Potable water supply",
+      "inspection": "Quality test",
+      "every": 3,
+      "unit": "months",
+      "who": "Accredited laboratory",
+      "basis": "Microbiological and chemical"
+    },
+    {
+      "category": "Welfare & emergency",
+      "item": "Sanitary facilities",
+      "inspection": "Inspection",
+      "every": 1,
+      "unit": "months",
+      "who": "Site supervisor",
+      "basis": "Provision against headcount and cleanliness"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Winding engine / mine hoist",
+      "inspection": "Statutory examination",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent engineer",
+      "basis": "Daily rope inspection; statutory periodic examination"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Winding rope",
+      "inspection": "Non-destructive testing",
+      "every": 6,
+      "unit": "months",
+      "who": "Specialist",
+      "basis": "Rope condition; discard criteria"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Main ventilation fan",
+      "inspection": "Inspection and performance test",
+      "every": 3,
+      "unit": "months",
+      "who": "Ventilation engineer",
+      "basis": "Airflow against the ventilation plan"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Ventilation survey (underground)",
+      "inspection": "Survey",
+      "every": 3,
+      "unit": "months",
+      "who": "Ventilation officer",
+      "basis": "Airflow at each working face"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Tailings facility instrumentation",
+      "inspection": "Reading and review",
+      "every": 1,
+      "unit": "months",
+      "who": "TSF engineer",
+      "basis": "Piezometers, survey monuments, freeboard"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Tailings storage facility",
+      "inspection": "Dam safety inspection",
+      "every": 12,
+      "unit": "months",
+      "who": "Engineer of Record",
+      "basis": "Plus independent dam safety review at the set interval"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Pit slope monitoring system",
+      "inspection": "Verification",
+      "every": 1,
+      "unit": "months",
+      "who": "Geotechnical engineer",
+      "basis": "Instrument function and trigger levels"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Explosives magazine",
+      "inspection": "Inspection",
+      "every": 1,
+      "unit": "months",
+      "who": "Magazine keeper",
+      "basis": "Stock reconciliation, security and condition"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Underground refuge chamber",
+      "inspection": "Inspection and function test",
+      "every": 1,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Air, water, seal and communications"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Conveyor fire protection",
+      "inspection": "Inspection and test",
+      "every": 3,
+      "unit": "months",
+      "who": "Competent person",
+      "basis": "Detection and suppression"
+    },
+    {
+      "category": "Mining & heavy industry",
+      "item": "Settling pond and silt trap",
+      "inspection": "Inspection and desilting check",
+      "every": 1,
+      "unit": "months",
+      "who": "Environmental officer",
+      "basis": "Capacity before the rains"
+    }
+  ],
+
+  // ---- Auto-calculations --------------------------------------------------
+  // Quantity in, derived figure out. Every factor is visible and editable,
+  // and every calculator states its basis — a compliance number whose
+  // origin nobody can explain is worse than no number.
+  calculators: [
+    {
+      "id": "ghg-fuel",
+      "name": "Fuel burned → CO₂e",
+      "group": "Emissions",
+      "basis": "Combustion emission factors are approximately constant per litre or kg of fuel — they come from the fuel's carbon content, not from where it is burned. Figures here are widely used defaults; replace them with your national or supplier factor where you have one.",
+      "inputs": [
+        {
+          "key": "qty",
+          "label": "Quantity used",
+          "unit": "unit of the fuel"
+        },
+        {
+          "key": "factor",
+          "label": "Emission factor",
+          "unit": "kg CO₂e per unit",
+          "default": 2.68,
+          "factorTable": [
+            {
+              "name": "Diesel (gas oil)",
+              "unit": "litres",
+              "factor": 2.68
+            },
+            {
+              "name": "Petrol / gasoline",
+              "unit": "litres",
+              "factor": 2.31
+            },
+            {
+              "name": "Kerosene / jet fuel",
+              "unit": "litres",
+              "factor": 2.54
+            },
+            {
+              "name": "Heavy fuel oil",
+              "unit": "litres",
+              "factor": 3.11
+            },
+            {
+              "name": "LPG",
+              "unit": "litres",
+              "factor": 1.56
+            },
+            {
+              "name": "LPG",
+              "unit": "kg",
+              "factor": 2.98
+            },
+            {
+              "name": "Natural gas",
+              "unit": "m³",
+              "factor": 2.02
+            },
+            {
+              "name": "Coal (bituminous)",
+              "unit": "kg",
+              "factor": 2.42
+            },
+            {
+              "name": "Charcoal",
+              "unit": "kg",
+              "factor": 3.3
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "co2",
+          "label": "CO₂e emitted",
+          "unit": "kg",
+          "expr": "qty * factor"
+        },
+        {
+          "key": "t",
+          "label": "CO₂e emitted",
+          "unit": "tonnes",
+          "expr": "qty * factor / 1000"
+        }
+      ],
+      "note": "Scope 1 (direct) emissions. Fuel used by a contractor's plant on your site is usually yours to report as Scope 1 or 3 depending on operational control — decide once and be consistent."
+    },
+    {
+      "id": "ghg-power",
+      "name": "Grid electricity → CO₂e",
+      "group": "Emissions",
+      "basis": "Grid emission factors vary enormously by country and year — a hydro-dominated grid can be a tenth of a coal-dominated one. There is no safe default, so Verda will not supply one: enter the published factor for your grid and year.",
+      "inputs": [
+        {
+          "key": "kwh",
+          "label": "Electricity consumed",
+          "unit": "kWh"
+        },
+        {
+          "key": "factor",
+          "label": "Grid emission factor",
+          "unit": "kg CO₂e per kWh"
+        }
+      ],
+      "outputs": [
+        {
+          "key": "co2",
+          "label": "CO₂e emitted",
+          "unit": "kg",
+          "expr": "kwh * factor"
+        },
+        {
+          "key": "t",
+          "label": "CO₂e emitted",
+          "unit": "tonnes",
+          "expr": "kwh * factor / 1000"
+        }
+      ],
+      "note": "Scope 2 (purchased energy). Use your utility's or national regulator's published factor and record which year it is from."
+    },
+    {
+      "id": "ghg-intensity",
+      "name": "Emissions intensity",
+      "group": "Emissions",
+      "basis": "Intensity makes periods comparable when production changes. Choose one denominator and keep it.",
+      "inputs": [
+        {
+          "key": "co2",
+          "label": "Total CO₂e",
+          "unit": "tonnes"
+        },
+        {
+          "key": "output",
+          "label": "Production in the period",
+          "unit": "unit of production"
+        }
+      ],
+      "outputs": [
+        {
+          "key": "intensity",
+          "label": "Emissions intensity",
+          "unit": "t CO₂e per unit of production",
+          "expr": "co2 / output"
+        }
+      ],
+      "note": "State the denominator every time — tonnes of ore, m³ of concrete, units produced. An intensity figure without its denominator is meaningless."
+    },
+    {
+      "id": "waste-mass",
+      "name": "Waste volume → mass",
+      "group": "Waste",
+      "basis": "Waste is measured in skips and containers but reported and charged in tonnes. Densities vary with compaction and moisture — these are working defaults, and a weighbridge ticket beats any of them.",
+      "inputs": [
+        {
+          "key": "vol",
+          "label": "Volume",
+          "unit": "m³"
+        },
+        {
+          "key": "density",
+          "label": "Bulk density",
+          "unit": "t/m³",
+          "default": 0.2,
+          "factorTable": [
+            {
+              "name": "Mixed general waste (loose)",
+              "unit": "t/m³",
+              "factor": 0.2
+            },
+            {
+              "name": "Mixed general waste (compacted)",
+              "unit": "t/m³",
+              "factor": 0.45
+            },
+            {
+              "name": "Paper and cardboard (loose)",
+              "unit": "t/m³",
+              "factor": 0.1
+            },
+            {
+              "name": "Plastics (loose)",
+              "unit": "t/m³",
+              "factor": 0.06
+            },
+            {
+              "name": "Glass",
+              "unit": "t/m³",
+              "factor": 0.3
+            },
+            {
+              "name": "Scrap metal",
+              "unit": "t/m³",
+              "factor": 0.6
+            },
+            {
+              "name": "Timber / wood waste",
+              "unit": "t/m³",
+              "factor": 0.25
+            },
+            {
+              "name": "Food / biodegradable",
+              "unit": "t/m³",
+              "factor": 0.5
+            },
+            {
+              "name": "Construction rubble",
+              "unit": "t/m³",
+              "factor": 1.5
+            },
+            {
+              "name": "Soil (contaminated, in situ)",
+              "unit": "t/m³",
+              "factor": 1.8
+            },
+            {
+              "name": "Used oil",
+              "unit": "t/m³",
+              "factor": 0.88
+            },
+            {
+              "name": "Sewage sludge (dewatered)",
+              "unit": "t/m³",
+              "factor": 1.0
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "mass",
+          "label": "Mass",
+          "unit": "tonnes",
+          "expr": "vol * density"
+        },
+        {
+          "key": "kg",
+          "label": "Mass",
+          "unit": "kg",
+          "expr": "vol * density * 1000"
+        }
+      ],
+      "note": "Where a weighbridge ticket exists, use it and record the ticket number — a calculated mass is an estimate and should be labelled as one."
+    },
+    {
+      "id": "waste-diversion",
+      "name": "Waste diversion rate",
+      "group": "Waste",
+      "basis": "The share of waste kept out of landfill. A headline sustainability figure, so define it the same way every period.",
+      "inputs": [
+        {
+          "key": "recycled",
+          "label": "Recycled, reused or recovered",
+          "unit": "tonnes"
+        },
+        {
+          "key": "total",
+          "label": "Total waste generated",
+          "unit": "tonnes"
+        }
+      ],
+      "outputs": [
+        {
+          "key": "rate",
+          "label": "Diversion from landfill",
+          "unit": "%",
+          "expr": "recycled / total * 100",
+          "compare": {
+            "good": "higher"
+          }
+        }
+      ],
+      "note": "State whether hazardous waste and tailings are in or out of the denominator — including mine waste makes the figure look very different."
+    },
+    {
+      "id": "water-permit",
+      "name": "Abstraction against permit limit",
+      "group": "Water",
+      "basis": "A permit sets a maximum abstraction, usually per day. Exceeding it is a licence breach, so the comparison should be automatic rather than noticed at audit.",
+      "inputs": [
+        {
+          "key": "abstracted",
+          "label": "Abstracted in the period",
+          "unit": "m³"
+        },
+        {
+          "key": "days",
+          "label": "Days in the period",
+          "unit": "days",
+          "default": 30
+        },
+        {
+          "key": "limit",
+          "label": "Permitted daily limit",
+          "unit": "m³/day"
+        }
+      ],
+      "outputs": [
+        {
+          "key": "perday",
+          "label": "Average daily abstraction",
+          "unit": "m³/day",
+          "expr": "abstracted / days"
+        },
+        {
+          "key": "pct",
+          "label": "Of permitted limit",
+          "unit": "%",
+          "expr": "(abstracted / days) / limit * 100",
+          "compare": {
+            "limit": 100,
+            "good": "lower"
+          }
+        }
+      ],
+      "note": "An average within the limit can still hide a day that exceeded it. Where the permit is a daily cap, check the peak day too."
+    },
+    {
+      "id": "water-percapita",
+      "name": "Water use per person",
+      "group": "Water",
+      "basis": "Used to size supply and to sanity-check consumption against a camp's headcount.",
+      "inputs": [
+        {
+          "key": "volume",
+          "label": "Water supplied",
+          "unit": "m³"
+        },
+        {
+          "key": "people",
+          "label": "People accommodated",
+          "unit": "persons"
+        },
+        {
+          "key": "days",
+          "label": "Days",
+          "unit": "days",
+          "default": 30
+        }
+      ],
+      "outputs": [
+        {
+          "key": "lpd",
+          "label": "Consumption",
+          "unit": "litres per person per day",
+          "expr": "volume * 1000 / people / days"
+        }
+      ],
+      "note": "Worker accommodation standards commonly expect a minimum supply per person per day — check the figure applicable in your jurisdiction and compare."
+    },
+    {
+      "id": "limit-check",
+      "name": "Monitoring result against a limit",
+      "group": "Compliance",
+      "basis": "Any measured parameter against its permitted or standard value. Works for effluent, stack emissions, noise, dust or occupational exposure.",
+      "inputs": [
+        {
+          "key": "result",
+          "label": "Measured result",
+          "unit": "as measured"
+        },
+        {
+          "key": "limit",
+          "label": "Permit or standard limit",
+          "unit": "same unit"
+        }
+      ],
+      "outputs": [
+        {
+          "key": "pct",
+          "label": "Of the limit",
+          "unit": "%",
+          "expr": "result / limit * 100",
+          "compare": {
+            "limit": 100,
+            "good": "lower"
+          }
+        },
+        {
+          "key": "margin",
+          "label": "Headroom to the limit",
+          "unit": "in the unit you entered",
+          "expr": "limit - result"
+        }
+      ],
+      "note": "Verda compares two numbers you supply. It does not know your permit — enter the limit from the licence or the applicable standard, and record which."
+    },
+    {
+      "id": "noise-exposure",
+      "name": "Daily noise exposure (LEX,8h)",
+      "group": "Occupational",
+      "basis": "Noise dose depends on level and duration together: 3 dB more is twice the energy, so half the time gives the same dose (the 3 dB exchange rate used by ISO and most national standards).",
+      "inputs": [
+        {
+          "key": "level",
+          "label": "Measured level",
+          "unit": "dB(A)"
+        },
+        {
+          "key": "hours",
+          "label": "Exposure duration",
+          "unit": "hours",
+          "default": 8
+        }
+      ],
+      "outputs": [
+        {
+          "key": "lex",
+          "label": "Daily exposure LEX,8h",
+          "unit": "dB(A)",
+          "expr": "level + 10 * log10(hours / 8)",
+          "compare": {
+            "limit": 85,
+            "good": "lower"
+          }
+        }
+      ],
+      "note": "Compare against your national exposure limit — commonly 85 dB(A) for action and 87 dB(A) as a hard limit, but confirm locally. Above the action level, hearing protection and audiometry are usually mandatory."
+    },
+    {
+      "id": "welfare",
+      "name": "Welfare provision from headcount",
+      "group": "Welfare",
+      "basis": "Sanitation, water and first aid provision scale with headcount. Ratios differ by jurisdiction — these are common working ratios to be checked against your own regulations.",
+      "inputs": [
+        {
+          "key": "people",
+          "label": "People on site",
+          "unit": "persons"
+        },
+        {
+          "key": "perToilet",
+          "label": "Persons per toilet",
+          "unit": "persons",
+          "default": 15
+        },
+        {
+          "key": "litres",
+          "label": "Drinking water per person per day",
+          "unit": "litres",
+          "default": 5
+        },
+        {
+          "key": "perKit",
+          "label": "Persons per first aid kit",
+          "unit": "persons",
+          "default": 50
+        }
+      ],
+      "outputs": [
+        {
+          "key": "toilets",
+          "label": "Toilets required",
+          "unit": "units",
+          "expr": "ceil(people / perToilet)"
+        },
+        {
+          "key": "water",
+          "label": "Drinking water per day",
+          "unit": "litres",
+          "expr": "people * litres"
+        },
+        {
+          "key": "kits",
+          "label": "First aid kits",
+          "unit": "units",
+          "expr": "ceil(people / perKit)"
+        }
+      ],
+      "note": "Verify every ratio against the occupational safety regulations of the jurisdiction — the defaults here are typical, not authoritative, and several countries also set separate provision by sex."
+    },
+    {
+      "id": "ppe-stock",
+      "name": "PPE stock from headcount",
+      "group": "Welfare",
+      "basis": "Working out how much to hold and reorder, from headcount and replacement frequency.",
+      "inputs": [
+        {
+          "key": "people",
+          "label": "People needing the item",
+          "unit": "persons"
+        },
+        {
+          "key": "perYear",
+          "label": "Replacements per person per year",
+          "unit": "issues",
+          "default": 4
+        },
+        {
+          "key": "weeks",
+          "label": "Reorder lead time",
+          "unit": "weeks",
+          "default": 6
+        }
+      ],
+      "outputs": [
+        {
+          "key": "annual",
+          "label": "Annual requirement",
+          "unit": "units",
+          "expr": "people * perYear"
+        },
+        {
+          "key": "buffer",
+          "label": "Minimum stock to hold",
+          "unit": "units",
+          "expr": "ceil(people * perYear * weeks / 52)"
+        }
+      ],
+      "note": "Add a margin for new starters, visitors and damage; a stock-out is a stopped job or, worse, a job done without the PPE."
+    },
+    {
+      "id": "first-aiders",
+      "name": "First aiders and fire wardens",
+      "group": "Welfare",
+      "basis": "Trained-person provision scales with headcount and shift pattern.",
+      "inputs": [
+        {
+          "key": "people",
+          "label": "People per shift",
+          "unit": "persons"
+        },
+        {
+          "key": "perFirstAider",
+          "label": "Persons per first aider",
+          "unit": "persons",
+          "default": 25
+        },
+        {
+          "key": "perWarden",
+          "label": "Persons per fire warden",
+          "unit": "persons",
+          "default": 50
+        },
+        {
+          "key": "shifts",
+          "label": "Shifts per day",
+          "unit": "shifts",
+          "default": 1
+        }
+      ],
+      "outputs": [
+        {
+          "key": "firstAiders",
+          "label": "First aiders needed",
+          "unit": "persons",
+          "expr": "ceil(people / perFirstAider) * shifts"
+        },
+        {
+          "key": "wardens",
+          "label": "Fire wardens needed",
+          "unit": "persons",
+          "expr": "ceil(people / perWarden) * shifts"
+        }
+      ],
+      "note": "Cover every shift, not just days — and allow for leave and turnover, or the requirement quietly fails."
+    },
+    {
+      "id": "ventilation",
+      "name": "Underground airflow from diesel fleet",
+      "group": "Mining",
+      "basis": "Underground ventilation requirement is commonly set from the rated power of diesel equipment working in the area.",
+      "inputs": [
+        {
+          "key": "kw",
+          "label": "Diesel equipment rated power in the district",
+          "unit": "kW"
+        },
+        {
+          "key": "rate",
+          "label": "Airflow required per kW",
+          "unit": "m³/s per kW",
+          "default": 0.06
+        }
+      ],
+      "outputs": [
+        {
+          "key": "flow",
+          "label": "Minimum airflow",
+          "unit": "m³/s",
+          "expr": "kw * rate"
+        },
+        {
+          "key": "cfm",
+          "label": "Minimum airflow",
+          "unit": "m³/min",
+          "expr": "kw * rate * 60"
+        }
+      ],
+      "note": "The per-kW figure is set by national mining regulations and varies (commonly 0.05–0.08 m³/s per kW). Enter the rate your jurisdiction requires — and remember it is a minimum before heat, dust, gas and blasting fumes are considered."
+    },
+    {
+      "id": "stockpile",
+      "name": "Stockpile volume → tonnes",
+      "group": "Mining",
+      "basis": "Converting a surveyed or estimated stockpile into tonnage for reporting and reconciliation.",
+      "inputs": [
+        {
+          "key": "vol",
+          "label": "Stockpile volume",
+          "unit": "m³"
+        },
+        {
+          "key": "sg",
+          "label": "Bulk density",
+          "unit": "t/m³",
+          "default": 1.6
+        },
+        {
+          "key": "moisture",
+          "label": "Moisture content",
+          "unit": "%",
+          "default": 5
+        }
+      ],
+      "outputs": [
+        {
+          "key": "wet",
+          "label": "Wet tonnes",
+          "unit": "t",
+          "expr": "vol * sg"
+        },
+        {
+          "key": "dry",
+          "label": "Dry tonnes",
+          "unit": "t",
+          "expr": "vol * sg * (1 - moisture / 100)"
+        }
+      ],
+      "note": "Bulk density differs from in-situ density because of voids — use a measured bulk density where reporting matters."
+    },
+    {
+      "id": "frequency-rate",
+      "name": "Injury frequency rate",
+      "group": "Safety",
+      "basis": "Events per million hours worked — the ILO/international convention. Verda calculates these automatically in Analytics from the incident register; this calculator is for checking a figure by hand or converting someone else's.",
+      "inputs": [
+        {
+          "key": "events",
+          "label": "Events in the period",
+          "unit": "count"
+        },
+        {
+          "key": "hours",
+          "label": "Hours worked",
+          "unit": "hours"
+        },
+        {
+          "key": "base",
+          "label": "Exposure base",
+          "unit": "hours",
+          "default": 1000000
+        }
+      ],
+      "outputs": [
+        {
+          "key": "rate",
+          "label": "Frequency rate",
+          "unit": "per exposure base",
+          "expr": "events / hours * base"
+        }
+      ],
+      "note": "Set the base to 1,000,000 for the ILO convention or 200,000 for US OSHA practice. The same performance gives a number five times smaller on the OSHA base — never compare the two without converting."
+    }
+  ],
 
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100

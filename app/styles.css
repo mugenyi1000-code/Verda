@@ -310,6 +310,20 @@ th.num { text-align: right; }
 .compact-list li { break-inside: avoid; padding: 4px 0; border-bottom: none; }
 @media (max-width: 700px) { .compact-list { columns: 1; } }
 
+/* ---- Calculators: quantity in, derived figure out ---- */
+.calc-group { margin: 26px 0 10px; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.calc-card h4 { margin: 0 0 4px; font-size: 1rem; }
+.calc-out { margin-top: 4px; }
+.calc-result {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  padding: 9px 12px; border-radius: 10px; background: var(--brand-3); margin: 7px 0;
+}
+.calc-figure { font-size: 1.4rem; font-weight: 800; color: var(--brand-1); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.calc-unit { font-size: .84rem; font-weight: 700; color: var(--muted); }
+.calc-name { font-size: .84rem; color: var(--text); }
+.calc-note { margin: 8px 0 0; border-top: 1px solid var(--border); padding-top: 8px; }
+.field-grid select { margin-bottom: 4px; }
+
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
 .risk-matrix th { font-size: .75rem; color: var(--muted); font-weight: 700; width: 16%; text-align: center; }

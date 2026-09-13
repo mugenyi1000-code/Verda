@@ -54,6 +54,7 @@
       workflowRuns: [],
       incidents: [],
       subcontractors: [],
+      equipment: [],          // equipment and machines under an inspection regime
       workforce: [],          // exposure hours by period, client and employer — the KPI denominator
       risks: [],
       actions: [],
@@ -65,7 +66,7 @@
 
   let state = load();
   // Saved states from before these registers existed must not crash on load.
-  ["subcontractors", "workforce"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
+  ["subcontractors", "workforce", "equipment"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
     try {
@@ -83,6 +84,8 @@
 
   /* ---------------------------- ICONS (inline SVG, no external deps) ---------------------------- */
   const ICON_PATHS = {
+    // calipers over a gauge — measurement and examination
+    inspections: '<path d="M9 3v8a3 3 0 0 0 6 0V3"/><path d="M7 3h4M13 3h4"/><path d="M12 14v3"/><circle cx="12" cy="19.5" r="2.5"/>',
     dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
     reporting: '<path d="M6 2.5h8l4 4V21a.5.5 0 0 1-.5.5h-11A.5.5 0 0 1 6 21V3a.5.5 0 0 1 .5-.5Z"/><path d="M14 2.5V7h4"/><path d="M9 12h6M9 15.5h6M9 8.5h3"/>',
     esia: '<rect x="4.5" y="3.5" width="15" height="18" rx="1.5"/><path d="M9 2.5h6a1 1 0 0 1 1 1V5H8V3.5a1 1 0 0 1 1-1Z"/><path d="m8.5 12.5 2 2 4-4.5M8.5 17h7"/>',
@@ -307,6 +310,7 @@
     { id: "incidents", group: "monitor", label: () => T().incidents, render: renderIncidents },
     { id: "risk", group: "monitor", label: () => T().risk, render: renderRisk },
     { id: "audits", group: "monitor", label: () => T().audits, render: renderAudits },
+    { id: "inspections", group: "monitor", label: () => T().inspections, render: renderInspections },
     { id: "records", group: "monitor", label: () => T().records, render: renderRecords },
     { id: "maps", group: "monitor", label: () => T().maps, render: renderMaps },
 
@@ -358,6 +362,7 @@
      leads with the hero and the pillar gallery instead. */
   const SECTION_ILLUS = {
     analytics: "governance", incidents: "safety", risk: "safety", audits: "audit",
+    inspections: "audit",
     records: "people", maps: "sitemap", actions: "audit", reporting: "documents",
     esia: "wildlife", training: "training", workflows: "governance", clients: "people",
     checklists: "industry", documents: "documents", credits: "governance", revenue: "governance", plans: "revenue",
@@ -1537,6 +1542,309 @@
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       btn.dataset.tab === "ehs" ? ehsPanel() : esiaAuditPanel();
+    }));
+  }
+
+  /* ====================== INSPECTIONS & CALCULATIONS ======================
+     Two halves of the same job: knowing what has to be examined and when,
+     and turning a quantity into the figure a standard or a permit actually
+     asks for. Both are calculated — a due date typed by hand goes stale, and
+     a conversion done in someone's head is a conversion nobody can check. */
+
+  // Add an interval expressed in days or months to a date.
+  function addInterval(dateStr, every, unit) {
+    if (!dateStr) return "";
+    if (unit === "days") {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + Number(every));
+      return d.toISOString().slice(0, 10);
+    }
+    return addMonths(dateStr, Number(every));
+  }
+
+  // Due status, with a warning window so an examination is chased before it
+  // lapses rather than after — a lapsed statutory examination usually means
+  // the equipment may not lawfully be used.
+  function dueStatus(nextDue, warnDays) {
+    if (!nextDue) return { label: "Not scheduled", status: "warning", days: null };
+    const days = daysUntil(nextDue);
+    if (days < 0) return { label: `Overdue by ${Math.abs(days)}d`, status: "critical", days };
+    if (days <= (warnDays || 30)) return { label: `Due in ${days}d`, status: "warning", days };
+    return { label: `Valid — ${days}d`, status: "good", days };
+  }
+
+  // A tiny, deliberately limited expression evaluator for calculator formulas.
+  // Only numbers, the named inputs, arithmetic, ceil/floor/log10/sqrt/min/max
+  // are accepted — anything else is rejected rather than executed.
+  function evalFormula(expr, vars) {
+    const allowed = /^[\d\s+\-*/().,a-zA-Z_]+$/;
+    if (!allowed.test(expr)) return null;
+    const fns = { ceil: Math.ceil, floor: Math.floor, round: Math.round, log10: Math.log10, sqrt: Math.sqrt, min: Math.min, max: Math.max, abs: Math.abs };
+    const names = Object.keys(vars).concat(Object.keys(fns));
+    const values = Object.keys(vars).map(k => Number(vars[k])).concat(Object.keys(fns).map(k => fns[k]));
+    try {
+      // eslint-disable-next-line no-new-func
+      const out = Function(...names, `"use strict"; return (${expr});`)(...values);
+      return Number.isFinite(out) ? out : null;
+    } catch (e) { return null; }
+  }
+
+  // Whole numbers print whole — "18 toilets", not "18.0 toilets".
+  const fmtNum = (v) => {
+    if (v === null) return "—";
+    if (Number.isInteger(v)) return v.toLocaleString();
+    if (Math.abs(v) >= 1000) return Math.round(v).toLocaleString();
+    return Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2);
+  };
+
+  function renderInspections(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Inspections &amp; Calculations</h1>
+            <p class="muted">Equipment and machines that must be examined, when each one is next due, and the calculations
+              that turn a quantity into the figure a standard or permit asks for. Due dates and derived figures are calculated,
+              never typed.</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="register">Equipment register</button>
+          <button class="tab-btn" data-tab="regimes">Inspection requirements</button>
+          <button class="tab-btn" data-tab="calc">Calculators</button>
+        </div>
+        <div id="insp-panel"></div>
+      </section>
+    `));
+    const panel = main.querySelector("#insp-panel");
+
+    /* ---------------- Equipment register ---------------- */
+    function registerPanel() {
+      const cats = [...new Set(S.inspectionRegimes.map(r => r.category))];
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Add equipment</h3>
+          <div class="form-row">
+            <label>Equipment type
+              <select id="eq-type">${cats.map(c =>
+                `<optgroup label="${esc(c)}">${S.inspectionRegimes.map((r, i) => r.category === c
+                  ? `<option value="${i}">${esc(r.item)} — ${esc(r.inspection)}</option>` : "").join("")}</optgroup>`).join("")}</select></label>
+            <label>Asset ID / description<input id="eq-id" placeholder="e.g. CRN-02 Liebherr 40t" /></label>
+            <label>Client / site<select id="eq-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+          </div>
+          <div class="form-row">
+            <label>Owned by<select id="eq-owner">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
+            <label>Owner name<input id="eq-owner-name" placeholder="Own plant or sub-contractor" list="eq-owner-options" /></label>
+            <label>Last inspection<input id="eq-last" type="date" value="${today()}" /></label>
+            <label>Certificate no.<input id="eq-cert" placeholder="Report / certificate reference" /></label>
+          </div>
+          <div id="eq-regime" class="guide-box"></div>
+          <button class="btn btn-primary" id="eq-add">${icon("audits")}<span>Add to register</span></button>
+          <datalist id="eq-owner-options">${state.subcontractors.map(sc => `<option value="${esc(sc.name)}"></option>`).join("")}</datalist>
+        </div>
+
+        <div class="grid grid-3" id="eq-kpis"></div>
+
+        <div class="card">
+          <h3>Equipment register</h3>
+          <p class="muted small">Next due is calculated from the last inspection date and the statutory interval. Sorted by what lapses first.</p>
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Asset</th><th>Type</th><th>Inspection</th><th>Owner</th><th>Site</th><th>Last</th><th>Interval</th><th>Next due</th><th>Status</th><th></th></tr></thead>
+              <tbody id="eq-rows"></tbody>
+            </table>
+          </div>
+          <button class="btn" id="eq-download">Download register (.txt)</button>
+        </div>`;
+
+      // Show what the selected type actually requires, before it is added.
+      function showRegime() {
+        const r = S.inspectionRegimes[Number(panel.querySelector("#eq-type").value)];
+        panel.querySelector("#eq-regime").innerHTML = `
+          <p><strong>${esc(r.item)} — ${esc(r.inspection)}.</strong> Every <strong>${r.every} ${esc(r.unit)}</strong>, by: ${esc(r.who)}.</p>
+          <p class="small">${esc(r.basis)}</p>
+          <p class="small muted">Verda will set the next due date from the last inspection you enter. The interval is a maximum — check the regulation applying to your jurisdiction.</p>`;
+      }
+      showRegime();
+      panel.querySelector("#eq-type").addEventListener("change", showRegime);
+
+      function refresh() {
+        const rows = state.equipment.map(e => {
+          const r = S.inspectionRegimes[e.regime] || {};
+          const next = addInterval(e.last, r.every, r.unit);
+          return { e, r, next, st: dueStatus(next) };
+        }).sort((a, b) => (a.st.days === null ? 1e9 : a.st.days) - (b.st.days === null ? 1e9 : b.st.days));
+
+        panel.querySelector("#eq-rows").innerHTML = rows.map(({ e, r, next, st }) => `
+          <tr${st.status === "critical" ? ' class="row-overdue"' : ""}>
+            <td>${esc(e.assetId)}</td><td>${esc(r.item || "—")}</td><td>${esc(r.inspection || "—")}</td>
+            <td>${esc(e.ownerName || e.owner || "—")}</td><td>${esc(e.client)}</td>
+            <td>${esc(e.last)}</td><td>${r.every} ${esc(r.unit || "")}</td>
+            <td>${esc(next)}</td><td>${statusBadge(st.label, st.status)}</td>
+            <td class="row-actions">
+              <button class="btn btn-ghost btn-sm" data-done="${esc(e.id)}" title="Record an inspection today">Inspected</button>
+              <button class="btn btn-ghost btn-sm" data-del="${esc(e.id)}">Remove</button></td></tr>`).join("") ||
+          `<tr><td colspan="10" class="muted">No equipment registered yet. Add the plant and machines that carry a statutory examination — that is where a lapse costs most.</td></tr>`;
+
+        const overdue = rows.filter(r => r.st.status === "critical").length;
+        const soon = rows.filter(r => r.st.status === "warning").length;
+        panel.querySelector("#eq-kpis").innerHTML =
+          statCard("audits", "Equipment registered", rows.length, "Items carrying an inspection requirement.") +
+          statCard("risk", "Overdue examinations", overdue, overdue ? "Usually means the item may not lawfully be used." : "None overdue.", overdue > 0) +
+          statCard("actions", "Due within 30 days", soon, "Schedule the competent person now.", soon > 0);
+
+        panel.querySelectorAll("[data-done]").forEach(b => b.addEventListener("click", () => {
+          const e = state.equipment.find(x => x.id === b.dataset.done);
+          e.last = today(); save(); refresh();
+        }));
+        panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          state.equipment = state.equipment.filter(x => x.id !== b.dataset.del);
+          save(); refresh();
+        }));
+      }
+      refresh();
+
+      panel.querySelector("#eq-add").addEventListener("click", () => {
+        const assetId = panel.querySelector("#eq-id").value.trim();
+        if (!assetId) { alert("Give the asset an ID or description so it can be found on site."); return; }
+        state.equipment.push({
+          id: uid("eq"), assetId, regime: Number(panel.querySelector("#eq-type").value),
+          client: panel.querySelector("#eq-client").value,
+          owner: panel.querySelector("#eq-owner").value,
+          ownerName: panel.querySelector("#eq-owner-name").value.trim(),
+          last: panel.querySelector("#eq-last").value || today(),
+          cert: panel.querySelector("#eq-cert").value.trim()
+        });
+        save(); refresh();
+        panel.querySelector("#eq-id").value = ""; panel.querySelector("#eq-cert").value = "";
+      });
+
+      panel.querySelector("#eq-download").addEventListener("click", () => {
+        const lines = state.equipment.map(e => {
+          const r = S.inspectionRegimes[e.regime] || {};
+          const next = addInterval(e.last, r.every, r.unit);
+          return `${e.assetId}\n    ${r.item} — ${r.inspection}\n    Owner: ${e.ownerName || e.owner}  |  Site: ${e.client}` +
+            `\n    Last: ${e.last}  |  Every ${r.every} ${r.unit}  |  Next due: ${next}  |  ${dueStatus(next).label}` +
+            `\n    Certificate: ${e.cert || "—"}\n    Basis: ${r.basis}`;
+        });
+        downloadText("Equipment-Inspection-Register.txt",
+          "EQUIPMENT & MACHINE INSPECTION REGISTER\nNext due dates calculated from the last inspection and the statutory interval.\n\n" +
+          (lines.join("\n\n") || "No equipment registered."));
+      });
+    }
+
+    /* ---------------- Inspection requirements reference ---------------- */
+    function regimesPanel() {
+      const cats = [...new Set(S.inspectionRegimes.map(r => r.category))];
+      panel.innerHTML = `
+        <div class="card">
+          <h3>What has to be inspected, and how often</h3>
+          <p class="muted small">${S.inspectionRegimes.length} equipment and machine inspection requirements across ${cats.length} categories.
+            Intervals are maximums under most regimes — several jurisdictions are stricter, and a manufacturer's schedule may be shorter still.</p>
+          <label>Category<select id="rg-cat"><option value="">— all categories —</option>${
+            cats.map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Equipment</th><th>Inspection</th><th class="num">Interval</th><th>By whom</th><th>Basis</th></tr></thead>
+            <tbody id="rg-rows"></tbody></table>
+          </div>
+          <button class="btn" id="rg-download">Download requirements (.txt)</button>
+        </div>`;
+      function load() {
+        const cat = panel.querySelector("#rg-cat").value;
+        panel.querySelector("#rg-rows").innerHTML = S.inspectionRegimes.filter(r => !cat || r.category === cat)
+          .map(r => `<tr><td>${esc(r.item)}</td><td>${esc(r.inspection)}</td>
+            <td class="num">${r.every} ${esc(r.unit)}</td><td>${esc(r.who)}</td><td>${esc(r.basis)}</td></tr>`).join("");
+      }
+      load();
+      panel.querySelector("#rg-cat").addEventListener("change", load);
+      panel.querySelector("#rg-download").addEventListener("click", () =>
+        downloadText("Inspection-Requirements.txt", "EQUIPMENT & MACHINE INSPECTION REQUIREMENTS\n\n" +
+          cats.map(c => `${c.toUpperCase()}\n` + S.inspectionRegimes.filter(r => r.category === c)
+            .map(r => `  • ${r.item} — ${r.inspection}\n      Every ${r.every} ${r.unit}, by ${r.who}\n      ${r.basis}`).join("\n")).join("\n\n")));
+    }
+
+    /* ---------------- Calculators ---------------- */
+    function calcPanel() {
+      const groups = [...new Set(S.calculators.map(c => c.group))];
+      panel.innerHTML = `
+        <div class="card notice-card">
+          <h3>Enter a quantity, get the figure the standard asks for</h3>
+          <p>Every calculation updates as you type. Every factor is shown and editable, and every calculator states where its
+            basis comes from — a compliance figure whose origin nobody can explain is worse than no figure at all.</p>
+          <p class="small">Where a factor depends on your permit, your grid or your national regulation, Verda asks you for it
+            rather than supplying a default that would look authoritative and be wrong.</p>
+        </div>
+        ${groups.map(g => `
+          <h3 class="calc-group">${esc(g)}</h3>
+          ${S.calculators.filter(c => c.group === g).map(c => `
+            <div class="card calc-card" data-calc="${esc(c.id)}">
+              <h4>${esc(c.name)}</h4>
+              <p class="muted small">${esc(c.basis)}</p>
+              <div class="field-grid">
+                ${c.inputs.map(inp => inp.factorTable
+                  ? `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
+                       <select data-factor="${esc(inp.key)}">${inp.factorTable.map((f, i) =>
+                         `<option value="${f.factor}" ${f.factor === inp.default ? "selected" : ""}>${esc(f.name)} — ${f.factor} ${esc(f.unit)}</option>`).join("")}</select>
+                       <input type="number" step="any" data-in="${esc(inp.key)}" value="${inp.default}" />
+                     </label>`
+                  : `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
+                       <input type="number" step="any" data-in="${esc(inp.key)}" ${inp.default !== undefined ? `value="${inp.default}"` : ""} placeholder="${inp.default === undefined ? "enter a value" : ""}" />
+                     </label>`).join("")}
+              </div>
+              <div class="calc-out" data-out></div>
+              ${c.note ? `<p class="muted small calc-note">${esc(c.note)}</p>` : ""}
+            </div>`).join("")}`).join("")}`;
+
+      S.calculators.forEach(c => {
+        const card = panel.querySelector(`[data-calc="${c.id}"]`);
+        if (!card) return;
+        const read = () => {
+          const vars = {};
+          c.inputs.forEach(inp => {
+            const el = card.querySelector(`[data-in="${inp.key}"]`);
+            vars[inp.key] = el && el.value !== "" ? Number(el.value) : NaN;
+          });
+          return vars;
+        };
+        const compute = () => {
+          const vars = read();
+          const missing = c.inputs.filter(inp => !Number.isFinite(vars[inp.key]));
+          if (missing.length) {
+            card.querySelector("[data-out]").innerHTML =
+              `<p class="muted small">Enter ${missing.map(m => esc(m.label.toLowerCase())).join(" and ")} to calculate.</p>`;
+            return;
+          }
+          card.querySelector("[data-out]").innerHTML = c.outputs.map(o => {
+            const v = evalFormula(o.expr, vars);
+            let badge = "";
+            if (o.compare && o.compare.limit !== undefined && v !== null) {
+              const over = o.compare.good === "lower" ? v > o.compare.limit : v < o.compare.limit;
+              badge = statusBadge(over ? "Above the limit you entered" : "Within the limit you entered", over ? "critical" : "good");
+            }
+            return `<div class="calc-result">
+              <span class="calc-figure">${fmtNum(v)}</span>
+              <span class="calc-unit">${esc(o.unit)}</span>
+              <span class="calc-name">${esc(o.label)}</span> ${badge}</div>`;
+          }).join("");
+        };
+        card.querySelectorAll("[data-in]").forEach(el => el.addEventListener("input", compute));
+        // A factor table writes the chosen factor into its own number field,
+        // which stays editable so a site-specific factor can be used instead.
+        card.querySelectorAll("[data-factor]").forEach(sel => sel.addEventListener("change", () => {
+          const target = card.querySelector(`[data-in="${sel.dataset.factor}"]`);
+          target.value = sel.value; compute();
+        }));
+        compute();
+      });
+    }
+
+    const panels = { register: registerPanel, regimes: regimesPanel, calc: calcPanel };
+    registerPanel();
+    main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panels[btn.dataset.tab]();
     }));
   }
 
