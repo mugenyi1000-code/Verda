@@ -738,6 +738,35 @@
 
   const MAX_PHOTOS_PER_SECTION = 6;
 
+  /* ---- Carry-forward of cumulative figures -------------------------------
+     Lender-facing reports ask for two numbers on every line: this period, and
+     the running total to date. Re-typing the running total each period is how
+     those series go wrong, and a client 20 periods in cannot reconstruct it
+     from scratch. Verda owns the series instead: the previous report for the
+     same client and format supplies the opening balance, and the new total is
+     computed rather than typed. */
+
+  function priorReportFor(clientName, standardId) {
+    return state.reports
+      .filter(r => r.clientName === clientName && r.standard === standardId && r.full)
+      .slice(-1)[0] || null;
+  }
+
+  // The cumulative figure this row closed at last period, or null if this row
+  // (or this client) has no history yet.
+  function priorCumulative(prior, sectionId, tableDef, labelValue) {
+    if (!prior) return null;
+    const cf = tableDef.carryForward;
+    const rows = ((prior.full.segmentData[sectionId] || {}).tables || {})[tableDef.id];
+    if (!rows) return null;
+    const key = String(labelValue || "").trim().toLowerCase();
+    if (!key) return null;
+    const match = rows.find(r => String(r[cf.labelKey] || "").trim().toLowerCase() === key);
+    if (!match) return null;
+    const v = Number(match[cf.cumulativeKey]);
+    return Number.isFinite(v) ? v : null;
+  }
+
   function renderReporting(main) {
     let standard = VERDA_SEED.reportStandards[0];
     const segsFor = (std) => VERDA_SEED[std.segmentsKey];
@@ -760,6 +789,13 @@
       return m.tables[tableDef.id];
     }
     const tablesFor = (id) => VERDA_SEED.sectionTables[id] || [];
+
+    let prior = null;                    // previous report for this client + format
+    function refreshPrior() {
+      const sel = main.querySelector("#rep-client");
+      const client = sel && state.clients.find(c => c.id === sel.value);
+      prior = client ? priorReportFor(client.name, standard.id) : null;
+    }
 
     // Starter rows pre-fill a label column so the expected rows are visible.
     // A row carrying nothing but that scaffolding is not data, and must not be
@@ -855,6 +891,19 @@
             <option value="">—</option>
             ${c.options.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
         }
+        // The cumulative column is computed from last period's closing figure
+        // plus this period's, and locked — except on the first report for this
+        // client, where the user establishes the opening balance.
+        if (t.carryForward && c.key === t.carryForward.cumulativeKey) {
+          const opening = priorCumulative(prior, sectionId, t, row[t.carryForward.labelKey]);
+          if (opening !== null) {
+            const total = opening + (Number(row[t.carryForward.periodKey]) || 0);
+            row[c.key] = String(total);
+            return `<td><input type="number" class="cell-computed" data-cell="${esc(c.key)}" data-row="${ri}"
+              value="${total}" readonly
+              title="Carried forward from ${esc(prior.period)}: ${opening}, plus this period" /></td>`;
+          }
+        }
         const type = c.type === "number" ? "number" : c.type === "date" ? "date" : "text";
         return `<td><input type="${type}" data-cell="${esc(c.key)}" data-row="${ri}" value="${esc(v)}" /></td>`;
       }).join("")}<td class="row-actions"><button class="btn btn-ghost btn-sm" data-delrow="${ri}" title="Remove this row" aria-label="Remove row ${ri + 1}">✕</button></td></tr>`).join("");
@@ -866,6 +915,9 @@
         <div class="table-scroll"><table class="table entry-table"><thead><tr>${head}<th></th></tr></thead>
         <tbody>${body}</tbody></table></div>
         <button class="btn btn-ghost btn-sm" data-addrow="${esc(t.id)}">+ Add row</button>
+        ${t.carryForward ? (prior
+          ? `<p class="muted small carry-note">Running totals are carried forward from <strong>${esc(prior.period)}</strong> and locked — enter this period's figure and the total updates itself.</p>`
+          : `<p class="muted small carry-note">This is the first report for this client in this format, so enter the opening running totals yourself. From the next one Verda carries them forward.</p>`) : ""}
         <div class="chart-slot" data-chart="${esc(t.id)}">${t.chart ? renderChartBlock(t, rows) : ""}</div>
       </div>`;
     }
@@ -961,6 +1013,7 @@
         wrap.querySelectorAll("[data-cell]").forEach(el => {
           el.addEventListener("input", () => {
             rows[Number(el.dataset.row)][el.dataset.cell] = el.value;
+            recomputeCumulative(sec.id, t, wrap, Number(el.dataset.row));
             updateProgress();
           });
           // Charts refresh on commit (blur / select change), not per keystroke.
@@ -996,6 +1049,18 @@
       renderPhotos(sec.id);
     }
 
+    function recomputeCumulative(sectionId, t, wrap, ri) {
+      if (!t.carryForward) return;
+      const cf = t.carryForward;
+      const rows = tableRows(sectionId, t);
+      const opening = priorCumulative(prior, sectionId, t, rows[ri][cf.labelKey]);
+      if (opening === null) return;
+      const total = opening + (Number(rows[ri][cf.periodKey]) || 0);
+      rows[ri][cf.cumulativeKey] = String(total);
+      const cell = wrap.querySelector(`[data-cell="${cf.cumulativeKey}"][data-row="${ri}"]`);
+      if (cell) cell.value = String(total);
+    }
+
     function refreshChart(sectionId, t) {
       const slot = main.querySelector(`.seg-form[data-seg="${sectionId}"] [data-chart="${t.id}"]`);
       if (slot && t.chart) slot.innerHTML = renderChartBlock(t, tableRows(sectionId, t));
@@ -1009,7 +1074,11 @@
       const fresh = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
       const rows = tableRows(sec.id, t);
       fresh.querySelectorAll("[data-cell]").forEach(el => {
-        el.addEventListener("input", () => { rows[Number(el.dataset.row)][el.dataset.cell] = el.value; updateProgress(); });
+        el.addEventListener("input", () => {
+          rows[Number(el.dataset.row)][el.dataset.cell] = el.value;
+          recomputeCumulative(sec.id, t, fresh, Number(el.dataset.row));
+          updateProgress();
+        });
         el.addEventListener("change", () => refreshChart(sec.id, t));
       });
       fresh.querySelector("[data-addrow]").addEventListener("click", () => { rows.push({}); rerenderTable(sec, t); });
@@ -1084,13 +1153,19 @@
       renderSegForms();
     });
 
+    refreshPrior();
     renderHeaderFields();
     renderSegToggles();
+    main.querySelector("#rep-client").addEventListener("change", () => {
+      refreshPrior();
+      renderSegForms();
+    });
 
     main.querySelector("#rep-standard").addEventListener("change", (e) => {
       standard = VERDA_SEED.reportStandards.find(s => s.id === e.target.value);
       segs = segsFor(standard);
       model = {};                 // a different format asks different questions
+      refreshPrior();
       renderHeaderFields();
       renderSegToggles();
     });
@@ -1187,6 +1262,7 @@
       preview.scrollIntoView({ behavior: "smooth", block: "start" });
       renderTopbar();
       refreshList();
+      refreshPrior();             // this report is now the carry-forward source
       updateProgress();
     });
   }

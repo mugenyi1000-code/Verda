@@ -20,6 +20,7 @@ client relationship in-house.
 
 - **`docs/business-model.md`** — the compliance care plan offer, financial logic, and rollout plan.
 - **`docs/pricing-tiers.md`** — three fixed-fee packages ready to quote.
+- **`docs/exit-strategy.md`** — Verda built backwards from an acquisition: what a $5M and a $10M outcome actually require, who the realistic buyers are and what each pays for, and which value drivers are reachable before a backend exists.
 - **`docs/service-scope-checklist.md`** — what a quarterly visit actually covers (effluent/air sampling, waste audit, permit tracking) so delivery stays consistent and billable.
 - **`docs/compliance-care-plan-agreement-template.md`** — a short-form service agreement to get a signature fast (not a substitute for legal review).
 - **`docs/outreach-emails/`** — personalized pitch emails for the five warm leads already scoped (Abubaker Technical, Cosmic Investments, Kaletex Ventures, Lusango Real Uganda, Crested Crane Timber).
@@ -103,6 +104,14 @@ sub-sections in the sidebar:
   download two ways: `.txt` with the tables rendered as fixed-width text, or a
   standalone `.html` file carrying the tables, charts and photographs, styled
   to print cleanly.
+
+  **Running totals carry forward.** Lender-facing formats ask for two figures
+  on every line — this period and the total to date. Verda owns the series:
+  the previous report for the same client and format supplies the opening
+  balance, and the new total is computed rather than re-typed (locked, with
+  the source period on hover). On a client's first report you set the opening
+  balances yourself. See `docs/exit-strategy.md` for why this mechanism, and
+  not the module count, is where the enterprise value sits.
 
   **Guided mode**, on by default, explains in plain English what each section
   is for, how to fill it, and shows example wording — enough that someone who

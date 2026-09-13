@@ -259,6 +259,10 @@ a { color: var(--brand-1); }
 .row-actions { white-space: nowrap; }
 .row-actions .btn { padding: 4px 9px; }
 
+/* A computed cell: carried forward from the previous period, not typed. */
+.cell-computed { background: var(--brand-3); font-weight: 700; cursor: not-allowed; }
+.carry-note { margin: 6px 0 0; }
+
 /* ---- Photo drop zone ---- */
 .dropzone {
   border: 2px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center;

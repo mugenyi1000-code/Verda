@@ -1169,6 +1169,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     "ghg": [
       {
         "id": "energy",
+        "carryForward": {
+          "labelKey": "source",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Energy & fuel use",
         "hint": "Every source you paid for this period. The emission factor converts it to CO₂e — leave blank if you don't have one yet.",
         "columns": [
@@ -2073,6 +2078,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       },
       {
         "id": "interactions",
+        "carryForward": {
+          "labelKey": "item",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Health & safety interactions",
         "hint": "Month figure and the running total — reviewers read the two together.",
         "columns": [
@@ -2132,6 +2142,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       },
       {
         "id": "ppe",
+        "carryForward": {
+          "labelKey": "item",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "PPE penetration",
         "hint": "Issued, lost, and people seen without the right PPE.",
         "columns": [
@@ -2261,6 +2276,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     "clinic": [
       {
         "id": "clinic-cases",
+        "carryForward": {
+          "labelKey": "condition",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Clinic attendance by condition",
         "hint": "Cases seen this month and the running total; flag anything notifiable.",
         "columns": [
@@ -2496,6 +2516,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       },
       {
         "id": "traffic-incidents",
+        "carryForward": {
+          "labelKey": "item",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Traffic incidents & driver training",
         "hint": "Incidents this month and the training response.",
         "columns": [
@@ -2548,6 +2573,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     "water-energy": [
       {
         "id": "water",
+        "carryForward": {
+          "labelKey": "source",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Water abstraction by source and activity",
         "hint": "Month and cumulative for every source, as the permit conditions require.",
         "columns": [
@@ -2703,6 +2733,11 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     "waste": [
       {
         "id": "waste-streams",
+        "carryForward": {
+          "labelKey": "stream",
+          "periodKey": "month",
+          "cumulativeKey": "accumulated"
+        },
         "title": "Waste generated, handled and transferred",
         "hint": "Month and cumulative by stream, with the waste transfer note reference.",
         "columns": [
