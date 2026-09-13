@@ -213,7 +213,7 @@ a { color: var(--brand-1); }
    carry one, and every bar is directly value-labelled, so identity and
    magnitude are never colour-alone. */
 .chart-figure { margin: 0; }
-.chart-title { font-weight: 700; font-size: .88rem; margin: 12px 0 2px; }
+.chart-title { font-weight: 700; font-size: .95rem; margin: 0 0 4px; }
 .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .8rem; color: var(--muted); margin: 2px 0 6px; }
 .chart-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; }
@@ -285,6 +285,30 @@ a { color: var(--brand-1); }
 .report-section h4 { margin: 14px 0 3px; font-size: .92rem; }
 .kv-table th { width: 34%; color: var(--muted); font-weight: 600; }
 .report-photos .photo-card img { height: 150px; }
+
+/* ---- Auto-KPI tiles ----
+   Status colour is a supporting cue only: every tile carries its own label
+   and a sub-line saying what the figure is, so nothing is read from colour. */
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .kpi-grid { grid-template-columns: 1fr; } }
+.kpi-tile {
+  background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border);
+  border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-sm);
+}
+.kpi-value { font-size: 1.7rem; font-weight: 800; letter-spacing: -.02em; color: var(--brand-1); line-height: 1.1; }
+.kpi-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-top: 4px; }
+.kpi-sub { margin-top: 3px; }
+.kpi-good { border-left-color: var(--chart-good); }
+.kpi-warning { border-left-color: var(--chart-warning); }
+.kpi-critical { border-left-color: var(--chart-critical); }
+.kpi-critical .kpi-value { color: var(--warn); }
+.kpi-table th { font-weight: 600; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+th.num { text-align: right; }
+.compact-list { columns: 2; column-gap: 28px; }
+.compact-list li { break-inside: avoid; padding: 4px 0; border-bottom: none; }
+@media (max-width: 700px) { .compact-list { columns: 1; } }
 
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }

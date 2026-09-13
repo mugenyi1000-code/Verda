@@ -1807,20 +1807,12 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
 
   // ---- Training & competency ----------------------------------------------
   // validityMonths: how long the certificate stays valid before refresher is due
-  trainingCourses: [
-    { name: "General EHS Induction", validityMonths: 12 },
-    { name: "Fire Safety & Evacuation", validityMonths: 12 },
-    { name: "First Aid at Work", validityMonths: 24 },
-    { name: "Working at Height", validityMonths: 24 },
-    { name: "Confined Space Entry", validityMonths: 12 },
-    { name: "Manual Handling", validityMonths: 36 },
-    { name: "Hazardous Chemicals / SDS Awareness", validityMonths: 24 },
-    { name: "PPE Selection & Use", validityMonths: 24 },
-    { name: "Emergency Response / Spill Response", validityMonths: 12 },
-    { name: "Defensive Driving", validityMonths: 36 },
-    { name: "ISO 45001 Awareness", validityMonths: 36 },
-    { name: "ISO 14001 Awareness", validityMonths: 36 }
-  ],
+  // Superseded by trainingCatalogue above, which carries the same validity
+  // periods plus a category and the roles each course is normally required for.
+  // Kept as an alias so any saved state or integration referring to the old
+  // name still resolves.
+  get trainingCourses() { return this.trainingCatalogue; },
+
 
   // ---- Revenue planner defaults --------------------------------------------
   // PLACEHOLDER FIGURES — they exist so the planner opens with something to
@@ -4709,6 +4701,2111 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       "example": "Appendices A–C and G–I are attached. Appendix D is not applicable this month as no outbreak SOP activity was required."
     }
   },
+
+  /* ===================== REFERENCE LIBRARIES =====================
+     Pick-lists a practitioner would otherwise retype into every new
+     register. They are starting positions, not an exhaustive statement
+     of what applies to any particular site. */
+
+  // Hazards by energy/exposure category, each with the controls normally
+  // expected. Selecting one in the Risk Register pre-fills its controls.
+  hazardLibrary: [
+    {
+      "category": "Mechanical",
+      "hazard": "Unguarded rotating shaft, drive or coupling",
+      "controls": "Fixed guarding; interlocked access; LOTO before maintenance; pre-use guard inspection",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "In-running nip point on conveyor or roller",
+      "controls": "Nip guards; pull-cord emergency stop tested; no cleaning while running",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Entanglement in auger, mixer or agitator",
+      "controls": "Interlocked lid; LOTO; permit for internal entry; no loose clothing policy",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Crush injury from press, baler or compactor",
+      "controls": "Two-hand control; light curtain; trapped-key interlock; stored-energy release",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Cut or amputation from blade, saw or shear",
+      "controls": "Blade guard; push stick; anti-kickback; blade change procedure under LOTO",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Ejected material or workpiece",
+      "controls": "Chip screen; face shield; correct clamping; exclusion zone",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Stored energy release on maintenance (spring, hydraulic, pneumatic)",
+      "controls": "Energy isolation procedure; bleed and verify zero energy; try-out step",
+      "sectors": "all"
+    },
+    {
+      "category": "Mechanical",
+      "hazard": "Hand tool injury — wrong tool, defective tool",
+      "controls": "Tool register and inspection; colour-coded quarterly checks; task-based tool selection",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Contact with live low-voltage conductor",
+      "controls": "Isolation and lock-off; test before touch; competent person only; RCD protection",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Arc flash during switching or racking",
+      "controls": "Arc flash study; PPE matched to incident energy; remote racking; approach boundaries",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Contact with overhead power line by plant or tipper",
+      "controls": "Route survey; goal posts and bunting; height limiter; spotter; permit to work",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Buried cable strike during excavation",
+      "controls": "Service drawings; CAT and genny scan; hand-dig trial holes; permit to dig",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Defective portable appliance or damaged flex",
+      "controls": "Portable appliance testing register; pre-use visual check; remove from service tagging",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Static discharge igniting flammable atmosphere",
+      "controls": "Bonding and earthing; conductive footwear; humidity control; flow-rate limits",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Backfeed from generator onto isolated network",
+      "controls": "Changeover interlock; permit to work; proving dead at point of work",
+      "sectors": "all"
+    },
+    {
+      "category": "Electrical",
+      "hazard": "Battery room hydrogen accumulation",
+      "controls": "Forced ventilation; gas detection; no ignition sources; acid handling PPE",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Fall from unprotected edge, roof or opening",
+      "controls": "Edge protection; covers secured and labelled; permit to work at height; harness as last resort",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Fall from ladder",
+      "controls": "Ladder register and inspection; three points of contact; alternative access preferred",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Scaffold collapse or incomplete scaffold use",
+      "controls": "Erection by competent person; scafftag system; weekly inspection; no unauthorised alteration",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Fall through fragile roof or skylight",
+      "controls": "Fragile surface survey; crawling boards; netting below; signage",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Falling object striking person below",
+      "controls": "Toe boards and brick guards; exclusion zone below; tool tethering; hard hat",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Failure of harness, lanyard or anchor point",
+      "controls": "Certified anchor points; harness pre-use and 6-monthly inspection; rescue plan before access",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "No rescue plan for a suspended worker",
+      "controls": "Written rescue plan; trauma straps; rescue equipment on site; drilled team",
+      "sectors": "all"
+    },
+    {
+      "category": "Gravity / work at height",
+      "hazard": "Fall into open excavation or pit",
+      "controls": "Barriers and signage; covers; lighting; backfill promptly",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Pedestrian struck by reversing vehicle",
+      "controls": "Traffic management plan; one-way systems; banksman; reversing alarms and cameras",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Forklift overturn or load fall",
+      "controls": "Operator certification; load chart adherence; speed limit; seatbelt; rack inspection",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Vehicle rollover on haul road or incline",
+      "controls": "Haul road design standard; berms; speed limits; ROPS and seatbelt; operator training",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Loss of control due to brake or steering failure",
+      "controls": "Planned preventive maintenance; daily pre-use inspection; defect reporting and stand-down",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Road traffic collision on public roads",
+      "controls": "Journey management; fatigue policy; defensive driving; telematics review",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Driver fatigue on long haul",
+      "controls": "Hours-of-service limits; rest schedule; journey planning; fatigue reporting without penalty",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Unsecured load shifting or falling",
+      "controls": "Load securing standard; pre-departure check; axle-load compliance",
+      "sectors": "all"
+    },
+    {
+      "category": "Vehicles & mobile plant",
+      "hazard": "Collision between plant and plant in a congested area",
+      "controls": "Segregation; proximity detection; radio protocol; site speed limit",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Inhalation of solvent, fume or vapour",
+      "controls": "Substitution; local exhaust ventilation with statutory testing; RPE with face-fit; exposure monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Skin contact causing burn or dermatitis",
+      "controls": "Glove selection by breakthrough time; skin checks; barrier and after-work creams",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Splash to eyes during decanting or sampling",
+      "controls": "Closed transfer; face shield and goggles; emergency eyewash within 10 seconds' reach",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Incompatible chemical storage causing reaction",
+      "controls": "Segregation matrix; bunded separate stores; SDS-driven storage plan",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Acid or caustic burn during maintenance",
+      "controls": "Flush and neutralise before breaking containment; chemical suit; standby person",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Cyanide exposure in gold processing",
+      "controls": "International Cyanide Management Code conformance; antidote kit and trained responders; area gas monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Mercury exposure in artisanal gold processing",
+      "controls": "Retorts and closed systems; substitution; ventilation; no amalgam burning in living areas; health screening",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Asbestos disturbance in older buildings",
+      "controls": "Asbestos survey and register; licensed removal; no drilling before check; air clearance",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Lead, cadmium or arsenic exposure in smelting",
+      "controls": "Enclosure and extraction; biological monitoring; no eating in work areas; laundering of workwear",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Pesticide exposure during mixing and spraying",
+      "controls": "Registered products only; closed transfer; spray PPE; re-entry intervals; cholinesterase monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Chemical",
+      "hazard": "Fuel or oil spill contaminating soil or water",
+      "controls": "Bunded storage to 110%; drip trays; spill kits and trained responders; interceptor maintenance",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Hot work igniting nearby combustibles",
+      "controls": "Hot work permit; 10 m clearance or screens; fire watch during and after; extinguisher at hand",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Flammable liquid vapour ignition",
+      "controls": "Hazardous area classification; ATEX-rated equipment; bonding and earthing; no ignition sources",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Combustible dust explosion (wood, grain, sugar, metal)",
+      "controls": "Dust control and housekeeping; explosion relief; ignition source control; ducting design",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "LPG cylinder failure or leak",
+      "controls": "Outdoor ventilated storage; upright securing; leak testing; flashback arrestors",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Blocked or locked fire exit",
+      "controls": "Daily exit check; anti-panic hardware; no storage in escape routes",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Electrical fire from overloaded circuit",
+      "controls": "Load assessment; thermographic survey; no daisy-chained adaptors",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Bush or grass fire reaching the site",
+      "controls": "Firebreaks maintained; vegetation management; water tender availability; community liaison",
+      "sectors": "all"
+    },
+    {
+      "category": "Fire & explosion",
+      "hazard": "Explosives mishandling or unauthorised access",
+      "controls": "Licensed blaster; magazine licence and security; issue and return reconciliation; misfire procedure",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Pressure vessel or boiler failure",
+      "controls": "Statutory examination; pressure relief testing; competent operator; water treatment regime",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Steam release or burn from line breaking",
+      "controls": "Isolation and depressurisation; drain and vent; permit; thermal PPE",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Compressed air injection injury",
+      "controls": "No air-blast cleaning of clothing; pressure-reducing nozzles; hose whip checks",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Molten metal splash",
+      "controls": "Dry tools and moulds; no water near launders; aluminised PPE; exclusion zones",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Contact with hot surface or process line",
+      "controls": "Insulation and guarding; warning signage; thermal gloves",
+      "sectors": "all"
+    },
+    {
+      "category": "Pressure & thermal",
+      "hazard": "Cryogenic burn from liquid nitrogen or CO₂",
+      "controls": "Face shield and cryo gloves; oxygen depletion monitoring; ventilation",
+      "sectors": "all"
+    },
+    {
+      "category": "Confined space & atmosphere",
+      "hazard": "Oxygen deficiency in a tank, silo or vessel",
+      "controls": "Confined space permit; gas testing before and during; forced ventilation; standby person",
+      "sectors": "all"
+    },
+    {
+      "category": "Confined space & atmosphere",
+      "hazard": "Toxic gas accumulation (H₂S, CO, methane)",
+      "controls": "Continuous personal monitoring; escape sets; ventilation; no lone entry",
+      "sectors": "all"
+    },
+    {
+      "category": "Confined space & atmosphere",
+      "hazard": "Engulfment in grain, sand or slurry",
+      "controls": "No walk-down on stored product; lifeline and harness; bottom-emptying stopped and isolated",
+      "sectors": "all"
+    },
+    {
+      "category": "Confined space & atmosphere",
+      "hazard": "Inability to rescue an unconscious entrant",
+      "controls": "Rescue plan and equipment at entry; tripod and winch; trained rescue team on standby",
+      "sectors": "all"
+    },
+    {
+      "category": "Confined space & atmosphere",
+      "hazard": "Hot work inside a confined space",
+      "controls": "Combined permits; continuous gas monitoring; fume extraction; fire watch outside",
+      "sectors": "all"
+    },
+    {
+      "category": "Noise & vibration",
+      "hazard": "Noise-induced hearing loss",
+      "controls": "Noise survey and mapping; engineering control first; hearing protection zones; audiometry",
+      "sectors": "all"
+    },
+    {
+      "category": "Noise & vibration",
+      "hazard": "Hand-arm vibration syndrome",
+      "controls": "Tool selection by vibration magnitude; exposure time limits; health surveillance; anti-vibration gloves",
+      "sectors": "all"
+    },
+    {
+      "category": "Noise & vibration",
+      "hazard": "Whole-body vibration from mobile plant",
+      "controls": "Seat maintenance; haul road condition; job rotation; exposure assessment",
+      "sectors": "all"
+    },
+    {
+      "category": "Noise & vibration",
+      "hazard": "Blast vibration damaging community structures",
+      "controls": "Blast design and delay timing; monitoring at nearest structure; pre-blast condition surveys",
+      "sectors": "all"
+    },
+    {
+      "category": "Radiation",
+      "hazard": "Ionising radiation from density or level gauges",
+      "controls": "Source register; licence; shielding and interlocks; dosimetry; leak testing",
+      "sectors": "all"
+    },
+    {
+      "category": "Radiation",
+      "hazard": "Industrial radiography exposure to bystanders",
+      "controls": "Cordoned area and warning; competent radiographer; dose-rate survey; out-of-hours scheduling",
+      "sectors": "all"
+    },
+    {
+      "category": "Radiation",
+      "hazard": "Naturally occurring radioactive material in scale or ore",
+      "controls": "NORM assessment; controlled descaling; waste route; dose monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Radiation",
+      "hazard": "Ultraviolet exposure from welding arc",
+      "controls": "Welding screens; auto-darkening helmet; skin coverage; bystander protection",
+      "sectors": "all"
+    },
+    {
+      "category": "Radiation",
+      "hazard": "Solar UV exposure for outdoor workers",
+      "controls": "Shade provision; scheduling; long sleeves and brim; sunscreen",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Needlestick or sharps injury",
+      "controls": "Sharps containers at point of use; safety-engineered devices; PEP available 24/7; no recapping",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Exposure to sewage or contaminated water",
+      "controls": "Vaccination; hand hygiene; waterproof dressings on cuts; washing facilities",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Airborne infection in a healthcare or crowded setting",
+      "controls": "Ventilation; respiratory protection with fit-testing; isolation procedure; screening",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Legionella in cooling towers or water systems",
+      "controls": "Water safety plan; temperature and biocide regime; sampling; tower cleaning",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Zoonotic disease from livestock or wildlife contact",
+      "controls": "Vaccination and prophylaxis; PPE; hand hygiene; carcass handling procedure",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Snake, scorpion or insect bite on remote sites",
+      "controls": "Site clearance; boots and gaiters; antivenom access plan; first aid training; medevac route",
+      "sectors": "all"
+    },
+    {
+      "category": "Biological",
+      "hazard": "Malaria in endemic areas",
+      "controls": "Vector control; treated nets; prophylaxis policy; rapid testing and treatment at site clinic",
+      "sectors": "all"
+    },
+    {
+      "category": "Ergonomic & manual handling",
+      "hazard": "Manual handling injury from heavy or awkward loads",
+      "controls": "Mechanical aids; team lift limits; load design; manual handling training",
+      "sectors": "all"
+    },
+    {
+      "category": "Ergonomic & manual handling",
+      "hazard": "Repetitive strain from production-line tasks",
+      "controls": "Job rotation; workstation redesign; rest breaks; early symptom reporting",
+      "sectors": "all"
+    },
+    {
+      "category": "Ergonomic & manual handling",
+      "hazard": "Poor workstation posture for display screen users",
+      "controls": "DSE assessment; adjustable chair and screen height; breaks",
+      "sectors": "all"
+    },
+    {
+      "category": "Ergonomic & manual handling",
+      "hazard": "Patient handling injury in healthcare",
+      "controls": "Hoists and slide sheets; handling assessment per patient; training and supervision",
+      "sectors": "all"
+    },
+    {
+      "category": "Ergonomic & manual handling",
+      "hazard": "Prolonged awkward posture in confined maintenance work",
+      "controls": "Task planning; job rotation; kneeling pads and supports; time limits",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Work-related stress and excessive workload",
+      "controls": "Workload monitoring; realistic scheduling; manager training; access to support",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Fatigue from shift pattern or overtime",
+      "controls": "Shift design; maximum hours; rest facilities; fatigue reporting without penalty",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Violence or aggression from the public or patients",
+      "controls": "Risk assessment; de-escalation training; alarm systems; post-incident support",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Harassment, bullying or discrimination",
+      "controls": "Policy and reporting channel; investigation procedure; no retaliation; leadership accountability",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Sexual harassment and gender-based violence",
+      "controls": "Prevention policy and training; confidential reporting; survivor-centred response; supplier flow-down",
+      "sectors": "all"
+    },
+    {
+      "category": "Psychosocial",
+      "hazard": "Isolation of lone or remote workers",
+      "controls": "Check-in protocol; satellite communication; escalation if contact missed; buddy system",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Excavation or trench collapse",
+      "controls": "Support system designed by competent person; inspection before each shift; spoil setback; safe access",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Pit slope or highwall failure",
+      "controls": "Geotechnical review; slope monitoring with trigger action response plan; standoff distances",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Underground ground fall or rockburst",
+      "controls": "Ground support standard; scaling procedure; seismic monitoring; exclusion after blasting",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Tailings storage facility breach",
+      "controls": "Engineer of Record; dam safety review; instrumentation and trigger levels; EPRP with downstream communities",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Waste rock dump instability",
+      "controls": "Dump design and lift heights; tipping control; monitoring; no tipping in wet conditions",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Inrush of water or slurry underground",
+      "controls": "Hydrogeological model; probe drilling ahead; barriers and pumping capacity; escape routes",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Subsidence affecting surface structures",
+      "controls": "Subsidence monitoring; exclusion zones; community notification; structure surveys",
+      "sectors": "all"
+    },
+    {
+      "category": "Geotechnical & ground",
+      "hazard": "Abandoned shaft or working collapse",
+      "controls": "Legacy workings survey; capping and fencing; access control; community awareness",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Uncontrolled effluent discharge to a watercourse",
+      "controls": "Treatment to permit limits; flow and quality monitoring; interlocked shutdown; incident reporting",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Dust nuisance to neighbouring communities",
+      "controls": "Water suppression; sealed haul roads; enclosure of transfer points; boundary monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Acid rock drainage from waste rock or tailings",
+      "controls": "Geochemical characterisation; encapsulation; water treatment; long-term monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Hydrocarbon spill to ground or water",
+      "controls": "Bunding; drip trays; spill kits; interceptors; trained spill responders",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Illegal or unlicensed waste disposal by a contractor",
+      "controls": "Handler licence verification; waste transfer notes; site audit of the disposal route",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Loss of protected habitat or species during clearance",
+      "controls": "Pre-clearance survey; exclusion zones; supervised clearance; species relocation protocol",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Invasive species spread by vehicles and equipment",
+      "controls": "Wash-down at entry and exit; monitoring; control programme",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Over-abstraction depleting a community water source",
+      "controls": "Permit limits and metering; catchment monitoring; alternative supply where impact is proven",
+      "sectors": "all"
+    },
+    {
+      "category": "Environmental",
+      "hazard": "Greenhouse gas emissions above the permitted or committed level",
+      "controls": "Metering by source; reduction plan; efficiency projects; verified reporting",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Community grievance escalating to blockade or unrest",
+      "controls": "Functioning grievance mechanism; engagement plan; visible closure of commitments",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Excessive force by security personnel",
+      "controls": "Voluntary Principles training; rules on use of force; vetting; incident reporting and investigation",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Influx of job seekers overwhelming local services",
+      "controls": "Influx management plan; local recruitment through community structures; service impact monitoring",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Land acquisition leaving households worse off",
+      "controls": "PS5-aligned compensation; livelihood restoration; independent monitoring; grievance route",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Damage to cultural heritage or graves",
+      "controls": "Chance finds procedure; pre-clearance survey; authority notification; work stoppage protocol",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Child labour in the workforce or supply chain",
+      "controls": "Age verification at recruitment; supplier audits; remediation procedure, not dismissal alone",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Theft, vandalism or armed intrusion",
+      "controls": "Access control; patrols; lighting; community relations; response protocol with police",
+      "sectors": "all"
+    },
+    {
+      "category": "Community & security",
+      "hazard": "Community road safety impact from project traffic",
+      "controls": "Route planning away from schools; speed control; flag personnel; community sensitisation",
+      "sectors": "all"
+    },
+    {
+      "category": "Process & asset integrity",
+      "hazard": "Loss of containment from a tank or pipeline",
+      "controls": "Integrity inspection programme; corrosion monitoring; secondary containment; leak detection",
+      "sectors": "all"
+    },
+    {
+      "category": "Process & asset integrity",
+      "hazard": "Overfilling a storage tank",
+      "controls": "High-level alarm and independent trip; filling procedure; operator presence during transfer",
+      "sectors": "all"
+    },
+    {
+      "category": "Process & asset integrity",
+      "hazard": "Failure of a safety-critical instrument or trip",
+      "controls": "Safety-critical element register; proof testing at defined interval; override control",
+      "sectors": "all"
+    },
+    {
+      "category": "Process & asset integrity",
+      "hazard": "Uncontrolled change to plant or process",
+      "controls": "Management of change procedure; technical authority sign-off; update of drawings and procedures",
+      "sectors": "all"
+    },
+    {
+      "category": "Process & asset integrity",
+      "hazard": "Lifting equipment failure",
+      "controls": "Statutory thorough examination; pre-use inspection; SWL marking; lift plan for complex lifts",
+      "sectors": "all"
+    },
+    {
+      "category": "Emergency & external",
+      "hazard": "Delay in medical evacuation from a remote site",
+      "controls": "Medevac plan with named facility; communications tested; trained first responders; helipad or route",
+      "sectors": "all"
+    },
+    {
+      "category": "Emergency & external",
+      "hazard": "Flooding of the site or access road",
+      "controls": "Drainage design; flood warning; seasonal planning; alternative access",
+      "sectors": "all"
+    },
+    {
+      "category": "Emergency & external",
+      "hazard": "Epidemic or outbreak affecting the workforce",
+      "controls": "Outbreak SOP; screening; isolation facility; liaison with district health authority",
+      "sectors": "all"
+    },
+    {
+      "category": "Emergency & external",
+      "hazard": "Civil unrest or conflict affecting operations",
+      "controls": "Security risk assessment per area; evacuation plan; communication tree; travel restrictions",
+      "sectors": "all"
+    },
+    {
+      "category": "Emergency & external",
+      "hazard": "Loss of power or water to critical operations",
+      "controls": "Standby supply tested; critical load prioritisation; storage capacity",
+      "sectors": "all"
+    }
+  ],
+
+  // Training courses with the validity period Verda uses to calculate the
+  // refresher date, and who typically needs each one.
+  trainingCatalogue: [
+    {
+      "name": "General EHS Induction",
+      "category": "Induction",
+      "validityMonths": 12,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Site-Specific Induction",
+      "category": "Induction",
+      "validityMonths": 12,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Visitor and Contractor Induction",
+      "category": "Induction",
+      "validityMonths": 12,
+      "roles": "Visitors, contractors"
+    },
+    {
+      "name": "Toolbox Talk Delivery",
+      "category": "Induction",
+      "validityMonths": 24,
+      "roles": "Supervisors"
+    },
+    {
+      "name": "Fire Safety & Evacuation",
+      "category": "Emergency",
+      "validityMonths": 12,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Fire Warden / Marshal",
+      "category": "Emergency",
+      "validityMonths": 24,
+      "roles": "Nominated wardens"
+    },
+    {
+      "name": "Fire Extinguisher Practical Use",
+      "category": "Emergency",
+      "validityMonths": 12,
+      "roles": "Wardens, plant operators"
+    },
+    {
+      "name": "First Aid at Work",
+      "category": "Emergency",
+      "validityMonths": 24,
+      "roles": "Nominated first aiders"
+    },
+    {
+      "name": "Advanced / Remote First Aid",
+      "category": "Emergency",
+      "validityMonths": 24,
+      "roles": "Remote site responders"
+    },
+    {
+      "name": "CPR and AED",
+      "category": "Emergency",
+      "validityMonths": 12,
+      "roles": "First aiders, clinic staff"
+    },
+    {
+      "name": "Emergency Response Team Member",
+      "category": "Emergency",
+      "validityMonths": 12,
+      "roles": "ERT members"
+    },
+    {
+      "name": "Mine Rescue Brigade",
+      "category": "Emergency",
+      "validityMonths": 12,
+      "roles": "Underground rescue teams"
+    },
+    {
+      "name": "Spill Response",
+      "category": "Emergency",
+      "validityMonths": 24,
+      "roles": "Operators, drivers, store staff"
+    },
+    {
+      "name": "Medevac and Casualty Handling",
+      "category": "Emergency",
+      "validityMonths": 24,
+      "roles": "Remote site supervisors"
+    },
+    {
+      "name": "Working at Height",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Anyone working above 1.8 m"
+    },
+    {
+      "name": "Harness Inspection and Fitting",
+      "category": "High-risk work",
+      "validityMonths": 12,
+      "roles": "Height workers"
+    },
+    {
+      "name": "Height Rescue",
+      "category": "High-risk work",
+      "validityMonths": 12,
+      "roles": "Rescue teams"
+    },
+    {
+      "name": "Scaffold Erection (competent person)",
+      "category": "High-risk work",
+      "validityMonths": 36,
+      "roles": "Scaffolders"
+    },
+    {
+      "name": "Scaffold Inspection",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Scaffold inspectors"
+    },
+    {
+      "name": "Ladder Safety",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Everyone using ladders"
+    },
+    {
+      "name": "Confined Space Entry",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Entrants and attendants"
+    },
+    {
+      "name": "Confined Space Standby / Rescue",
+      "category": "High-risk work",
+      "validityMonths": 12,
+      "roles": "Standby persons"
+    },
+    {
+      "name": "Permit to Work — Issuer",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Permit issuers"
+    },
+    {
+      "name": "Permit to Work — Receiver",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Permit receivers"
+    },
+    {
+      "name": "Lockout / Tagout (LOTO)",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Maintenance, operators"
+    },
+    {
+      "name": "Hot Work and Fire Watch",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Welders, fire watch"
+    },
+    {
+      "name": "Excavation and Trenching Safety",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Excavation supervisors"
+    },
+    {
+      "name": "Lifting Operations — Appointed Person",
+      "category": "High-risk work",
+      "validityMonths": 36,
+      "roles": "Lift planners"
+    },
+    {
+      "name": "Slinger / Banksman",
+      "category": "High-risk work",
+      "validityMonths": 24,
+      "roles": "Riggers, banksmen"
+    },
+    {
+      "name": "Crane Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Crane operators"
+    },
+    {
+      "name": "Forklift Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 36,
+      "roles": "Forklift operators"
+    },
+    {
+      "name": "Excavator / Loader Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 36,
+      "roles": "Plant operators"
+    },
+    {
+      "name": "Haul Truck Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Haul truck operators"
+    },
+    {
+      "name": "Underground Mobile Equipment Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Underground operators"
+    },
+    {
+      "name": "Elevated Work Platform Operator",
+      "category": "Plant & equipment",
+      "validityMonths": 36,
+      "roles": "MEWP operators"
+    },
+    {
+      "name": "Defensive Driving",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "All drivers"
+    },
+    {
+      "name": "Journey Management",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Drivers, supervisors"
+    },
+    {
+      "name": "Fatigue Management",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Drivers, shift workers"
+    },
+    {
+      "name": "Machine Guarding and Safe Operation",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Machine operators"
+    },
+    {
+      "name": "Pressure Vessel and Boiler Operation",
+      "category": "Plant & equipment",
+      "validityMonths": 24,
+      "roles": "Boiler operators"
+    },
+    {
+      "name": "Hazardous Chemicals / SDS Awareness",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "Anyone handling chemicals"
+    },
+    {
+      "name": "Chemical Spill and Decontamination",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "Chemical handlers"
+    },
+    {
+      "name": "Cyanide Management (ICMC)",
+      "category": "Chemical & health",
+      "validityMonths": 12,
+      "roles": "Gold plant personnel"
+    },
+    {
+      "name": "Mercury Handling and Alternatives",
+      "category": "Chemical & health",
+      "validityMonths": 12,
+      "roles": "ASM gold processors"
+    },
+    {
+      "name": "Asbestos Awareness",
+      "category": "Chemical & health",
+      "validityMonths": 12,
+      "roles": "Maintenance, demolition"
+    },
+    {
+      "name": "Respiratory Protection and Face-Fit Testing",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "RPE users"
+    },
+    {
+      "name": "Silica and Dust Exposure Awareness",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "Mining, quarry, construction"
+    },
+    {
+      "name": "Noise Awareness and Hearing Conservation",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "Workers in noise zones"
+    },
+    {
+      "name": "Heat Stress Prevention",
+      "category": "Chemical & health",
+      "validityMonths": 12,
+      "roles": "Outdoor and hot-process workers"
+    },
+    {
+      "name": "Occupational Health Surveillance Awareness",
+      "category": "Chemical & health",
+      "validityMonths": 24,
+      "roles": "Supervisors, HR"
+    },
+    {
+      "name": "Blasting — Licensed Shotfirer",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "Shotfirers"
+    },
+    {
+      "name": "Explosives Handling and Storage",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "Magazine keepers"
+    },
+    {
+      "name": "Underground Ventilation Awareness",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "Underground workers"
+    },
+    {
+      "name": "Ground Control and Scaling",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "Underground workers"
+    },
+    {
+      "name": "Tailings Facility Operation and Surveillance",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "TSF operators"
+    },
+    {
+      "name": "Gas Detection and Self-Rescuer Use",
+      "category": "Mining",
+      "validityMonths": 12,
+      "roles": "Underground workers"
+    },
+    {
+      "name": "Mine Closure and Rehabilitation Planning",
+      "category": "Mining",
+      "validityMonths": 36,
+      "roles": "Environmental teams"
+    },
+    {
+      "name": "Artisanal Mining Formalisation and Due Diligence",
+      "category": "Mining",
+      "validityMonths": 24,
+      "roles": "ASM liaison officers"
+    },
+    {
+      "name": "Environmental Awareness",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Waste Management and Segregation",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Water and Effluent Monitoring",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Environmental officers"
+    },
+    {
+      "name": "Air Quality and Emissions Monitoring",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Environmental officers"
+    },
+    {
+      "name": "Biodiversity and Species Handling",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Clearance teams"
+    },
+    {
+      "name": "GHG Accounting (GHG Protocol)",
+      "category": "Environment",
+      "validityMonths": 36,
+      "roles": "Sustainability staff"
+    },
+    {
+      "name": "Environmental Incident Investigation",
+      "category": "Environment",
+      "validityMonths": 24,
+      "roles": "Environmental officers"
+    },
+    {
+      "name": "Incident Investigation and Root Cause Analysis",
+      "category": "Management systems",
+      "validityMonths": 24,
+      "roles": "Supervisors, EHS staff"
+    },
+    {
+      "name": "Risk Assessment and JSA/JHA",
+      "category": "Management systems",
+      "validityMonths": 24,
+      "roles": "Supervisors"
+    },
+    {
+      "name": "Behaviour-Based Safety Observation",
+      "category": "Management systems",
+      "validityMonths": 24,
+      "roles": "Supervisors, observers"
+    },
+    {
+      "name": "Internal Auditor — ISO 45001",
+      "category": "Management systems",
+      "validityMonths": 36,
+      "roles": "EHS auditors"
+    },
+    {
+      "name": "Internal Auditor — ISO 14001",
+      "category": "Management systems",
+      "validityMonths": 36,
+      "roles": "EHS auditors"
+    },
+    {
+      "name": "Lead Auditor (ISO 19011)",
+      "category": "Management systems",
+      "validityMonths": 36,
+      "roles": "Lead auditors"
+    },
+    {
+      "name": "Contractor EHS Management",
+      "category": "Management systems",
+      "validityMonths": 24,
+      "roles": "Contract holders"
+    },
+    {
+      "name": "Legal Register and Compliance Obligations",
+      "category": "Management systems",
+      "validityMonths": 12,
+      "roles": "EHS managers"
+    },
+    {
+      "name": "ESIA and ESMP Implementation",
+      "category": "Management systems",
+      "validityMonths": 36,
+      "roles": "Project E&S staff"
+    },
+    {
+      "name": "IFC Performance Standards Awareness",
+      "category": "Management systems",
+      "validityMonths": 36,
+      "roles": "Project E&S staff"
+    },
+    {
+      "name": "Emergency Preparedness Planning",
+      "category": "Management systems",
+      "validityMonths": 24,
+      "roles": "Site management"
+    },
+    {
+      "name": "Community Engagement and Grievance Handling",
+      "category": "Social & community",
+      "validityMonths": 24,
+      "roles": "Community liaison officers"
+    },
+    {
+      "name": "Voluntary Principles on Security & Human Rights",
+      "category": "Social & community",
+      "validityMonths": 12,
+      "roles": "Security personnel"
+    },
+    {
+      "name": "Prevention of Sexual Exploitation, Abuse and Harassment",
+      "category": "Social & community",
+      "validityMonths": 12,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Gender-Based Violence Prevention",
+      "category": "Social & community",
+      "validityMonths": 12,
+      "roles": "Supervisors, community teams"
+    },
+    {
+      "name": "Child Labour Identification and Remediation",
+      "category": "Social & community",
+      "validityMonths": 24,
+      "roles": "HR, supply chain"
+    },
+    {
+      "name": "Resettlement and Livelihood Restoration",
+      "category": "Social & community",
+      "validityMonths": 36,
+      "roles": "Land teams"
+    },
+    {
+      "name": "Cultural Heritage and Chance Finds",
+      "category": "Social & community",
+      "validityMonths": 24,
+      "roles": "Earthworks teams"
+    },
+    {
+      "name": "Stakeholder Engagement Planning",
+      "category": "Social & community",
+      "validityMonths": 36,
+      "roles": "Community teams"
+    },
+    {
+      "name": "HIV/AIDS, TB and Malaria Awareness",
+      "category": "Social & community",
+      "validityMonths": 12,
+      "roles": "Everyone on site"
+    },
+    {
+      "name": "Food Hygiene and Safe Handling",
+      "category": "Sector-specific",
+      "validityMonths": 12,
+      "roles": "Catering staff"
+    },
+    {
+      "name": "Infection Prevention and Control",
+      "category": "Sector-specific",
+      "validityMonths": 12,
+      "roles": "Healthcare staff"
+    },
+    {
+      "name": "Sharps and Healthcare Waste Handling",
+      "category": "Sector-specific",
+      "validityMonths": 12,
+      "roles": "Healthcare staff"
+    },
+    {
+      "name": "Radiation Protection Supervisor",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "Radiation supervisors"
+    },
+    {
+      "name": "Electrical Safety — Authorised Person",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "Authorised electrical persons"
+    },
+    {
+      "name": "Arc Flash Awareness",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "Electrical workers"
+    },
+    {
+      "name": "Pesticide Application and Safe Use",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "Spray operators"
+    },
+    {
+      "name": "Dangerous Goods Transport (ADR-equivalent)",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "DG drivers"
+    },
+    {
+      "name": "Manual Handling",
+      "category": "Sector-specific",
+      "validityMonths": 24,
+      "roles": "Everyone"
+    },
+    {
+      "name": "Display Screen Equipment Assessment",
+      "category": "Sector-specific",
+      "validityMonths": 36,
+      "roles": "Office staff, assessors"
+    }
+  ],
+
+  // Injury classification drives every safety frequency rate. `counts` says
+  // which rates an incident of that class feeds.
+  injuryClassifications: [
+    {
+      "code": "FAT",
+      "label": "Fatality",
+      "counts": [
+        "trifr",
+        "aifr"
+      ],
+      "desc": "Death resulting from a work-related incident."
+    },
+    {
+      "code": "LTI",
+      "label": "Lost Time Injury",
+      "counts": [
+        "ltifr",
+        "trifr",
+        "aifr"
+      ],
+      "desc": "Injury where the person cannot attend the next scheduled shift."
+    },
+    {
+      "code": "RWC",
+      "label": "Restricted Work Case",
+      "counts": [
+        "trifr",
+        "aifr"
+      ],
+      "desc": "Person returns but cannot perform their full normal duties."
+    },
+    {
+      "code": "MTC",
+      "label": "Medical Treatment Case",
+      "counts": [
+        "trifr",
+        "aifr"
+      ],
+      "desc": "Treatment beyond first aid by a medical professional; no lost time."
+    },
+    {
+      "code": "FAC",
+      "label": "First Aid Case",
+      "counts": [
+        "aifr"
+      ],
+      "desc": "Minor injury treated on site; no further treatment required."
+    },
+    {
+      "code": "OI",
+      "label": "Occupational Illness",
+      "counts": [
+        "trifr",
+        "aifr"
+      ],
+      "desc": "Work-related illness or disease, including noise-induced hearing loss."
+    },
+    {
+      "code": "NM",
+      "label": "Near Miss",
+      "counts": [
+        "nearmiss"
+      ],
+      "desc": "No injury or damage, but the potential was there."
+    },
+    {
+      "code": "NI",
+      "label": "No Injury (damage / environmental / security)",
+      "counts": [],
+      "desc": "Property damage, spill, or security event with no personal injury."
+    }
+  ],
+
+  // Who the injured or trained person works for. Every safety rate can be
+  // split on this, because a contractor-heavy site that reports only its own
+  // employees' injuries is reporting a fiction.
+  employerTypes: [
+    "Direct employee",
+    "Sub-contractor",
+    "Agency / casual labour",
+    "Visitor",
+    "Community member"
+  ],
+
+  // Investigation causes: what happened at the sharp end, and why the system
+  // allowed it. Underlying causes are where corrective actions belong.
+  causeTaxonomy: {
+    "immediate": [
+      "Inadequate or missing guard / barrier",
+      "Defective tool or equipment",
+      "Failure to isolate energy",
+      "Failure to use PPE provided",
+      "Working without a permit",
+      "Operating at unsafe speed",
+      "Bypassing a safety device",
+      "Poor housekeeping",
+      "Inadequate lighting or visibility",
+      "Unsafe position for the task",
+      "Servicing equipment in motion",
+      "Inadequate warning or signage",
+      "Improper loading or placement",
+      "Horseplay or distraction",
+      "Adverse weather or ground conditions"
+    ],
+    "underlying": [
+      "Inadequate risk assessment for the task",
+      "Procedure absent, unclear or impractical",
+      "Inadequate training or competence verification",
+      "Supervision not present or not effective",
+      "Equipment design or selection inadequate",
+      "Planned maintenance not performed",
+      "Time or production pressure",
+      "Change not managed (new plant, people or method)",
+      "Communication or handover failure",
+      "Contractor management inadequate",
+      "Fatigue or shift design",
+      "Safety culture — reporting discouraged or hazards normalised",
+      "Resourcing — insufficient people or budget",
+      "Standard exists but is not enforced"
+    ]
+  },
+
+  // Permit-to-work types and the control each one exists to guarantee.
+  permitToWorkTypes: [
+    {
+      "type": "Hot work",
+      "validity": "Shift",
+      "key": "Fire watch during and 30 minutes after; combustibles cleared or screened"
+    },
+    {
+      "type": "Confined space entry",
+      "validity": "Shift",
+      "key": "Gas test before and during; standby person; rescue equipment on site"
+    },
+    {
+      "type": "Work at height",
+      "validity": "Shift",
+      "key": "Access method agreed; rescue plan; edge protection or fall arrest"
+    },
+    {
+      "type": "Excavation / ground disturbance",
+      "validity": "Task",
+      "key": "Services located and proved; support design; inspection before each shift"
+    },
+    {
+      "type": "Electrical isolation / live work",
+      "validity": "Task",
+      "key": "Isolation, lock-off, prove dead; authorised person only"
+    },
+    {
+      "type": "Lifting operations",
+      "validity": "Task",
+      "key": "Lift plan; appointed person; certified equipment; exclusion zone"
+    },
+    {
+      "type": "Line breaking / loss of containment",
+      "validity": "Task",
+      "key": "Drained, depressurised, purged; spill containment ready"
+    },
+    {
+      "type": "Radiography / radiation source use",
+      "validity": "Task",
+      "key": "Cordon and dose survey; competent radiographer; out-of-hours scheduling"
+    },
+    {
+      "type": "Blasting",
+      "validity": "Event",
+      "key": "Licensed shotfirer; exclusion and sentries; community notification; post-blast clearance"
+    },
+    {
+      "type": "Vehicle / plant movement in restricted area",
+      "validity": "Shift",
+      "key": "Route agreed; banksman; overhead and underground services checked"
+    },
+    {
+      "type": "Diving / work over water",
+      "validity": "Task",
+      "key": "Dive plan; standby diver; rescue craft; communications"
+    },
+    {
+      "type": "Road or access closure",
+      "validity": "Event",
+      "key": "Traffic management plan; signage; community and authority notification"
+    }
+  ],
+
+  // Scenarios an emergency plan and drill programme should cover.
+  emergencyScenarios: [
+    "Fire in a building or plant area",
+    "Explosion or blast incident",
+    "Major chemical spill or release",
+    "Fuel or oil spill to water",
+    "Medical emergency and casualty evacuation",
+    "Fatality on site",
+    "Confined space rescue",
+    "Working at height rescue",
+    "Underground fire or entrapment",
+    "Tailings facility breach",
+    "Pit wall or excavation collapse",
+    "Inrush of water or slurry",
+    "Vehicle accident on site or public road",
+    "Loss of power to critical systems",
+    "Flooding of site or access",
+    "Disease outbreak among the workforce",
+    "Civil unrest, blockade or security incident",
+    "Armed intrusion or hostage situation",
+    "Bush or grass fire approaching site",
+    "Structural collapse",
+    "Gas leak or asphyxiation event",
+    "Missing person on site",
+    "Severe weather / lightning",
+    "Bomb threat or suspicious package"
+  ],
+
+  // Environmental and occupational monitoring parameters with usual units.
+  monitoringParameters: [
+    {
+      "medium": "Air — ambient",
+      "parameter": "PM2.5",
+      "unit": "µg/m³"
+    },
+    {
+      "medium": "Air — ambient",
+      "parameter": "PM10",
+      "unit": "µg/m³"
+    },
+    {
+      "medium": "Air — ambient",
+      "parameter": "Dust deposition",
+      "unit": "mg/m²/day"
+    },
+    {
+      "medium": "Air — ambient",
+      "parameter": "SO₂",
+      "unit": "µg/m³"
+    },
+    {
+      "medium": "Air — ambient",
+      "parameter": "NO₂",
+      "unit": "µg/m³"
+    },
+    {
+      "medium": "Air — stack",
+      "parameter": "Particulate matter",
+      "unit": "mg/Nm³"
+    },
+    {
+      "medium": "Air — stack",
+      "parameter": "SO₂",
+      "unit": "mg/Nm³"
+    },
+    {
+      "medium": "Air — stack",
+      "parameter": "Metals (Pb, Cd, As)",
+      "unit": "mg/Nm³"
+    },
+    {
+      "medium": "Noise",
+      "parameter": "Daytime LAeq",
+      "unit": "dB(A)"
+    },
+    {
+      "medium": "Noise",
+      "parameter": "Night-time LAeq",
+      "unit": "dB(A)"
+    },
+    {
+      "medium": "Vibration",
+      "parameter": "Peak particle velocity",
+      "unit": "mm/s"
+    },
+    {
+      "medium": "Vibration",
+      "parameter": "Airblast overpressure",
+      "unit": "dB(L)"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "pH",
+      "unit": "pH units"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "BOD₅",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "COD",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "Total suspended solids",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "Oil and grease",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "Total dissolved solids",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "Heavy metals (Cu, Pb, Zn, Cd, As)",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — effluent",
+      "parameter": "Cyanide (WAD)",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — surface/ground",
+      "parameter": "Electrical conductivity",
+      "unit": "µS/cm"
+    },
+    {
+      "medium": "Water — surface/ground",
+      "parameter": "Turbidity",
+      "unit": "NTU"
+    },
+    {
+      "medium": "Water — surface/ground",
+      "parameter": "Sulphate",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Water — drinking",
+      "parameter": "E. coli / faecal coliforms",
+      "unit": "CFU/100ml"
+    },
+    {
+      "medium": "Water — drinking",
+      "parameter": "Residual chlorine",
+      "unit": "mg/l"
+    },
+    {
+      "medium": "Soil",
+      "parameter": "Total petroleum hydrocarbons",
+      "unit": "mg/kg"
+    },
+    {
+      "medium": "Soil",
+      "parameter": "Heavy metals",
+      "unit": "mg/kg"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Respirable crystalline silica",
+      "unit": "mg/m³ (8h TWA)"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Respirable dust",
+      "unit": "mg/m³ (8h TWA)"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Diesel particulate matter",
+      "unit": "µg/m³ EC"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Personal noise exposure",
+      "unit": "dB(A) LEX,8h"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Hand-arm vibration",
+      "unit": "m/s² A(8)"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Welding fume",
+      "unit": "mg/m³"
+    },
+    {
+      "medium": "Occupational",
+      "parameter": "Heat stress (WBGT)",
+      "unit": "°C"
+    }
+  ],
+
+  // Waste streams with hazard classification and the normal disposal route.
+  wasteStreamLibrary: [
+    {
+      "stream": "Mixed general waste",
+      "class": "Non-hazardous",
+      "route": "Licensed landfill"
+    },
+    {
+      "stream": "Paper and cardboard",
+      "class": "Recyclable",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Plastics",
+      "class": "Recyclable",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Scrap metal",
+      "class": "Recyclable",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Glass",
+      "class": "Recyclable",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Wood and timber offcuts",
+      "class": "Recyclable",
+      "route": "Reuse or licensed recycler"
+    },
+    {
+      "stream": "Food and biodegradable waste",
+      "class": "Non-hazardous",
+      "route": "Composting or licensed landfill"
+    },
+    {
+      "stream": "Construction and demolition rubble",
+      "class": "Non-hazardous",
+      "route": "Reuse as fill or licensed disposal"
+    },
+    {
+      "stream": "Used oil",
+      "class": "Hazardous",
+      "route": "Licensed hazardous waste handler"
+    },
+    {
+      "stream": "Oily rags and absorbents",
+      "class": "Hazardous",
+      "route": "Licensed hazardous waste handler"
+    },
+    {
+      "stream": "Oil filters",
+      "class": "Hazardous",
+      "route": "Licensed hazardous waste handler"
+    },
+    {
+      "stream": "Contaminated soil",
+      "class": "Hazardous",
+      "route": "Treatment or licensed hazardous disposal"
+    },
+    {
+      "stream": "Used batteries (lead-acid)",
+      "class": "Hazardous",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Used batteries (lithium)",
+      "class": "Hazardous",
+      "route": "Licensed recycler"
+    },
+    {
+      "stream": "Used tyres",
+      "class": "Special",
+      "route": "Licensed recycler or authorised reuse"
+    },
+    {
+      "stream": "Chemical containers (empty)",
+      "class": "Hazardous",
+      "route": "Triple-rinse then licensed handler"
+    },
+    {
+      "stream": "Solvent and paint waste",
+      "class": "Hazardous",
+      "route": "Licensed hazardous waste handler"
+    },
+    {
+      "stream": "Fluorescent tubes and lamps",
+      "class": "Hazardous",
+      "route": "Licensed hazardous waste handler"
+    },
+    {
+      "stream": "E-waste (IT and electrical)",
+      "class": "Hazardous",
+      "route": "Licensed e-waste handler"
+    },
+    {
+      "stream": "Medical / healthcare waste",
+      "class": "Hazardous",
+      "route": "Licensed medical waste treatment"
+    },
+    {
+      "stream": "Sharps",
+      "class": "Hazardous",
+      "route": "Licensed medical waste treatment"
+    },
+    {
+      "stream": "Sewage and septic sludge",
+      "class": "Special",
+      "route": "Licensed treatment works"
+    },
+    {
+      "stream": "Water treatment sludge",
+      "class": "Special",
+      "route": "Licensed disposal or beneficial use"
+    },
+    {
+      "stream": "Tailings",
+      "class": "Mining",
+      "route": "Engineered tailings storage facility"
+    },
+    {
+      "stream": "Waste rock / overburden",
+      "class": "Mining",
+      "route": "Engineered dump with ARD control"
+    },
+    {
+      "stream": "Slag and smelter residue",
+      "class": "Mining",
+      "route": "Characterise then licensed disposal or reuse"
+    },
+    {
+      "stream": "Asbestos-containing material",
+      "class": "Hazardous",
+      "route": "Licensed asbestos removal and disposal"
+    },
+    {
+      "stream": "Explosives and packaging",
+      "class": "Hazardous",
+      "route": "Licensed destruction by the supplier"
+    }
+  ],
+
+  // Job roles, for competence matrices and training assignment.
+  jobRoles: [
+    "Site worker / operative",
+    "Machine operator",
+    "Mobile plant operator",
+    "Driver",
+    "Electrician",
+    "Mechanic / fitter",
+    "Welder / fabricator",
+    "Storeman",
+    "Laboratory technician",
+    "Nurse / clinic officer",
+    "Security officer",
+    "Supervisor / foreman",
+    "Shift superintendent",
+    "Site manager",
+    "Project manager",
+    "EHS officer",
+    "EHS manager",
+    "Environmental officer",
+    "Community liaison officer",
+    "Occupational hygienist",
+    "Sustainability / ESG manager",
+    "HR officer",
+    "Contracts / procurement officer",
+    "Engineer",
+    "Geologist",
+    "Surveyor",
+    "Blaster / shotfirer",
+    "Mine captain",
+    "Executive / director"
+  ],
+
+  // Audit finding grading, with the closure target each grade implies.
+  auditFindingCategories: [
+    {
+      "category": "Major non-conformity",
+      "meaning": "A legal breach, an absent control for a fatal risk, or a systemic failure. Stop-work may be warranted.",
+      "target": "Immediate"
+    },
+    {
+      "category": "Minor non-conformity",
+      "meaning": "A single lapse against a requirement that does not on its own defeat the system.",
+      "target": "30 days"
+    },
+    {
+      "category": "Observation",
+      "meaning": "Not yet a breach, but it will become one if left.",
+      "target": "90 days"
+    },
+    {
+      "category": "Opportunity for improvement",
+      "meaning": "Compliant, but better practice exists.",
+      "target": "Next review"
+    },
+    {
+      "category": "Positive practice",
+      "meaning": "Worth recording and replicating at other sites.",
+      "target": "—"
+    }
+  ],
+
+  // Sub-contractor pre-qualification. A principal is answerable for the
+  // people its contractors bring on site, so this is checked before award.
+  subcontractorPrequal: [
+    "Company registration and tax compliance certificate current",
+    "Relevant operating licences held for the scope of work",
+    "Workers' compensation insurance current, with cover verified against headcount",
+    "Public liability insurance current and adequate for the scope",
+    "EHS policy signed by their senior management",
+    "Named EHS representative with defined competence and site presence",
+    "Three-year injury and fatality history disclosed",
+    "Enforcement or prosecution history disclosed",
+    "Method statements and risk assessments submitted for the scope",
+    "Evidence of worker training and competence for the tasks awarded",
+    "Plant and equipment inspection and certification records",
+    "PPE provision confirmed as the sub-contractor's responsibility",
+    "Emergency and incident reporting protocol agreed with the principal",
+    "Sub-sub-contracting rules agreed in writing",
+    "Labour standards: contracts, wages, hours, and no child or forced labour",
+    "Worker grievance mechanism available to their workforce",
+    "Accommodation and transport arrangements inspected where provided",
+    "Waste and environmental obligations flowed down in the contract",
+    "Bridging document agreed where both parties have EHS management systems",
+    "Performance review frequency and KPI reporting obligation agreed"
+  ],
+
+  // Document types an EHS document register normally holds.
+  documentTypes: [
+    "EHS policy",
+    "Environmental and social management plan (ESMP)",
+    "ESIA / EIS report",
+    "Project brief",
+    "Permit or licence certificate",
+    "Legal register",
+    "Risk assessment / JSA",
+    "Method statement",
+    "Standard operating procedure",
+    "Emergency response plan",
+    "Traffic management plan",
+    "Waste management plan",
+    "Tailings management plan",
+    "Mine closure and rehabilitation plan",
+    "Stakeholder engagement plan",
+    "Grievance procedure",
+    "Resettlement action plan",
+    "Training matrix",
+    "Competence certificate",
+    "Statutory inspection certificate",
+    "Calibration certificate",
+    "Monitoring / laboratory report",
+    "Waste transfer note",
+    "Audit report",
+    "Incident investigation report",
+    "Management review minutes",
+    "Insurance certificate",
+    "Contract / bridging document",
+    "Toolbox talk record",
+    "Inspection checklist"
+  ],
+
+  // What Verda computes automatically, from which register, and which
+  // direction is good. Shown to the user next to every figure so no KPI is
+  // a number of unexplained origin.
+  kpiDefinitions: [
+    {
+      "id": "ltifr",
+      "name": "LTIFR — Lost Time Injury Frequency Rate",
+      "group": "Safety",
+      "formula": "(Fatalities + Lost Time Injuries) × 1,000,000 ÷ hours worked",
+      "source": "Incident register (classification) and exposure hours",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "trifr",
+      "name": "TRIFR — Total Recordable Injury Frequency Rate",
+      "group": "Safety",
+      "formula": "(Fatalities + LTI + RWC + MTC + occupational illness) × 1,000,000 ÷ hours worked",
+      "source": "Incident register and exposure hours",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "aifr",
+      "name": "AIFR — All Injury Frequency Rate",
+      "group": "Safety",
+      "formula": "All injuries including first aid cases × 1,000,000 ÷ hours worked",
+      "source": "Incident register and exposure hours",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "severity",
+      "name": "Severity rate",
+      "group": "Safety",
+      "formula": "Days lost × 1,000,000 ÷ hours worked",
+      "source": "Incident register (days lost) and exposure hours",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "fatalities",
+      "name": "Fatalities",
+      "group": "Safety",
+      "formula": "Count of work-related deaths in the period",
+      "source": "Incident register",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "nearmissrate",
+      "name": "Near-miss reporting rate",
+      "group": "Leading",
+      "formula": "Near misses × 1,000,000 ÷ hours worked",
+      "source": "Incident register and exposure hours",
+      "goodWhen": "higher"
+    },
+    {
+      "id": "nmratio",
+      "name": "Near-miss to injury ratio",
+      "group": "Leading",
+      "formula": "Near misses ÷ recordable injuries",
+      "source": "Incident register",
+      "goodWhen": "higher"
+    },
+    {
+      "id": "trainingvalid",
+      "name": "Training currency",
+      "group": "Leading",
+      "formula": "Training records in date ÷ all training records",
+      "source": "Training register",
+      "goodWhen": "higher"
+    },
+    {
+      "id": "actionclosure",
+      "name": "Action closure rate",
+      "group": "Leading",
+      "formula": "Closed actions ÷ all actions raised",
+      "source": "Actions (CAPA) register",
+      "goodWhen": "higher"
+    },
+    {
+      "id": "overdueactions",
+      "name": "Overdue actions",
+      "group": "Leading",
+      "formula": "Open actions past their due date",
+      "source": "Actions (CAPA) register",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "highrisks",
+      "name": "High and critical risks open",
+      "group": "Leading",
+      "formula": "Risks scoring above 9 on the 5×5 matrix",
+      "source": "Risk register",
+      "goodWhen": "lower"
+    },
+    {
+      "id": "contractorshare",
+      "name": "Sub-contractor share of hours",
+      "group": "Workforce",
+      "formula": "Sub-contractor hours ÷ total hours worked",
+      "source": "Workforce and hours register",
+      "goodWhen": "context"
+    },
+    {
+      "id": "headcount",
+      "name": "Workforce on site",
+      "group": "Workforce",
+      "formula": "Sum of headcount across all employers in the period",
+      "source": "Workforce and hours register",
+      "goodWhen": "context"
+    },
+    {
+      "id": "femaleshare",
+      "name": "Female share of workforce",
+      "group": "Workforce",
+      "formula": "Female headcount ÷ total headcount",
+      "source": "Workforce and hours register",
+      "goodWhen": "context"
+    }
+  ],
+
+  // Frequency rates are per million hours worked (the ILO/international
+  // convention). US OSHA practice uses 200,000 hours; the multiplier is
+  // shown with every rate so the two are never silently confused.
+  kpiExposureBase: 1000000,
 
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100

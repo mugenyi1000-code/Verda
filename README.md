@@ -79,14 +79,25 @@ sub-sections in the sidebar:
   Wellbeing, Environment, People & Community, Biodiversity & ESG,
   Governance & Compliance), every sector as a one-click entry point, plus
   headline counts, upcoming visits and quick actions.
-- **Analytics** — leading/lagging indicators: incidents by month, actions by
-  status, risk profile, and KPI tiles for open/overdue actions, high risks
-  and training currency. Charts are inline SVG (no chart library, so they
-  work offline) with a data-table view under each one.
+- **Analytics** — **automatic KPIs, nothing typed in.** LTIFR, TRIFR, AIFR,
+  severity rate, near-miss reporting rate and the near-miss:injury ratio, each
+  calculated from the incident classification and the hours register, per
+  million hours worked (the ILO convention — stated on screen, because OSHA's
+  200,000-hour base gives a number five times smaller for identical
+  performance). **Every rate splits your own workforce from your
+  sub-contractors**, because a site-wide figure hides the group most often
+  getting hurt. With no hours recorded a rate shows a dash, never a zero that
+  reads like good news. An expandable panel gives every formula and its source
+  register. Plus incidents by classification and by employer, actions by
+  status and the risk profile — inline SVG, working offline, with a data table
+  under each chart.
 - **Incidents** — report and classify incidents and near-misses by type and
   severity, track investigation status, and raise a corrective action
   straight from any record.
-- **Risk Register** — 5×5 likelihood × severity matrix with automatic
+- **Risk Register** — pick from a **124-hazard library** across 18 energy and
+  exposure categories (mechanical, electrical, gravity, chemical, confined
+  space, geotechnical, psychosocial, community and more) and the controls
+  normally expected come with it — then a 5×5 likelihood × severity matrix with automatic
   scoring and banding (Low/Medium/High/Critical), controls and owner per
   hazard, and a live matrix heatmap.
 - **Audits** — Auto EHS Audit (per-sector checklist, AI-assisted findings
@@ -154,11 +165,24 @@ sub-sections in the sidebar:
 - **ToR & ESIA Reporting** — structured input following the standard
   ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
   for EEIS processing" step.
-- **Training & Competency** — course records per person with validity
-  periods and automatic Valid / Expiring soon / Expired status.
-- **Workflows**, **Clients & Compliance Care Plans**, **Checklists** (per
-  sector + an EHS permits checklist), **Documents Library**, **Credits &
-  Billing**.
+- **Training & Competency** — a **95-course catalogue** across induction,
+  emergency, high-risk work, plant, chemical and health, mining, environment,
+  management systems, social and sector-specific streams. Each carries its
+  validity period, so choosing a course sets the refresher date itself;
+  records track role and employer and show Valid / Expiring soon / Expired.
+- **Clients, Sub-contractors & Workforce** — care plans, a **sub-contractor
+  register** (scope, pre-qualification status against a 20-point checklist,
+  insurance expiry with overdue flagging, EHS contact) and the **workforce &
+  hours register** that every safety rate is calculated from, entered per
+  employer so the direct/sub-contractor split is real rather than assumed.
+- **Checklists & Regulatory Register** — sector checklists, per-country
+  permits and regulators, plus the **reference libraries**: hazards, the
+  training catalogue, injury classification, cause taxonomy (15 immediate,
+  14 underlying), 12 permit-to-work types, 24 emergency scenarios, 34
+  monitoring parameters with units, 28 waste streams with disposal routes,
+  audit finding grades, 29 job roles, 30 document types, and every KPI
+  definition. All downloadable.
+- **Workflows**, **Documents Library**, **Credits & Billing**.
 
 **Grow — enablement, marketplace and community**
 - **Plans & Pricing** — how Verda is packaged and sold as a product

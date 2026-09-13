@@ -53,6 +53,8 @@
       ],
       workflowRuns: [],
       incidents: [],
+      subcontractors: [],
+      workforce: [],          // exposure hours by period, client and employer — the KPI denominator
       risks: [],
       actions: [],
       training: [],
@@ -62,6 +64,8 @@
   }
 
   let state = load();
+  // Saved states from before these registers existed must not crash on load.
+  ["subcontractors", "workforce"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
     try {
@@ -1687,52 +1691,235 @@
 
   /* ============================ CLIENTS / CARE PLANS ============================ */
   function renderClients(main) {
+    const S = VERDA_SEED;
     main.appendChild(h(`
       <section>
-        <h1>Clients & Compliance Care Plans</h1>
-        <p class="muted">A Compliance Care Plan is Verda's recurring monitoring engagement — the fixed-fee alternative to a one-off ESIA/ESMP project (formerly called a "retainer").</p>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Clients, Sub-contractors &amp; Workforce</h1>
+            <p class="muted">Who you monitor, who works for them, and the hours behind every safety rate.
+              A principal is answerable for the people its sub-contractors bring on site, so they are tracked here too — not as an afterthought.</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="clients">Clients &amp; care plans</button>
+          <button class="tab-btn" data-tab="subs">Sub-contractors</button>
+          <button class="tab-btn" data-tab="hours">Workforce &amp; hours</button>
+        </div>
+        <div id="client-panel"></div>
+      </section>
+    `));
+    const panel = main.querySelector("#client-panel");
+
+    /* ---------------- Clients ---------------- */
+    function clientsPanel() {
+      panel.innerHTML = `
         <div class="card">
           <h3>Add a client</h3>
           <div class="form-row">
             <input id="cl-name" placeholder="Client name" />
-            <select id="cl-industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g =>
-              `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i =>
+            <select id="cl-industry">${[...new Set(S.industries.map(i => i.group))].map(g =>
+              `<optgroup label="${esc(g)}">${S.industries.filter(i => i.group === g).map(i =>
                 `<option>${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
-            <select id="cl-country">${VERDA_SEED.countries.map(c =>
+            <select id="cl-country">${S.countries.map(c =>
               `<option value="${esc(c.id)}" ${c.id === state.country ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
             <input id="cl-site" placeholder="Site" />
             <select id="cl-plan"><option>Monthly</option><option>Quarterly</option></select>
-            <input id="cl-nextvisit" type="date" />
-            <input id="cl-permit" type="date" />
+            <input id="cl-nextvisit" type="date" title="Next visit" />
+            <input id="cl-permit" type="date" title="Permit expiry" />
             <button class="btn btn-primary" id="cl-add">Add</button>
           </div>
         </div>
-        <table class="table">
-          <thead><tr><th>Client</th><th>Industry</th><th>Country</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th></tr></thead>
-          <tbody id="cl-rows"></tbody>
-        </table>
-      </section>
-    `));
-    function refresh() {
-      main.querySelector("#cl-rows").innerHTML = state.clients.map(c => `
-        <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td>
-        <td>${esc(countryName(c.country))}</td>
-        <td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td><td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>
-      `).join("");
-    }
-    refresh();
-    main.querySelector("#cl-add").addEventListener("click", () => {
-      const name = main.querySelector("#cl-name").value.trim();
-      if (!name) { alert("Enter a client name."); return; }
-      state.clients.push({
-        id: uid("c"), name, industry: main.querySelector("#cl-industry").value,
-        country: main.querySelector("#cl-country").value, site: main.querySelector("#cl-site").value,
-        plan: main.querySelector("#cl-plan").value, nextVisit: main.querySelector("#cl-nextvisit").value || "TBD",
-        permitExpiry: main.querySelector("#cl-permit").value || "TBD", status: "Active"
+        <div class="card">
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Client</th><th>Industry</th><th>Country</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th></tr></thead>
+              <tbody id="cl-rows"></tbody>
+            </table>
+          </div>
+        </div>`;
+      function refresh() {
+        panel.querySelector("#cl-rows").innerHTML = state.clients.map(c => `
+          <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(countryName(c.country))}</td>
+          <td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td>
+          <td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>`).join("");
+      }
+      refresh();
+      panel.querySelector("#cl-add").addEventListener("click", () => {
+        const name = panel.querySelector("#cl-name").value.trim();
+        if (!name) { alert("Enter a client name."); return; }
+        state.clients.push({
+          id: uid("c"), name, industry: panel.querySelector("#cl-industry").value,
+          country: panel.querySelector("#cl-country").value, site: panel.querySelector("#cl-site").value,
+          plan: panel.querySelector("#cl-plan").value, nextVisit: panel.querySelector("#cl-nextvisit").value || "TBD",
+          permitExpiry: panel.querySelector("#cl-permit").value || "TBD", status: "Active"
+        });
+        save(); refresh();
+        panel.querySelector("#cl-name").value = ""; panel.querySelector("#cl-site").value = "";
       });
-      save(); refresh();
-      main.querySelector("#cl-name").value = ""; main.querySelector("#cl-site").value = "";
-    });
+    }
+
+    /* ---------------- Sub-contractors ---------------- */
+    function subsPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Register a sub-contractor</h3>
+          <div class="form-row">
+            <input id="sc-name" placeholder="Sub-contractor name" />
+            <select id="sc-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select>
+            <input id="sc-scope" placeholder="Scope of work" />
+            <select id="sc-status">
+              <option>Pre-qualification in progress</option><option>Approved</option>
+              <option>Approved with conditions</option><option>Suspended</option><option>Not approved</option>
+            </select>
+            <input id="sc-insurance" type="date" title="Insurance expiry" />
+            <input id="sc-contact" placeholder="EHS contact" />
+            <button class="btn btn-primary" id="sc-add">Add</button>
+          </div>
+          <p class="muted small">Pre-qualification status is your record of a decision, not the decision itself — work through the checklist below before you mark one approved.</p>
+        </div>
+        <div class="card">
+          <h3>Sub-contractor register</h3>
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Sub-contractor</th><th>Client / site</th><th>Scope</th><th>Pre-qualification</th><th>Insurance expiry</th><th>EHS contact</th><th></th></tr></thead>
+              <tbody id="sc-rows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Pre-qualification checklist</h3>
+          <p class="muted small">${S.subcontractorPrequal.length} checks before award. Tick as you verify — this is a working sheet.</p>
+          <ul class="checklist">${S.subcontractorPrequal.map(i => `<li><label><input type="checkbox"/> ${esc(i)}</label></li>`).join("")}</ul>
+          <button class="btn" id="sc-download">Download checklist (.txt)</button>
+        </div>`;
+      const PQ_STATUS = { "Approved": "good", "Approved with conditions": "warning",
+        "Pre-qualification in progress": "warning", "Suspended": "critical", "Not approved": "critical" };
+      function refresh() {
+        panel.querySelector("#sc-rows").innerHTML = state.subcontractors.map(sc => {
+          const days = sc.insurance ? daysUntil(sc.insurance) : null;
+          const expiring = days !== null && days < 30;
+          return `<tr><td>${esc(sc.name)}</td><td>${esc(sc.client)}</td><td>${esc(sc.scope)}</td>
+            <td>${statusBadge(sc.status, PQ_STATUS[sc.status] || "warning")}</td>
+            <td${expiring ? ' class="row-overdue"' : ""}>${esc(sc.insurance || "—")}${
+              days !== null && days < 0 ? " (expired)" : expiring ? ` (${days}d)` : ""}</td>
+            <td>${esc(sc.contact || "—")}</td>
+            <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(sc.id)}">Remove</button></td></tr>`;
+        }).join("") || `<tr><td colspan="7" class="muted">No sub-contractors registered yet. Every company that brings workers on site belongs here.</td></tr>`;
+        panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          state.subcontractors = state.subcontractors.filter(x => x.id !== b.dataset.del);
+          save(); refresh();
+        }));
+      }
+      refresh();
+      panel.querySelector("#sc-add").addEventListener("click", () => {
+        const name = panel.querySelector("#sc-name").value.trim();
+        if (!name) { alert("Enter the sub-contractor's name."); return; }
+        state.subcontractors.push({
+          id: uid("sc"), name, client: panel.querySelector("#sc-client").value,
+          scope: panel.querySelector("#sc-scope").value.trim(),
+          status: panel.querySelector("#sc-status").value,
+          insurance: panel.querySelector("#sc-insurance").value,
+          contact: panel.querySelector("#sc-contact").value.trim()
+        });
+        save(); refresh();
+        panel.querySelector("#sc-name").value = ""; panel.querySelector("#sc-scope").value = "";
+      });
+      panel.querySelector("#sc-download").addEventListener("click", () =>
+        downloadText("Subcontractor-Prequalification-Checklist.txt",
+          "SUB-CONTRACTOR PRE-QUALIFICATION CHECKLIST\n\n" + S.subcontractorPrequal.map(i => `[ ] ${i}`).join("\n")));
+    }
+
+    /* ---------------- Workforce & hours ---------------- */
+    function hoursPanel() {
+      panel.innerHTML = `
+        <div class="card notice-card">
+          <h3>Why this matters</h3>
+          <p>Every safety frequency rate is <em>events per ${VERDA_SEED.kpiExposureBase.toLocaleString()} hours worked</em>.
+            Without hours there is no denominator, and Verda will show a dash rather than a zero that reads like good news.</p>
+          <p class="small">Enter hours for each employer separately — your own workforce and each sub-contractor — and every KPI can be split between them.
+            A site that reports only its direct employees' injuries is reporting a fiction.</p>
+        </div>
+        <div class="card">
+          <h3>Record a period</h3>
+          <div class="form-row">
+            <label>Period<input id="wf-period" placeholder="e.g. October 2026" /></label>
+            <label>Client / site<select id="wf-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Employer type<select id="wf-type">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
+            <label>Employer name<input id="wf-employer" placeholder="Own workforce or sub-contractor" list="wf-employer-options" /></label>
+          </div>
+          <div class="form-row">
+            <label>Headcount<input id="wf-head" type="number" min="0" /></label>
+            <label>Of which female<input id="wf-female" type="number" min="0" /></label>
+            <label>Hours worked<input id="wf-hours" type="number" min="0" placeholder="Total for the period" /></label>
+            <button class="btn btn-primary" id="wf-add">Add period</button>
+          </div>
+          <datalist id="wf-employer-options">${state.subcontractors.map(sc => `<option value="${esc(sc.name)}"></option>`).join("")}</datalist>
+        </div>
+        <div class="card">
+          <h3>Workforce &amp; hours register</h3>
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Period</th><th>Client / site</th><th>Employer type</th><th>Employer</th><th>Headcount</th><th>Female</th><th>Hours</th><th></th></tr></thead>
+              <tbody id="wf-rows"></tbody>
+              <tfoot id="wf-total"></tfoot>
+            </table>
+          </div>
+        </div>
+        <div class="card"><h3>Hours by employer</h3><div id="wf-chart"></div></div>`;
+      function refresh() {
+        panel.querySelector("#wf-rows").innerHTML = state.workforce.slice().reverse().map(w => `
+          <tr><td>${esc(w.period)}</td><td>${esc(w.client)}</td><td>${esc(w.employerType)}</td>
+          <td>${esc(w.employer || "—")}</td><td>${Number(w.headcount) || 0}</td><td>${Number(w.female) || 0}</td>
+          <td>${(Number(w.hours) || 0).toLocaleString()}</td>
+          <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(w.id)}">Remove</button></td></tr>`).join("") ||
+          `<tr><td colspan="8" class="muted">No hours recorded yet — until there are, every frequency rate shows a dash.</td></tr>`;
+        const tot = exposure();
+        panel.querySelector("#wf-total").innerHTML = state.workforce.length
+          ? `<tr><th colspan="4">Total</th><th>${tot.headcount}</th><th>${tot.female}</th><th>${tot.hours.toLocaleString()}</th><th></th></tr>` : "";
+        panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          state.workforce = state.workforce.filter(x => x.id !== b.dataset.del);
+          save(); refresh();
+        }));
+        // hours by employer, biggest first
+        const byEmp = new Map();
+        state.workforce.forEach(w => {
+          const k = w.employer || w.employerType;
+          byEmp.set(k, (byEmp.get(k) || 0) + (Number(w.hours) || 0));
+        });
+        const rows = Array.from(byEmp, ([label, v]) => ({ label, values: { hours: v } }))
+          .sort((a, b) => b.values.hours - a.values.hours).slice(0, 8);
+        panel.querySelector("#wf-chart").innerHTML = rows.length
+          ? groupedBarChart(rows, [{ key: "hours", label: "Hours worked" }], "Hours by employer", "Hours")
+          : `<p class="muted small">Add a period above and the split appears here.</p>`;
+      }
+      refresh();
+      panel.querySelector("#wf-add").addEventListener("click", () => {
+        const period = panel.querySelector("#wf-period").value.trim();
+        const hours = Number(panel.querySelector("#wf-hours").value);
+        if (!period) { alert("Enter the period this covers, e.g. October 2026."); return; }
+        if (!hours) { alert("Enter the hours worked — without them no frequency rate can be calculated."); return; }
+        state.workforce.push({
+          id: uid("wf"), period, client: panel.querySelector("#wf-client").value,
+          employerType: panel.querySelector("#wf-type").value,
+          employer: panel.querySelector("#wf-employer").value.trim(),
+          headcount: Number(panel.querySelector("#wf-head").value) || 0,
+          female: Number(panel.querySelector("#wf-female").value) || 0,
+          hours
+        });
+        save(); refresh();
+        panel.querySelector("#wf-hours").value = ""; panel.querySelector("#wf-head").value = "";
+        panel.querySelector("#wf-female").value = "";
+      });
+    }
+
+    const panels = { clients: clientsPanel, subs: subsPanel, hours: hoursPanel };
+    clientsPanel();
+    main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panels[btn.dataset.tab]();
+    }));
   }
 
   /* ============================ DOCUMENTS ============================ */
@@ -1779,6 +1966,9 @@
           <button class="tab-btn active" data-tab="industry">By sector</button>
           <button class="tab-btn" data-tab="permits">Permits &amp; approvals</button>
           <button class="tab-btn" data-tab="register">Regulators &amp; law</button>
+          <button class="tab-btn" data-tab="hazards">Hazard library</button>
+          <button class="tab-btn" data-tab="training">Training catalogue</button>
+          <button class="tab-btn" data-tab="lists">Other registers</button>
         </div>
         <div id="checklist-panel"></div>
         <div class="card notice-card">
@@ -1884,7 +2074,102 @@
           `\n\n${VERDA_SEED.contentReview.note}\n`));
     }
 
-    const panels = { industry: industryPanel, permits: permitsPanel, register: registerPanel };
+    /* ---- Hazard library ---- */
+    function hazardsPanel() {
+      const S = VERDA_SEED;
+      const cats = [...new Set(S.hazardLibrary.map(hz => hz.category))];
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Hazard library</h3>
+          <p class="muted small">${S.hazardLibrary.length} hazards across ${cats.length} categories, each with the controls normally expected.
+            Pick any of these straight into the <a href="#/risk">Risk Register</a> and the controls come with it.</p>
+          <label>Category<select id="hz-cat"><option value="">— all categories —</option>${
+            cats.map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Category</th><th>Hazard</th><th>Controls normally expected</th></tr></thead>
+            <tbody id="hz-rows"></tbody></table></div>
+          <button class="btn" id="hz-download">Download hazard library (.txt)</button>
+        </div>`;
+      function load() {
+        const cat = panel.querySelector("#hz-cat").value;
+        const rows = S.hazardLibrary.filter(hz => !cat || hz.category === cat);
+        panel.querySelector("#hz-rows").innerHTML = rows.map(hz =>
+          `<tr><td>${esc(hz.category)}</td><td>${esc(hz.hazard)}</td><td>${esc(hz.controls)}</td></tr>`).join("");
+      }
+      load();
+      panel.querySelector("#hz-cat").addEventListener("change", load);
+      panel.querySelector("#hz-download").addEventListener("click", () =>
+        downloadText("Hazard-Library.txt", "HAZARD LIBRARY\n\n" + cats.map(c =>
+          `${c.toUpperCase()}\n` + S.hazardLibrary.filter(hz => hz.category === c)
+            .map(hz => `  • ${hz.hazard}\n      Controls: ${hz.controls}`).join("\n")).join("\n\n")));
+    }
+
+    /* ---- Training catalogue ---- */
+    function trainingPanel() {
+      const S = VERDA_SEED;
+      const cats = [...new Set(S.trainingCatalogue.map(t => t.category))];
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Training catalogue</h3>
+          <p class="muted small">${S.trainingCatalogue.length} courses with the validity period Verda uses to calculate each refresher date.
+            Recording one in <a href="#/training">Training &amp; Competency</a> sets the expiry automatically.</p>
+          <label>Category<select id="tc-cat"><option value="">— all categories —</option>${
+            cats.map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Course</th><th>Category</th><th class="num">Valid for</th><th>Typically required for</th></tr></thead>
+            <tbody id="tc-rows"></tbody></table></div>
+          <button class="btn" id="tc-download">Download catalogue (.txt)</button>
+        </div>`;
+      function load() {
+        const cat = panel.querySelector("#tc-cat").value;
+        panel.querySelector("#tc-rows").innerHTML = S.trainingCatalogue.filter(t => !cat || t.category === cat)
+          .map(t => `<tr><td>${esc(t.name)}</td><td>${esc(t.category)}</td><td class="num">${t.validityMonths} months</td><td>${esc(t.roles)}</td></tr>`).join("");
+      }
+      load();
+      panel.querySelector("#tc-cat").addEventListener("change", load);
+      panel.querySelector("#tc-download").addEventListener("click", () =>
+        downloadText("Training-Catalogue.txt", "TRAINING CATALOGUE\n\n" + cats.map(c =>
+          `${c.toUpperCase()}\n` + S.trainingCatalogue.filter(t => t.category === c)
+            .map(t => `  • ${t.name} — valid ${t.validityMonths} months (${t.roles})`).join("\n")).join("\n\n")));
+    }
+
+    /* ---- Everything else the platform draws its pick-lists from ---- */
+    function listsPanel() {
+      const S = VERDA_SEED;
+      const simple = (title, note, items, render) => `
+        <div class="card">
+          <h3>${esc(title)} <span class="muted small">(${items.length})</span></h3>
+          <p class="muted small">${esc(note)}</p>
+          ${render(items)}
+        </div>`;
+      const asList = (items) => `<ul class="checklist compact-list">${items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
+      const asTable = (cols) => (items) => `<div class="table-scroll"><table class="table">
+        <thead><tr>${cols.map(c => `<th>${esc(c[0])}</th>`).join("")}</tr></thead>
+        <tbody>${items.map(it => `<tr>${cols.map(c => `<td>${esc(String(it[c[1]] ?? ""))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+
+      panel.innerHTML =
+        simple("Injury classification", "Decides which frequency rate an incident feeds. Get this wrong and every safety KPI is wrong.",
+          S.injuryClassifications, asTable([["Code","code"],["Classification","label"],["What it means","desc"]])) +
+        simple("Employer types", "Who the person works for. Every safety rate can be split on this.", S.employerTypes, asList) +
+        simple("Immediate causes", "What happened at the sharp end.", S.causeTaxonomy.immediate, asList) +
+        simple("Underlying causes", "Why the system allowed it — this is where corrective actions belong.", S.causeTaxonomy.underlying, asList) +
+        simple("Permit to work types", "Each permit exists to guarantee one control.", S.permitToWorkTypes,
+          asTable([["Permit","type"],["Validity","validity"],["The control it guarantees","key"]])) +
+        simple("Emergency scenarios", "What an emergency plan and drill programme should cover.", S.emergencyScenarios, asList) +
+        simple("Monitoring parameters", "Environmental and occupational parameters with their usual units.", S.monitoringParameters,
+          asTable([["Medium","medium"],["Parameter","parameter"],["Unit","unit"]])) +
+        simple("Waste streams", "Hazard classification and the normal disposal route for each stream.", S.wasteStreamLibrary,
+          asTable([["Stream","stream"],["Class","class"],["Route","route"]])) +
+        simple("Audit finding grades", "What each grade means and how quickly it should close.", S.auditFindingCategories,
+          asTable([["Grade","category"],["Meaning","meaning"],["Closure target","target"]])) +
+        simple("Job roles", "For competence matrices and training assignment.", S.jobRoles, asList) +
+        simple("Document types", "What an EHS document register normally holds.", S.documentTypes, asList) +
+        simple("KPI definitions", "Every automatically calculated figure, its formula and its source.", S.kpiDefinitions,
+          asTable([["KPI","name"],["Formula","formula"],["Source","source"]]));
+    }
+
+    const panels = { industry: industryPanel, permits: permitsPanel, register: registerPanel,
+      hazards: hazardsPanel, training: trainingPanel, lists: listsPanel };
     industryPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -2143,13 +2428,29 @@
             <label>Type<select id="inc-type">${S.incidentTypes.map(t => `<option>${t}</option>`).join("")}</select></label>
             <label>Severity<select id="inc-sev">${S.incidentSeverities.map(t => `<option>${t}</option>`).join("")}</select></label>
           </div>
+          <div class="form-row">
+            <label>Classification
+              <select id="inc-class">${S.injuryClassifications.map(c =>
+                `<option value="${esc(c.code)}" ${c.code === "NM" ? "selected" : ""}>${esc(c.label)}</option>`).join("")}</select></label>
+            <label>Who they work for
+              <select id="inc-employer-type">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
+            <label>Employer name<input id="inc-employer" placeholder="Sub-contractor or company name" /></label>
+            <label>Days lost<input id="inc-days" type="number" min="0" value="0" /></label>
+          </div>
+          <p class="muted small" id="inc-class-help"></p>
           <label>What happened<textarea id="inc-desc" placeholder="Describe the event, who was involved, and the immediate action taken..."></textarea></label>
+          <div class="form-row">
+            <label>Immediate cause
+              <select id="inc-cause-i"><option value="">— not yet determined —</option>${S.causeTaxonomy.immediate.map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+            <label>Underlying cause
+              <select id="inc-cause-u"><option value="">— not yet determined —</option>${S.causeTaxonomy.underlying.map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+          </div>
           <button class="btn btn-primary" id="inc-add">${icon("incidents")}<span>Log incident</span></button>
         </div>
         <div class="card">
           <h3>Incident register</h3>
-          <table class="table"><thead><tr><th>Date</th><th>Site</th><th>Type</th><th>Severity</th><th>Status</th><th></th></tr></thead>
-          <tbody id="inc-rows"></tbody></table>
+          <div class="table-scroll"><table class="table"><thead><tr><th>Date</th><th>Site</th><th>Type</th><th>Class</th><th>Employer</th><th>Days lost</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+          <tbody id="inc-rows"></tbody></table></div>
         </div>
       </section>`));
 
@@ -2158,6 +2459,9 @@
       main.querySelector("#inc-rows").innerHTML = state.incidents.slice().reverse().map(i => `
         <tr>
           <td>${esc(i.date)}</td><td>${esc(i.client)}</td><td>${esc(i.type)}</td>
+          <td>${esc(i.classification || "—")}</td>
+          <td>${esc(i.employer || i.employerType || "—")}</td>
+          <td>${esc(String(i.daysLost || 0))}</td>
           <td>${statusBadge(i.severity, SEV_STATUS[i.severity])}</td>
           <td><select class="inc-status" data-id="${i.id}">${S.incidentStatuses.map(s => `<option ${s === i.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
           <td><button class="btn btn-ghost btn-sm" data-raise="${i.id}">Raise action</button></td>
@@ -2187,12 +2491,38 @@
       state.incidents.push({
         id: uid("inc"), date: main.querySelector("#inc-date").value || today(),
         client: main.querySelector("#inc-client").value, type: main.querySelector("#inc-type").value,
-        severity: main.querySelector("#inc-sev").value, desc, status: "Open"
+        severity: main.querySelector("#inc-sev").value, desc, status: "Open",
+        classification: main.querySelector("#inc-class").value,
+        employerType: main.querySelector("#inc-employer-type").value,
+        employer: main.querySelector("#inc-employer").value.trim(),
+        daysLost: Number(main.querySelector("#inc-days").value) || 0,
+        causeImmediate: main.querySelector("#inc-cause-i").value,
+        causeUnderlying: main.querySelector("#inc-cause-u").value
       });
       save();
       main.querySelector("#inc-desc").value = "";
+      main.querySelector("#inc-employer").value = "";
+      main.querySelector("#inc-days").value = "0";
       refresh();
     });
+
+    // Say what the chosen classification means and which rates it feeds —
+    // classification is the single field that decides every safety KPI.
+    function classHelp() {
+      const c = VERDA_SEED.injuryClassifications.find(x => x.code === main.querySelector("#inc-class").value);
+      const rates = { ltifr: "LTIFR", trifr: "TRIFR", aifr: "AIFR", nearmiss: "near-miss rate" };
+      const feeds = c.counts.map(k => rates[k]).filter(Boolean);
+      main.querySelector("#inc-class-help").textContent =
+        `${c.desc} ${feeds.length ? "Counts toward: " + feeds.join(", ") + "." : "Counts toward no injury frequency rate."}`;
+    }
+    classHelp();
+    main.querySelector("#inc-class").addEventListener("change", classHelp);
+
+    // Sub-contractor picker: employer name suggests from the register.
+    const empList = main.querySelector("#inc-employer");
+    empList.setAttribute("list", "inc-employer-options");
+    empList.insertAdjacentHTML("afterend",
+      `<datalist id="inc-employer-options">${state.subcontractors.map(sc => `<option value="${esc(sc.name)}"></option>`).join("")}</datalist>`);
   }
 
   /* ============================ RISK REGISTER ============================ */
@@ -2204,6 +2534,13 @@
         <p class="muted">Score hazards on a 5×5 likelihood × severity matrix. Verda bands the score and tracks controls and ownership.</p>
         <div class="card">
           <h3>Add a hazard</h3>
+          <div class="form-row">
+            <label>Hazard category
+              <select id="risk-cat"><option value="">— all categories —</option>${
+                [...new Set(S.hazardLibrary.map(hz => hz.category))].map(c => `<option>${esc(c)}</option>`).join("")}</select></label>
+            <label>Pick from the hazard library
+              <select id="risk-lib"><option value="">— choose, or type your own below —</option></select></label>
+          </div>
           <div class="form-row">
             <label>Hazard<input id="risk-hazard" placeholder="e.g. Unguarded conveyor drive" /></label>
             <label>Area / activity<input id="risk-area" placeholder="e.g. Packing line" /></label>
@@ -2227,6 +2564,26 @@
           <tbody id="risk-rows"></tbody></table>
         </div>
       </section>`));
+
+    /* The hazard library fills in the hazard and its normally-expected
+       controls, so a register starts from known practice rather than a blank
+       box. Both fields stay editable — the library is a starting point. */
+    const libSel = main.querySelector("#risk-lib");
+    const catSel = main.querySelector("#risk-cat");
+    function fillLib() {
+      const cat = catSel.value;
+      const list = S.hazardLibrary.filter(hz => !cat || hz.category === cat);
+      libSel.innerHTML = `<option value="">— choose, or type your own below —</option>` +
+        list.map((hz, i) => `<option value="${S.hazardLibrary.indexOf(hz)}">${esc(hz.hazard)}</option>`).join("");
+    }
+    fillLib();
+    catSel.addEventListener("change", fillLib);
+    libSel.addEventListener("change", () => {
+      const hz = S.hazardLibrary[Number(libSel.value)];
+      if (!hz) return;
+      main.querySelector("#risk-hazard").value = hz.hazard;
+      main.querySelector("#risk-controls").value = hz.controls;
+    });
 
     function refresh() {
       // matrix
@@ -2344,24 +2701,35 @@
           <div class="form-row">
             <label>Person<input id="tr-person" placeholder="Full name" /></label>
             <label>Site / client<select id="tr-client">${state.clients.map(c => `<option>${esc(c.name)}</option>`).join("")}</select></label>
-            <label>Course<select id="tr-course">${S.trainingCourses.map(c => `<option value="${c.name}">${c.name} (${c.validityMonths} mo)</option>`).join("")}</select></label>
+            <label>Role<select id="tr-role">${S.jobRoles.map(r => `<option>${esc(r)}</option>`).join("")}</select></label>
+            <label>Employer<select id="tr-employer-type">${S.employerTypes.map(t => `<option>${esc(t)}</option>`).join("")}</select></label>
+          </div>
+          <div class="form-row">
+            <label>Employer name<input id="tr-employer" placeholder="Sub-contractor or company name" list="tr-employer-options" /></label>
+            <label>Course
+              <select id="tr-course">${[...new Set(S.trainingCatalogue.map(c => c.category))].map(cat =>
+                `<optgroup label="${esc(cat)}">${S.trainingCatalogue.filter(c => c.category === cat).map(c =>
+                  `<option value="${esc(c.name)}">${esc(c.name)} — ${c.validityMonths} mo</option>`).join("")}</optgroup>`).join("")}</select></label>
             <label>Completed<input id="tr-date" type="date" value="${today()}" /></label>
           </div>
+          <p class="muted small" id="tr-course-help"></p>
+          <datalist id="tr-employer-options">${state.subcontractors.map(sc => `<option value="${esc(sc.name)}"></option>`).join("")}</datalist>
           <button class="btn btn-primary" id="tr-add">${icon("training")}<span>Add record</span></button>
         </div>
         <div class="card">
           <h3>Competency matrix</h3>
-          <table class="table"><thead><tr><th>Person</th><th>Site</th><th>Course</th><th>Completed</th><th>Expires</th><th>Status</th></tr></thead>
-          <tbody id="tr-rows"></tbody></table>
+          <div class="table-scroll"><table class="table"><thead><tr><th>Person</th><th>Site</th><th>Role</th><th>Employer</th><th>Course</th><th>Completed</th><th>Expires</th><th>Status</th></tr></thead>
+          <tbody id="tr-rows"></tbody></table></div>
         </div>
       </section>`));
 
     function refresh() {
       main.querySelector("#tr-rows").innerHTML = state.training.slice().reverse().map(t => {
         const st = trainingStatus(t.expires);
-        return `<tr><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.course)}</td>
+        return `<tr><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.role || "—")}</td>
+          <td>${esc(t.employer || t.employerType || "—")}</td><td>${esc(t.course)}</td>
           <td>${esc(t.completed)}</td><td>${esc(t.expires)}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
-      }).join("") || `<tr><td colspan="6" class="muted">No training records yet.</td></tr>`;
+      }).join("") || `<tr><td colspan="8" class="muted">No training records yet.</td></tr>`;
     }
     refresh();
 
@@ -2369,16 +2737,29 @@
       const person = main.querySelector("#tr-person").value.trim();
       if (!person) { alert("Enter the person's name."); return; }
       const courseName = main.querySelector("#tr-course").value;
-      const course = S.trainingCourses.find(c => c.name === courseName);
+      const course = S.trainingCatalogue.find(c => c.name === courseName);
       const completed = main.querySelector("#tr-date").value || today();
       state.training.push({
         id: uid("tr"), person, client: main.querySelector("#tr-client").value,
+        role: main.querySelector("#tr-role").value,
+        employerType: main.querySelector("#tr-employer-type").value,
+        employer: main.querySelector("#tr-employer").value.trim(),
         course: courseName, completed, expires: addMonths(completed, course.validityMonths)
       });
       save();
       main.querySelector("#tr-person").value = "";
       refresh();
     });
+
+    // The refresher date is calculated, so say which validity period produced it.
+    function courseHelp() {
+      const c = S.trainingCatalogue.find(x => x.name === main.querySelector("#tr-course").value);
+      main.querySelector("#tr-course-help").textContent = c
+        ? `Valid for ${c.validityMonths} months — Verda sets the refresher date from the completion date. Typically required for: ${c.roles}.`
+        : "";
+    }
+    courseHelp();
+    main.querySelector("#tr-course").addEventListener("change", courseHelp);
   }
 
   /* ---- Platform (SaaS) revenue: what Verda earns its developers ---- */
@@ -2698,6 +3079,68 @@
   }
 
   /* ============================ ANALYTICS ============================ */
+  /* ============================ AUTO KPI ENGINE ============================
+     Every figure below is computed from registers the user already fills in —
+     incidents, actions, training, risks and the workforce/hours register — so
+     no KPI is typed in by hand and none can drift from its source data.
+     Frequency rates need exposure hours: without them a rate is undefined,
+     and Verda says so rather than printing a zero that reads like good news. */
+
+  const EMPLOYER_DIRECT = "Direct employee";
+
+  // Hours and headcount for a period, optionally filtered to one employer type.
+  function exposure(filterFn) {
+    const rows = state.workforce.filter(w => !filterFn || filterFn(w));
+    return {
+      hours: rows.reduce((a, w) => a + (Number(w.hours) || 0), 0),
+      headcount: rows.reduce((a, w) => a + (Number(w.headcount) || 0), 0),
+      female: rows.reduce((a, w) => a + (Number(w.female) || 0), 0)
+    };
+  }
+
+  const classOf = (inc) => VERDA_SEED.injuryClassifications.find(c => c.code === inc.classification);
+  const countsToward = (inc, rate) => {
+    const c = classOf(inc);
+    return !!c && c.counts.indexOf(rate) !== -1;
+  };
+
+  // rate = events per kpiExposureBase hours worked. Null when hours are unknown.
+  function frequencyRate(events, hours) {
+    if (!hours) return null;
+    return (events * VERDA_SEED.kpiExposureBase) / hours;
+  }
+
+  function computeKpis(filterFn) {
+    const incidents = state.incidents.filter(i => !filterFn || filterFn(i));
+    const ex = exposure(filterFn ? (w) => filterFn({ employerType: w.employerType, employer: w.employer, client: w.client }) : null);
+    const n = (rate) => incidents.filter(i => countsToward(i, rate)).length;
+    const fatalities = incidents.filter(i => i.classification === "FAT").length;
+    const daysLost = incidents.reduce((a, i) => a + (Number(i.daysLost) || 0), 0);
+    const recordable = n("trifr");
+    const nearMiss = n("nearmiss");
+    return {
+      hours: ex.hours, headcount: ex.headcount, female: ex.female,
+      fatalities, daysLost, recordable, nearMiss,
+      ltifr: frequencyRate(n("ltifr"), ex.hours),
+      trifr: frequencyRate(recordable, ex.hours),
+      aifr: frequencyRate(n("aifr"), ex.hours),
+      severity: frequencyRate(daysLost, ex.hours),
+      nearmissrate: frequencyRate(nearMiss, ex.hours),
+      nmratio: recordable ? nearMiss / recordable : null,
+      incidents: incidents.length
+    };
+  }
+
+  const fmtRate = (v) => v === null ? "—" : (v < 10 ? v.toFixed(2) : Math.round(v).toLocaleString());
+  const pct = (num, den) => den ? Math.round((num / den) * 100) : null;
+
+  function kpiCard(label, value, sub, status) {
+    return `<div class="kpi-tile${status ? " kpi-" + status : ""}">
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-label">${esc(label)}</div>
+      ${sub ? `<div class="kpi-sub muted small">${esc(sub)}</div>` : ""}</div>`;
+  }
+
   function renderAnalytics(main) {
     const openActions = state.actions.filter(a => a.status !== "Closed");
     const overdue = openActions.filter(a => daysUntil(a.due) < 0);
@@ -2727,10 +3170,92 @@
       color: `var(--chart-${b.status})`
     }));
 
+    /* ---- Auto KPIs, computed from the registers ---- */
+    const all = computeKpis(null);
+    const direct = computeKpis((x) => (x.employerType || EMPLOYER_DIRECT) === EMPLOYER_DIRECT);
+    const subs = computeKpis((x) => x.employerType && x.employerType !== EMPLOYER_DIRECT);
+    const base = VERDA_SEED.kpiExposureBase.toLocaleString();
+    const noHours = !all.hours;
+
+    const rateRow = (key, label) => `
+      <tr><th>${esc(label)}</th>
+        <td class="num">${fmtRate(all[key])}</td>
+        <td class="num">${fmtRate(direct[key])}</td>
+        <td class="num">${fmtRate(subs[key])}</td></tr>`;
+
+    const kpiSection = `
+      ${noHours ? `<div class="card notice-card">
+        <h3>Frequency rates need hours</h3>
+        <p>No exposure hours have been recorded, so every rate below shows a dash rather than a zero.
+          A zero would read as "no injuries per million hours" when what it really means is "we don't know".</p>
+        <p class="small">Add hours under <a href="#/clients">Clients → Workforce &amp; hours</a>, per employer, and every rate here fills in and splits automatically.</p>
+      </div>` : ""}
+
+      <div class="kpi-grid">
+        ${kpiCard("Hours worked", all.hours ? all.hours.toLocaleString() : "—", "All employers, all periods recorded")}
+        ${kpiCard("Workforce", all.headcount || "—", all.headcount ? `${pct(all.female, all.headcount)}% female` : "Add a period to populate")}
+        ${kpiCard("Sub-contractor share of hours", all.hours ? pct(subs.hours, all.hours) + "%" : "—",
+          subs.hours ? `${subs.hours.toLocaleString()} of ${all.hours.toLocaleString()} hours` : "No sub-contractor hours recorded")}
+        ${kpiCard("Fatalities", all.fatalities, "Work-related deaths recorded", all.fatalities ? "critical" : "good")}
+        ${kpiCard("LTIFR", fmtRate(all.ltifr), `Lost time injuries per ${base} hours`, all.ltifr === null ? null : (all.ltifr > 0 ? "warning" : "good"))}
+        ${kpiCard("TRIFR", fmtRate(all.trifr), `Recordable injuries per ${base} hours`, all.trifr === null ? null : (all.trifr > 0 ? "warning" : "good"))}
+        ${kpiCard("Severity rate", fmtRate(all.severity), `Days lost per ${base} hours`)}
+        ${kpiCard("Near-miss : injury ratio", all.nmratio === null ? "—" : all.nmratio.toFixed(1) + " : 1",
+          "A healthy reporting culture runs high")}
+      </div>
+
+      <div class="card">
+        <h3>Safety rates — own workforce against sub-contractors</h3>
+        <p class="muted small">Per ${base} hours worked, calculated from the incident classification and the hours register.
+          Reporting a site-wide rate without this split hides the group most often getting hurt.</p>
+        <div class="table-scroll">
+          <table class="table kpi-table">
+            <thead><tr><th>Rate</th><th class="num">All</th><th class="num">Direct employees</th><th class="num">Sub-contractors</th></tr></thead>
+            <tbody>
+              ${rateRow("ltifr", "LTIFR — lost time injury frequency")}
+              ${rateRow("trifr", "TRIFR — total recordable injury frequency")}
+              ${rateRow("aifr", "AIFR — all injury frequency (incl. first aid)")}
+              ${rateRow("severity", "Severity rate — days lost")}
+              ${rateRow("nearmissrate", "Near-miss reporting rate")}
+              <tr><th>Hours worked</th><td class="num">${all.hours.toLocaleString()}</td><td class="num">${direct.hours.toLocaleString()}</td><td class="num">${subs.hours.toLocaleString()}</td></tr>
+              <tr><th>Recordable injuries</th><td class="num">${all.recordable}</td><td class="num">${direct.recordable}</td><td class="num">${subs.recordable}</td></tr>
+              <tr><th>Days lost</th><td class="num">${all.daysLost}</td><td class="num">${direct.daysLost}</td><td class="num">${subs.daysLost}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details class="chart-table">
+          <summary>How each of these is calculated</summary>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>KPI</th><th>Formula</th><th>Source register</th></tr></thead>
+            <tbody>${VERDA_SEED.kpiDefinitions.map(k =>
+              `<tr><td>${esc(k.name)}</td><td>${esc(k.formula)}</td><td>${esc(k.source)}</td></tr>`).join("")}</tbody></table>
+          </div>
+          <p class="muted small">Rates are per ${base} hours — the ILO/international convention. US OSHA practice uses 200,000 hours, which produces a number five times smaller for the same performance; never compare the two without converting.</p>
+        </details>
+      </div>`;
+
+    // Incidents by classification, and by employer type — both from the register.
+    const classRows = VERDA_SEED.injuryClassifications
+      .map(c => ({ label: c.code, values: { n: state.incidents.filter(i => i.classification === c.code).length } }))
+      .filter(r => r.values.n > 0);
+    const empRows = VERDA_SEED.employerTypes
+      .map(t => ({ label: t, values: { n: state.incidents.filter(i => (i.employerType || EMPLOYER_DIRECT) === t).length } }))
+      .filter(r => r.values.n > 0);
+
     main.appendChild(h(`
       <section>
         <h1>Analytics</h1>
-        <p class="muted">Leading and lagging indicators across every module — the management view of what the records add up to.</p>
+        <p class="muted">Leading and lagging indicators across every module — the management view of what the records add up to.
+          Every figure here is calculated from the registers; nothing on this page is typed in.</p>
+        ${kpiSection}
+        <div class="grid grid-2">
+          <div class="card">${
+            classRows.length ? groupedBarChart(classRows, [{ key: "n", label: "Incidents" }], "Incidents by classification", "Incidents")
+              : `<h3>Incidents by classification</h3><p class="muted small">Log an incident and its classification appears here.</p>`}</div>
+          <div class="card">${
+            empRows.length ? groupedBarChart(empRows, [{ key: "n", label: "Incidents" }], "Incidents by employer type", "Incidents")
+              : `<h3>Incidents by employer</h3><p class="muted small">Log an incident and the direct/sub-contractor split appears here.</p>`}</div>
+        </div>
         <div class="grid grid-3">
           ${statCard("incidents", "Incidents logged", state.incidents.length, "All severities, all sites.")}
           ${statCard("actions", "Open actions", openActions.length, `${overdue.length} overdue.`, overdue.length > 0)}
