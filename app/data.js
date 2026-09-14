@@ -25,8 +25,8 @@ const VERDA_SEED = {
   // the regulator's own guidance before it is relied on; `contentReview`
   // below records when this register was last written and who should check
   // it. Amendments, statutory instruments and fee schedules change often.
-  contentReview: { compiled: "2026-09", verifyBy: "2027-03", owner: "EHS content lead",
-    note: "Verify every instrument, permit and authority against the current law of the jurisdiction before relying on it. Where a client operates across borders, the stricter requirement governs unless a local legal opinion says otherwise." },
+  contentReview: { compiled: "2026-09", verifyBy: "2027-03", owner: "EHS content lead", linksChecked: "2026-09",
+    note: "Regulator sites and e-permitting portals were checked in September 2026. Government portals are rebuilt and renamed often — if a link fails, start from the regulator's own home page. Verify every instrument, permit and authority against the current law of the jurisdiction before relying on it. Where a client operates across borders, the stricter requirement governs unless a local legal opinion says otherwise." },
 
   countries: [
     {
@@ -42,31 +42,37 @@ const VERDA_SEED = {
         {
           "name": "National Environment Management Authority",
           "abbr": "NEMA",
+          "url": "https://www.nema.go.ug/",
           "remit": "ESIA approval, environmental audits, waste, noise, air"
         },
         {
           "name": "Directorate of Water Resources Management (Ministry of Water & Environment)",
           "abbr": "DWRM",
+          "url": "https://www.mwe.go.ug/",
           "remit": "Water abstraction and wastewater discharge permits"
         },
         {
           "name": "Department of Occupational Safety and Health (Ministry of Gender, Labour & Social Development)",
           "abbr": "OSH",
+          "url": "https://mglsd.go.ug/",
           "remit": "Workplace registration, statutory inspections, plant examination"
         },
         {
           "name": "Directorate of Geological Survey and Mines (Ministry of Energy & Mineral Development)",
           "abbr": "DGSM",
+          "url": "https://www.minerals.go.ug/",
           "remit": "Mineral rights, mine inspection"
         },
         {
           "name": "Uganda Wildlife Authority",
           "abbr": "UWA",
+          "url": "https://ugandawildlife.org/",
           "remit": "Operations in or near protected areas"
         },
         {
           "name": "National Forestry Authority",
           "abbr": "NFA",
+          "url": "https://www.nfa.go.ug/",
           "remit": "Forest reserves, timber movement"
         },
         {
@@ -77,11 +83,13 @@ const VERDA_SEED = {
         {
           "name": "Atomic Energy Council",
           "abbr": "AEC",
+          "url": "https://aec.go.ug/",
           "remit": "Radiation sources and gauges"
         },
         {
           "name": "Uganda National Bureau of Standards",
           "abbr": "UNBS",
+          "url": "https://www.unbs.go.ug/",
           "remit": "Product and effluent standards"
         }
       ],
@@ -132,7 +140,51 @@ const VERDA_SEED = {
           "covers": "Compensation for occupational injury"
         }
       ],
-      "permits": [
+      "portals": [
+          {
+            "name": "NEMA ELMIS — e-services portal",
+            "what": "Project briefs, ToR and ESIA submission, certificate status",
+            "url": "https://eservices.nema.go.ug/",
+            "verified": true
+          },
+          {
+            "name": "NEMA — ESIA guidance",
+            "what": "Process, forms and requirements before you apply",
+            "url": "https://www.nema.go.ug/en/esia/",
+            "verified": true
+          },
+          {
+            "name": "NEMA Mobile (ELMIS app)",
+            "what": "Submit project briefs and ESIA applications from a phone",
+            "url": "https://play.google.com/store/apps/details?id=com.nema_mobile",
+            "verified": true
+          },
+          {
+            "name": "Ministry of Water & Environment",
+            "what": "Water abstraction, discharge and construction permits",
+            "url": "https://www.mwe.go.ug/about/services",
+            "verified": true
+          },
+          {
+            "name": "Uganda Mining Cadastre eGov Portal",
+            "what": "Mineral rights: apply, renew, pay statutory dues",
+            "url": "https://dgsmportal.minerals.go.ug/",
+            "verified": true
+          },
+          {
+            "name": "URSB eRegistry",
+            "what": "Company and business name registration",
+            "url": "https://eregistry.ursb.go.ug/",
+            "verified": true
+          },
+          {
+            "name": "Doing Business Portal — licensing authorities",
+            "what": "Which authority licenses what, with requirements and fees",
+            "url": "https://doingbusiness.finance.go.ug/regulatory-licensing-authorities/national-environment-management-authority-nema",
+            "verified": true
+          }
+        ],
+        "permits": [
         {
           "permit": "ESIA Certificate of Approval",
           "authority": "NEMA",
@@ -198,36 +250,43 @@ const VERDA_SEED = {
         {
           "name": "National Environment Management Authority",
           "abbr": "NEMA",
+          "url": "https://www.nema.go.ke/",
           "remit": "EIA licensing, annual environmental audits, effluent licensing"
         },
         {
           "name": "Directorate of Occupational Safety and Health Services",
           "abbr": "DOSHS",
+          "url": "https://www.doshmis.go.ke/",
           "remit": "Workplace registration, statutory examinations, OSH audits"
         },
         {
           "name": "Water Resources Authority",
           "abbr": "WRA",
+          "url": "https://wra.go.ke/",
           "remit": "Water abstraction permits, catchment protection"
         },
         {
           "name": "State Department for Mining / Mining Licensing Committee",
+          "url": "https://portal.miningcadastre.go.ke/",
           "abbr": "—",
           "remit": "Mineral rights under the Mining Act"
         },
         {
           "name": "National Construction Authority",
           "abbr": "NCA",
+          "url": "https://nca.go.ke/",
           "remit": "Contractor registration, site compliance"
         },
         {
           "name": "Kenya Bureau of Standards",
           "abbr": "KEBS",
+          "url": "https://www.kebs.org/",
           "remit": "Product and discharge standards"
         },
         {
           "name": "Kenya Nuclear Regulatory Authority",
           "abbr": "KNRA",
+          "url": "https://knra.go.ke/",
           "remit": "Radiation sources"
         },
         {
@@ -288,7 +347,39 @@ const VERDA_SEED = {
           "covers": "Carbon reporting and carbon market participation"
         }
       ],
-      "permits": [
+      "portals": [
+          {
+            "name": "NEMA on eCitizen",
+            "what": "EIA licence, effluent discharge licence, waste licences — apply, pay and track",
+            "url": "https://nema.ecitizen.go.ke/",
+            "verified": true
+          },
+          {
+            "name": "eCitizen",
+            "what": "The single sign-on for most Kenyan government services",
+            "url": "https://accounts.ecitizen.go.ke/",
+            "verified": true
+          },
+          {
+            "name": "DOSHS — workplace registration and renewal",
+            "what": "Registration forms DOSHS 21A/21B/23, OSH levy, statutory audits",
+            "url": "https://www.doshmis.go.ke/services/registration-and-renewal-of-workplaces",
+            "verified": true
+          },
+          {
+            "name": "Water Resources Authority — permitting",
+            "what": "Water abstraction and use permits",
+            "url": "https://wra.go.ke/water-use-allocation/",
+            "verified": true
+          },
+          {
+            "name": "Kenya Mining Cadastre Portal",
+            "what": "Mineral rights: register, apply, pay, monitor licence status",
+            "url": "https://portal.miningcadastre.go.ke/",
+            "verified": true
+          }
+        ],
+        "permits": [
         {
           "permit": "EIA Licence",
           "authority": "NEMA",
@@ -354,20 +445,24 @@ const VERDA_SEED = {
         {
           "name": "National Environment Management Council",
           "abbr": "NEMC",
+          "url": "https://www.nemc.or.tz/",
           "remit": "EIA certification, environmental audit, inspections"
         },
         {
           "name": "Vice President's Office – Division of Environment",
+          "url": "https://www.vpo.go.tz/",
           "abbr": "VPO-DoE",
           "remit": "Policy, appeals, approvals"
         },
         {
           "name": "Occupational Safety and Health Authority",
           "abbr": "OSHA Tanzania",
+          "url": "https://www.osha.go.tz/",
           "remit": "Workplace registration, compliance licence, statutory examinations"
         },
         {
           "name": "Mining Commission (Tume ya Madini)",
+          "url": "https://www.tumemadini.go.tz/",
           "abbr": "—",
           "remit": "Mineral rights, mine inspection, ASM licensing"
         },
@@ -384,11 +479,13 @@ const VERDA_SEED = {
         {
           "name": "Tanzania Atomic Energy Commission",
           "abbr": "TAEC",
+          "url": "https://www.taec.go.tz/",
           "remit": "Radiation sources"
         },
         {
           "name": "Tanzania Bureau of Standards",
           "abbr": "TBS",
+          "url": "https://www.tbs.go.tz/",
           "remit": "Standards and product certification"
         }
       ],
@@ -439,7 +536,39 @@ const VERDA_SEED = {
           "covers": "Abstraction and discharge control"
         }
       ],
-      "permits": [
+      "portals": [
+          {
+            "name": "NEMC Projects Management System (PMS)",
+            "what": "EIA and environmental audit submission for developers and registered experts",
+            "url": "https://eia.nemc.or.tz/",
+            "verified": true
+          },
+          {
+            "name": "NEMC — EIA procedure",
+            "what": "The steps, forms and fees before you apply",
+            "url": "https://www.nemc.or.tz/",
+            "verified": true
+          },
+          {
+            "name": "OSHA Tanzania — services",
+            "what": "Workplace registration, compliance licence, statutory examinations",
+            "url": "https://www.osha.go.tz/services?language=eng",
+            "verified": true
+          },
+          {
+            "name": "Tume ya Madini — licence applications",
+            "what": "Mineral licence application forms and services",
+            "url": "http://tumemadini.eganet.go.tz/licensing/licence-application/",
+            "verified": true
+          },
+          {
+            "name": "Madini Portal — mining cadastre map",
+            "what": "Licence map and cadastre search",
+            "url": "http://portal.madini.go.tz/map/",
+            "verified": true
+          }
+        ],
+        "permits": [
         {
           "permit": "EIA Certificate",
           "authority": "NEMC / VPO",
@@ -501,26 +630,31 @@ const VERDA_SEED = {
         {
           "name": "Agence Congolaise de l'Environnement",
           "abbr": "ACE",
+          "url": "https://www.ace.gouv.cd/",
           "remit": "Approval of EIES and PGES outside the mining sector"
         },
         {
           "name": "Ministère de l'Environnement et Développement Durable",
           "abbr": "MEDD",
+          "url": "https://environnement.gouv.cd/",
           "remit": "Environmental policy and enforcement"
         },
         {
           "name": "Direction de Protection de l'Environnement Minier",
+          "url": "https://www.mines-rdc.cd/",
           "abbr": "DPEM",
           "remit": "Environmental approval and inspection for mining projects"
         },
         {
           "name": "Cadastre Minier",
           "abbr": "CAMI",
+          "url": "https://cami.cd/",
           "remit": "Mining titles and perimeters"
         },
         {
           "name": "Service d'Assistance et d'Encadrement de l'Exploitation Minière Artisanale et à Petite Échelle",
           "abbr": "SAEMAPE",
+          "url": "https://saemape.cd/",
           "remit": "Artisanal and small-scale mining oversight"
         },
         {
@@ -530,6 +664,7 @@ const VERDA_SEED = {
         },
         {
           "name": "Caisse Nationale de Sécurité Sociale",
+          "url": "https://www.cnss.cd/",
           "abbr": "CNSS",
           "remit": "Social security and occupational injury"
         }
@@ -566,7 +701,27 @@ const VERDA_SEED = {
           "covers": "Applies to 3TG and cobalt from conflict-affected and high-risk areas"
         }
       ],
-      "permits": [
+      "portals": [
+          {
+            "name": "Cadastre Minier (CAMI)",
+            "what": "Titres miniers et de carrières — demande, renouvellement, cadastre",
+            "url": "https://cami.cd/",
+            "verified": true
+          },
+          {
+            "name": "CAMI — conditions de demande",
+            "what": "Ce qu'il faut fournir avant de déposer une demande",
+            "url": "https://cami.cd/conditions-de-demande/",
+            "verified": true
+          },
+          {
+            "name": "ITIE RDC — octroi des droits miniers",
+            "what": "Explication de la procédure d'octroi, y compris l'instruction environnementale",
+            "url": "https://www.itierdc.net/octroi-des-droits-miniers/",
+            "verified": true
+          }
+        ],
+        "permits": [
         {
           "permit": "Étude d'Impact Environnemental et Social (EIES) approval",
           "authority": "ACE (or DPEM for mining)",
@@ -621,21 +776,25 @@ const VERDA_SEED = {
         {
           "name": "Zambia Environmental Management Agency",
           "abbr": "ZEMA",
+          "url": "https://www.zema.org.zm/",
           "remit": "EIA/EPB decisions, licensing of emissions, effluent and waste"
         },
         {
           "name": "Mine Safety Department (Ministry of Mines and Minerals Development)",
+          "url": "https://www.mmmd.gov.zm/",
           "abbr": "MSD",
           "remit": "Mine safety inspection, statutory mine regulations"
         },
         {
           "name": "Mining Cadastre Department",
+          "url": "https://eservices.gov.zm/",
           "abbr": "—",
           "remit": "Mining rights and licences"
         },
         {
           "name": "Water Resources Management Authority",
           "abbr": "WARMA",
+          "url": "https://warma.org.zm/",
           "remit": "Water abstraction and use permits"
         },
         {
@@ -646,11 +805,13 @@ const VERDA_SEED = {
         {
           "name": "Workers' Compensation Fund Control Board",
           "abbr": "WCFCB",
+          "url": "https://www.wcfcb.org.zm/",
           "remit": "Occupational injury compensation"
         },
         {
           "name": "Zambia Bureau of Standards",
           "abbr": "ZABS",
+          "url": "https://www.zabs.org.zm/",
           "remit": "Standards"
         },
         {
@@ -706,7 +867,51 @@ const VERDA_SEED = {
           "covers": "Abstraction, discharge and catchment protection"
         }
       ],
-      "permits": [
+      "portals": [
+          {
+            "name": "ZEMA e-services (via ZamPass)",
+            "what": "EPB/EIS decisions, emission, effluent and waste licences",
+            "url": "https://eservices.gov.zm/",
+            "verified": true
+          },
+          {
+            "name": "ZamPass registration",
+            "what": "The government single sign-on you need before any ZEMA application",
+            "url": "https://zampass.gsb.gov.zm/register",
+            "verified": true
+          },
+          {
+            "name": "ZEMA — licensing services",
+            "what": "Which licence you need and what it covers",
+            "url": "https://www.zema.org.zm/our-services/licensing/",
+            "verified": true
+          },
+          {
+            "name": "My-WARMA portal",
+            "what": "Water abstraction and use permits",
+            "url": "http://water-permits.warma.org.zm/home",
+            "verified": true
+          },
+          {
+            "name": "WARMA — permitting and licensing",
+            "what": "Requirements, including the ZEMA approval needed for civil works",
+            "url": "https://warma.org.zm/?page_id=1733",
+            "verified": true
+          },
+          {
+            "name": "Zambia Mining Cadastre (Government Service Bus)",
+            "what": "Mining rights applications and licence administration",
+            "url": "https://eservices.gov.zm/",
+            "verified": true
+          },
+          {
+            "name": "Geological data portal",
+            "what": "Public spatial mining and geological data",
+            "url": "https://ngdr.gsb.gov.zm/",
+            "verified": true
+          }
+        ],
+        "permits": [
         {
           "permit": "Environmental Project Brief (EPB) or Environmental Impact Statement (EIS) decision letter",
           "authority": "ZEMA",

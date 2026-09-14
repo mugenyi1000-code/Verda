@@ -489,6 +489,8 @@ textarea { min-height: 74px; resize: vertical; }
 .table thead th { color: var(--muted); font-weight: 700; font-size: .74rem; text-transform: uppercase; letter-spacing: .03em; border-bottom: 2px solid var(--border); }
 .table tbody tr { border-bottom: 1px solid var(--border); transition: background-color .1s ease; }
 .table tbody tr:hover { background: var(--brand-3); }
+.table a { font-weight: 600; text-decoration: none; }
+.table a:hover { text-decoration: underline; }
 .table tbody tr:last-child { border-bottom: none; }
 
 /* ---- Segments / checklists ---- */

@@ -68,6 +68,15 @@ where submissions are made in French. Every entry carries a compiled date, a
 review-due date and an explicit instruction to verify against current law; it
 is a practitioner's starting register, not legal advice.
 
+A **Where to apply** tab carries the actual e-permitting portals — NEMA's
+ELMIS for Uganda, NEMA-on-eCitizen for Kenya, NEMC's Projects Management
+System for Tanzania, CAMI for DR Congo, ZEMA via ZamPass for Zambia, plus the
+water and mining cadastre portals for each — 27 links in all, each saying what
+you do there, with a downloadable copy and the month it was checked. Where no
+official site could be confirmed the entry says so rather than offering a
+plausible guess: a wrong portal is how application fees get paid to the wrong
+party.
+
 See `docs/competitive-benchmark.md` for how Verda's module coverage compares
 with established EHS platforms and what is still on the roadmap.
 

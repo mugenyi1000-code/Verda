@@ -33,6 +33,11 @@
       `<option value="${esc(c.name)}" ${cur && c.name === cur.name ? "selected" : ""}>${esc(c.name)}</option>`).join("");
   }
 
+  // External links open in a new tab and never hand the opener to the target.
+  function extLink(url, text) {
+    return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)} ↗</a>`;
+  }
+
   const countryName = (id) => {
     const c = VERDA_SEED.countries.find(x => x.id === id);
     return c ? c.name : "—";
@@ -2319,6 +2324,7 @@
           <button class="tab-btn" data-tab="hazards">Hazard library</button>
           <button class="tab-btn" data-tab="training">Training catalogue</button>
           <button class="tab-btn" data-tab="lists">Other registers</button>
+          <button class="tab-btn" data-tab="apply">Where to apply</button>
         </div>
         <div id="checklist-panel"></div>
         <div class="card notice-card">
@@ -2373,7 +2379,8 @@
       panel.innerHTML = `
         <div class="card">
           <h3>Permits and approvals — ${esc(c.name)}</h3>
-          <p class="muted small">Submissions are made in ${esc(c.reportingLanguage)}. Verify scope, fees and validity with the issuing authority: requirements turn on project type and scale.</p>
+          <p class="muted small">Submissions are made in ${esc(c.reportingLanguage)}. Verify scope, fees and validity with the issuing authority: requirements turn on project type and scale.
+            The <strong>Where to apply</strong> tab has the portal links for each of these.</p>
           <div class="table-scroll">
             <table class="table"><thead><tr><th>Permit / approval</th><th>Issuing authority</th><th>When it is needed</th></tr></thead>
             <tbody>${c.permits.map(p =>
@@ -2403,7 +2410,7 @@
           <div class="table-scroll">
             <table class="table"><thead><tr><th>Body</th><th>Short</th><th>What it regulates</th></tr></thead>
             <tbody>${c.regulators.map(r =>
-              `<tr><td>${esc(r.name)}</td><td>${esc(r.abbr)}</td><td>${esc(r.remit)}</td></tr>`).join("")}</tbody></table>
+              `<tr><td>${r.url ? extLink(r.url, r.name) : esc(r.name)}</td><td>${esc(r.abbr)}</td><td>${esc(r.remit)}</td></tr>`).join("")}</tbody></table>
           </div>
         </div>
         <div class="card">
@@ -2518,8 +2525,52 @@
           asTable([["KPI","name"],["Formula","formula"],["Source","source"]]));
     }
 
+    /* ---- Where to apply: the actual portals ---- */
+    function applyPanel() {
+      const c = COUNTRY();
+      panel.innerHTML = `
+        <div class="card notice-card">
+          <h3>Applying in ${esc(c.name)}</h3>
+          <p>Submissions are made in ${esc(c.reportingLanguage)}. Most of these need a government account created
+            <em>before</em> you can start an application — set that up first, because it is usually the slowest step.</p>
+          <p class="small">Links checked ${esc(VERDA_SEED.contentReview.linksChecked || VERDA_SEED.contentReview.compiled)}.
+            Government portals are rebuilt and renamed often: if one fails, start from the regulator's own home page in the
+            <strong>Regulators &amp; law</strong> tab rather than trusting a stale link.</p>
+        </div>
+        <div class="card">
+          <h3>Application portals and guidance</h3>
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Portal</th><th>What you do there</th></tr></thead>
+              <tbody>${c.portals.map(x =>
+                `<tr><td>${extLink(x.url, x.name)}</td><td>${esc(x.what)}</td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+          <button class="btn" id="apply-download">Download links (.txt)</button>
+        </div>
+        <div class="card">
+          <h3>Regulator websites</h3>
+          <div class="table-scroll">
+            <table class="table">
+              <thead><tr><th>Body</th><th>Regulates</th></tr></thead>
+              <tbody>${c.regulators.map(r =>
+                `<tr><td>${r.url ? extLink(r.url, r.name) : esc(r.name) + ' <span class="muted small">(no official site confirmed)</span>'}</td>
+                <td>${esc(r.remit)}</td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+          <p class="muted small">Where no site is listed, Verda has not confirmed an official one — ask the authority directly
+            rather than following a search result that looks plausible. A wrong portal is how application fees get paid to the wrong party.</p>
+        </div>`;
+      panel.querySelector("#apply-download").addEventListener("click", () =>
+        downloadText(`Permit-Portals-${c.id.toUpperCase()}.txt`,
+          `WHERE TO APPLY — ${c.name.toUpperCase()}\nSubmissions in ${c.reportingLanguage}\n` +
+          `Links checked ${VERDA_SEED.contentReview.linksChecked || VERDA_SEED.contentReview.compiled}; portals change, verify before use.\n\n` +
+          `APPLICATION PORTALS\n` + c.portals.map(x => `  ${x.name}\n      ${x.what}\n      ${x.url}`).join("\n\n") +
+          `\n\nREGULATORS\n` + c.regulators.map(r => `  ${r.name}${r.url ? "\n      " + r.url : "  (no official site confirmed)"}\n      ${r.remit}`).join("\n")));
+    }
+
     const panels = { industry: industryPanel, permits: permitsPanel, register: registerPanel,
-      hazards: hazardsPanel, training: trainingPanel, lists: listsPanel };
+      hazards: hazardsPanel, training: trainingPanel, lists: listsPanel, apply: applyPanel };
     industryPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
