@@ -9960,6 +9960,399 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     }
   ],
 
+  // ---- Wetland & sensitive-area spatial data ------------------------------
+  // Verda does NOT ship wetland boundaries. It cannot: national wetland
+  // boundaries are held by the agencies below, they are large, they are
+  // licensed, and they change. Shipping a plausible-looking polygon would be
+  // worse than shipping none — someone would screen a site against invented
+  // geometry and conclude "no wetland here" when there is one.
+  //
+  // What Verda does instead: names where the authoritative layer comes from,
+  // and lets you load the layer you obtained and screen your coordinates
+  // against it (Maps → Sensitive areas).
+  wetlandSourcesGlobal: [
+    {
+      "name": "Ramsar Sites Information Service (RSIS)",
+      "what": "Designated Ramsar wetland sites — boundaries where digitised, otherwise centroids. The definitive source for internationally important wetlands.",
+      "url": "https://rsis.ramsar.org/",
+      "format": "Shapefile, KML/KMZ",
+      "licence": "Open access from the Ramsar Secretariat; check the terms on the download page",
+      "note": "Only some sites have boundary polygons; the rest are point centroids. A centroid is not a boundary and must not be screened against as if it were."
+    },
+    {
+      "name": "Global Mangrove Watch",
+      "what": "Mangrove extent and change, globally, by year",
+      "url": "https://www.globalmangrovewatch.org/",
+      "format": "Shapefile, GeoTIFF",
+      "licence": "Open, attribution required",
+      "note": "Relevant to coastal Tanzania and Kenya; not to landlocked Uganda, Zambia or inland DRC."
+    },
+    {
+      "name": "Global Lakes and Wetlands Database (GLWD)",
+      "what": "Global wetland and lake extent, coarse resolution",
+      "url": "https://www.worldwildlife.org/pages/global-lakes-and-wetlands-database",
+      "format": "Shapefile, raster",
+      "licence": "Free for non-commercial use — check before using in a paid assignment",
+      "note": "Coarse. Useful for orientation and desk screening, never for a boundary determination."
+    },
+    {
+      "name": "Copernicus / ESA WorldCover",
+      "what": "Global land cover at 10 m including herbaceous wetland and mangrove classes",
+      "url": "https://esa-worldcover.org/",
+      "format": "GeoTIFF",
+      "licence": "CC BY 4.0",
+      "note": "Land cover class, not a legal wetland boundary — the two are different things and regulators treat them differently."
+    },
+    {
+      "name": "Protected Planet (WDPA)",
+      "what": "World Database on Protected Areas — many wetlands sit inside protected areas",
+      "url": "https://www.protectedplanet.net/",
+      "format": "Shapefile, geodatabase",
+      "licence": "Free with attribution; commercial use has conditions",
+      "note": "Screen against protected areas as well as wetlands — the overlap is often what triggers a permit."
+    }
+  ],
+
+  wetlandSourcesByCountry: {
+    "ug": [
+      {
+        "name": "Wetlands Management Department, Ministry of Water & Environment",
+        "what": "The national wetlands inventory and wetland boundary data for Uganda. The authoritative source for a wetland determination.",
+        "url": "https://www.mwe.go.ug/",
+        "format": "Request from the Department",
+        "licence": "Government data — request in writing; conditions apply",
+        "note": "Uganda's wetland boundaries are held by the Wetlands Management Department. The 1996 national land-cover wetland layer circulates widely and is badly out of date — do not screen against it."
+      },
+      {
+        "name": "NEMA Uganda",
+        "what": "Environmental sensitivity and ESIA-related spatial data",
+        "url": "https://www.nema.go.ug/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "NEMA is the approving authority for a wetland-affecting project, so their determination is the one that counts."
+      },
+      {
+        "name": "Uganda Wetlands Atlas (UNEP/UNDP with Government of Uganda)",
+        "what": "Published mapping of wetland location and condition, Volumes I and II",
+        "url": "https://www.unep.org/resources/report/uganda-wetlands-atlas-volume-i",
+        "format": "PDF atlas",
+        "licence": "Open publication",
+        "note": "An atlas, not a GIS layer. Good for context and for citing in an ESIA; not a substitute for surveyed boundaries."
+      }
+    ],
+    "ke": [
+      {
+        "name": "NEMA Kenya",
+        "what": "Environmental spatial data and the wetland regulations regime",
+        "url": "https://www.nema.go.ke/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "The Environmental Management and Co-ordination (Wetlands, River Banks, Lake Shores and Sea Shore Management) Regulations govern wetland works — the setback distances matter as much as the boundary."
+      },
+      {
+        "name": "Kenya Wildlife Service / Kenya Forest Service",
+        "what": "Protected area and forest reserve boundaries, which frequently contain wetlands",
+        "url": "https://www.kws.go.ke/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Check both — a wetland inside a protected area attracts two consent regimes."
+      },
+      {
+        "name": "Water Resources Authority",
+        "what": "Catchment, riparian and water resource spatial data",
+        "url": "https://wra.go.ke/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Riparian reserve widths are set in law and are the most commonly breached setback on construction sites."
+      }
+    ],
+    "tz": [
+      {
+        "name": "NEMC Tanzania",
+        "what": "Environmental spatial data and EIA determinations",
+        "url": "https://www.nemc.or.tz/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Tanzania's Environmental Management Act sets a 60 m protected zone from the highest water mark of rivers, dams and lakes — screen against that, not only against the wetland polygon."
+      },
+      {
+        "name": "Ministry of Water / Basin Water Boards",
+        "what": "Basin, wetland and water resource data by basin",
+        "url": "https://www.maji.go.tz/",
+        "format": "Request from the relevant Basin Water Board",
+        "licence": "Government data",
+        "note": "Data is held by basin, not nationally — identify which Basin Water Board covers your site first."
+      },
+      {
+        "name": "Global Mangrove Watch — Tanzania coast",
+        "what": "Mangrove extent along the Tanzanian coastline",
+        "url": "https://www.globalmangrovewatch.org/",
+        "format": "Shapefile",
+        "licence": "Open, attribution",
+        "note": "Mangrove clearance is separately prohibited and prosecuted; treat it as a red flag, not a constraint to be mitigated."
+      }
+    ],
+    "cd": [
+      {
+        "name": "Agence Congolaise de l'Environnement (ACE)",
+        "what": "Données environnementales et instruction des EIES",
+        "url": "https://www.ace.gouv.cd/",
+        "format": "Sur demande",
+        "licence": "Données publiques",
+        "note": "La RDC abrite les tourbières de la Cuvette Centrale — parmi les plus vastes zones humides tropicales du monde et un stock de carbone majeur. Toute activité y touchant appelle une vigilance particulière."
+      },
+      {
+        "name": "Ramsar — RDC",
+        "what": "Sites Ramsar désignés en RDC, dont la Cuvette Centrale",
+        "url": "https://rsis.ramsar.org/",
+        "format": "Shapefile, KML",
+        "licence": "Accès libre",
+        "note": "Le site Ramsar de la Cuvette Centrale est l'un des plus étendus au monde — vérifier systématiquement le chevauchement."
+      },
+      {
+        "name": "CongoPeat / peatland research datasets",
+        "what": "Peatland extent mapping for the Cuvette Centrale",
+        "url": "https://congopeat.net/",
+        "format": "Research datasets",
+        "licence": "Research use — check terms",
+        "note": "Research data, not a regulatory boundary. Cite it as evidence, do not present it as a legal determination."
+      }
+    ],
+    "zm": [
+      {
+        "name": "ZEMA",
+        "what": "Environmental spatial data and EIA/EPB determinations",
+        "url": "https://www.zema.org.zm/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Zambia's major wetlands — the Kafue Flats, Bangweulu, Barotse floodplain, Lukanga and Busanga swamps — are Ramsar designated. Check RSIS as well as ZEMA."
+      },
+      {
+        "name": "Water Resources Management Authority (WARMA)",
+        "what": "Catchment and water resource spatial data",
+        "url": "https://warma.org.zm/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Abstraction from or discharge to a wetland system needs a WARMA permit independently of any ZEMA decision."
+      },
+      {
+        "name": "Department of National Parks and Wildlife / Forestry",
+        "what": "Protected area and forest reserve boundaries",
+        "url": "https://www.mtn.gov.zm/",
+        "format": "Request",
+        "licence": "Government data",
+        "note": "Several Zambian wetlands are Game Management Areas — a separate consent regime again."
+      }
+    ]
+  },
+
+  // ---- Statutory officer roles --------------------------------------------
+  // The posts that exist, what each is responsible for, and where the current
+  // holder sits. Verda deliberately ships NO names, numbers or email
+  // addresses: these are individual public servants who transfer constantly,
+  // a fabricated or stale contact in a submitted report is worse than a blank,
+  // and publishing officials' personal details is not ours to do. Record the
+  // people you actually deal with in the contacts register, which tracks when
+  // each was last verified.
+  officerRoles: {
+    "ug": [
+      {
+        "role": "District Environment Officer (DEO)",
+        "level": "District",
+        "remit": "Environmental compliance, ESIA input, inspection and enforcement within the district; NEMA's local counterpart.",
+        "find": "District local government headquarters — Natural Resources Department"
+      },
+      {
+        "role": "District Natural Resources Officer (DNRO)",
+        "level": "District",
+        "remit": "Heads the Natural Resources Department; wetlands, forestry, environment and lands coordination.",
+        "find": "District local government headquarters"
+      },
+      {
+        "role": "District Physical Planner",
+        "level": "District",
+        "remit": "Physical development plans and development control under the Physical Planning Act; sits on the District Physical Planning Committee.",
+        "find": "District local government — Physical Planning Department"
+      },
+      {
+        "role": "District Forestry Officer",
+        "level": "District",
+        "remit": "Forest reserves, tree cover, timber movement permits.",
+        "find": "District local government / National Forestry Authority range office"
+      },
+      {
+        "role": "District Water Officer",
+        "level": "District",
+        "remit": "Water supply and abstraction at district level; liaison with DWRM.",
+        "find": "District local government"
+      },
+      {
+        "role": "Sub-county Environment Focal Person",
+        "level": "Sub-county",
+        "remit": "First point of contact for site-level environmental issues and community complaints.",
+        "find": "Sub-county headquarters"
+      },
+      {
+        "role": "Community Development Officer (CDO)",
+        "level": "District / Sub-county",
+        "remit": "Community engagement, grievance handling, vulnerable groups.",
+        "find": "District or sub-county local government"
+      }
+    ],
+    "ke": [
+      {
+        "role": "County Director of Environment (NEMA)",
+        "level": "County",
+        "remit": "NEMA's county office; EIA processing, compliance inspection, enforcement notices.",
+        "find": "NEMA county office"
+      },
+      {
+        "role": "County Environment Officer",
+        "level": "County",
+        "remit": "County government environment function; waste, county-level environmental management.",
+        "find": "County government — Department of Environment"
+      },
+      {
+        "role": "County Director of Physical Planning",
+        "level": "County",
+        "remit": "Physical and land use planning, development applications and change of user under the Physical and Land Use Planning Act.",
+        "find": "County government — Lands and Physical Planning"
+      },
+      {
+        "role": "County Director of Natural Resources",
+        "level": "County",
+        "remit": "Natural resource management, forests and water at county level.",
+        "find": "County government"
+      },
+      {
+        "role": "Sub-County Environment Officer",
+        "level": "Sub-county",
+        "remit": "Local inspection and complaints.",
+        "find": "Sub-county administration office"
+      },
+      {
+        "role": "County Environment Committee",
+        "level": "County",
+        "remit": "Statutory committee under EMCA advising on county environmental matters.",
+        "find": "County government secretariat"
+      }
+    ],
+    "tz": [
+      {
+        "role": "District / Town Environment Management Officer",
+        "level": "District / Town Council",
+        "remit": "Statutory post under the Environmental Management Act 2004 — coordinates environmental protection across the council area; must hold a relevant degree or diploma.",
+        "find": "District or Town Council headquarters"
+      },
+      {
+        "role": "Ward Environment Management Officer",
+        "level": "Ward",
+        "remit": "Designated officer coordinating environmental protection in the ward.",
+        "find": "Ward executive office"
+      },
+      {
+        "role": "Village / Mtaa Environment Management Officer",
+        "level": "Village / Mtaa",
+        "remit": "Village-level environmental coordination; works with the Village Environment Committee.",
+        "find": "Village executive office"
+      },
+      {
+        "role": "District Natural Resources Officer",
+        "level": "District",
+        "remit": "Forestry, wildlife, beekeeping and natural resource management.",
+        "find": "District Council — Natural Resources Department"
+      },
+      {
+        "role": "Town / District Planner",
+        "level": "District / Town Council",
+        "remit": "Urban planning and development control under the Urban Planning Act.",
+        "find": "Council — Urban Planning Department"
+      },
+      {
+        "role": "District Land Officer",
+        "level": "District",
+        "remit": "Land allocation, titles and land use conflicts.",
+        "find": "District Council — Lands Department"
+      }
+    ],
+    "cd": [
+      {
+        "role": "Coordonnateur Provincial de l'Environnement",
+        "level": "Province",
+        "remit": "Coordination de l'application de la réglementation environnementale dans la province.",
+        "find": "Coordination Provinciale de l'Environnement"
+      },
+      {
+        "role": "Chef de Division Provinciale de l'Environnement",
+        "level": "Province",
+        "remit": "Division provinciale du MEDD — inspection et suivi environnemental.",
+        "find": "Division Provinciale de l'Environnement"
+      },
+      {
+        "role": "Superviseur / Inspecteur environnemental",
+        "level": "Territoire",
+        "remit": "Inspection de terrain et constats.",
+        "find": "Bureau du Territoire"
+      },
+      {
+        "role": "Chef de Division de l'Urbanisme et Habitat",
+        "level": "Province",
+        "remit": "Urbanisme, permis de bâtir et contrôle du développement.",
+        "find": "Division Provinciale de l'Urbanisme et Habitat"
+      },
+      {
+        "role": "Administrateur de Territoire",
+        "level": "Territoire",
+        "remit": "Autorité administrative territoriale — interlocuteur pour l'accès et les relations communautaires.",
+        "find": "Bureau du Territoire"
+      },
+      {
+        "role": "Agent DPEM (projets miniers)",
+        "level": "Province",
+        "remit": "Suivi environnemental spécifique au secteur minier.",
+        "find": "Direction de Protection de l'Environnement Minier"
+      }
+    ],
+    "zm": [
+      {
+        "role": "ZEMA Regional Inspector",
+        "level": "Region / Province",
+        "remit": "ZEMA regional office; licensing support, inspection and enforcement.",
+        "find": "ZEMA regional office"
+      },
+      {
+        "role": "District Environmental Officer / Council Environmental Health Officer",
+        "level": "District Council",
+        "remit": "District-level environmental health, waste and nuisance control.",
+        "find": "District Council"
+      },
+      {
+        "role": "District Planning Officer / Physical Planner",
+        "level": "District Council",
+        "remit": "Development control and planning permission under the Urban and Regional Planning Act.",
+        "find": "District Council — Planning Department"
+      },
+      {
+        "role": "District Forestry Officer",
+        "level": "District",
+        "remit": "Forest reserves, tree licences, charcoal control.",
+        "find": "Forestry Department district office"
+      },
+      {
+        "role": "WARMA Catchment Officer",
+        "level": "Catchment",
+        "remit": "Water abstraction and discharge permitting in the catchment.",
+        "find": "WARMA catchment or regional office"
+      },
+      {
+        "role": "Mine Safety Inspector",
+        "level": "National / regional",
+        "remit": "Mine safety inspection under the Mines and Minerals Development Act.",
+        "find": "Mine Safety Department, Ministry of Mines"
+      }
+    ]
+  },
+
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100
 };

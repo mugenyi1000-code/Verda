@@ -66,6 +66,8 @@
       credits: {},
       creditLedger: [],
       reports: [],
+      geoLayers: [],         // sensitive-area layers the user has loaded (GeoJSON)
+      officerContacts: [],   // the officers this user actually deals with
       docs: {},              // in-progress ToR and ESIA content, per document type
       docRecords: [],        // generated and submitted ToR/ESIA documents
       esiaDrafts: [],
@@ -96,7 +98,7 @@
   // Saved states from before these registers existed must not crash on load.
   if (!state.ui || typeof state.ui !== "object") state.ui = {};
   if (!state.docs || typeof state.docs !== "object") state.docs = {};
-  ["subcontractors", "workforce", "equipment", "docRecords"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
+  ["subcontractors", "workforce", "equipment", "docRecords", "geoLayers", "officerContacts"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
     try {
@@ -2464,13 +2466,307 @@
     });
   }
 
+  /* ==================== SENSITIVE AREAS & SCREENING ====================
+     Verda ships no wetland boundaries — see the note in data.js. What it does
+     is let you load the layer you obtained from the agency that holds it, and
+     screen every coordinate you have recorded against it. That is the part
+     that actually answers a question: "does sampling point P3 fall inside a
+     wetland?" A map you can look at does not answer it; a screening result
+     with a distance does. */
+
+  // Ray casting. Works on a polygon's outer ring in degrees, which is fine at
+  // the scale a site sits at; it is not a projected-area calculation and is
+  // not claimed to be one.
+  function pointInRing(lng, lat, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      const intersects = ((yi > lat) !== (yj > lat)) &&
+        (lng < ((xj - xi) * (lat - yi)) / ((yj - yi) || 1e-12) + xi);
+      if (intersects) inside = !inside;
+    }
+    return inside;
+  }
+  // A polygon with holes: inside the outer ring and outside every hole.
+  function pointInPolygon(lng, lat, rings) {
+    if (!rings.length || !pointInRing(lng, lat, rings[0])) return false;
+    for (let i = 1; i < rings.length; i++) if (pointInRing(lng, lat, rings[i])) return false;
+    return true;
+  }
+  function pointInFeature(lng, lat, geom) {
+    if (!geom) return false;
+    if (geom.type === "Polygon") return pointInPolygon(lng, lat, geom.coordinates);
+    if (geom.type === "MultiPolygon") return geom.coordinates.some(p => pointInPolygon(lng, lat, p));
+    return false;
+  }
+
+  // Great-circle distance in metres — used to report how close a point sits to
+  // a boundary it is outside of, because "outside" and "outside by 4 m" are
+  // different answers.
+  function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371000, toRad = (d) => (d * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  // Distance to the nearest vertex of a feature. An approximation — it can
+  // overstate the distance to a long straight edge — so it is labelled as the
+  // nearest mapped vertex, not the nearest point on the boundary.
+  function distanceToFeature(lat, lng, geom) {
+    let best = Infinity;
+    const walk = (rings) => rings.forEach(ring => ring.forEach(([x, y]) => {
+      const d = haversine(lat, lng, y, x);
+      if (d < best) best = d;
+    }));
+    if (geom.type === "Polygon") walk(geom.coordinates);
+    else if (geom.type === "MultiPolygon") geom.coordinates.forEach(walk);
+    else if (geom.type === "Point") best = haversine(lat, lng, geom.coordinates[1], geom.coordinates[0]);
+    else if (geom.type === "LineString") walk([geom.coordinates]);
+    return best;
+  }
+
+  const featureName = (f) => {
+    const p = f.properties || {};
+    return p.name || p.NAME || p.Name || p.SITE_NAME || p.site_name || p.WETLAND || p.title || "(unnamed feature)";
+  };
+
+  // Every coordinate the platform holds: client sites, and every coordinate
+  // table in the ToR and ESIA documents.
+  function allProjectPoints() {
+    const pts = [];
+    state.clients.forEach(c => {
+      if (Number.isFinite(Number(c.lat)) && Number.isFinite(Number(c.lng)))
+        pts.push({ label: c.name, source: "Client site", lat: Number(c.lat), lng: Number(c.lng) });
+    });
+    Object.entries(state.docs || {}).forEach(([kind, store]) => {
+      Object.entries(store).forEach(([secId, m]) => {
+        if (!m || !m.tables) return;
+        const defs = VERDA_SEED.sectionTables[secId] || [];
+        defs.filter(t => t.map).forEach(t => {
+          (m.tables[t.id] || []).forEach(r => {
+            if (validLat(r.lat) && validLng(r.lng)) {
+              pts.push({
+                label: r[t.columns[0].key] || t.title,
+                source: `${kind.toUpperCase()} — ${t.title}`,
+                lat: Number(r.lat), lng: Number(r.lng)
+              });
+            }
+          });
+        });
+      });
+    });
+    return pts;
+  }
+
+  function screenPoints(points, layer, bufferM) {
+    return points.map(p => {
+      let inside = null, nearest = null, nearestDist = Infinity;
+      layer.features.forEach(f => {
+        if (pointInFeature(p.lng, p.lat, f.geometry)) { if (!inside) inside = f; }
+        const d = distanceToFeature(p.lat, p.lng, f.geometry);
+        if (d < nearestDist) { nearestDist = d; nearest = f; }
+      });
+      const within = !inside && nearestDist <= bufferM;
+      return {
+        point: p,
+        status: inside ? "inside" : within ? "buffer" : "outside",
+        feature: inside ? featureName(inside) : featureName(nearest),
+        distance: inside ? 0 : nearestDist
+      };
+    });
+  }
+
+  function renderSensitiveAreas(panel) {
+    const S = VERDA_SEED;
+    const c = COUNTRY();
+    const nat = S.wetlandSourcesByCountry[c.id] || [];
+
+    let lastStatus = "";
+    function draw() {
+      const layers = state.geoLayers;
+      panel.innerHTML = `
+        <div class="card notice-card">
+          <h3>Wetlands and other sensitive areas</h3>
+          <p><strong>Verda does not ship wetland boundaries, and will not.</strong> National wetland boundaries are held by the
+            agencies listed below; they are large, licensed, and revised. A plausible-looking polygon shipped in an app is worse
+            than none — someone screens a site against it, reads "no wetland here", and clears works that needed a permit.</p>
+          <p class="small">What Verda does instead: obtain the layer from the authority that holds it, load it here, and every
+            coordinate in the platform — client sites, ToR study areas, ESIA sampling points, receptors, monitoring points — is
+            screened against it with a distance.</p>
+        </div>
+
+        <div class="card">
+          <h3>Load a layer</h3>
+          <div class="form-row">
+            <label>Layer name<input id="geo-name" placeholder="e.g. Wetlands — Wetlands Management Dept 2025" /></label>
+            <label>Type<select id="geo-kind">
+              <option>Wetland</option><option>Protected area</option><option>Forest reserve</option>
+              <option>Riparian buffer</option><option>Cultural heritage</option><option>Settlement</option><option>Other</option>
+            </select></label>
+            <label>Screening buffer (m)<input id="geo-buffer" type="number" value="500" min="0" /></label>
+          </div>
+          <div class="dropzone" id="geo-drop" tabindex="0" role="button" aria-label="Load a GeoJSON layer">
+            <p><strong>Drop a GeoJSON file here</strong> — or click to choose.</p>
+            <p class="muted small">GeoJSON (.geojson / .json). A browser cannot read a .shp directly: convert the shapefile first
+              in QGIS (Export → Save Features As → GeoJSON) or with mapshaper.org, and keep it in WGS84 / EPSG:4326.</p>
+            <input type="file" accept=".geojson,.json,application/geo+json,application/json" hidden id="geo-file" />
+          </div>
+          <div id="geo-status">${lastStatus}</div>
+        </div>
+
+        ${layers.length ? `<div class="card">
+          <h3>Loaded layers</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Layer</th><th>Type</th><th class="num">Features</th><th>Loaded</th><th></th></tr></thead>
+            <tbody>${layers.map(l => `<tr><td>${esc(l.name)}</td><td>${esc(l.kind)}</td>
+              <td class="num">${l.features.length}</td><td>${esc(l.date.slice(0, 10))}</td>
+              <td class="row-actions"><button class="btn btn-ghost btn-sm" data-geo-del="${esc(l.id)}">Remove</button></td></tr>`).join("")}
+            </tbody></table></div>
+        </div>` : ""}
+
+        <div class="card"><h3>Screening result</h3><div id="geo-screen"></div></div>
+
+        <div class="card">
+          <h3>Where the authoritative layer comes from — ${esc(c.name)}</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Source</th><th>What it holds</th><th>Format</th><th>Note</th></tr></thead>
+            <tbody>${nat.map(x => `<tr><td>${extLink(x.url, x.name)}</td><td>${esc(x.what)}</td>
+              <td>${esc(x.format)}<br/><span class="muted small">${esc(x.licence)}</span></td>
+              <td class="small">${esc(x.note)}</td></tr>`).join("")}</tbody></table></div>
+        </div>
+        <div class="card">
+          <h3>Regional and global sources</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Source</th><th>What it holds</th><th>Format &amp; licence</th><th>Note</th></tr></thead>
+            <tbody>${S.wetlandSourcesGlobal.map(x => `<tr><td>${extLink(x.url, x.name)}</td><td>${esc(x.what)}</td>
+              <td>${esc(x.format)}<br/><span class="muted small">${esc(x.licence)}</span></td>
+              <td class="small">${esc(x.note)}</td></tr>`).join("")}</tbody></table></div>
+          <p class="muted small">Whichever layer you screen against, the determination that counts is the regulator's.
+            A screening result is evidence for a conversation with them, not a substitute for it.</p>
+        </div>`;
+
+      const file = panel.querySelector("#geo-file"), dz = panel.querySelector("#geo-drop");
+      dz.addEventListener("click", () => file.click());
+      dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); file.click(); } });
+      ["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.add("dropzone-active"); }));
+      ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.remove("dropzone-active"); }));
+      dz.addEventListener("drop", (e) => { if (e.dataTransfer.files.length) loadGeo(e.dataTransfer.files[0]); });
+      file.addEventListener("change", () => { if (file.files.length) loadGeo(file.files[0]); file.value = ""; });
+      panel.querySelectorAll("[data-geo-del]").forEach(b => b.addEventListener("click", () => {
+        state.geoLayers = state.geoLayers.filter(x => x.id !== b.dataset.geoDel);
+        save(); draw();
+      }));
+      screen();
+    }
+
+    function loadGeo(f) {
+      const status = panel.querySelector("#geo-status");
+      const reader = new FileReader();
+      reader.onerror = () => { status.innerHTML = `<p class="calc-invalid">Could not read that file.</p>`; };
+      reader.onload = () => {
+        let gj;
+        try { gj = JSON.parse(reader.result); }
+        catch (e) {
+          status.innerHTML = `<p class="calc-invalid">That is not valid JSON. If it is a .shp, convert it to GeoJSON first — a browser cannot read a shapefile.</p>`;
+          return;
+        }
+        const features = gj.type === "FeatureCollection" ? gj.features
+          : gj.type === "Feature" ? [gj]
+          : gj.type && gj.coordinates ? [{ type: "Feature", properties: {}, geometry: gj }] : null;
+        if (!features || !features.length) {
+          status.innerHTML = `<p class="calc-invalid">No features found. Expected a GeoJSON FeatureCollection.</p>`;
+          return;
+        }
+        const polys = features.filter(x => x.geometry && /Polygon/.test(x.geometry.type)).length;
+        const layer = {
+          id: uid("geo"), name: panel.querySelector("#geo-name").value.trim() || f.name.replace(/\.[^.]+$/, ""),
+          kind: panel.querySelector("#geo-kind").value, date: new Date().toISOString(),
+          features: features.map(x => ({ properties: x.properties || {}, geometry: x.geometry })).filter(x => x.geometry)
+        };
+        state.geoLayers.push(layer);
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+        catch (e) {
+          state.geoLayers.pop();
+          status.innerHTML = `<p class="calc-invalid">That layer is too large for browser storage. Simplify it first
+            (in QGIS: Vector → Geometry Tools → Simplify, or clip it to your area of interest) and load it again.</p>`;
+          return;
+        }
+        lastStatus = `<p class="muted small">Loaded <strong>${esc(layer.name)}</strong> — ${layer.features.length} feature(s),
+          ${polys} polygon(s). ${polys ? "" : "No polygons, so points can be measured against it but not screened as inside or outside."}</p>`;
+        draw();
+      };
+      reader.readAsText(f);
+    }
+
+    function screen() {
+      const box = panel.querySelector("#geo-screen");
+      const pts = allProjectPoints();
+      const layers = state.geoLayers;
+      if (!layers.length) {
+        box.innerHTML = `<p class="muted small">Load a layer above and every coordinate the platform holds is screened against it.
+          ${pts.length ? `${pts.length} coordinate(s) are ready to screen.` : "No coordinates recorded yet — add them on a client site, or in a ToR or ESIA coordinate table."}</p>`;
+        return;
+      }
+      if (!pts.length) {
+        box.innerHTML = `<p class="muted small">No coordinates to screen yet. Record them against a client site, or in a ToR or ESIA coordinate table, and they appear here.</p>`;
+        return;
+      }
+      const buffer = Number(panel.querySelector("#geo-buffer").value) || 0;
+      const html = layers.map(l => {
+        const rows = screenPoints(pts, l, buffer);
+        const inside = rows.filter(r => r.status === "inside").length;
+        const near = rows.filter(r => r.status === "buffer").length;
+        return `<h4>${esc(l.name)} <span class="muted small">(${esc(l.kind)})</span></h4>
+          <div class="kpi-grid">
+            ${kpiCard("Inside the layer", inside, inside ? "These need a determination before work proceeds." : "No point falls inside.", inside ? "critical" : "good")}
+            ${kpiCard(`Within ${buffer} m`, near, near ? "Close enough that a setback may apply." : "None within the buffer.", near ? "warning" : "good")}
+            ${kpiCard("Outside", rows.length - inside - near, "Beyond the buffer.")}
+          </div>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Point</th><th>Source</th><th class="num">Lat</th><th class="num">Long</th><th>Nearest feature</th><th class="num">Distance</th><th>Result</th></tr></thead>
+            <tbody>${rows.map(r => `<tr${r.status === "inside" ? ' class="row-overdue"' : ""}>
+              <td>${esc(r.point.label)}</td><td class="small">${esc(r.point.source)}</td>
+              <td class="num">${r.point.lat.toFixed(5)}</td><td class="num">${r.point.lng.toFixed(5)}</td>
+              <td>${esc(r.feature)}</td>
+              <td class="num">${r.status === "inside" ? "—" : Math.round(r.distance).toLocaleString() + " m"}</td>
+              <td>${statusBadge(
+                r.status === "inside" ? "Inside" : r.status === "buffer" ? "Within buffer" : "Outside",
+                r.status === "inside" ? "critical" : r.status === "buffer" ? "warning" : "good")}</td></tr>`).join("")}
+            </tbody></table></div>`;
+      }).join("");
+      box.innerHTML = html + `<p class="muted small">Distance is to the nearest mapped vertex of the feature, which can overstate
+        the distance to a long straight boundary — treat a near miss as "check it properly". Screening uses the layer you loaded:
+        it is only as current and as accurate as that layer, and the regulator's determination is the one that counts.</p>
+        <div class="modal-actions"><button class="btn" id="geo-dl">Download screening result (.txt)</button></div>`;
+      const dl = panel.querySelector("#geo-dl");
+      if (dl) dl.addEventListener("click", () => {
+        const lines = layers.map(l => {
+          const rows = screenPoints(pts, l, buffer);
+          return `LAYER: ${l.name} (${l.kind}) — ${l.features.length} features, loaded ${l.date.slice(0, 10)}\n` +
+            rows.map(r => `  ${r.point.label} [${r.point.source}]  ${r.point.lat.toFixed(6)}, ${r.point.lng.toFixed(6)}\n` +
+              `      ${r.status === "inside" ? "INSIDE" : r.status === "buffer" ? "WITHIN " + buffer + " m" : "OUTSIDE"} — ${r.feature}` +
+              `${r.status === "inside" ? "" : ` (${Math.round(r.distance)} m to nearest mapped vertex)`}`).join("\n");
+        }).join("\n\n");
+        downloadText("Sensitive-Area-Screening.txt",
+          `SENSITIVE AREA SCREENING\nGenerated ${today()}  |  Buffer ${buffer} m\n` +
+          `Screened against layers loaded by the user. Only as current as those layers.\n` +
+          `The regulator's determination is the one that counts.\n\n` + lines + "\n");
+      });
+    }
+
+    draw();
+    panel.addEventListener("input", (e) => { if (e.target.id === "geo-buffer") screen(); });
+  }
+
   /* ============================ MAPS ============================ */
   function renderMaps(main) {
     main.appendChild(h(`
       <section>
         <h1>Maps & Site Visits</h1>
-        <p class="muted">Client site locations on an ArcGIS (Esri) basemap — colour follows your selected theme.</p>
+        <p class="muted">Client site locations on an ArcGIS (Esri) basemap — colour follows your selected theme.
+          Load a sensitive-area layer below and every coordinate in the platform is screened against it.</p>
         <div class="card"><div id="verda-map" style="height:420px;border-radius:12px;overflow:hidden;"></div></div>
+        <div id="geo-panel"></div>
         <div class="card">
           <h3>Add / edit site coordinates</h3>
           <table class="table"><thead><tr><th>Client</th><th>Lat</th><th>Lng</th><th></th></tr></thead>
@@ -2501,6 +2797,8 @@
       VerdaMap.init("verda-map", state.theme);
       VerdaMap.setMarkers(state.clients.filter(c => c.lat && c.lng));
     }
+
+    renderSensitiveAreas(main.querySelector("#geo-panel"));
 
     function refreshRows() {
       main.querySelectorAll("[data-save]").forEach(btn => btn.addEventListener("click", () => {
@@ -2845,6 +3143,7 @@
           <button class="tab-btn" data-tab="training">Training catalogue</button>
           <button class="tab-btn" data-tab="lists">Other registers</button>
           <button class="tab-btn" data-tab="apply">Where to apply</button>
+          <button class="tab-btn" data-tab="officers">Officer contacts</button>
         </div>
         <div id="checklist-panel"></div>
         <div class="card notice-card">
@@ -3089,8 +3388,108 @@
           `\n\nREGULATORS\n` + c.regulators.map(r => `  ${r.name}${r.url ? "\n      " + r.url : "  (no official site confirmed)"}\n      ${r.remit}`).join("\n")));
     }
 
+    /* ---- Officer contacts: roles shipped, people kept by the user ---- */
+    function officersPanel() {
+      const c = COUNTRY();
+      const roles = VERDA_SEED.officerRoles[c.id] || [];
+      const STALE_DAYS = 180;
+
+      function draw() {
+        const mine = state.officerContacts.filter(x => x.country === c.id);
+        panel.innerHTML = `
+          <div class="card notice-card">
+            <h3>Why Verda ships no names</h3>
+            <p>These are individual public servants. They transfer, are promoted and are replaced constantly, and a stale name and
+              number in a submitted report is worse than a blank line — someone calls a stranger, or a regulator reads a contact who
+              left two years ago. Publishing officials' personal details is also not ours to do.</p>
+            <p class="small">So Verda ships the <strong>roles</strong> — which posts exist in ${esc(c.name)}, what each is responsible for, and
+              where the current holder sits — and gives you a register for the people you actually deal with, which flags a contact
+              that has not been verified in ${STALE_DAYS} days.</p>
+          </div>
+
+          <div class="card">
+            <h3>Statutory roles — ${esc(c.name)}</h3>
+            <div class="table-scroll"><table class="table">
+              <thead><tr><th>Role</th><th>Level</th><th>What they are responsible for</th><th>Where to find the current holder</th></tr></thead>
+              <tbody>${roles.map(r => `<tr><td><strong>${esc(r.role)}</strong></td><td>${esc(r.level)}</td>
+                <td class="small">${esc(r.remit)}</td><td class="small">${esc(r.find)}</td></tr>`).join("")}</tbody></table></div>
+            <button class="btn" id="of-roles-dl">Download roles (.txt)</button>
+          </div>
+
+          <div class="card">
+            <h3>Your contact register</h3>
+            <div class="form-row">
+              <label>Name<input id="of-name" placeholder="Post holder's name" /></label>
+              <label>Role<select id="of-role">${roles.map(r => `<option>${esc(r.role)}</option>`).join("")}<option>Other</option></select></label>
+              <label>District / county / province<input id="of-area" placeholder="Where they cover" /></label>
+            </div>
+            <div class="form-row">
+              <label>Phone<input id="of-phone" placeholder="Office or mobile" /></label>
+              <label>Email<input id="of-email" type="email" placeholder="Official address" /></label>
+              <label>Last verified<input id="of-date" type="date" value="${today()}" /></label>
+              <button class="btn btn-primary" id="of-add">Add contact</button>
+            </div>
+            <p class="muted small">Record how you verified it — a name taken from a two-year-old report is not verified.</p>
+            <label>How this was verified<input id="of-how" placeholder="e.g. spoke to them on 14/09, or confirmed at the district office" /></label>
+          </div>
+
+          <div class="card">
+            <h3>Contacts on file — ${esc(c.name)} <span class="muted small">(${mine.length})</span></h3>
+            <div class="table-scroll"><table class="table">
+              <thead><tr><th>Name</th><th>Role</th><th>Area</th><th>Phone</th><th>Email</th><th>Last verified</th><th></th></tr></thead>
+              <tbody>${mine.map(x => {
+                const age = x.verified ? Math.abs(daysUntil(x.verified)) : null;
+                const stale = age === null || age > STALE_DAYS;
+                return `<tr${stale ? ' class="row-overdue"' : ""}>
+                  <td>${esc(x.name)}</td><td class="small">${esc(x.role)}</td><td>${esc(x.area || "—")}</td>
+                  <td>${esc(x.phone || "—")}</td><td>${esc(x.email || "—")}</td>
+                  <td>${esc(x.verified || "—")} ${statusBadge(stale ? "Verify" : `${age}d ago`, stale ? "warning" : "good")}</td>
+                  <td class="row-actions">
+                    <button class="btn btn-ghost btn-sm" data-of-ok="${esc(x.id)}" title="Confirm this is still current">Verified today</button>
+                    <button class="btn btn-ghost btn-sm" data-of-del="${esc(x.id)}">Remove</button></td></tr>`;
+              }).join("") || `<tr><td colspan="7" class="muted">No contacts recorded for ${esc(c.name)} yet. Add the people you actually deal with — starting with the district or county environment officer for each of your sites.</td></tr>`}
+              </tbody></table></div>
+            ${mine.length ? `<button class="btn" id="of-dl">Download contacts (.txt)</button>` : ""}
+          </div>`;
+
+        panel.querySelector("#of-add").addEventListener("click", () => {
+          const name = panel.querySelector("#of-name").value.trim();
+          if (!name) { alert("Enter the post holder's name."); return; }
+          state.officerContacts.push({
+            id: uid("of"), country: c.id, name,
+            role: panel.querySelector("#of-role").value,
+            area: panel.querySelector("#of-area").value.trim(),
+            phone: panel.querySelector("#of-phone").value.trim(),
+            email: panel.querySelector("#of-email").value.trim(),
+            verified: panel.querySelector("#of-date").value || today(),
+            how: panel.querySelector("#of-how").value.trim()
+          });
+          save(); draw();
+        });
+        panel.querySelectorAll("[data-of-ok]").forEach(b => b.addEventListener("click", () => {
+          const x = state.officerContacts.find(y => y.id === b.dataset.ofOk);
+          x.verified = today(); save(); draw();
+        }));
+        panel.querySelectorAll("[data-of-del]").forEach(b => b.addEventListener("click", () => {
+          state.officerContacts = state.officerContacts.filter(y => y.id !== b.dataset.ofDel);
+          save(); draw();
+        }));
+        panel.querySelector("#of-roles-dl").addEventListener("click", () =>
+          downloadText(`Officer-Roles-${c.id.toUpperCase()}.txt`,
+            `STATUTORY OFFICER ROLES — ${c.name.toUpperCase()}\n\n` +
+            roles.map(r => `  ${r.role}  [${r.level}]\n      ${r.remit}\n      Where to find them: ${r.find}`).join("\n\n") +
+            `\n\nVerda ships no names or numbers for these posts: holders change constantly and a stale contact is worse than a blank.\n`));
+        const dl = panel.querySelector("#of-dl");
+        if (dl) dl.addEventListener("click", () => downloadText(`Officer-Contacts-${c.id.toUpperCase()}.txt`,
+          `OFFICER CONTACTS — ${c.name.toUpperCase()}\nExported ${today()}\n\n` +
+          mine.map(x => `  ${x.name} — ${x.role}\n      Area: ${x.area || "—"}  |  Phone: ${x.phone || "—"}  |  Email: ${x.email || "—"}` +
+            `\n      Last verified: ${x.verified || "never"}${x.how ? "  (" + x.how + ")" : ""}`).join("\n\n") + "\n"));
+      }
+      draw();
+    }
+
     const panels = { industry: industryPanel, permits: permitsPanel, register: registerPanel,
-      hazards: hazardsPanel, training: trainingPanel, lists: listsPanel, apply: applyPanel };
+      hazards: hazardsPanel, training: trainingPanel, lists: listsPanel, apply: applyPanel, officers: officersPanel };
     industryPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));

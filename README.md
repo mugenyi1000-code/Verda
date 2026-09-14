@@ -135,6 +135,18 @@ sub-sections in the sidebar:
   authoritative and be wrong.
 - **Records** — PPE, Environment, Community and CSR records with a photo
   gallery.
+- **Maps & Site Visits — sensitive-area screening.** Verda **does not ship
+  wetland boundaries and will not**: national wetland layers are held by the
+  agencies that survey them, are large, licensed and revised, and a
+  plausible-looking polygon shipped in an app is worse than none — someone
+  screens a site against it, reads "no wetland here", and clears works that
+  needed a permit. Instead Verda names where the authoritative layer comes
+  from for each country (plus Ramsar RSIS, Global Mangrove Watch, GLWD,
+  WorldCover and the WDPA), lets you **load the layer you obtained** as
+  GeoJSON, and **screens every coordinate the platform holds against it** —
+  client sites, ToR study areas, ESIA sampling points, receptors and
+  monitoring points — reporting inside / within-buffer / outside with a
+  distance, and downloading as a screening record.
 - **Maps & Site Visits** — client sites on a real ArcGIS/Esri basemap
   (via Leaflet), colour-matched to the active theme, plus a Matterport
   embed slot for virtual walkthroughs.
@@ -227,6 +239,15 @@ sub-sections in the sidebar:
   insurance expiry with overdue flagging, EHS contact) and the **workforce &
   hours register** that every safety rate is calculated from, entered per
   employer so the direct/sub-contractor split is real rather than assumed.
+- **Officer contacts** — the statutory posts that exist in each country
+  (district/county environment officer, natural resources officer, physical
+  planner, and the rest), what each is responsible for, and where the current
+  holder sits. Verda ships **no names, numbers or email addresses**: these are
+  individual public servants who transfer constantly, a stale contact in a
+  submitted report is worse than a blank line, and publishing officials'
+  personal details is not ours to do. What it gives you instead is a register
+  for the people you actually deal with, recording how each was verified and
+  flagging any contact not confirmed in 180 days.
 - **Checklists & Regulatory Register** — sector checklists, per-country
   permits and regulators, plus the **reference libraries**: hazards, the
   training catalogue, injury classification, cause taxonomy (15 immediate,
