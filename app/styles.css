@@ -717,3 +717,26 @@ td .empty-state { padding: 26px 16px; }
   h1, h2, h3 { page-break-after: avoid; }
   .table thead th { background: #f3f3f3; }
 }
+
+/* ---- Workflow runs ---------------------------------------------------------
+   A run is a procedure in progress: progress bar, per-step due dates, and the
+   evidence reference that actually closes each step. */
+.wf-run-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.wf-run-head h3 { margin: 0 0 2px; }
+.wf-run-meta { display: flex; align-items: center; gap: 8px; }
+.wf-bar { height: 5px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin: 12px 0 4px; }
+.wf-bar span { display: block; height: 100%; background: var(--brand-2); border-radius: var(--r-pill); transition: width .25s ease; }
+.wf-steps td:first-child { width: 34px; }
+.wf-steps input[type="checkbox"] { width: auto; margin: 0; }
+.wf-steps .wf-note { margin: 0; padding: 5px 8px; font-size: .82rem; min-width: 150px; }
+
+/* ---- Audit items ----------------------------------------------------------
+   The item text leads; the controls sit on one line beneath it at narrow
+   widths so a long clause is never squeezed into a sliver of column. */
+.audit-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.audit-item:last-child { border-bottom: none; }
+.audit-item-text { font-size: .89rem; margin-bottom: 6px; }
+.audit-item-controls { display: grid; grid-template-columns: 170px 210px 1fr; gap: 8px; }
+.audit-item-controls select, .audit-item-controls input { margin: 0; font-size: .83rem; padding: 6px 9px; }
+.audit-item-controls select:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 760px) { .audit-item-controls { grid-template-columns: 1fr; } }

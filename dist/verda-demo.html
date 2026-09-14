@@ -720,6 +720,29 @@ td .empty-state { padding: 26px 16px; }
   .table thead th { background: #f3f3f3; }
 }
 
+/* ---- Workflow runs ---------------------------------------------------------
+   A run is a procedure in progress: progress bar, per-step due dates, and the
+   evidence reference that actually closes each step. */
+.wf-run-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.wf-run-head h3 { margin: 0 0 2px; }
+.wf-run-meta { display: flex; align-items: center; gap: 8px; }
+.wf-bar { height: 5px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin: 12px 0 4px; }
+.wf-bar span { display: block; height: 100%; background: var(--brand-2); border-radius: var(--r-pill); transition: width .25s ease; }
+.wf-steps td:first-child { width: 34px; }
+.wf-steps input[type="checkbox"] { width: auto; margin: 0; }
+.wf-steps .wf-note { margin: 0; padding: 5px 8px; font-size: .82rem; min-width: 150px; }
+
+/* ---- Audit items ----------------------------------------------------------
+   The item text leads; the controls sit on one line beneath it at narrow
+   widths so a long clause is never squeezed into a sliver of column. */
+.audit-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.audit-item:last-child { border-bottom: none; }
+.audit-item-text { font-size: .89rem; margin-bottom: 6px; }
+.audit-item-controls { display: grid; grid-template-columns: 170px 210px 1fr; gap: 8px; }
+.audit-item-controls select, .audit-item-controls input { margin: 0; font-size: .83rem; padding: 6px 9px; }
+.audit-item-controls select:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 760px) { .audit-item-controls { grid-template-columns: 1fr; } }
+
 </style>
 
   <header class="topbar">
@@ -2968,14 +2991,1160 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   ],
 
   // ---- Workflow templates ---------------------------------------------------
+  // ---- Workflows -----------------------------------------------------------
+  // Each template is a real procedure: what starts it, what "done" means, and
+  // step by step who does it, within how many days, and what evidence closes
+  // the step. A run computes each step's due date from the start date and the
+  // step's own SLA, so a stalled procedure is visible rather than assumed.
   workflowTemplates: [
-    { id: "hr", name: "HR Compliance Workflow", area: "HR",
-      steps: ["New-hire EHS induction completed", "PPE issued and sign-off recorded", "Contractor EHS pre-qualification checked", "Training records updated in file", "Medical/fitness-to-work record on file"] },
-    { id: "env", name: "Environmental Management Workflow", area: "Environment",
-      steps: ["Incident/spill response steps followed", "Permit renewal tracked against expiry date", "Waste transfer manifests reconciled", "Effluent/air monitoring results logged", "Corrective actions closed out"] },
-    { id: "safety", name: "Safety Administration Workflow", area: "Safety Admin",
-      steps: ["Incident investigated and root cause recorded", "Near-miss logged and closed out", "Safety committee meeting held and minuted", "Corrective/preventive actions tracked to closure", "Statutory reporting obligations checked"] }
+    {
+      "id": "hr-onboard",
+      "name": "New worker onboarding",
+      "area": "People & HR",
+      "trigger": "A worker is offered a role, before first shift",
+      "outcome": "The worker is cleared to start and every record exists to prove it",
+      "steps": [
+        {
+          "task": "Right to work and age verification completed",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Copy of ID; age verification record"
+        },
+        {
+          "task": "Contract issued in a language the worker reads",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Signed contract"
+        },
+        {
+          "task": "Pre-placement medical / fitness to work",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Fitness certificate"
+        },
+        {
+          "task": "General EHS induction delivered",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Signed induction register"
+        },
+        {
+          "task": "Site-specific induction and area walk",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Induction record"
+        },
+        {
+          "task": "Task risk assessment briefed to the worker",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Signed briefing record"
+        },
+        {
+          "task": "PPE issued against the task hazard assessment",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "PPE issue record with signature"
+        },
+        {
+          "task": "Competence verified for the tasks assigned",
+          "role": "Supervisor",
+          "days": 5,
+          "evidence": "Competence assessment"
+        },
+        {
+          "task": "Added to the training matrix and emergency roll",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Training matrix entry"
+        },
+        {
+          "task": "Grievance mechanism and code of conduct explained",
+          "role": "HR officer",
+          "days": 1,
+          "evidence": "Acknowledgement signed"
+        }
+      ]
+    },
+    {
+      "id": "hr-exit",
+      "name": "Worker separation",
+      "area": "People & HR",
+      "trigger": "A worker resigns, is released or the contract ends",
+      "outcome": "Nothing is outstanding to the worker and nothing of the company's leaves with them",
+      "steps": [
+        {
+          "task": "Exit interview conducted",
+          "role": "HR officer",
+          "days": 3,
+          "evidence": "Exit interview record"
+        },
+        {
+          "task": "Exit medical where exposure warrants it",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Exit medical record"
+        },
+        {
+          "task": "PPE, tools and access cards returned",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "Return record"
+        },
+        {
+          "task": "Final dues, leave and benefits settled",
+          "role": "Finance",
+          "days": 7,
+          "evidence": "Payment record"
+        },
+        {
+          "task": "Removed from access control, roll call and training matrix",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "System record"
+        },
+        {
+          "task": "Health surveillance record archived for the retention period",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Archive reference"
+        }
+      ]
+    },
+    {
+      "id": "hr-grievance",
+      "name": "Worker grievance",
+      "area": "People & HR",
+      "trigger": "A worker raises a grievance through any channel",
+      "outcome": "The grievance is resolved or escalated, and the worker knows the outcome",
+      "steps": [
+        {
+          "task": "Grievance logged and acknowledged to the worker",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Grievance register entry"
+        },
+        {
+          "task": "Confidentiality and no-retaliation confirmed in writing",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Written confirmation"
+        },
+        {
+          "task": "Investigation assigned to someone not involved",
+          "role": "HR manager",
+          "days": 3,
+          "evidence": "Assignment record"
+        },
+        {
+          "task": "Investigation completed and findings recorded",
+          "role": "Investigator",
+          "days": 14,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Outcome communicated to the worker",
+          "role": "HR manager",
+          "days": 3,
+          "evidence": "Communication record"
+        },
+        {
+          "task": "Corrective action raised where a system failure is found",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA reference"
+        },
+        {
+          "task": "Closure recorded with the worker's acknowledgement",
+          "role": "HR officer",
+          "days": 5,
+          "evidence": "Signed closure"
+        }
+      ]
+    },
+    {
+      "id": "env-monitoring",
+      "name": "Periodic environmental monitoring",
+      "area": "Environment",
+      "trigger": "The monitoring plan falls due for the period",
+      "outcome": "Results are in, compared against limits, and any exceedance has an action",
+      "steps": [
+        {
+          "task": "Confirm parameters, points and frequency against the permit",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Monitoring plan extract"
+        },
+        {
+          "task": "Book the accredited laboratory and confirm the method",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Laboratory booking"
+        },
+        {
+          "task": "Verify sampling equipment calibration is in date",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Calibration certificate"
+        },
+        {
+          "task": "Collect samples with chain of custody",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Chain of custody form"
+        },
+        {
+          "task": "Receive and check results against the permit limit",
+          "role": "Environmental officer",
+          "days": 10,
+          "evidence": "Laboratory report"
+        },
+        {
+          "task": "Investigate any exceedance to root cause",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Investigation note"
+        },
+        {
+          "task": "Raise corrective action for each exceedance",
+          "role": "Environmental officer",
+          "days": 3,
+          "evidence": "CAPA reference"
+        },
+        {
+          "task": "Report results in the periodic report and to the regulator if required",
+          "role": "Environmental officer",
+          "days": 10,
+          "evidence": "Submitted report"
+        }
+      ]
+    },
+    {
+      "id": "env-waste",
+      "name": "Waste transfer",
+      "area": "Environment",
+      "trigger": "Waste is ready to leave site",
+      "outcome": "The waste has left legally and the paper trail proves it",
+      "steps": [
+        {
+          "task": "Waste characterised and classified",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Classification record"
+        },
+        {
+          "task": "Verify the carrier's licence is current and covers this waste",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Copy of licence"
+        },
+        {
+          "task": "Verify the receiving facility is licensed for this stream",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Copy of facility licence"
+        },
+        {
+          "task": "Weigh or measure and record the quantity",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "Weighbridge ticket"
+        },
+        {
+          "task": "Waste transfer note issued and signed by both parties",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Signed transfer note"
+        },
+        {
+          "task": "Confirm receipt at the disposal facility",
+          "role": "Environmental officer",
+          "days": 7,
+          "evidence": "Receipt confirmation"
+        },
+        {
+          "task": "Register updated with quantity and running total",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Waste register entry"
+        }
+      ]
+    },
+    {
+      "id": "env-spill",
+      "name": "Spill or release response",
+      "area": "Environment",
+      "trigger": "A spill or uncontrolled release occurs",
+      "outcome": "The release is contained, cleaned, reported and prevented from recurring",
+      "steps": [
+        {
+          "task": "Stop the source and make the area safe",
+          "role": "Site supervisor",
+          "days": 1,
+          "evidence": "Initial report"
+        },
+        {
+          "task": "Contain with spill kit or bunding",
+          "role": "Emergency responder",
+          "days": 1,
+          "evidence": "Photographs"
+        },
+        {
+          "task": "Estimate quantity and affected area",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Estimate record"
+        },
+        {
+          "task": "Notify the regulator where the threshold requires it",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Notification copy"
+        },
+        {
+          "task": "Recover and dispose of contaminated material through a licensed route",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Waste transfer note"
+        },
+        {
+          "task": "Sample soil or water where contamination is credible",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Laboratory report"
+        },
+        {
+          "task": "Investigate to root cause",
+          "role": "EHS manager",
+          "days": 7,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Corrective action raised and tracked to closure",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "CAPA reference"
+        }
+      ]
+    },
+    {
+      "id": "env-clearance",
+      "name": "Vegetation clearance approval",
+      "area": "Environment",
+      "trigger": "An area is proposed for clearance",
+      "outcome": "Clearance is approved, supervised and within the permitted footprint",
+      "steps": [
+        {
+          "task": "Confirm the area sits inside the approved project footprint",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Footprint drawing with coordinates"
+        },
+        {
+          "task": "Screen against wetland, protected area and riparian layers",
+          "role": "Environmental officer",
+          "days": 3,
+          "evidence": "Screening record"
+        },
+        {
+          "task": "Pre-clearance biodiversity and chance-finds survey",
+          "role": "Ecologist",
+          "days": 10,
+          "evidence": "Survey report"
+        },
+        {
+          "task": "Mark exclusion zones and no-go areas on the ground",
+          "role": "Survey team",
+          "days": 2,
+          "evidence": "Photographs and coordinates"
+        },
+        {
+          "task": "Brief the clearance crew on limits and chance-finds procedure",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Signed briefing"
+        },
+        {
+          "task": "Supervise clearance and record area cleared",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Daily record"
+        },
+        {
+          "task": "Salvage topsoil for reinstatement",
+          "role": "Earthworks supervisor",
+          "days": 2,
+          "evidence": "Stockpile record"
+        }
+      ]
+    },
+    {
+      "id": "saf-incident",
+      "name": "Incident investigation",
+      "area": "Safety",
+      "trigger": "An incident or high-potential near-miss is reported",
+      "outcome": "Root cause is understood and the actions that prevent recurrence are closed",
+      "steps": [
+        {
+          "task": "Make the area safe and preserve the scene",
+          "role": "Site supervisor",
+          "days": 1,
+          "evidence": "Initial notification"
+        },
+        {
+          "task": "Notify management and, where required, the regulator",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Notification copy"
+        },
+        {
+          "task": "Classify the injury and record days lost",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Incident register entry"
+        },
+        {
+          "task": "Collect evidence: photographs, statements, records",
+          "role": "Investigator",
+          "days": 3,
+          "evidence": "Evidence pack"
+        },
+        {
+          "task": "Investigate to immediate and underlying cause",
+          "role": "Investigator",
+          "days": 14,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Agree corrective actions with owners and dates",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Share the lesson learned across the site",
+          "role": "EHS officer",
+          "days": 7,
+          "evidence": "Toolbox talk record"
+        },
+        {
+          "task": "Verify actions are effective, not just closed",
+          "role": "EHS manager",
+          "days": 60,
+          "evidence": "Verification note"
+        }
+      ]
+    },
+    {
+      "id": "saf-ptw",
+      "name": "Permit to work",
+      "area": "Safety",
+      "trigger": "High-risk work is planned",
+      "outcome": "The work is done under the controls the permit exists to guarantee",
+      "steps": [
+        {
+          "task": "Identify the permit types the task needs",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Permit application"
+        },
+        {
+          "task": "Task risk assessment and method statement approved",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Approved RAMS"
+        },
+        {
+          "task": "Isolations applied, locked and proved dead or zero-energy",
+          "role": "Authorised person",
+          "days": 1,
+          "evidence": "Isolation certificate"
+        },
+        {
+          "task": "Gas test or atmosphere check where required",
+          "role": "Competent tester",
+          "days": 1,
+          "evidence": "Gas test record"
+        },
+        {
+          "task": "Standby, rescue and emergency arrangements in place",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Rescue plan"
+        },
+        {
+          "task": "Permit issued and briefed to every worker on the job",
+          "role": "Permit issuer",
+          "days": 1,
+          "evidence": "Signed permit"
+        },
+        {
+          "task": "Work supervised and conditions re-checked at each break",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Permit continuation"
+        },
+        {
+          "task": "Permit closed, isolations removed, area handed back",
+          "role": "Permit issuer",
+          "days": 1,
+          "evidence": "Signed close-out"
+        }
+      ]
+    },
+    {
+      "id": "saf-inspection",
+      "name": "Planned inspection round",
+      "area": "Safety",
+      "trigger": "The inspection schedule falls due",
+      "outcome": "Findings are raised, owned and closed before the next round",
+      "steps": [
+        {
+          "task": "Confirm scope and the checklist for this round",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Inspection checklist"
+        },
+        {
+          "task": "Conduct the inspection with the area supervisor present",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Completed checklist"
+        },
+        {
+          "task": "Photograph each finding",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Photographs"
+        },
+        {
+          "task": "Grade findings and set closure targets",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Graded finding list"
+        },
+        {
+          "task": "Assign owners and agree dates",
+          "role": "EHS manager",
+          "days": 3,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Verify closure at the next round",
+          "role": "EHS officer",
+          "days": 30,
+          "evidence": "Verification record"
+        }
+      ]
+    },
+    {
+      "id": "saf-moc",
+      "name": "Management of change",
+      "area": "Safety",
+      "trigger": "Plant, process, people or method is to change",
+      "outcome": "The change is assessed and controlled before it happens, not after",
+      "steps": [
+        {
+          "task": "Change described and initiator recorded",
+          "role": "Originator",
+          "days": 1,
+          "evidence": "Change request"
+        },
+        {
+          "task": "Screen whether the change is minor or significant",
+          "role": "EHS manager",
+          "days": 3,
+          "evidence": "Screening record"
+        },
+        {
+          "task": "Risk assessment of the change",
+          "role": "EHS officer",
+          "days": 7,
+          "evidence": "Risk assessment"
+        },
+        {
+          "task": "Technical authority review and approval",
+          "role": "Engineering",
+          "days": 10,
+          "evidence": "Approval signature"
+        },
+        {
+          "task": "Update drawings, procedures and training material",
+          "role": "Document controller",
+          "days": 14,
+          "evidence": "Updated documents"
+        },
+        {
+          "task": "Brief affected workers before the change takes effect",
+          "role": "Supervisor",
+          "days": 3,
+          "evidence": "Briefing record"
+        },
+        {
+          "task": "Post-implementation review",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Review note"
+        }
+      ]
+    },
+    {
+      "id": "saf-emergency",
+      "name": "Emergency drill",
+      "area": "Safety",
+      "trigger": "The drill programme falls due, or a new scenario is identified",
+      "outcome": "The plan is tested, the gaps are known, and the gaps are closed",
+      "steps": [
+        {
+          "task": "Select the scenario and set objectives",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Drill plan"
+        },
+        {
+          "task": "Notify or deliberately do not notify participants",
+          "role": "EHS manager",
+          "days": 2,
+          "evidence": "Drill plan"
+        },
+        {
+          "task": "Involve external responders where the scenario needs them",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Correspondence"
+        },
+        {
+          "task": "Run the drill with observers at each station",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Observer notes"
+        },
+        {
+          "task": "Record times: alarm, assembly, roll call complete",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Timing record"
+        },
+        {
+          "task": "Debrief with participants the same day",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Debrief notes"
+        },
+        {
+          "task": "Raise actions for each gap found",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Update the emergency plan where the drill showed it was wrong",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Revised plan"
+        }
+      ]
+    },
+    {
+      "id": "per-renewal",
+      "name": "Permit renewal",
+      "area": "Permitting & legal",
+      "trigger": "A permit reaches 120 days from expiry",
+      "outcome": "The renewed permit is in hand before the current one lapses",
+      "steps": [
+        {
+          "task": "Confirm the renewal window and documents required",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Authority guidance"
+        },
+        {
+          "task": "Compile supporting documents and monitoring records",
+          "role": "EHS officer",
+          "days": 20,
+          "evidence": "Document pack"
+        },
+        {
+          "task": "Settle any outstanding compliance conditions first",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Evidence of closure"
+        },
+        {
+          "task": "Submit the application and pay the fee",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Submission receipt"
+        },
+        {
+          "task": "Track the application and respond to queries",
+          "role": "EHS officer",
+          "days": 30,
+          "evidence": "Correspondence"
+        },
+        {
+          "task": "Receive the permit and update the register and expiry date",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Permit copy"
+        },
+        {
+          "task": "Brief the site on any changed conditions",
+          "role": "EHS manager",
+          "days": 7,
+          "evidence": "Briefing record"
+        }
+      ]
+    },
+    {
+      "id": "per-legal-update",
+      "name": "Legal register review",
+      "area": "Permitting & legal",
+      "trigger": "The review cycle falls due, or an amendment is published",
+      "outcome": "The register reflects the law as it now stands, and any new duty has an owner",
+      "steps": [
+        {
+          "task": "Check each instrument against the current consolidated text",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Updated register"
+        },
+        {
+          "task": "Identify new or amended duties",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Gap list"
+        },
+        {
+          "task": "Assess what each new duty requires of this site",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Impact note"
+        },
+        {
+          "task": "Assign actions for anything not already in place",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Brief management on material changes",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Management review minute"
+        },
+        {
+          "task": "Record the review date and the next due date",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Register header"
+        }
+      ]
+    },
+    {
+      "id": "con-prequal",
+      "name": "Sub-contractor pre-qualification",
+      "area": "Contractor management",
+      "trigger": "A sub-contractor is proposed for award",
+      "outcome": "The contractor is approved, or approved with conditions that are tracked",
+      "steps": [
+        {
+          "task": "Issue the pre-qualification questionnaire",
+          "role": "Procurement",
+          "days": 3,
+          "evidence": "Issued questionnaire"
+        },
+        {
+          "task": "Verify licences, registration and insurance currency",
+          "role": "Procurement",
+          "days": 7,
+          "evidence": "Certificate copies"
+        },
+        {
+          "task": "Review three-year injury and enforcement history",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Disclosed history"
+        },
+        {
+          "task": "Review method statements and risk assessments for the scope",
+          "role": "EHS officer",
+          "days": 10,
+          "evidence": "Reviewed RAMS"
+        },
+        {
+          "task": "Verify worker competence and plant certification",
+          "role": "EHS officer",
+          "days": 10,
+          "evidence": "Certificates"
+        },
+        {
+          "task": "Agree the bridging document where both have systems",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Signed bridging document"
+        },
+        {
+          "task": "Approval decision recorded with any conditions",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Approval record"
+        },
+        {
+          "task": "Mobilisation induction before any work starts",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Induction register"
+        }
+      ]
+    },
+    {
+      "id": "con-review",
+      "name": "Sub-contractor performance review",
+      "area": "Contractor management",
+      "trigger": "The review interval falls due",
+      "outcome": "Performance is judged on evidence, and poor performance has consequences",
+      "steps": [
+        {
+          "task": "Compile the contractor's incident, hours and training data",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Data pack"
+        },
+        {
+          "task": "Calculate their frequency rates separately from yours",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Rate calculation"
+        },
+        {
+          "task": "Review open findings from inspections and audits",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Finding list"
+        },
+        {
+          "task": "Hold the review meeting with their management present",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Minutes"
+        },
+        {
+          "task": "Agree improvement actions with dates",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Record the outcome against their pre-qualification status",
+          "role": "Procurement",
+          "days": 5,
+          "evidence": "Updated status"
+        }
+      ]
+    },
+    {
+      "id": "com-grievance",
+      "name": "Community grievance",
+      "area": "Community & social",
+      "trigger": "A community member raises a concern through any channel",
+      "outcome": "The concern is resolved or explained, and the complainant knows the outcome",
+      "steps": [
+        {
+          "task": "Log and acknowledge within the committed period",
+          "role": "Community liaison officer",
+          "days": 3,
+          "evidence": "Grievance register entry"
+        },
+        {
+          "task": "Assess whether it is project-related and how serious",
+          "role": "Community liaison officer",
+          "days": 5,
+          "evidence": "Assessment note"
+        },
+        {
+          "task": "Investigate on the ground with the complainant present",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Site visit record"
+        },
+        {
+          "task": "Agree a remedy or explain why none applies",
+          "role": "EHS manager",
+          "days": 14,
+          "evidence": "Agreed remedy"
+        },
+        {
+          "task": "Implement the remedy",
+          "role": "Responsible department",
+          "days": 30,
+          "evidence": "Evidence of completion"
+        },
+        {
+          "task": "Confirm the outcome with the complainant",
+          "role": "Community liaison officer",
+          "days": 7,
+          "evidence": "Signed acknowledgement"
+        },
+        {
+          "task": "Close out and report in the periodic report",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Report entry"
+        }
+      ]
+    },
+    {
+      "id": "com-engagement",
+      "name": "Planned community engagement",
+      "area": "Community & social",
+      "trigger": "The engagement plan falls due or a disruptive activity is scheduled",
+      "outcome": "The community was told in advance, heard, and what they said was acted on",
+      "steps": [
+        {
+          "task": "Identify who is affected and who must be present",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Stakeholder list"
+        },
+        {
+          "task": "Notify in the local language and through local channels",
+          "role": "Community liaison officer",
+          "days": 7,
+          "evidence": "Notice copies"
+        },
+        {
+          "task": "Hold the meeting at a time and place people can reach",
+          "role": "Community liaison officer",
+          "days": 1,
+          "evidence": "Attendance register"
+        },
+        {
+          "task": "Record issues raised verbatim, not summarised",
+          "role": "Community liaison officer",
+          "days": 2,
+          "evidence": "Minutes"
+        },
+        {
+          "task": "Assign an owner to each commitment made",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Commitment register"
+        },
+        {
+          "task": "Report back on the previous meeting's commitments",
+          "role": "Community liaison officer",
+          "days": 1,
+          "evidence": "Report-back record"
+        }
+      ]
+    },
+    {
+      "id": "min-blast",
+      "name": "Blast execution",
+      "area": "Mining & heavy industry",
+      "trigger": "A blast is scheduled",
+      "outcome": "The blast is fired safely, within limits, with the community notified",
+      "steps": [
+        {
+          "task": "Blast design approved by the licensed shotfirer",
+          "role": "Shotfirer",
+          "days": 2,
+          "evidence": "Blast design"
+        },
+        {
+          "task": "Explosives drawn and reconciled against the magazine register",
+          "role": "Magazine keeper",
+          "days": 1,
+          "evidence": "Issue record"
+        },
+        {
+          "task": "Community and neighbours notified in advance",
+          "role": "Community liaison officer",
+          "days": 2,
+          "evidence": "Notification record"
+        },
+        {
+          "task": "Exclusion zone established and sentries posted",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Sentry log"
+        },
+        {
+          "task": "Vibration and airblast monitors deployed at receptors",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Monitor placement record"
+        },
+        {
+          "task": "Blast fired and all-clear given after inspection",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Blast record"
+        },
+        {
+          "task": "Misfire procedure applied if any charge failed",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Misfire record"
+        },
+        {
+          "task": "Results compared against limits and reported",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Monitoring result"
+        }
+      ]
+    },
+    {
+      "id": "min-tsf",
+      "name": "Tailings facility surveillance",
+      "area": "Mining & heavy industry",
+      "trigger": "The surveillance interval falls due",
+      "outcome": "The facility's condition is known and any trigger exceedance is acted on",
+      "steps": [
+        {
+          "task": "Read all instrumentation: piezometers, monuments, flows",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Instrument readings"
+        },
+        {
+          "task": "Measure freeboard and beach width against design",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Survey record"
+        },
+        {
+          "task": "Walk the embankment and record any seepage or cracking",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Inspection record with photographs"
+        },
+        {
+          "task": "Compare readings against trigger levels",
+          "role": "TSF engineer",
+          "days": 3,
+          "evidence": "Trend review"
+        },
+        {
+          "task": "Escalate to the Engineer of Record on any trigger exceedance",
+          "role": "TSF engineer",
+          "days": 1,
+          "evidence": "Escalation record"
+        },
+        {
+          "task": "Update the water balance",
+          "role": "TSF engineer",
+          "days": 5,
+          "evidence": "Water balance"
+        },
+        {
+          "task": "Report to management and record in the monthly return",
+          "role": "TSF engineer",
+          "days": 10,
+          "evidence": "Monthly return"
+        }
+      ]
+    },
+    {
+      "id": "ms-review",
+      "name": "Management review",
+      "area": "Management system",
+      "trigger": "The management review interval falls due",
+      "outcome": "Top management has seen the performance and decided what changes",
+      "steps": [
+        {
+          "task": "Compile performance data: rates, actions, audits, objectives",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Data pack"
+        },
+        {
+          "task": "Review progress against last review's actions",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Action status"
+        },
+        {
+          "task": "Review legal compliance status and any enforcement",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Compliance report"
+        },
+        {
+          "task": "Review stakeholder and worker feedback",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Feedback summary"
+        },
+        {
+          "task": "Hold the review with top management present",
+          "role": "Site manager",
+          "days": 1,
+          "evidence": "Minutes with attendance"
+        },
+        {
+          "task": "Record decisions on resources, objectives and changes",
+          "role": "Site manager",
+          "days": 5,
+          "evidence": "Signed minutes"
+        },
+        {
+          "task": "Assign and track the actions arising",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "CAPA entries"
+        }
+      ]
+    },
+    {
+      "id": "ms-doc",
+      "name": "Document control",
+      "area": "Management system",
+      "trigger": "A controlled document is created or revised",
+      "outcome": "The current version is the only one in use",
+      "steps": [
+        {
+          "task": "Draft or revise with the change clearly marked",
+          "role": "Author",
+          "days": 10,
+          "evidence": "Draft with change log"
+        },
+        {
+          "task": "Technical review by a competent reviewer",
+          "role": "Reviewer",
+          "days": 7,
+          "evidence": "Review comments"
+        },
+        {
+          "task": "Approval by the document owner",
+          "role": "Owner",
+          "days": 5,
+          "evidence": "Approval signature"
+        },
+        {
+          "task": "Version and date applied, register updated",
+          "role": "Document controller",
+          "days": 2,
+          "evidence": "Register entry"
+        },
+        {
+          "task": "Superseded copies withdrawn from the point of use",
+          "role": "Document controller",
+          "days": 3,
+          "evidence": "Withdrawal record"
+        },
+        {
+          "task": "Affected people briefed on what changed",
+          "role": "Supervisor",
+          "days": 7,
+          "evidence": "Briefing record"
+        }
+      ]
+    }
   ],
+
 
   // ---- Credit costs for AI/paid actions --------------------------------
   // ---- Report tables --------------------------------------------------------
@@ -11113,6 +12282,653 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
     ]
   },
 
+  // ---- Audit protocols -----------------------------------------------------
+  // Audit types beyond the per-sector EHS checklist: management system audits
+  // against the Annex SL clause structure the standards share, compliance and
+  // readiness audits, and the subject-specific protocols (tailings,
+  // accommodation, contractor) where the consequence of missing something is
+  // highest. `basis` says why the protocol is shaped the way it is.
+  auditProtocols: [
+    {
+      "id": "iso45001",
+      "name": "Management system audit — ISO 45001",
+      "group": "Management system",
+      "scope": "The OH&S management system against the standard's clauses",
+      "basis": "ISO 45001 follows the Annex SL structure: clauses 4 to 10. Auditing clause by clause is how a certification body will do it.",
+      "sections": [
+        {
+          "title": "4. Context of the organisation",
+          "items": [
+            "Internal and external issues affecting the OH&S system are identified and reviewed",
+            "Interested parties and their relevant requirements are determined",
+            "Scope of the management system is documented and defensible",
+            "Processes and their interactions are defined"
+          ]
+        },
+        {
+          "title": "5. Leadership and worker participation",
+          "items": [
+            "Top management demonstrates leadership, not just sign-off",
+            "OH&S policy is current, communicated and available to interested parties",
+            "Roles, responsibilities and authorities are assigned and understood",
+            "Workers are consulted on hazard identification and controls",
+            "Workers participate through a functioning committee with minutes",
+            "Barriers to participation (language, literacy, fear of reprisal) are removed"
+          ]
+        },
+        {
+          "title": "6. Planning",
+          "items": [
+            "Hazard identification is ongoing, not a one-off exercise",
+            "Risks and opportunities are assessed and recorded",
+            "Legal and other requirements are identified and kept current",
+            "OH&S objectives are measurable and have plans to achieve them"
+          ]
+        },
+        {
+          "title": "7. Support",
+          "items": [
+            "Resources for the system are determined and provided",
+            "Competence requirements are defined and evidenced per role",
+            "Workers are aware of the policy, hazards and their right to remove themselves from danger",
+            "Communication is planned: what, when, to whom, how",
+            "Documented information is controlled, versioned and available where used"
+          ]
+        },
+        {
+          "title": "8. Operation",
+          "items": [
+            "Operational controls follow the hierarchy: elimination before PPE",
+            "Management of change is applied before changes take effect",
+            "Procurement controls extend OH&S requirements to what is bought",
+            "Contractors are coordinated and their workers covered",
+            "Outsourced functions are controlled",
+            "Emergency preparedness is planned, tested and revised after tests"
+          ]
+        },
+        {
+          "title": "9. Performance evaluation",
+          "items": [
+            "Monitoring and measurement is defined, with calibrated equipment",
+            "Compliance with legal requirements is evaluated and recorded",
+            "Internal audits cover the whole system on a programme",
+            "Management review is held at planned intervals with the required inputs"
+          ]
+        },
+        {
+          "title": "10. Improvement",
+          "items": [
+            "Incidents and nonconformities are investigated to root cause",
+            "Corrective actions address the cause, not the symptom",
+            "Effectiveness of corrective action is verified",
+            "Continual improvement is demonstrable in the data"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iso14001",
+      "name": "Management system audit — ISO 14001",
+      "group": "Management system",
+      "scope": "The environmental management system against the standard's clauses",
+      "basis": "ISO 14001 shares the Annex SL clause structure with ISO 45001, so a combined audit is normal — the evidence differs, the structure does not.",
+      "sections": [
+        {
+          "title": "4. Context",
+          "items": [
+            "Environmental conditions affected by, and affecting, the organisation are understood",
+            "Interested parties' environmental requirements are determined",
+            "Scope includes the activities, products and services with environmental aspects"
+          ]
+        },
+        {
+          "title": "5. Leadership",
+          "items": [
+            "Environmental policy includes commitment to protection and to compliance",
+            "Policy is available to interested parties, not just internally",
+            "Responsibilities for the EMS are assigned"
+          ]
+        },
+        {
+          "title": "6. Planning",
+          "items": [
+            "Environmental aspects are identified across the life cycle",
+            "Significance criteria are defined and applied consistently",
+            "Compliance obligations are identified and accessible",
+            "Environmental objectives are set with plans, resources and timeframes"
+          ]
+        },
+        {
+          "title": "7. Support",
+          "items": [
+            "Competence for those whose work affects environmental performance is evidenced",
+            "Awareness extends to the consequences of not conforming",
+            "Internal and external communication on environmental matters is planned"
+          ]
+        },
+        {
+          "title": "8. Operation",
+          "items": [
+            "Operational controls are established for significant aspects",
+            "Life-cycle perspective is applied to design, procurement and end of life",
+            "Requirements are communicated to external providers and contractors",
+            "Emergency preparedness covers environmental release scenarios"
+          ]
+        },
+        {
+          "title": "9. Performance evaluation",
+          "items": [
+            "Monitoring covers the parameters the obligations require",
+            "Compliance evaluation is documented with its frequency defined",
+            "Internal audit programme covers the EMS"
+          ]
+        },
+        {
+          "title": "10. Improvement",
+          "items": [
+            "Nonconformities including releases are corrected and investigated",
+            "Improvement in environmental performance is demonstrable"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal",
+      "name": "Legal compliance audit",
+      "group": "Compliance",
+      "scope": "Every permit, licence and statutory duty applicable to the site",
+      "basis": "Built around the jurisdiction register in Checklists. Compliance evaluation at a defined frequency is itself a requirement of both ISO standards.",
+      "sections": [
+        {
+          "title": "Permits and approvals",
+          "items": [
+            "Every required permit is identified for the activities actually carried out",
+            "Each permit is current and held on site",
+            "Permit conditions are extracted into a trackable register",
+            "Each condition has an owner and evidence of compliance",
+            "Renewals are diarised with enough lead time to complete them",
+            "Variations and changes of scope have been notified where required"
+          ]
+        },
+        {
+          "title": "Reporting obligations",
+          "items": [
+            "Periodic returns to the regulator are submitted on time",
+            "Monitoring results are reported at the required frequency",
+            "Incident notification thresholds are known and have been met",
+            "Annual environmental audit or equivalent has been submitted"
+          ]
+        },
+        {
+          "title": "Statutory registrations",
+          "items": [
+            "Workplace or factory registration is current",
+            "Statutory examinations of plant are in date",
+            "Professional registrations of practitioners are current",
+            "Workers' compensation insurance covers the actual headcount"
+          ]
+        },
+        {
+          "title": "Enforcement history",
+          "items": [
+            "Improvement or prohibition notices are closed out",
+            "Prosecutions or penalties are disclosed and their conditions met",
+            "Regulator correspondence is filed and actioned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contractor",
+      "name": "Sub-contractor audit",
+      "group": "Contractor management",
+      "scope": "A sub-contractor's own arrangements, on their work, on your site",
+      "basis": "A principal is answerable for the people its contractors bring on site, so this is audited on evidence, not on assurances.",
+      "sections": [
+        {
+          "title": "Documentation and status",
+          "items": [
+            "Pre-qualification is current and any conditions are being met",
+            "Insurance covers the scope and the actual headcount",
+            "Bridging document is signed and understood by both parties",
+            "Sub-sub-contracting is within what was agreed"
+          ]
+        },
+        {
+          "title": "Workers",
+          "items": [
+            "Every worker on site appears on their register",
+            "Contracts, wages and hours comply with the labour code",
+            "No worker is under the legal minimum age",
+            "Induction and task training records exist for each worker",
+            "Competence certificates verified for licensed tasks",
+            "Their workers can raise a grievance without going through their supervisor"
+          ]
+        },
+        {
+          "title": "On the job",
+          "items": [
+            "Risk assessments and method statements match the work being done",
+            "Permits are obtained and followed",
+            "PPE is supplied by them, correct and worn",
+            "Plant and equipment certification is current and on site",
+            "Housekeeping and waste segregation in their areas"
+          ]
+        },
+        {
+          "title": "Performance",
+          "items": [
+            "Their incidents are reported to you, including near-misses",
+            "Their hours are reported so their rates can be calculated separately",
+            "Previous audit findings are closed",
+            "Their own supervision is present during work"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accommodation",
+      "name": "Workers' accommodation audit",
+      "group": "Welfare",
+      "scope": "Camps, guest houses and any accommodation provided to workers",
+      "basis": "Assessed against the IFC/EBRD workers' accommodation guidance, which lenders apply directly.",
+      "sections": [
+        {
+          "title": "Space and sleeping",
+          "items": [
+            "Floor area per person meets the standard",
+            "Beds are not shared or hot-bedded",
+            "Rooms have natural light and ventilation",
+            "Lockable personal storage per worker",
+            "Separate accommodation for women with lockable access"
+          ]
+        },
+        {
+          "title": "Sanitation and water",
+          "items": [
+            "Toilets and showers meet the ratio per person, separated by sex",
+            "Water supply is potable and tested at the required frequency",
+            "Adequate water quantity per person per day",
+            "Laundry facilities are provided",
+            "Waste water is disposed of without creating a nuisance"
+          ]
+        },
+        {
+          "title": "Food and kitchens",
+          "items": [
+            "Kitchens are separated from sleeping areas",
+            "Food handlers have current health certificates",
+            "Cold chain and temperature records are kept",
+            "Pest control programme operates with records",
+            "Dining space is adequate for the shift pattern"
+          ]
+        },
+        {
+          "title": "Safety and welfare",
+          "items": [
+            "Fire detection, extinguishers and marked escape routes",
+            "Evacuation drill has been held in the accommodation itself",
+            "Electrical installation inspected and safe",
+            "First aid provision and access to medical care",
+            "Rest and recreation space provided",
+            "Workers are free to leave the accommodation outside working hours",
+            "Accommodation is not a condition of employment in a way that traps workers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tsf",
+      "name": "Tailings facility audit",
+      "group": "Mining & heavy industry",
+      "scope": "The tailings storage facility, its governance and its surveillance",
+      "basis": "Structured around the Global Industry Standard on Tailings Management. A TSF failure is the highest-consequence event most mines carry.",
+      "sections": [
+        {
+          "title": "Governance and accountability",
+          "items": [
+            "Engineer of Record is appointed in writing and currently engaged",
+            "Accountable Executive is named and understands the role",
+            "Responsible Tailings Facility Engineer is appointed on site",
+            "Independent review has been carried out at the required interval",
+            "Review findings are tracked to closure with dates"
+          ]
+        },
+        {
+          "title": "Design and knowledge base",
+          "items": [
+            "Design basis report is current for the facility as it now stands",
+            "Site characterisation covers geotechnical, hydrological and seismic conditions",
+            "Consequence classification is current and justified",
+            "Deposition plan matches what is actually being deposited"
+          ]
+        },
+        {
+          "title": "Operation and surveillance",
+          "items": [
+            "Freeboard and beach width are within design at all times",
+            "Instrumentation is installed, read on schedule and trending reviewed",
+            "Trigger action response plan exists with defined trigger levels",
+            "Water balance is maintained and reconciled",
+            "Surveillance inspections are recorded with photographs",
+            "Seepage and drainage performance are monitored"
+          ]
+        },
+        {
+          "title": "Emergency and closure",
+          "items": [
+            "Emergency preparedness and response plan covers a breach scenario",
+            "Downstream communities are identified, informed and involved in planning",
+            "Inundation mapping has been carried out",
+            "Closure plan exists and is costed",
+            "Financial assurance for closure is in place at current value"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emergency",
+      "name": "Emergency preparedness audit",
+      "group": "Safety",
+      "scope": "The emergency plan as it would actually perform, not as written",
+      "basis": "Audited against the scenarios the site genuinely faces, drawn from the risk register.",
+      "sections": [
+        {
+          "title": "Planning",
+          "items": [
+            "Emergency plan covers every credible scenario for this site",
+            "Roles are assigned by post, not by name, and cover every shift",
+            "Contact lists are current and have been called to test",
+            "External responders know the site and its hazards",
+            "Plan is available where an emergency would start, not only in the office"
+          ]
+        },
+        {
+          "title": "Equipment and provision",
+          "items": [
+            "Alarm is audible everywhere including high-noise areas",
+            "Assembly points are suitable, signed and reachable",
+            "Firefighting equipment is in place, serviced and accessible",
+            "First aid and medical equipment is stocked and in date",
+            "Emergency vehicles are available and maintained",
+            "Rescue equipment matches the rescue scenarios identified"
+          ]
+        },
+        {
+          "title": "Competence",
+          "items": [
+            "Emergency team members are trained and their training is current",
+            "First aiders cover every shift and location",
+            "Wardens know their sweep areas",
+            "Workers know what to do on hearing the alarm"
+          ]
+        },
+        {
+          "title": "Testing and learning",
+          "items": [
+            "Drills cover the full range of scenarios over the cycle",
+            "Drills include night shift and contractors",
+            "Times are recorded: alarm, assembly, roll call complete",
+            "Debriefs are held and gaps recorded",
+            "The plan has actually been revised as a result of a drill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "waste",
+      "name": "Waste management audit",
+      "group": "Environment",
+      "scope": "The waste stream end to end: generation, storage, transfer, disposal",
+      "basis": "The audit follows the waste, not the paperwork — the paperwork is checked against where the waste actually went.",
+      "sections": [
+        {
+          "title": "Segregation and storage",
+          "items": [
+            "Segregation happens at the point of generation",
+            "Containers are labelled, correct and not overfilled",
+            "Hazardous waste is stored on impermeable bunded hardstanding, under cover",
+            "Incompatible wastes are stored apart",
+            "Storage time limits are observed",
+            "Areas are secure from scavenging and from weather"
+          ]
+        },
+        {
+          "title": "Transfer and disposal",
+          "items": [
+            "Carrier licences are verified and current for each stream",
+            "Receiving facility licences are verified",
+            "Waste transfer notes are complete, signed and retained",
+            "Quantities reconcile between generation, transfer and receipt",
+            "The disposal route has been physically verified at least once"
+          ]
+        },
+        {
+          "title": "Minimisation and reporting",
+          "items": [
+            "Waste quantities are recorded by stream with a running total",
+            "Diversion from landfill is measured and defined consistently",
+            "Reduction opportunities have been identified and acted on",
+            "Waste data is reported to the regulator where required"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ptw-audit",
+      "name": "Permit to work system audit",
+      "group": "Safety",
+      "scope": "Whether the permit system works in practice, not whether forms exist",
+      "basis": "Audited by following live permits into the field — a permit file that looks perfect and a job site that does not is the finding.",
+      "sections": [
+        {
+          "title": "System design",
+          "items": [
+            "Permit types cover every high-risk activity on site",
+            "Issuers and receivers are authorised and trained",
+            "Authorisation limits are defined and respected",
+            "Cross-referencing between simultaneous permits is required"
+          ]
+        },
+        {
+          "title": "Live permits in the field",
+          "items": [
+            "The work being done matches the work described on the permit",
+            "Isolations described on the permit are physically in place",
+            "Gas tests were done and recorded at the stated intervals",
+            "Every worker on the job has been briefed and signed on",
+            "Standby and rescue arrangements are physically present",
+            "The permit is at the worksite, not in the office"
+          ]
+        },
+        {
+          "title": "Close-out",
+          "items": [
+            "Permits are closed properly, not abandoned",
+            "Isolations are removed under control",
+            "Area is handed back in a safe state",
+            "Expired permits are not still being worked to"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hygiene",
+      "name": "Camp hygiene and food safety audit",
+      "group": "Welfare",
+      "scope": "Kitchens, canteens, water supply and sanitation",
+      "basis": "Foodborne illness on a remote site takes out a shift, and there is nowhere to send people.",
+      "sections": [
+        {
+          "title": "Food handling",
+          "items": [
+            "Food handlers hold current health certificates",
+            "Hand washing facilities with soap at the point of need",
+            "Raw and cooked food separated at every stage",
+            "Cooking and holding temperatures recorded",
+            "Cold chain maintained with alarms on the fridges",
+            "Leftovers policy is defined and followed"
+          ]
+        },
+        {
+          "title": "Premises",
+          "items": [
+            "Kitchen surfaces are cleanable and in good repair",
+            "Extraction is cleaned on schedule",
+            "Pest control with a current map and bait records",
+            "Waste is removed frequently and stored away from food",
+            "Cleaning schedule is signed off, not just posted"
+          ]
+        },
+        {
+          "title": "Water and sanitation",
+          "items": [
+            "Drinking water is tested at the required frequency",
+            "Water storage tanks are cleaned and covered",
+            "Toilets are clean, stocked and maintained",
+            "Sewage disposal does not contaminate water sources"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "premob",
+      "name": "Pre-mobilisation readiness audit",
+      "group": "Compliance",
+      "scope": "Whether the site is ready for work to start at all",
+      "basis": "Run before first mobilisation. Every line here is something that is expensive to fix once work has started.",
+      "sections": [
+        {
+          "title": "Approvals in place",
+          "items": [
+            "Environmental approval issued and conditions extracted",
+            "Construction or operating permit in hand",
+            "Land access and wayleaves settled",
+            "Workplace registration completed"
+          ]
+        },
+        {
+          "title": "Site establishment",
+          "items": [
+            "Site boundary defined and marked against the approved footprint",
+            "Access road and traffic arrangements agreed",
+            "Welfare, sanitation and water provision in place before workers arrive",
+            "Waste storage and removal arrangements contracted",
+            "Fuel and chemical storage bunded before delivery"
+          ]
+        },
+        {
+          "title": "People and systems",
+          "items": [
+            "EHS resource appointed and on site",
+            "Emergency plan written and responders identified",
+            "Induction programme ready to run",
+            "First aid provision and medevac route confirmed",
+            "Grievance mechanism publicised to the community before works begin"
+          ]
+        },
+        {
+          "title": "Baseline",
+          "items": [
+            "Pre-works condition survey of nearby structures completed",
+            "Environmental baseline monitoring completed before disturbance",
+            "Photographic record of pre-existing site condition taken"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "closure",
+      "name": "Closure and demobilisation readiness audit",
+      "group": "Compliance",
+      "scope": "Whether the site can be handed back without leaving liabilities",
+      "basis": "Run before demobilisation. What is not closed out before the team leaves usually never is.",
+      "sections": [
+        {
+          "title": "Physical closure",
+          "items": [
+            "Structures removed or formally handed over",
+            "Contaminated ground identified and remediated",
+            "Fuel and chemical storage decommissioned and areas tested",
+            "Waste removed with transfer notes retained",
+            "Borrow areas and stockpiles reinstated",
+            "Erosion control in place on reinstated ground"
+          ]
+        },
+        {
+          "title": "Ecological and land",
+          "items": [
+            "Reinstatement matches the approved restoration plan",
+            "Planting established and survival monitored",
+            "Land returned in the condition agreed with the owner",
+            "Post-closure monitoring plan agreed and funded"
+          ]
+        },
+        {
+          "title": "Administrative",
+          "items": [
+            "Permits surrendered or transferred",
+            "Final reports submitted to the regulator",
+            "Community commitments discharged and evidenced",
+            "Outstanding grievances closed",
+            "Workers' final dues settled and exit medicals completed",
+            "Records archived for the statutory retention period"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbs",
+      "name": "Behavioural safety observation",
+      "group": "Safety",
+      "scope": "What people actually do, observed and discussed at the time",
+      "basis": "An observation is a conversation, not an inspection. Recording who was at fault defeats the purpose and stops the reporting.",
+      "sections": [
+        {
+          "title": "Position of people",
+          "items": [
+            "Line of fire: nobody between a load and a hard place",
+            "Working at the correct height and reach, not overstretching",
+            "Clear of moving plant and pinch points",
+            "Escape route from the work position is clear"
+          ]
+        },
+        {
+          "title": "Tools and equipment",
+          "items": [
+            "Correct tool for the task, in good condition",
+            "Guards in place and used",
+            "Equipment inspected before use"
+          ]
+        },
+        {
+          "title": "Procedures",
+          "items": [
+            "The procedure being followed is the current one",
+            "Permit conditions observed in practice",
+            "Shortcuts identified and the reason for them understood"
+          ]
+        },
+        {
+          "title": "PPE and housekeeping",
+          "items": [
+            "PPE correct for the task and correctly worn",
+            "Work area tidy, access clear",
+            "Waste and materials stored, not left where people walk"
+          ]
+        },
+        {
+          "title": "The conversation",
+          "items": [
+            "Observation discussed with the worker at the time",
+            "Worker's own view of the barriers was asked for and recorded",
+            "Anything the worker cannot fix themselves was escalated"
+          ]
+        }
+      ]
+    }
+  ],
+
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100
 };
@@ -11481,6 +13297,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         { id: "p1", author: "Verda Team", text: "Welcome to the Verda Community — post questions or share compliance tips here.", date: "2026-09-01" }
       ],
       workflowRuns: [],
+      esmpAudit: [],
       incidents: [],
       subcontractors: [],
       equipment: [],          // equipment and machines under an inspection regime
@@ -11893,6 +13710,11 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
   function daysUntil(dateStr) {
     if (!dateStr) return null;
     return Math.round((new Date(dateStr) - new Date(today())) / 86400000);
+  }
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + Number(n || 0));
+    return d.toISOString().slice(0, 10);
   }
   function addMonths(dateStr, months) {
     const d = new Date(dateStr);
@@ -13414,37 +15236,241 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     return inline ? `<div class="report-doc">${head}${body}</div>` : head + body;
   }
 
-  /* ============================ AUDITS ============================ */
+  /* ============================ AUDITS ============================
+     Beyond the per-sector EHS checklist: management system audits against the
+     Annex SL clauses the standards share, compliance and readiness audits, and
+     the protocols where missing something costs most — tailings, workers'
+     accommodation, contractors.
+
+     A finding is graded, and the grade sets the closure target. An audit that
+     produces findings with no owner and no date is an audit that changed
+     nothing, so raising a corrective action is one click from each finding. */
+
   function renderAudits(main) {
+    const S = VERDA_SEED;
+    const groups = [...new Set(S.auditProtocols.map(p => p.group))];
+
     main.appendChild(h(`
       <section>
-        <h1>Audits</h1>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Audits</h1>
+            <p class="muted">${S.auditProtocols.length} audit protocols plus the ${S.industries.length} sector checklists and your own ESMP commitments.
+              Findings are graded, each grade carries a closure target, and a corrective action can be raised from any finding.</p>
+          </div>
+        </div>
         <div class="tabs">
-          <button class="tab-btn active" data-tab="ehs">Auto EHS Audit</button>
-          <button class="tab-btn" data-tab="esia">ESIA Audit</button>
+          <button class="tab-btn active" data-tab="conduct">Conduct an audit</button>
+          <button class="tab-btn" data-tab="ehs">Sector EHS checklist</button>
+          <button class="tab-btn" data-tab="esia">ESIA / ESMP commitments</button>
+          <button class="tab-btn" data-tab="register">Audit register</button>
+          <button class="tab-btn" data-tab="protocols">Protocol library</button>
         </div>
         <div id="audit-panel"></div>
       </section>
     `));
     const panel = main.querySelector("#audit-panel");
 
+    const GRADE = S.auditFindingCategories;
+    const gradeDays = { "Major non-conformity": 0, "Minor non-conformity": 30, "Observation": 90, "Opportunity for improvement": 180, "Positive practice": null };
+    const gradeStatus = { "Major non-conformity": "critical", "Minor non-conformity": "serious", "Observation": "warning", "Opportunity for improvement": "good", "Positive practice": "good" };
+
+    /* ---------------- Conduct ---------------- */
+    function conductPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <div class="form-row">
+            <label>Protocol<select id="ap-protocol">${groups.map(g =>
+              `<optgroup label="${esc(g)}">${S.auditProtocols.filter(p => p.group === g).map(p =>
+                `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+            <label>Client / site<select id="ap-client">${clientOptions()}</select></label>
+            <label>Auditor<input id="ap-auditor" placeholder="Who is carrying out the audit" /></label>
+            <label>Date<input id="ap-date" type="date" value="${today()}" /></label>
+          </div>
+          <div id="ap-basis" class="guide-box"></div>
+        </div>
+        <div id="ap-items"></div>
+        <div class="card">
+          <div id="ap-score"></div>
+          <div class="modal-actions">
+            <button class="btn btn-primary" id="ap-save">Save audit &amp; raise actions</button>
+            <button class="btn" id="ap-ai">AI findings summary (${S.creditCosts.auditAiSummary} credits)</button>
+          </div>
+        </div>
+        <div id="ap-output"></div>`;
+
+      const answers = {};
+      function proto() { return S.auditProtocols.find(p => p.id === panel.querySelector("#ap-protocol").value); }
+
+      function load() {
+        const p = proto();
+        Object.keys(answers).forEach(k => delete answers[k]);
+        panel.querySelector("#ap-basis").innerHTML =
+          `<p><strong>Scope.</strong> ${esc(p.scope)}</p><p class="small">${esc(p.basis)}</p>`;
+        panel.querySelector("#ap-items").innerHTML = p.sections.map((sec, si) => `
+          <div class="card">
+            <h4>${esc(sec.title)}</h4>
+            ${sec.items.map((item, ii) => {
+              const key = `${si}-${ii}`;
+              return `<div class="audit-item" data-key="${key}">
+                <div class="audit-item-text">${esc(item)}</div>
+                <div class="audit-item-controls">
+                  <select data-af="result" data-key="${key}">
+                    <option value="">— not assessed —</option>
+                    <option>Conforms</option><option>Does not conform</option><option>Partially conforms</option><option>Not applicable</option>
+                  </select>
+                  <select data-af="grade" data-key="${key}" disabled>
+                    <option value="">Grade</option>
+                    ${GRADE.map(g => `<option>${esc(g.category)}</option>`).join("")}
+                  </select>
+                  <input data-af="note" data-key="${key}" placeholder="Evidence seen, or what is missing" />
+                </div>
+              </div>`;
+            }).join("")}
+          </div>`).join("");
+
+        panel.querySelectorAll("[data-af]").forEach(el => el.addEventListener("input", () => {
+          const k = el.dataset.key;
+          answers[k] = answers[k] || {};
+          answers[k][el.dataset.af] = el.value;
+          if (el.dataset.af === "result") {
+            // A grade only means something on something that did not conform.
+            const g = panel.querySelector(`[data-af="grade"][data-key="${k}"]`);
+            const needsGrade = /Does not conform|Partially conforms/.test(el.value);
+            g.disabled = !needsGrade;
+            if (needsGrade && !g.value) g.value = el.value === "Does not conform" ? "Major non-conformity" : "Minor non-conformity";
+            if (!needsGrade) g.value = "";
+            answers[k].grade = g.value;
+          }
+          score();
+        }));
+        score();
+      }
+
+      function collect() {
+        const p = proto();
+        const out = [];
+        p.sections.forEach((sec, si) => sec.items.forEach((item, ii) => {
+          const a = answers[`${si}-${ii}`] || {};
+          out.push({ section: sec.title, item, result: a.result || "", grade: a.grade || "", note: a.note || "" });
+        }));
+        return out;
+      }
+
+      function score() {
+        const rows = collect();
+        const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
+        const conform = assessed.filter(r => r.result === "Conforms").length;
+        const pct = assessed.length ? Math.round((conform / assessed.length) * 100) : null;
+        const byGrade = GRADE.map(g => ({ label: g.category, n: rows.filter(r => r.grade === g.category).length }));
+        panel.querySelector("#ap-score").innerHTML = `
+          <div class="kpi-grid">
+            ${kpiCard("Conformance", pct === null ? "—" : pct + "%", `${conform} of ${assessed.length} assessed`,
+              pct === null ? null : pct >= 90 ? "good" : pct >= 70 ? "warning" : "critical")}
+            ${kpiCard("Items assessed", `${assessed.length} / ${rows.length}`, "Excluding not applicable.")}
+            ${byGrade.filter(g => g.n).map(g => kpiCard(g.label, g.n,
+              gradeDays[g.label] === null ? "Record and replicate." :
+              gradeDays[g.label] === 0 ? "Close immediately." : `Close within ${gradeDays[g.label]} days.`,
+              gradeStatus[g.label])).join("")}
+          </div>`;
+      }
+
+      load();
+      panel.querySelector("#ap-protocol").addEventListener("change", load);
+
+      panel.querySelector("#ap-save").addEventListener("click", () => {
+        const p = proto();
+        const rows = collect();
+        const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
+        if (!assessed.length) { alert("Assess at least one item before saving."); return; }
+        const findings = rows.filter(r => r.grade && r.grade !== "Positive practice");
+        const date = panel.querySelector("#ap-date").value || today();
+        const client = panel.querySelector("#ap-client").value;
+        setCurrentClient(client);
+        const rec = {
+          id: uid("aud"), protocolId: p.id, protocolName: p.name, client,
+          auditor: panel.querySelector("#ap-auditor").value.trim(), date,
+          assessed: assessed.length, total: rows.length,
+          conformance: Math.round((assessed.filter(r => r.result === "Conforms").length / assessed.length) * 100),
+          rows
+        };
+        state.audits.push(rec);
+        // Each finding becomes a corrective action with the grade's own closure
+        // target as its due date — a finding without an owner and a date is an
+        // audit that changed nothing.
+        let raised = 0;
+        findings.forEach(f => {
+          const days = gradeDays[f.grade];
+          state.actions.push({
+            id: uid("act"), title: `${f.grade}: ${f.item}`,
+            source: "Audit finding", client, owner: "",
+            due: addDays(date, days === null ? 90 : days || 0),
+            priority: f.grade === "Major non-conformity" ? "High" : f.grade === "Minor non-conformity" ? "Medium" : "Low",
+            status: "Open", notes: f.note || ""
+          });
+          raised++;
+        });
+        save(); 
+        panel.querySelector("#ap-output").innerHTML = card("Audit saved", `
+          <p>${esc(p.name)} at ${esc(client)} — ${rec.conformance}% conformance across ${rec.assessed} assessed items.</p>
+          <p class="muted small">${raised} corrective action${raised === 1 ? "" : "s"} raised in <a href="#/actions">Actions (CAPA)</a>,
+            each dated from its grade's closure target. Assign owners there.</p>
+          <div class="modal-actions"><button class="btn" id="ap-dl">Download audit report</button></div>`);
+        panel.querySelector("#ap-dl").addEventListener("click", () => downloadAudit(rec));
+      });
+
+      panel.querySelector("#ap-ai").addEventListener("click", () => {
+        const p = proto();
+        const rows = collect().filter(r => r.result);
+        if (!rows.length) { alert("Assess at least one item first."); return; }
+        if (!spendCredits(S.creditCosts.auditAiSummary, "Audit findings summary")) return;
+        const text = VerdaAI.generateAuditSummary({
+          industry: p.name,
+          findings: rows.map(r => ({ item: r.item, status: r.result === "Conforms" ? "Compliant" : r.result === "Not applicable" ? "N/A" : "Non-Compliant", note: r.note }))
+        });
+        panel.querySelector("#ap-output").innerHTML = card("Findings summary", `<pre class="report-pre">${esc(text)}</pre>
+          <div class="modal-actions"><button class="btn btn-primary" id="ap-ai-dl">Download .txt</button></div>`);
+        panel.querySelector("#ap-ai-dl").addEventListener("click", () =>
+          downloadText(`Audit-Summary-${p.name.replace(/[^\w]+/g, "_")}.txt`, text));
+        renderTopbar();
+      });
+    }
+
+    function downloadAudit(rec) {
+      const findings = rec.rows.filter(r => r.grade);
+      downloadText(`Audit-${rec.protocolName.replace(/[^\w]+/g, "_")}-${rec.date}.txt`,
+        `${rec.protocolName.toUpperCase()}\nClient / site: ${rec.client}\nAuditor: ${rec.auditor || "—"}\nDate: ${rec.date}\n` +
+        `Conformance: ${rec.conformance}% (${rec.assessed} of ${rec.total} items assessed)\n` +
+        `-----------------------------------------------------------------------\n\n` +
+        (findings.length ? `FINDINGS\n` + findings.map(f =>
+          `  [${f.grade}] ${f.item}\n      Section: ${f.section}\n      Result: ${f.result}\n      Note: ${f.note || "—"}` +
+          `\n      Closure target: ${gradeDays[f.grade] === null ? "—" : gradeDays[f.grade] === 0 ? "immediate" : gradeDays[f.grade] + " days"}`
+        ).join("\n\n") : "No graded findings recorded.\n") +
+        `\n\nFULL RESULT\n` + rec.rows.filter(r => r.result).map(r =>
+          `  [${r.result}] ${r.item}${r.note ? "\n      " + r.note : ""}`).join("\n") + "\n");
+    }
+
+    /* ---------------- Sector EHS checklist (kept) ---------------- */
     function ehsPanel() {
       panel.innerHTML = `
         <div class="card">
-          <label>Industry checklist
-            <select id="audit-industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g => `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
-          </label>
+          <label>Sector checklist
+            <select id="audit-industry">${[...new Set(S.industries.map(i => i.group))].map(g =>
+              `<optgroup label="${esc(g)}">${S.industries.filter(i => i.group === g).map(i =>
+                `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+          <p class="muted small" id="audit-count"></p>
           <div id="audit-items"></div>
           <div class="modal-actions">
-            <button class="btn btn-primary" id="audit-ai">Generate AI Findings Summary (${VERDA_SEED.creditCosts.auditAiSummary} credits)</button>
+            <button class="btn btn-primary" id="audit-ai">Generate AI findings summary (${S.creditCosts.auditAiSummary} credits)</button>
           </div>
         </div>
         <div id="audit-output"></div>`;
       function loadItems() {
-        const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        const ind = S.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        panel.querySelector("#audit-count").textContent = `${ind.checklist.length} items.`;
         panel.querySelector("#audit-items").innerHTML = ind.checklist.map((item, idx) => `
           <div class="audit-row">
-            <div>${item}</div>
+            <div>${esc(item)}</div>
             <select data-idx="${idx}" class="audit-status">
               <option>Compliant</option><option>Non-Compliant</option><option>N/A</option>
             </select>
@@ -13454,61 +15480,131 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       loadItems();
       panel.querySelector("#audit-industry").addEventListener("change", loadItems);
       panel.querySelector("#audit-ai").addEventListener("click", () => {
-        const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        const ind = S.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
         const findings = ind.checklist.map((item, idx) => ({
           item, status: panel.querySelectorAll(".audit-status")[idx].value,
           note: panel.querySelectorAll(".audit-note")[idx].value
         }));
-        if (!spendCredits(VERDA_SEED.creditCosts.auditAiSummary, "Auto EHS audit AI summary")) return;
+        if (!spendCredits(S.creditCosts.auditAiSummary, "Auto EHS audit AI summary")) return;
         const text = VerdaAI.generateAuditSummary({ industry: ind.name, findings });
-        state.audits.push({ id: uid("aud"), type: "EHS", industry: ind.name, text, date: new Date().toISOString() });
+        state.audits.push({ id: uid("aud"), protocolName: ind.name + " (sector checklist)", client: currentClient() ? currentClient().name : "",
+          date: today(), assessed: findings.filter(f => f.status !== "N/A").length, total: findings.length,
+          conformance: Math.round((findings.filter(f => f.status === "Compliant").length / Math.max(1, findings.filter(f => f.status !== "N/A").length)) * 100),
+          rows: findings.map(f => ({ section: ind.name, item: f.item, result: f.status, grade: "", note: f.note })) });
         save(); renderTopbar();
-        panel.querySelector("#audit-output").innerHTML = card("Audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
+        panel.querySelector("#audit-output").innerHTML = card("Findings summary", `<pre class="report-pre">${esc(text)}</pre>
           <div class="modal-actions"><button class="btn btn-primary" id="audit-dl">Download .txt</button></div>`);
-        panel.querySelector("#audit-dl").addEventListener("click", () => downloadText(`EHS-Audit-${ind.name.replace(/\s+/g,"_")}.txt`, text));
+        panel.querySelector("#audit-dl").addEventListener("click", () =>
+          downloadText(`Audit-${ind.name.replace(/[^\w]+/g, "_")}.txt`, text));
       });
     }
 
-    function esiaAuditPanel() {
+    /* ---------------- ESIA / ESMP commitments (kept) ---------------- */
+    function esiaPanel() {
       panel.innerHTML = `
         <div class="card">
-          <p class="muted">Audit site performance against ESMP commitments. Add each commitment and its current status.</p>
-          <div id="esia-audit-items"><div class="audit-row"><input class="ea-item" placeholder="ESMP commitment, e.g. 'Quarterly effluent testing'" />
-            <select class="ea-status"><option>Compliant</option><option>Non-Compliant</option><option>N/A</option></select>
-            <input class="ea-note" placeholder="Note (optional)" /></div></div>
-          <button class="btn btn-ghost btn-sm" id="ea-add-row">+ Add commitment</button>
-          <div class="modal-actions">
-            <button class="btn btn-primary" id="ea-ai">Generate AI Findings Summary (${VERDA_SEED.creditCosts.auditAiSummary} credits)</button>
+          <h3>ESIA / ESMP commitment audit</h3>
+          <p class="muted small">Audit against the commitments in your own ESMP. Add each commitment, then judge whether it is being met —
+            a commitment made in an approved ESIA is an enforceable condition, not an aspiration.</p>
+          <div class="form-row">
+            <label>Commitment<input id="esa-item" placeholder="e.g. Dust suppression twice daily on unsealed haul roads" /></label>
+            <label>Source<input id="esa-src" placeholder="ESMP section or permit condition" /></label>
+            <label>Status<select id="esa-status"><option>Met</option><option>Partly met</option><option>Not met</option><option>Not yet due</option></select></label>
+            <button class="btn btn-primary" id="esa-add">Add</button>
           </div>
-        </div>
-        <div id="ea-output"></div>`;
-      panel.querySelector("#ea-add-row").addEventListener("click", () => {
-        panel.querySelector("#esia-audit-items").insertAdjacentHTML("beforeend",
-          `<div class="audit-row"><input class="ea-item" placeholder="ESMP commitment" />
-            <select class="ea-status"><option>Compliant</option><option>Non-Compliant</option><option>N/A</option></select>
-            <input class="ea-note" placeholder="Note (optional)" /></div>`);
-      });
-      panel.querySelector("#ea-ai").addEventListener("click", () => {
-        const items = Array.from(panel.querySelectorAll(".ea-item")).map(i => i.value).filter(Boolean);
-        if (!items.length) { alert("Add at least one ESMP commitment."); return; }
-        const findings = items.map((item, idx) => ({
-          item, status: panel.querySelectorAll(".ea-status")[idx].value, note: panel.querySelectorAll(".ea-note")[idx].value
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Commitment</th><th>Source</th><th>Status</th><th></th></tr></thead>
+            <tbody id="esa-rows"></tbody></table></div>
+        </div>`;
+      state.esmpAudit = state.esmpAudit || [];
+      const ST = { "Met": "good", "Partly met": "warning", "Not met": "critical", "Not yet due": "warning" };
+      function refresh() {
+        panel.querySelector("#esa-rows").innerHTML = state.esmpAudit.map(x =>
+          `<tr><td>${esc(x.item)}</td><td class="small">${esc(x.src || "—")}</td>
+            <td>${statusBadge(x.status, ST[x.status])}</td>
+            <td class="row-actions"><button class="btn btn-ghost btn-sm" data-esa-del="${esc(x.id)}">Remove</button></td></tr>`).join("") ||
+          emptyState("wildlife", "No commitments recorded. Take them from the approved ESMP — each one is a condition someone can be held to.", 4);
+        panel.querySelectorAll("[data-esa-del]").forEach(b => b.addEventListener("click", () => {
+          state.esmpAudit = state.esmpAudit.filter(x => x.id !== b.dataset.esaDel); save(); refresh();
         }));
-        if (!spendCredits(VERDA_SEED.creditCosts.auditAiSummary, "ESIA audit AI summary")) return;
-        const text = VerdaAI.generateAuditSummary({ industry: "ESMP Commitments", findings });
-        state.audits.push({ id: uid("aud"), type: "ESIA", industry: "ESMP", text, date: new Date().toISOString() });
-        save(); renderTopbar();
-        panel.querySelector("#ea-output").innerHTML = card("ESIA audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
-          <div class="modal-actions"><button class="btn btn-primary" id="ea-dl">Download .txt</button></div>`);
-        panel.querySelector("#ea-dl").addEventListener("click", () => downloadText("ESIA-Audit.txt", text));
+      }
+      refresh();
+      panel.querySelector("#esa-add").addEventListener("click", () => {
+        const item = panel.querySelector("#esa-item").value.trim();
+        if (!item) { alert("Enter the commitment."); return; }
+        state.esmpAudit.push({ id: uid("esa"), item, src: panel.querySelector("#esa-src").value.trim(), status: panel.querySelector("#esa-status").value });
+        save(); refresh();
+        panel.querySelector("#esa-item").value = ""; panel.querySelector("#esa-src").value = "";
       });
     }
 
-    ehsPanel();
+    /* ---------------- Register ---------------- */
+    function registerPanel() {
+      const audits = state.audits.slice().reverse();
+      const gradeRows = GRADE.map(g => ({
+        label: g.category.replace(" non-conformity", ""),
+        values: { n: state.audits.reduce((a, x) => a + (x.rows || []).filter(r => r.grade === g.category).length, 0) },
+        color: `var(--chart-${gradeStatus[g.category]})`
+      })).filter(r => r.values.n);
+      panel.innerHTML = `
+        <div class="grid grid-3">
+          ${statCard("audits", "Audits completed", state.audits.length, "All protocols.")}
+          ${statCard("risk", "Open findings", state.actions.filter(a => a.source === "Audit finding" && a.status !== "Closed").length, "Raised from audits, not yet closed.", true)}
+          ${statCard("analytics", "Average conformance", state.audits.length
+            ? Math.round(state.audits.reduce((a, x) => a + (x.conformance || 0), 0) / state.audits.length) + "%" : "—", "Across every audit recorded.")}
+        </div>
+        ${gradeRows.length ? `<div class="card">${groupedBarChart(gradeRows, [{ key: "n", label: "Findings" }], "Findings by grade", "Findings")}</div>` : ""}
+        <div class="card">
+          <h3>Audit register</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Date</th><th>Protocol</th><th>Client / site</th><th>Auditor</th><th class="num">Assessed</th><th class="num">Conformance</th><th></th></tr></thead>
+            <tbody>${audits.map(a => `<tr>
+              <td>${esc(a.date)}</td><td>${esc(a.protocolName)}</td><td>${esc(a.client || "—")}</td>
+              <td class="small">${esc(a.auditor || "—")}</td><td class="num">${a.assessed}/${a.total}</td>
+              <td class="num">${a.conformance}%</td>
+              <td class="row-actions"><button class="btn btn-ghost btn-sm" data-aud-dl="${esc(a.id)}">Report</button></td></tr>`).join("") ||
+              emptyState("audit", "No audits recorded yet. Pick a protocol on the first tab and work through it — findings become corrective actions automatically.", 7)}
+            </tbody></table></div>
+        </div>`;
+      panel.querySelectorAll("[data-aud-dl]").forEach(b => b.addEventListener("click", () =>
+        downloadAudit(state.audits.find(x => x.id === b.dataset.audDl))));
+    }
+
+    /* ---------------- Protocol library ---------------- */
+    function protocolsPanel() {
+      panel.innerHTML = groups.map(g => `
+        <h3 class="calc-group">${esc(g)}</h3>
+        ${S.auditProtocols.filter(p => p.group === g).map(p => `
+          <div class="card">
+            <h4>${esc(p.name)}</h4>
+            <p class="muted small"><strong>Scope.</strong> ${esc(p.scope)}</p>
+            <p class="muted small">${esc(p.basis)}</p>
+            <details><summary>${p.sections.length} sections · ${p.sections.reduce((a, s) => a + s.items.length, 0)} items</summary>
+              ${p.sections.map(sec => `<h5>${esc(sec.title)}</h5>
+                <ul class="checklist">${sec.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`).join("")}
+            </details>
+          </div>`).join("")}`).join("") +
+        `<div class="card">
+          <h3>Finding grades and closure targets</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Grade</th><th>What it means</th><th>Closure target</th></tr></thead>
+            <tbody>${GRADE.map(g => `<tr><td>${statusBadge(g.category, gradeStatus[g.category])}</td>
+              <td class="small">${esc(g.meaning)}</td><td>${esc(g.target)}</td></tr>`).join("")}</tbody></table></div>
+          <p class="muted small">A corrective action is raised from every finding with the grade's target as its due date.</p>
+        </div>
+        <div class="modal-actions"><button class="btn" id="ap-lib-dl">Download every protocol (.txt)</button></div>`;
+      panel.querySelector("#ap-lib-dl").addEventListener("click", () =>
+        downloadText("Audit-Protocols.txt", "AUDIT PROTOCOLS\n\n" + S.auditProtocols.map(p =>
+          `${p.name.toUpperCase()}  [${p.group}]\n  Scope: ${p.scope}\n  Basis: ${p.basis}\n` +
+          p.sections.map(sec => `\n  ${sec.title}\n` + sec.items.map(i => `    [ ] ${i}`).join("\n")).join("")).join("\n\n")));
+    }
+
+    const panels = { conduct: conductPanel, ehs: ehsPanel, esia: esiaPanel, register: registerPanel, protocols: protocolsPanel };
+    conductPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      btn.dataset.tab === "ehs" ? ehsPanel() : esiaAuditPanel();
+      panels[btn.dataset.tab]();
     }));
   }
 
@@ -14226,46 +16322,207 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     });
   }
 
-  /* ============================ WORKFLOWS ============================ */
+  /* ============================ WORKFLOWS ============================
+     A template is a procedure, not a checklist: it states what starts it,
+     what "done" means, and for each step who does it, within how many days,
+     and what evidence closes it. A run computes each step's due date from the
+     start date and the step's own SLA — so a procedure that has stalled shows
+     as stalled, which a row of unticked boxes does not. */
+
   function renderWorkflows(main) {
+    const S = VERDA_SEED;
+    const areas = [...new Set(S.workflowTemplates.map(w => w.area))];
+
     main.appendChild(h(`
       <section>
-        <h1>Workflows</h1>
-        <p class="muted">Predefined workflows for HR, Environment, and Safety Administration — map each step to your applicable national OSH/Environment Act obligations.</p>
-        <div class="grid grid-3" id="wf-templates">
-          ${VERDA_SEED.workflowTemplates.map(w => `
-            <div class="card">
-              <h3>${w.name}</h3>
-              <p class="muted small">${w.area}</p>
-              <button class="btn btn-primary" data-start="${w.id}">Start a run</button>
-            </div>`).join("")}
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Workflows</h1>
+            <p class="muted">${S.workflowTemplates.length} procedures across ${areas.length} areas, ${S.workflowTemplates.reduce((a, w) => a + w.steps.length, 0)} steps in total.
+              Each step carries the role that owns it, the days it should take, and the evidence that closes it.
+              Start a run and Verda works out when each step is due.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Active workflow runs</h3>
-          <div id="wf-runs"></div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="runs">Active runs</button>
+          <button class="tab-btn" data-tab="library">Procedure library</button>
         </div>
+        <div id="wf-panel"></div>
       </section>
     `));
-    function refreshRuns() {
-      main.querySelector("#wf-runs").innerHTML = state.workflowRuns.slice().reverse().map(run => {
-        const tpl = VERDA_SEED.workflowTemplates.find(t => t.id === run.templateId);
-        return `<div class="wf-run">
-          <strong>${esc(tpl.name)}</strong> — ${esc(run.client) || "Unassigned"} <span class="muted small">${run.date.slice(0,10)}</span>
-          ${tpl.steps.map((s, i) => `<label class="seg-toggle"><input type="checkbox" class="wf-step" data-run="${run.id}" data-idx="${i}" ${run.done[i] ? "checked" : ""}/> ${s}</label>`).join("")}
+    const panel = main.querySelector("#wf-panel");
+
+    const stepDue = (run, i) => {
+      let days = 0;
+      const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+      for (let k = 0; k <= i; k++) days += Number(tpl.steps[k].days) || 0;
+      return addDays(run.started || run.date.slice(0, 10), days);
+    };
+
+    /* ---------------- Active runs ---------------- */
+    function runsPanel() {
+      const runs = state.workflowRuns.slice().reverse();
+      const openRuns = runs.filter(r => !r.closed);
+      let overdueTotal = 0, dueSoon = 0;
+      openRuns.forEach(r => {
+        const tpl = S.workflowTemplates.find(t => t.id === r.templateId);
+        if (!tpl) return;
+        tpl.steps.forEach((st, i) => {
+          if (r.done[i]) return;
+          const d = daysUntil(stepDue(r, i));
+          if (d < 0) overdueTotal++; else if (d <= 3) dueSoon++;
+        });
+      });
+
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Start a run</h3>
+          <div class="form-row">
+            <label>Procedure<select id="wf-start-tpl">${areas.map(a =>
+              `<optgroup label="${esc(a)}">${S.workflowTemplates.filter(w => w.area === a).map(w =>
+                `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+            <label>Client / site<select id="wf-start-client">${clientOptions()}</select></label>
+            <label>Reference<input id="wf-start-ref" placeholder="What this run is about" /></label>
+            <label>Start date<input id="wf-start-date" type="date" value="${today()}" /></label>
+            <button class="btn btn-primary" id="wf-start">Start</button>
+          </div>
+          <div id="wf-start-preview" class="guide-box"></div>
+        </div>
+
+        <div class="grid grid-3">
+          ${statCard("workflows", "Open runs", openRuns.length, `${runs.length - openRuns.length} closed.`)}
+          ${statCard("risk", "Overdue steps", overdueTotal, overdueTotal ? "A procedure that has stalled." : "Nothing overdue.", overdueTotal > 0)}
+          ${statCard("actions", "Due within 3 days", dueSoon, "Coming up.", dueSoon > 0)}
+        </div>
+
+        <div id="wf-runs"></div>`;
+
+      function preview() {
+        const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        panel.querySelector("#wf-start-preview").innerHTML = `
+          <p><strong>Starts when:</strong> ${esc(tpl.trigger)}</p>
+          <p><strong>Done means:</strong> ${esc(tpl.outcome)}</p>
+          <p class="small muted">${tpl.steps.length} steps · target completion
+            ${tpl.steps.reduce((a, x) => a + (Number(x.days) || 0), 0)} days from start.</p>`;
+      }
+      preview();
+      panel.querySelector("#wf-start-tpl").addEventListener("change", preview);
+
+      panel.querySelector("#wf-start").addEventListener("click", () => {
+        const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        setCurrentClient(panel.querySelector("#wf-start-client").value);
+        state.workflowRuns.push({
+          id: uid("run"), templateId: tpl.id,
+          client: panel.querySelector("#wf-start-client").value,
+          ref: panel.querySelector("#wf-start-ref").value.trim(),
+          started: panel.querySelector("#wf-start-date").value || today(),
+          done: tpl.steps.map(() => false), notes: tpl.steps.map(() => ""),
+          date: new Date().toISOString()
+        });
+        save(); runsPanel();
+      });
+
+      const box = panel.querySelector("#wf-runs");
+      box.innerHTML = runs.map(run => {
+        const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+        if (!tpl) return "";
+        const doneCount = run.done.filter(Boolean).length;
+        const pct = Math.round((doneCount / tpl.steps.length) * 100);
+        const overdue = tpl.steps.some((st, i) => !run.done[i] && daysUntil(stepDue(run, i)) < 0);
+        return `<div class="card wf-run">
+          <div class="wf-run-head">
+            <div>
+              <h3>${esc(tpl.name)}</h3>
+              <p class="muted small">${esc(run.client || "Unassigned")}${run.ref ? " · " + esc(run.ref) : ""} · started ${esc(run.started || run.date.slice(0, 10))}</p>
+            </div>
+            <div class="wf-run-meta">
+              ${statusBadge(run.closed ? "Closed" : overdue ? "Overdue" : pct === 100 ? "Complete" : `${pct}%`,
+                run.closed ? "good" : overdue ? "critical" : pct === 100 ? "good" : "warning")}
+              <button class="btn btn-ghost btn-sm" data-wf-del="${esc(run.id)}">Remove</button>
+            </div>
+          </div>
+          <div class="wf-bar"><span style="width:${pct}%"></span></div>
+          <div class="table-scroll"><table class="table wf-steps">
+            <thead><tr><th></th><th>Step</th><th>Role</th><th>Due</th><th>Evidence required</th><th>Evidence reference</th></tr></thead>
+            <tbody>${tpl.steps.map((st, i) => {
+              const due = stepDue(run, i), left = daysUntil(due), late = !run.done[i] && left < 0;
+              return `<tr${late ? ' class="row-overdue"' : ""}>
+                <td><input type="checkbox" class="wf-step" data-run="${esc(run.id)}" data-idx="${i}" ${run.done[i] ? "checked" : ""} /></td>
+                <td>${esc(st.task)}</td>
+                <td class="small">${esc(st.role)}</td>
+                <td class="small">${esc(due)}${run.done[i] ? "" : ` <span class="muted">(${left < 0 ? Math.abs(left) + "d late" : left + "d"})</span>`}</td>
+                <td class="small muted">${esc(st.evidence)}</td>
+                <td><input class="wf-note" data-run="${esc(run.id)}" data-idx="${i}" value="${esc(run.notes ? run.notes[i] || "" : "")}" placeholder="Record or file reference" /></td>
+              </tr>`;
+            }).join("")}</tbody></table></div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" data-wf-dl="${esc(run.id)}">Download run record</button>
+            ${pct === 100 && !run.closed ? `<button class="btn btn-primary btn-sm" data-wf-close="${esc(run.id)}">Close this run</button>` : ""}
+          </div>
         </div>`;
-      }).join("") || `<p class="muted">No workflow runs yet — start one above.</p>`;
-      main.querySelectorAll(".wf-step").forEach(cb => cb.addEventListener("change", () => {
+      }).join("") || `<div class="card">${emptyState("workflows", "No runs yet. Start one above — Verda works out when each step falls due from the procedure's own timings.")}</div>`;
+
+      box.querySelectorAll(".wf-step").forEach(cb => cb.addEventListener("change", () => {
         const run = state.workflowRuns.find(r => r.id === cb.dataset.run);
-        run.done[parseInt(cb.dataset.idx, 10)] = cb.checked;
+        run.done[Number(cb.dataset.idx)] = cb.checked;
+        save(); runsPanel();
+      }));
+      box.querySelectorAll(".wf-note").forEach(inp => inp.addEventListener("input", () => {
+        const run = state.workflowRuns.find(r => r.id === inp.dataset.run);
+        if (!run.notes) run.notes = [];
+        run.notes[Number(inp.dataset.idx)] = inp.value;
         save();
       }));
+      box.querySelectorAll("[data-wf-del]").forEach(b => b.addEventListener("click", () => {
+        state.workflowRuns = state.workflowRuns.filter(r => r.id !== b.dataset.wfDel);
+        save(); runsPanel();
+      }));
+      box.querySelectorAll("[data-wf-close]").forEach(b => b.addEventListener("click", () => {
+        state.workflowRuns.find(r => r.id === b.dataset.wfClose).closed = today();
+        save(); runsPanel();
+      }));
+      box.querySelectorAll("[data-wf-dl]").forEach(b => b.addEventListener("click", () => {
+        const run = state.workflowRuns.find(r => r.id === b.dataset.wfDl);
+        const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+        downloadText(`Workflow-${tpl.name.replace(/[^\w]+/g, "_")}.txt`,
+          `${tpl.name.toUpperCase()}\nClient / site: ${run.client || "—"}${run.ref ? "\nReference: " + run.ref : ""}\n` +
+          `Started: ${run.started || run.date.slice(0, 10)}\nStarts when: ${tpl.trigger}\nDone means: ${tpl.outcome}\n\n` +
+          tpl.steps.map((st, i) => `[${run.done[i] ? "x" : " "}] ${i + 1}. ${st.task}\n      Role: ${st.role}  |  Due: ${stepDue(run, i)}` +
+            `\n      Evidence required: ${st.evidence}\n      Evidence held: ${(run.notes && run.notes[i]) || "—"}`).join("\n\n") + "\n");
+      }));
     }
-    refreshRuns();
-    main.querySelectorAll("[data-start]").forEach(btn => btn.addEventListener("click", () => {
-      const tpl = VERDA_SEED.workflowTemplates.find(t => t.id === btn.dataset.start);
-      const client = prompt("Client / site for this workflow run (optional):", "") || "";
-      state.workflowRuns.push({ id: uid("run"), templateId: tpl.id, client, done: tpl.steps.map(() => false), date: new Date().toISOString() });
-      save(); refreshRuns();
+
+    /* ---------------- Procedure library ---------------- */
+    function libraryPanel() {
+      panel.innerHTML = areas.map(area => `
+        <h3 class="calc-group">${esc(area)}</h3>
+        ${S.workflowTemplates.filter(w => w.area === area).map(w => `
+          <div class="card">
+            <h4>${esc(w.name)}</h4>
+            <p class="muted small"><strong>Starts when:</strong> ${esc(w.trigger)}</p>
+            <p class="muted small"><strong>Done means:</strong> ${esc(w.outcome)}</p>
+            <details><summary>${w.steps.length} steps · ${w.steps.reduce((a, x) => a + x.days, 0)} days target</summary>
+              <div class="table-scroll"><table class="table">
+                <thead><tr><th class="num">#</th><th>Step</th><th>Role</th><th class="num">Days</th><th>Evidence</th></tr></thead>
+                <tbody>${w.steps.map((st, i) => `<tr><td class="num">${i + 1}</td><td>${esc(st.task)}</td>
+                  <td class="small">${esc(st.role)}</td><td class="num">${st.days}</td>
+                  <td class="small muted">${esc(st.evidence)}</td></tr>`).join("")}</tbody></table></div>
+            </details>
+          </div>`).join("")}`).join("") +
+        `<div class="modal-actions"><button class="btn" id="wf-lib-dl">Download every procedure (.txt)</button></div>`;
+      panel.querySelector("#wf-lib-dl").addEventListener("click", () =>
+        downloadText("Workflow-Procedures.txt", "WORKFLOW PROCEDURES\n\n" + areas.map(a =>
+          `${a.toUpperCase()}\n` + S.workflowTemplates.filter(w => w.area === a).map(w =>
+            `\n  ${w.name}\n      Starts when: ${w.trigger}\n      Done means: ${w.outcome}\n` +
+            w.steps.map((st, i) => `      ${i + 1}. ${st.task}  [${st.role}, ${st.days}d] — ${st.evidence}`).join("\n")).join("\n")).join("\n\n")));
+    }
+
+    const panels = { runs: runsPanel, library: libraryPanel };
+    runsPanel();
+    main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panels[btn.dataset.tab]();
     }));
   }
 

@@ -82,6 +82,7 @@
         { id: "p1", author: "Verda Team", text: "Welcome to the Verda Community — post questions or share compliance tips here.", date: "2026-09-01" }
       ],
       workflowRuns: [],
+      esmpAudit: [],
       incidents: [],
       subcontractors: [],
       equipment: [],          // equipment and machines under an inspection regime
@@ -494,6 +495,11 @@
   function daysUntil(dateStr) {
     if (!dateStr) return null;
     return Math.round((new Date(dateStr) - new Date(today())) / 86400000);
+  }
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + Number(n || 0));
+    return d.toISOString().slice(0, 10);
   }
   function addMonths(dateStr, months) {
     const d = new Date(dateStr);
@@ -2015,37 +2021,241 @@
     return inline ? `<div class="report-doc">${head}${body}</div>` : head + body;
   }
 
-  /* ============================ AUDITS ============================ */
+  /* ============================ AUDITS ============================
+     Beyond the per-sector EHS checklist: management system audits against the
+     Annex SL clauses the standards share, compliance and readiness audits, and
+     the protocols where missing something costs most — tailings, workers'
+     accommodation, contractors.
+
+     A finding is graded, and the grade sets the closure target. An audit that
+     produces findings with no owner and no date is an audit that changed
+     nothing, so raising a corrective action is one click from each finding. */
+
   function renderAudits(main) {
+    const S = VERDA_SEED;
+    const groups = [...new Set(S.auditProtocols.map(p => p.group))];
+
     main.appendChild(h(`
       <section>
-        <h1>Audits</h1>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Audits</h1>
+            <p class="muted">${S.auditProtocols.length} audit protocols plus the ${S.industries.length} sector checklists and your own ESMP commitments.
+              Findings are graded, each grade carries a closure target, and a corrective action can be raised from any finding.</p>
+          </div>
+        </div>
         <div class="tabs">
-          <button class="tab-btn active" data-tab="ehs">Auto EHS Audit</button>
-          <button class="tab-btn" data-tab="esia">ESIA Audit</button>
+          <button class="tab-btn active" data-tab="conduct">Conduct an audit</button>
+          <button class="tab-btn" data-tab="ehs">Sector EHS checklist</button>
+          <button class="tab-btn" data-tab="esia">ESIA / ESMP commitments</button>
+          <button class="tab-btn" data-tab="register">Audit register</button>
+          <button class="tab-btn" data-tab="protocols">Protocol library</button>
         </div>
         <div id="audit-panel"></div>
       </section>
     `));
     const panel = main.querySelector("#audit-panel");
 
+    const GRADE = S.auditFindingCategories;
+    const gradeDays = { "Major non-conformity": 0, "Minor non-conformity": 30, "Observation": 90, "Opportunity for improvement": 180, "Positive practice": null };
+    const gradeStatus = { "Major non-conformity": "critical", "Minor non-conformity": "serious", "Observation": "warning", "Opportunity for improvement": "good", "Positive practice": "good" };
+
+    /* ---------------- Conduct ---------------- */
+    function conductPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <div class="form-row">
+            <label>Protocol<select id="ap-protocol">${groups.map(g =>
+              `<optgroup label="${esc(g)}">${S.auditProtocols.filter(p => p.group === g).map(p =>
+                `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+            <label>Client / site<select id="ap-client">${clientOptions()}</select></label>
+            <label>Auditor<input id="ap-auditor" placeholder="Who is carrying out the audit" /></label>
+            <label>Date<input id="ap-date" type="date" value="${today()}" /></label>
+          </div>
+          <div id="ap-basis" class="guide-box"></div>
+        </div>
+        <div id="ap-items"></div>
+        <div class="card">
+          <div id="ap-score"></div>
+          <div class="modal-actions">
+            <button class="btn btn-primary" id="ap-save">Save audit &amp; raise actions</button>
+            <button class="btn" id="ap-ai">AI findings summary (${S.creditCosts.auditAiSummary} credits)</button>
+          </div>
+        </div>
+        <div id="ap-output"></div>`;
+
+      const answers = {};
+      function proto() { return S.auditProtocols.find(p => p.id === panel.querySelector("#ap-protocol").value); }
+
+      function load() {
+        const p = proto();
+        Object.keys(answers).forEach(k => delete answers[k]);
+        panel.querySelector("#ap-basis").innerHTML =
+          `<p><strong>Scope.</strong> ${esc(p.scope)}</p><p class="small">${esc(p.basis)}</p>`;
+        panel.querySelector("#ap-items").innerHTML = p.sections.map((sec, si) => `
+          <div class="card">
+            <h4>${esc(sec.title)}</h4>
+            ${sec.items.map((item, ii) => {
+              const key = `${si}-${ii}`;
+              return `<div class="audit-item" data-key="${key}">
+                <div class="audit-item-text">${esc(item)}</div>
+                <div class="audit-item-controls">
+                  <select data-af="result" data-key="${key}">
+                    <option value="">— not assessed —</option>
+                    <option>Conforms</option><option>Does not conform</option><option>Partially conforms</option><option>Not applicable</option>
+                  </select>
+                  <select data-af="grade" data-key="${key}" disabled>
+                    <option value="">Grade</option>
+                    ${GRADE.map(g => `<option>${esc(g.category)}</option>`).join("")}
+                  </select>
+                  <input data-af="note" data-key="${key}" placeholder="Evidence seen, or what is missing" />
+                </div>
+              </div>`;
+            }).join("")}
+          </div>`).join("");
+
+        panel.querySelectorAll("[data-af]").forEach(el => el.addEventListener("input", () => {
+          const k = el.dataset.key;
+          answers[k] = answers[k] || {};
+          answers[k][el.dataset.af] = el.value;
+          if (el.dataset.af === "result") {
+            // A grade only means something on something that did not conform.
+            const g = panel.querySelector(`[data-af="grade"][data-key="${k}"]`);
+            const needsGrade = /Does not conform|Partially conforms/.test(el.value);
+            g.disabled = !needsGrade;
+            if (needsGrade && !g.value) g.value = el.value === "Does not conform" ? "Major non-conformity" : "Minor non-conformity";
+            if (!needsGrade) g.value = "";
+            answers[k].grade = g.value;
+          }
+          score();
+        }));
+        score();
+      }
+
+      function collect() {
+        const p = proto();
+        const out = [];
+        p.sections.forEach((sec, si) => sec.items.forEach((item, ii) => {
+          const a = answers[`${si}-${ii}`] || {};
+          out.push({ section: sec.title, item, result: a.result || "", grade: a.grade || "", note: a.note || "" });
+        }));
+        return out;
+      }
+
+      function score() {
+        const rows = collect();
+        const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
+        const conform = assessed.filter(r => r.result === "Conforms").length;
+        const pct = assessed.length ? Math.round((conform / assessed.length) * 100) : null;
+        const byGrade = GRADE.map(g => ({ label: g.category, n: rows.filter(r => r.grade === g.category).length }));
+        panel.querySelector("#ap-score").innerHTML = `
+          <div class="kpi-grid">
+            ${kpiCard("Conformance", pct === null ? "—" : pct + "%", `${conform} of ${assessed.length} assessed`,
+              pct === null ? null : pct >= 90 ? "good" : pct >= 70 ? "warning" : "critical")}
+            ${kpiCard("Items assessed", `${assessed.length} / ${rows.length}`, "Excluding not applicable.")}
+            ${byGrade.filter(g => g.n).map(g => kpiCard(g.label, g.n,
+              gradeDays[g.label] === null ? "Record and replicate." :
+              gradeDays[g.label] === 0 ? "Close immediately." : `Close within ${gradeDays[g.label]} days.`,
+              gradeStatus[g.label])).join("")}
+          </div>`;
+      }
+
+      load();
+      panel.querySelector("#ap-protocol").addEventListener("change", load);
+
+      panel.querySelector("#ap-save").addEventListener("click", () => {
+        const p = proto();
+        const rows = collect();
+        const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
+        if (!assessed.length) { alert("Assess at least one item before saving."); return; }
+        const findings = rows.filter(r => r.grade && r.grade !== "Positive practice");
+        const date = panel.querySelector("#ap-date").value || today();
+        const client = panel.querySelector("#ap-client").value;
+        setCurrentClient(client);
+        const rec = {
+          id: uid("aud"), protocolId: p.id, protocolName: p.name, client,
+          auditor: panel.querySelector("#ap-auditor").value.trim(), date,
+          assessed: assessed.length, total: rows.length,
+          conformance: Math.round((assessed.filter(r => r.result === "Conforms").length / assessed.length) * 100),
+          rows
+        };
+        state.audits.push(rec);
+        // Each finding becomes a corrective action with the grade's own closure
+        // target as its due date — a finding without an owner and a date is an
+        // audit that changed nothing.
+        let raised = 0;
+        findings.forEach(f => {
+          const days = gradeDays[f.grade];
+          state.actions.push({
+            id: uid("act"), title: `${f.grade}: ${f.item}`,
+            source: "Audit finding", client, owner: "",
+            due: addDays(date, days === null ? 90 : days || 0),
+            priority: f.grade === "Major non-conformity" ? "High" : f.grade === "Minor non-conformity" ? "Medium" : "Low",
+            status: "Open", notes: f.note || ""
+          });
+          raised++;
+        });
+        save(); 
+        panel.querySelector("#ap-output").innerHTML = card("Audit saved", `
+          <p>${esc(p.name)} at ${esc(client)} — ${rec.conformance}% conformance across ${rec.assessed} assessed items.</p>
+          <p class="muted small">${raised} corrective action${raised === 1 ? "" : "s"} raised in <a href="#/actions">Actions (CAPA)</a>,
+            each dated from its grade's closure target. Assign owners there.</p>
+          <div class="modal-actions"><button class="btn" id="ap-dl">Download audit report</button></div>`);
+        panel.querySelector("#ap-dl").addEventListener("click", () => downloadAudit(rec));
+      });
+
+      panel.querySelector("#ap-ai").addEventListener("click", () => {
+        const p = proto();
+        const rows = collect().filter(r => r.result);
+        if (!rows.length) { alert("Assess at least one item first."); return; }
+        if (!spendCredits(S.creditCosts.auditAiSummary, "Audit findings summary")) return;
+        const text = VerdaAI.generateAuditSummary({
+          industry: p.name,
+          findings: rows.map(r => ({ item: r.item, status: r.result === "Conforms" ? "Compliant" : r.result === "Not applicable" ? "N/A" : "Non-Compliant", note: r.note }))
+        });
+        panel.querySelector("#ap-output").innerHTML = card("Findings summary", `<pre class="report-pre">${esc(text)}</pre>
+          <div class="modal-actions"><button class="btn btn-primary" id="ap-ai-dl">Download .txt</button></div>`);
+        panel.querySelector("#ap-ai-dl").addEventListener("click", () =>
+          downloadText(`Audit-Summary-${p.name.replace(/[^\w]+/g, "_")}.txt`, text));
+        renderTopbar();
+      });
+    }
+
+    function downloadAudit(rec) {
+      const findings = rec.rows.filter(r => r.grade);
+      downloadText(`Audit-${rec.protocolName.replace(/[^\w]+/g, "_")}-${rec.date}.txt`,
+        `${rec.protocolName.toUpperCase()}\nClient / site: ${rec.client}\nAuditor: ${rec.auditor || "—"}\nDate: ${rec.date}\n` +
+        `Conformance: ${rec.conformance}% (${rec.assessed} of ${rec.total} items assessed)\n` +
+        `-----------------------------------------------------------------------\n\n` +
+        (findings.length ? `FINDINGS\n` + findings.map(f =>
+          `  [${f.grade}] ${f.item}\n      Section: ${f.section}\n      Result: ${f.result}\n      Note: ${f.note || "—"}` +
+          `\n      Closure target: ${gradeDays[f.grade] === null ? "—" : gradeDays[f.grade] === 0 ? "immediate" : gradeDays[f.grade] + " days"}`
+        ).join("\n\n") : "No graded findings recorded.\n") +
+        `\n\nFULL RESULT\n` + rec.rows.filter(r => r.result).map(r =>
+          `  [${r.result}] ${r.item}${r.note ? "\n      " + r.note : ""}`).join("\n") + "\n");
+    }
+
+    /* ---------------- Sector EHS checklist (kept) ---------------- */
     function ehsPanel() {
       panel.innerHTML = `
         <div class="card">
-          <label>Industry checklist
-            <select id="audit-industry">${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(g => `<optgroup label="${esc(g)}">${VERDA_SEED.industries.filter(i => i.group === g).map(i => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select>
-          </label>
+          <label>Sector checklist
+            <select id="audit-industry">${[...new Set(S.industries.map(i => i.group))].map(g =>
+              `<optgroup label="${esc(g)}">${S.industries.filter(i => i.group === g).map(i =>
+                `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+          <p class="muted small" id="audit-count"></p>
           <div id="audit-items"></div>
           <div class="modal-actions">
-            <button class="btn btn-primary" id="audit-ai">Generate AI Findings Summary (${VERDA_SEED.creditCosts.auditAiSummary} credits)</button>
+            <button class="btn btn-primary" id="audit-ai">Generate AI findings summary (${S.creditCosts.auditAiSummary} credits)</button>
           </div>
         </div>
         <div id="audit-output"></div>`;
       function loadItems() {
-        const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        const ind = S.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        panel.querySelector("#audit-count").textContent = `${ind.checklist.length} items.`;
         panel.querySelector("#audit-items").innerHTML = ind.checklist.map((item, idx) => `
           <div class="audit-row">
-            <div>${item}</div>
+            <div>${esc(item)}</div>
             <select data-idx="${idx}" class="audit-status">
               <option>Compliant</option><option>Non-Compliant</option><option>N/A</option>
             </select>
@@ -2055,61 +2265,131 @@
       loadItems();
       panel.querySelector("#audit-industry").addEventListener("change", loadItems);
       panel.querySelector("#audit-ai").addEventListener("click", () => {
-        const ind = VERDA_SEED.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
+        const ind = S.industries.find(i => i.id === panel.querySelector("#audit-industry").value);
         const findings = ind.checklist.map((item, idx) => ({
           item, status: panel.querySelectorAll(".audit-status")[idx].value,
           note: panel.querySelectorAll(".audit-note")[idx].value
         }));
-        if (!spendCredits(VERDA_SEED.creditCosts.auditAiSummary, "Auto EHS audit AI summary")) return;
+        if (!spendCredits(S.creditCosts.auditAiSummary, "Auto EHS audit AI summary")) return;
         const text = VerdaAI.generateAuditSummary({ industry: ind.name, findings });
-        state.audits.push({ id: uid("aud"), type: "EHS", industry: ind.name, text, date: new Date().toISOString() });
+        state.audits.push({ id: uid("aud"), protocolName: ind.name + " (sector checklist)", client: currentClient() ? currentClient().name : "",
+          date: today(), assessed: findings.filter(f => f.status !== "N/A").length, total: findings.length,
+          conformance: Math.round((findings.filter(f => f.status === "Compliant").length / Math.max(1, findings.filter(f => f.status !== "N/A").length)) * 100),
+          rows: findings.map(f => ({ section: ind.name, item: f.item, result: f.status, grade: "", note: f.note })) });
         save(); renderTopbar();
-        panel.querySelector("#audit-output").innerHTML = card("Audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
+        panel.querySelector("#audit-output").innerHTML = card("Findings summary", `<pre class="report-pre">${esc(text)}</pre>
           <div class="modal-actions"><button class="btn btn-primary" id="audit-dl">Download .txt</button></div>`);
-        panel.querySelector("#audit-dl").addEventListener("click", () => downloadText(`EHS-Audit-${ind.name.replace(/\s+/g,"_")}.txt`, text));
+        panel.querySelector("#audit-dl").addEventListener("click", () =>
+          downloadText(`Audit-${ind.name.replace(/[^\w]+/g, "_")}.txt`, text));
       });
     }
 
-    function esiaAuditPanel() {
+    /* ---------------- ESIA / ESMP commitments (kept) ---------------- */
+    function esiaPanel() {
       panel.innerHTML = `
         <div class="card">
-          <p class="muted">Audit site performance against ESMP commitments. Add each commitment and its current status.</p>
-          <div id="esia-audit-items"><div class="audit-row"><input class="ea-item" placeholder="ESMP commitment, e.g. 'Quarterly effluent testing'" />
-            <select class="ea-status"><option>Compliant</option><option>Non-Compliant</option><option>N/A</option></select>
-            <input class="ea-note" placeholder="Note (optional)" /></div></div>
-          <button class="btn btn-ghost btn-sm" id="ea-add-row">+ Add commitment</button>
-          <div class="modal-actions">
-            <button class="btn btn-primary" id="ea-ai">Generate AI Findings Summary (${VERDA_SEED.creditCosts.auditAiSummary} credits)</button>
+          <h3>ESIA / ESMP commitment audit</h3>
+          <p class="muted small">Audit against the commitments in your own ESMP. Add each commitment, then judge whether it is being met —
+            a commitment made in an approved ESIA is an enforceable condition, not an aspiration.</p>
+          <div class="form-row">
+            <label>Commitment<input id="esa-item" placeholder="e.g. Dust suppression twice daily on unsealed haul roads" /></label>
+            <label>Source<input id="esa-src" placeholder="ESMP section or permit condition" /></label>
+            <label>Status<select id="esa-status"><option>Met</option><option>Partly met</option><option>Not met</option><option>Not yet due</option></select></label>
+            <button class="btn btn-primary" id="esa-add">Add</button>
           </div>
-        </div>
-        <div id="ea-output"></div>`;
-      panel.querySelector("#ea-add-row").addEventListener("click", () => {
-        panel.querySelector("#esia-audit-items").insertAdjacentHTML("beforeend",
-          `<div class="audit-row"><input class="ea-item" placeholder="ESMP commitment" />
-            <select class="ea-status"><option>Compliant</option><option>Non-Compliant</option><option>N/A</option></select>
-            <input class="ea-note" placeholder="Note (optional)" /></div>`);
-      });
-      panel.querySelector("#ea-ai").addEventListener("click", () => {
-        const items = Array.from(panel.querySelectorAll(".ea-item")).map(i => i.value).filter(Boolean);
-        if (!items.length) { alert("Add at least one ESMP commitment."); return; }
-        const findings = items.map((item, idx) => ({
-          item, status: panel.querySelectorAll(".ea-status")[idx].value, note: panel.querySelectorAll(".ea-note")[idx].value
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Commitment</th><th>Source</th><th>Status</th><th></th></tr></thead>
+            <tbody id="esa-rows"></tbody></table></div>
+        </div>`;
+      state.esmpAudit = state.esmpAudit || [];
+      const ST = { "Met": "good", "Partly met": "warning", "Not met": "critical", "Not yet due": "warning" };
+      function refresh() {
+        panel.querySelector("#esa-rows").innerHTML = state.esmpAudit.map(x =>
+          `<tr><td>${esc(x.item)}</td><td class="small">${esc(x.src || "—")}</td>
+            <td>${statusBadge(x.status, ST[x.status])}</td>
+            <td class="row-actions"><button class="btn btn-ghost btn-sm" data-esa-del="${esc(x.id)}">Remove</button></td></tr>`).join("") ||
+          emptyState("wildlife", "No commitments recorded. Take them from the approved ESMP — each one is a condition someone can be held to.", 4);
+        panel.querySelectorAll("[data-esa-del]").forEach(b => b.addEventListener("click", () => {
+          state.esmpAudit = state.esmpAudit.filter(x => x.id !== b.dataset.esaDel); save(); refresh();
         }));
-        if (!spendCredits(VERDA_SEED.creditCosts.auditAiSummary, "ESIA audit AI summary")) return;
-        const text = VerdaAI.generateAuditSummary({ industry: "ESMP Commitments", findings });
-        state.audits.push({ id: uid("aud"), type: "ESIA", industry: "ESMP", text, date: new Date().toISOString() });
-        save(); renderTopbar();
-        panel.querySelector("#ea-output").innerHTML = card("ESIA audit findings (AI-assisted)", `<pre class="report-pre">${esc(text)}</pre>
-          <div class="modal-actions"><button class="btn btn-primary" id="ea-dl">Download .txt</button></div>`);
-        panel.querySelector("#ea-dl").addEventListener("click", () => downloadText("ESIA-Audit.txt", text));
+      }
+      refresh();
+      panel.querySelector("#esa-add").addEventListener("click", () => {
+        const item = panel.querySelector("#esa-item").value.trim();
+        if (!item) { alert("Enter the commitment."); return; }
+        state.esmpAudit.push({ id: uid("esa"), item, src: panel.querySelector("#esa-src").value.trim(), status: panel.querySelector("#esa-status").value });
+        save(); refresh();
+        panel.querySelector("#esa-item").value = ""; panel.querySelector("#esa-src").value = "";
       });
     }
 
-    ehsPanel();
+    /* ---------------- Register ---------------- */
+    function registerPanel() {
+      const audits = state.audits.slice().reverse();
+      const gradeRows = GRADE.map(g => ({
+        label: g.category.replace(" non-conformity", ""),
+        values: { n: state.audits.reduce((a, x) => a + (x.rows || []).filter(r => r.grade === g.category).length, 0) },
+        color: `var(--chart-${gradeStatus[g.category]})`
+      })).filter(r => r.values.n);
+      panel.innerHTML = `
+        <div class="grid grid-3">
+          ${statCard("audits", "Audits completed", state.audits.length, "All protocols.")}
+          ${statCard("risk", "Open findings", state.actions.filter(a => a.source === "Audit finding" && a.status !== "Closed").length, "Raised from audits, not yet closed.", true)}
+          ${statCard("analytics", "Average conformance", state.audits.length
+            ? Math.round(state.audits.reduce((a, x) => a + (x.conformance || 0), 0) / state.audits.length) + "%" : "—", "Across every audit recorded.")}
+        </div>
+        ${gradeRows.length ? `<div class="card">${groupedBarChart(gradeRows, [{ key: "n", label: "Findings" }], "Findings by grade", "Findings")}</div>` : ""}
+        <div class="card">
+          <h3>Audit register</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Date</th><th>Protocol</th><th>Client / site</th><th>Auditor</th><th class="num">Assessed</th><th class="num">Conformance</th><th></th></tr></thead>
+            <tbody>${audits.map(a => `<tr>
+              <td>${esc(a.date)}</td><td>${esc(a.protocolName)}</td><td>${esc(a.client || "—")}</td>
+              <td class="small">${esc(a.auditor || "—")}</td><td class="num">${a.assessed}/${a.total}</td>
+              <td class="num">${a.conformance}%</td>
+              <td class="row-actions"><button class="btn btn-ghost btn-sm" data-aud-dl="${esc(a.id)}">Report</button></td></tr>`).join("") ||
+              emptyState("audit", "No audits recorded yet. Pick a protocol on the first tab and work through it — findings become corrective actions automatically.", 7)}
+            </tbody></table></div>
+        </div>`;
+      panel.querySelectorAll("[data-aud-dl]").forEach(b => b.addEventListener("click", () =>
+        downloadAudit(state.audits.find(x => x.id === b.dataset.audDl))));
+    }
+
+    /* ---------------- Protocol library ---------------- */
+    function protocolsPanel() {
+      panel.innerHTML = groups.map(g => `
+        <h3 class="calc-group">${esc(g)}</h3>
+        ${S.auditProtocols.filter(p => p.group === g).map(p => `
+          <div class="card">
+            <h4>${esc(p.name)}</h4>
+            <p class="muted small"><strong>Scope.</strong> ${esc(p.scope)}</p>
+            <p class="muted small">${esc(p.basis)}</p>
+            <details><summary>${p.sections.length} sections · ${p.sections.reduce((a, s) => a + s.items.length, 0)} items</summary>
+              ${p.sections.map(sec => `<h5>${esc(sec.title)}</h5>
+                <ul class="checklist">${sec.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`).join("")}
+            </details>
+          </div>`).join("")}`).join("") +
+        `<div class="card">
+          <h3>Finding grades and closure targets</h3>
+          <div class="table-scroll"><table class="table">
+            <thead><tr><th>Grade</th><th>What it means</th><th>Closure target</th></tr></thead>
+            <tbody>${GRADE.map(g => `<tr><td>${statusBadge(g.category, gradeStatus[g.category])}</td>
+              <td class="small">${esc(g.meaning)}</td><td>${esc(g.target)}</td></tr>`).join("")}</tbody></table></div>
+          <p class="muted small">A corrective action is raised from every finding with the grade's target as its due date.</p>
+        </div>
+        <div class="modal-actions"><button class="btn" id="ap-lib-dl">Download every protocol (.txt)</button></div>`;
+      panel.querySelector("#ap-lib-dl").addEventListener("click", () =>
+        downloadText("Audit-Protocols.txt", "AUDIT PROTOCOLS\n\n" + S.auditProtocols.map(p =>
+          `${p.name.toUpperCase()}  [${p.group}]\n  Scope: ${p.scope}\n  Basis: ${p.basis}\n` +
+          p.sections.map(sec => `\n  ${sec.title}\n` + sec.items.map(i => `    [ ] ${i}`).join("\n")).join("")).join("\n\n")));
+    }
+
+    const panels = { conduct: conductPanel, ehs: ehsPanel, esia: esiaPanel, register: registerPanel, protocols: protocolsPanel };
+    conductPanel();
     main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
       main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      btn.dataset.tab === "ehs" ? ehsPanel() : esiaAuditPanel();
+      panels[btn.dataset.tab]();
     }));
   }
 
@@ -2827,46 +3107,207 @@
     });
   }
 
-  /* ============================ WORKFLOWS ============================ */
+  /* ============================ WORKFLOWS ============================
+     A template is a procedure, not a checklist: it states what starts it,
+     what "done" means, and for each step who does it, within how many days,
+     and what evidence closes it. A run computes each step's due date from the
+     start date and the step's own SLA — so a procedure that has stalled shows
+     as stalled, which a row of unticked boxes does not. */
+
   function renderWorkflows(main) {
+    const S = VERDA_SEED;
+    const areas = [...new Set(S.workflowTemplates.map(w => w.area))];
+
     main.appendChild(h(`
       <section>
-        <h1>Workflows</h1>
-        <p class="muted">Predefined workflows for HR, Environment, and Safety Administration — map each step to your applicable national OSH/Environment Act obligations.</p>
-        <div class="grid grid-3" id="wf-templates">
-          ${VERDA_SEED.workflowTemplates.map(w => `
-            <div class="card">
-              <h3>${w.name}</h3>
-              <p class="muted small">${w.area}</p>
-              <button class="btn btn-primary" data-start="${w.id}">Start a run</button>
-            </div>`).join("")}
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Workflows</h1>
+            <p class="muted">${S.workflowTemplates.length} procedures across ${areas.length} areas, ${S.workflowTemplates.reduce((a, w) => a + w.steps.length, 0)} steps in total.
+              Each step carries the role that owns it, the days it should take, and the evidence that closes it.
+              Start a run and Verda works out when each step is due.</p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Active workflow runs</h3>
-          <div id="wf-runs"></div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="runs">Active runs</button>
+          <button class="tab-btn" data-tab="library">Procedure library</button>
         </div>
+        <div id="wf-panel"></div>
       </section>
     `));
-    function refreshRuns() {
-      main.querySelector("#wf-runs").innerHTML = state.workflowRuns.slice().reverse().map(run => {
-        const tpl = VERDA_SEED.workflowTemplates.find(t => t.id === run.templateId);
-        return `<div class="wf-run">
-          <strong>${esc(tpl.name)}</strong> — ${esc(run.client) || "Unassigned"} <span class="muted small">${run.date.slice(0,10)}</span>
-          ${tpl.steps.map((s, i) => `<label class="seg-toggle"><input type="checkbox" class="wf-step" data-run="${run.id}" data-idx="${i}" ${run.done[i] ? "checked" : ""}/> ${s}</label>`).join("")}
+    const panel = main.querySelector("#wf-panel");
+
+    const stepDue = (run, i) => {
+      let days = 0;
+      const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+      for (let k = 0; k <= i; k++) days += Number(tpl.steps[k].days) || 0;
+      return addDays(run.started || run.date.slice(0, 10), days);
+    };
+
+    /* ---------------- Active runs ---------------- */
+    function runsPanel() {
+      const runs = state.workflowRuns.slice().reverse();
+      const openRuns = runs.filter(r => !r.closed);
+      let overdueTotal = 0, dueSoon = 0;
+      openRuns.forEach(r => {
+        const tpl = S.workflowTemplates.find(t => t.id === r.templateId);
+        if (!tpl) return;
+        tpl.steps.forEach((st, i) => {
+          if (r.done[i]) return;
+          const d = daysUntil(stepDue(r, i));
+          if (d < 0) overdueTotal++; else if (d <= 3) dueSoon++;
+        });
+      });
+
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Start a run</h3>
+          <div class="form-row">
+            <label>Procedure<select id="wf-start-tpl">${areas.map(a =>
+              `<optgroup label="${esc(a)}">${S.workflowTemplates.filter(w => w.area === a).map(w =>
+                `<option value="${esc(w.id)}">${esc(w.name)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+            <label>Client / site<select id="wf-start-client">${clientOptions()}</select></label>
+            <label>Reference<input id="wf-start-ref" placeholder="What this run is about" /></label>
+            <label>Start date<input id="wf-start-date" type="date" value="${today()}" /></label>
+            <button class="btn btn-primary" id="wf-start">Start</button>
+          </div>
+          <div id="wf-start-preview" class="guide-box"></div>
+        </div>
+
+        <div class="grid grid-3">
+          ${statCard("workflows", "Open runs", openRuns.length, `${runs.length - openRuns.length} closed.`)}
+          ${statCard("risk", "Overdue steps", overdueTotal, overdueTotal ? "A procedure that has stalled." : "Nothing overdue.", overdueTotal > 0)}
+          ${statCard("actions", "Due within 3 days", dueSoon, "Coming up.", dueSoon > 0)}
+        </div>
+
+        <div id="wf-runs"></div>`;
+
+      function preview() {
+        const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        panel.querySelector("#wf-start-preview").innerHTML = `
+          <p><strong>Starts when:</strong> ${esc(tpl.trigger)}</p>
+          <p><strong>Done means:</strong> ${esc(tpl.outcome)}</p>
+          <p class="small muted">${tpl.steps.length} steps · target completion
+            ${tpl.steps.reduce((a, x) => a + (Number(x.days) || 0), 0)} days from start.</p>`;
+      }
+      preview();
+      panel.querySelector("#wf-start-tpl").addEventListener("change", preview);
+
+      panel.querySelector("#wf-start").addEventListener("click", () => {
+        const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        setCurrentClient(panel.querySelector("#wf-start-client").value);
+        state.workflowRuns.push({
+          id: uid("run"), templateId: tpl.id,
+          client: panel.querySelector("#wf-start-client").value,
+          ref: panel.querySelector("#wf-start-ref").value.trim(),
+          started: panel.querySelector("#wf-start-date").value || today(),
+          done: tpl.steps.map(() => false), notes: tpl.steps.map(() => ""),
+          date: new Date().toISOString()
+        });
+        save(); runsPanel();
+      });
+
+      const box = panel.querySelector("#wf-runs");
+      box.innerHTML = runs.map(run => {
+        const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+        if (!tpl) return "";
+        const doneCount = run.done.filter(Boolean).length;
+        const pct = Math.round((doneCount / tpl.steps.length) * 100);
+        const overdue = tpl.steps.some((st, i) => !run.done[i] && daysUntil(stepDue(run, i)) < 0);
+        return `<div class="card wf-run">
+          <div class="wf-run-head">
+            <div>
+              <h3>${esc(tpl.name)}</h3>
+              <p class="muted small">${esc(run.client || "Unassigned")}${run.ref ? " · " + esc(run.ref) : ""} · started ${esc(run.started || run.date.slice(0, 10))}</p>
+            </div>
+            <div class="wf-run-meta">
+              ${statusBadge(run.closed ? "Closed" : overdue ? "Overdue" : pct === 100 ? "Complete" : `${pct}%`,
+                run.closed ? "good" : overdue ? "critical" : pct === 100 ? "good" : "warning")}
+              <button class="btn btn-ghost btn-sm" data-wf-del="${esc(run.id)}">Remove</button>
+            </div>
+          </div>
+          <div class="wf-bar"><span style="width:${pct}%"></span></div>
+          <div class="table-scroll"><table class="table wf-steps">
+            <thead><tr><th></th><th>Step</th><th>Role</th><th>Due</th><th>Evidence required</th><th>Evidence reference</th></tr></thead>
+            <tbody>${tpl.steps.map((st, i) => {
+              const due = stepDue(run, i), left = daysUntil(due), late = !run.done[i] && left < 0;
+              return `<tr${late ? ' class="row-overdue"' : ""}>
+                <td><input type="checkbox" class="wf-step" data-run="${esc(run.id)}" data-idx="${i}" ${run.done[i] ? "checked" : ""} /></td>
+                <td>${esc(st.task)}</td>
+                <td class="small">${esc(st.role)}</td>
+                <td class="small">${esc(due)}${run.done[i] ? "" : ` <span class="muted">(${left < 0 ? Math.abs(left) + "d late" : left + "d"})</span>`}</td>
+                <td class="small muted">${esc(st.evidence)}</td>
+                <td><input class="wf-note" data-run="${esc(run.id)}" data-idx="${i}" value="${esc(run.notes ? run.notes[i] || "" : "")}" placeholder="Record or file reference" /></td>
+              </tr>`;
+            }).join("")}</tbody></table></div>
+          <div class="modal-actions">
+            <button class="btn btn-ghost btn-sm" data-wf-dl="${esc(run.id)}">Download run record</button>
+            ${pct === 100 && !run.closed ? `<button class="btn btn-primary btn-sm" data-wf-close="${esc(run.id)}">Close this run</button>` : ""}
+          </div>
         </div>`;
-      }).join("") || `<p class="muted">No workflow runs yet — start one above.</p>`;
-      main.querySelectorAll(".wf-step").forEach(cb => cb.addEventListener("change", () => {
+      }).join("") || `<div class="card">${emptyState("workflows", "No runs yet. Start one above — Verda works out when each step falls due from the procedure's own timings.")}</div>`;
+
+      box.querySelectorAll(".wf-step").forEach(cb => cb.addEventListener("change", () => {
         const run = state.workflowRuns.find(r => r.id === cb.dataset.run);
-        run.done[parseInt(cb.dataset.idx, 10)] = cb.checked;
+        run.done[Number(cb.dataset.idx)] = cb.checked;
+        save(); runsPanel();
+      }));
+      box.querySelectorAll(".wf-note").forEach(inp => inp.addEventListener("input", () => {
+        const run = state.workflowRuns.find(r => r.id === inp.dataset.run);
+        if (!run.notes) run.notes = [];
+        run.notes[Number(inp.dataset.idx)] = inp.value;
         save();
       }));
+      box.querySelectorAll("[data-wf-del]").forEach(b => b.addEventListener("click", () => {
+        state.workflowRuns = state.workflowRuns.filter(r => r.id !== b.dataset.wfDel);
+        save(); runsPanel();
+      }));
+      box.querySelectorAll("[data-wf-close]").forEach(b => b.addEventListener("click", () => {
+        state.workflowRuns.find(r => r.id === b.dataset.wfClose).closed = today();
+        save(); runsPanel();
+      }));
+      box.querySelectorAll("[data-wf-dl]").forEach(b => b.addEventListener("click", () => {
+        const run = state.workflowRuns.find(r => r.id === b.dataset.wfDl);
+        const tpl = S.workflowTemplates.find(t => t.id === run.templateId);
+        downloadText(`Workflow-${tpl.name.replace(/[^\w]+/g, "_")}.txt`,
+          `${tpl.name.toUpperCase()}\nClient / site: ${run.client || "—"}${run.ref ? "\nReference: " + run.ref : ""}\n` +
+          `Started: ${run.started || run.date.slice(0, 10)}\nStarts when: ${tpl.trigger}\nDone means: ${tpl.outcome}\n\n` +
+          tpl.steps.map((st, i) => `[${run.done[i] ? "x" : " "}] ${i + 1}. ${st.task}\n      Role: ${st.role}  |  Due: ${stepDue(run, i)}` +
+            `\n      Evidence required: ${st.evidence}\n      Evidence held: ${(run.notes && run.notes[i]) || "—"}`).join("\n\n") + "\n");
+      }));
     }
-    refreshRuns();
-    main.querySelectorAll("[data-start]").forEach(btn => btn.addEventListener("click", () => {
-      const tpl = VERDA_SEED.workflowTemplates.find(t => t.id === btn.dataset.start);
-      const client = prompt("Client / site for this workflow run (optional):", "") || "";
-      state.workflowRuns.push({ id: uid("run"), templateId: tpl.id, client, done: tpl.steps.map(() => false), date: new Date().toISOString() });
-      save(); refreshRuns();
+
+    /* ---------------- Procedure library ---------------- */
+    function libraryPanel() {
+      panel.innerHTML = areas.map(area => `
+        <h3 class="calc-group">${esc(area)}</h3>
+        ${S.workflowTemplates.filter(w => w.area === area).map(w => `
+          <div class="card">
+            <h4>${esc(w.name)}</h4>
+            <p class="muted small"><strong>Starts when:</strong> ${esc(w.trigger)}</p>
+            <p class="muted small"><strong>Done means:</strong> ${esc(w.outcome)}</p>
+            <details><summary>${w.steps.length} steps · ${w.steps.reduce((a, x) => a + x.days, 0)} days target</summary>
+              <div class="table-scroll"><table class="table">
+                <thead><tr><th class="num">#</th><th>Step</th><th>Role</th><th class="num">Days</th><th>Evidence</th></tr></thead>
+                <tbody>${w.steps.map((st, i) => `<tr><td class="num">${i + 1}</td><td>${esc(st.task)}</td>
+                  <td class="small">${esc(st.role)}</td><td class="num">${st.days}</td>
+                  <td class="small muted">${esc(st.evidence)}</td></tr>`).join("")}</tbody></table></div>
+            </details>
+          </div>`).join("")}`).join("") +
+        `<div class="modal-actions"><button class="btn" id="wf-lib-dl">Download every procedure (.txt)</button></div>`;
+      panel.querySelector("#wf-lib-dl").addEventListener("click", () =>
+        downloadText("Workflow-Procedures.txt", "WORKFLOW PROCEDURES\n\n" + areas.map(a =>
+          `${a.toUpperCase()}\n` + S.workflowTemplates.filter(w => w.area === a).map(w =>
+            `\n  ${w.name}\n      Starts when: ${w.trigger}\n      Done means: ${w.outcome}\n` +
+            w.steps.map((st, i) => `      ${i + 1}. ${st.task}  [${st.role}, ${st.days}d] — ${st.evidence}`).join("\n")).join("\n")).join("\n\n")));
+    }
+
+    const panels = { runs: runsPanel, library: libraryPanel };
+    runsPanel();
+    main.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      panels[btn.dataset.tab]();
     }));
   }
 

@@ -2208,14 +2208,1160 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   ],
 
   // ---- Workflow templates ---------------------------------------------------
+  // ---- Workflows -----------------------------------------------------------
+  // Each template is a real procedure: what starts it, what "done" means, and
+  // step by step who does it, within how many days, and what evidence closes
+  // the step. A run computes each step's due date from the start date and the
+  // step's own SLA, so a stalled procedure is visible rather than assumed.
   workflowTemplates: [
-    { id: "hr", name: "HR Compliance Workflow", area: "HR",
-      steps: ["New-hire EHS induction completed", "PPE issued and sign-off recorded", "Contractor EHS pre-qualification checked", "Training records updated in file", "Medical/fitness-to-work record on file"] },
-    { id: "env", name: "Environmental Management Workflow", area: "Environment",
-      steps: ["Incident/spill response steps followed", "Permit renewal tracked against expiry date", "Waste transfer manifests reconciled", "Effluent/air monitoring results logged", "Corrective actions closed out"] },
-    { id: "safety", name: "Safety Administration Workflow", area: "Safety Admin",
-      steps: ["Incident investigated and root cause recorded", "Near-miss logged and closed out", "Safety committee meeting held and minuted", "Corrective/preventive actions tracked to closure", "Statutory reporting obligations checked"] }
+    {
+      "id": "hr-onboard",
+      "name": "New worker onboarding",
+      "area": "People & HR",
+      "trigger": "A worker is offered a role, before first shift",
+      "outcome": "The worker is cleared to start and every record exists to prove it",
+      "steps": [
+        {
+          "task": "Right to work and age verification completed",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Copy of ID; age verification record"
+        },
+        {
+          "task": "Contract issued in a language the worker reads",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Signed contract"
+        },
+        {
+          "task": "Pre-placement medical / fitness to work",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Fitness certificate"
+        },
+        {
+          "task": "General EHS induction delivered",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Signed induction register"
+        },
+        {
+          "task": "Site-specific induction and area walk",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Induction record"
+        },
+        {
+          "task": "Task risk assessment briefed to the worker",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Signed briefing record"
+        },
+        {
+          "task": "PPE issued against the task hazard assessment",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "PPE issue record with signature"
+        },
+        {
+          "task": "Competence verified for the tasks assigned",
+          "role": "Supervisor",
+          "days": 5,
+          "evidence": "Competence assessment"
+        },
+        {
+          "task": "Added to the training matrix and emergency roll",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Training matrix entry"
+        },
+        {
+          "task": "Grievance mechanism and code of conduct explained",
+          "role": "HR officer",
+          "days": 1,
+          "evidence": "Acknowledgement signed"
+        }
+      ]
+    },
+    {
+      "id": "hr-exit",
+      "name": "Worker separation",
+      "area": "People & HR",
+      "trigger": "A worker resigns, is released or the contract ends",
+      "outcome": "Nothing is outstanding to the worker and nothing of the company's leaves with them",
+      "steps": [
+        {
+          "task": "Exit interview conducted",
+          "role": "HR officer",
+          "days": 3,
+          "evidence": "Exit interview record"
+        },
+        {
+          "task": "Exit medical where exposure warrants it",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Exit medical record"
+        },
+        {
+          "task": "PPE, tools and access cards returned",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "Return record"
+        },
+        {
+          "task": "Final dues, leave and benefits settled",
+          "role": "Finance",
+          "days": 7,
+          "evidence": "Payment record"
+        },
+        {
+          "task": "Removed from access control, roll call and training matrix",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "System record"
+        },
+        {
+          "task": "Health surveillance record archived for the retention period",
+          "role": "Occupational health",
+          "days": 5,
+          "evidence": "Archive reference"
+        }
+      ]
+    },
+    {
+      "id": "hr-grievance",
+      "name": "Worker grievance",
+      "area": "People & HR",
+      "trigger": "A worker raises a grievance through any channel",
+      "outcome": "The grievance is resolved or escalated, and the worker knows the outcome",
+      "steps": [
+        {
+          "task": "Grievance logged and acknowledged to the worker",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Grievance register entry"
+        },
+        {
+          "task": "Confidentiality and no-retaliation confirmed in writing",
+          "role": "HR officer",
+          "days": 2,
+          "evidence": "Written confirmation"
+        },
+        {
+          "task": "Investigation assigned to someone not involved",
+          "role": "HR manager",
+          "days": 3,
+          "evidence": "Assignment record"
+        },
+        {
+          "task": "Investigation completed and findings recorded",
+          "role": "Investigator",
+          "days": 14,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Outcome communicated to the worker",
+          "role": "HR manager",
+          "days": 3,
+          "evidence": "Communication record"
+        },
+        {
+          "task": "Corrective action raised where a system failure is found",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA reference"
+        },
+        {
+          "task": "Closure recorded with the worker's acknowledgement",
+          "role": "HR officer",
+          "days": 5,
+          "evidence": "Signed closure"
+        }
+      ]
+    },
+    {
+      "id": "env-monitoring",
+      "name": "Periodic environmental monitoring",
+      "area": "Environment",
+      "trigger": "The monitoring plan falls due for the period",
+      "outcome": "Results are in, compared against limits, and any exceedance has an action",
+      "steps": [
+        {
+          "task": "Confirm parameters, points and frequency against the permit",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Monitoring plan extract"
+        },
+        {
+          "task": "Book the accredited laboratory and confirm the method",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Laboratory booking"
+        },
+        {
+          "task": "Verify sampling equipment calibration is in date",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Calibration certificate"
+        },
+        {
+          "task": "Collect samples with chain of custody",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Chain of custody form"
+        },
+        {
+          "task": "Receive and check results against the permit limit",
+          "role": "Environmental officer",
+          "days": 10,
+          "evidence": "Laboratory report"
+        },
+        {
+          "task": "Investigate any exceedance to root cause",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Investigation note"
+        },
+        {
+          "task": "Raise corrective action for each exceedance",
+          "role": "Environmental officer",
+          "days": 3,
+          "evidence": "CAPA reference"
+        },
+        {
+          "task": "Report results in the periodic report and to the regulator if required",
+          "role": "Environmental officer",
+          "days": 10,
+          "evidence": "Submitted report"
+        }
+      ]
+    },
+    {
+      "id": "env-waste",
+      "name": "Waste transfer",
+      "area": "Environment",
+      "trigger": "Waste is ready to leave site",
+      "outcome": "The waste has left legally and the paper trail proves it",
+      "steps": [
+        {
+          "task": "Waste characterised and classified",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Classification record"
+        },
+        {
+          "task": "Verify the carrier's licence is current and covers this waste",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Copy of licence"
+        },
+        {
+          "task": "Verify the receiving facility is licensed for this stream",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Copy of facility licence"
+        },
+        {
+          "task": "Weigh or measure and record the quantity",
+          "role": "Stores",
+          "days": 1,
+          "evidence": "Weighbridge ticket"
+        },
+        {
+          "task": "Waste transfer note issued and signed by both parties",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Signed transfer note"
+        },
+        {
+          "task": "Confirm receipt at the disposal facility",
+          "role": "Environmental officer",
+          "days": 7,
+          "evidence": "Receipt confirmation"
+        },
+        {
+          "task": "Register updated with quantity and running total",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Waste register entry"
+        }
+      ]
+    },
+    {
+      "id": "env-spill",
+      "name": "Spill or release response",
+      "area": "Environment",
+      "trigger": "A spill or uncontrolled release occurs",
+      "outcome": "The release is contained, cleaned, reported and prevented from recurring",
+      "steps": [
+        {
+          "task": "Stop the source and make the area safe",
+          "role": "Site supervisor",
+          "days": 1,
+          "evidence": "Initial report"
+        },
+        {
+          "task": "Contain with spill kit or bunding",
+          "role": "Emergency responder",
+          "days": 1,
+          "evidence": "Photographs"
+        },
+        {
+          "task": "Estimate quantity and affected area",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Estimate record"
+        },
+        {
+          "task": "Notify the regulator where the threshold requires it",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Notification copy"
+        },
+        {
+          "task": "Recover and dispose of contaminated material through a licensed route",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Waste transfer note"
+        },
+        {
+          "task": "Sample soil or water where contamination is credible",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Laboratory report"
+        },
+        {
+          "task": "Investigate to root cause",
+          "role": "EHS manager",
+          "days": 7,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Corrective action raised and tracked to closure",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "CAPA reference"
+        }
+      ]
+    },
+    {
+      "id": "env-clearance",
+      "name": "Vegetation clearance approval",
+      "area": "Environment",
+      "trigger": "An area is proposed for clearance",
+      "outcome": "Clearance is approved, supervised and within the permitted footprint",
+      "steps": [
+        {
+          "task": "Confirm the area sits inside the approved project footprint",
+          "role": "Environmental officer",
+          "days": 2,
+          "evidence": "Footprint drawing with coordinates"
+        },
+        {
+          "task": "Screen against wetland, protected area and riparian layers",
+          "role": "Environmental officer",
+          "days": 3,
+          "evidence": "Screening record"
+        },
+        {
+          "task": "Pre-clearance biodiversity and chance-finds survey",
+          "role": "Ecologist",
+          "days": 10,
+          "evidence": "Survey report"
+        },
+        {
+          "task": "Mark exclusion zones and no-go areas on the ground",
+          "role": "Survey team",
+          "days": 2,
+          "evidence": "Photographs and coordinates"
+        },
+        {
+          "task": "Brief the clearance crew on limits and chance-finds procedure",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Signed briefing"
+        },
+        {
+          "task": "Supervise clearance and record area cleared",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Daily record"
+        },
+        {
+          "task": "Salvage topsoil for reinstatement",
+          "role": "Earthworks supervisor",
+          "days": 2,
+          "evidence": "Stockpile record"
+        }
+      ]
+    },
+    {
+      "id": "saf-incident",
+      "name": "Incident investigation",
+      "area": "Safety",
+      "trigger": "An incident or high-potential near-miss is reported",
+      "outcome": "Root cause is understood and the actions that prevent recurrence are closed",
+      "steps": [
+        {
+          "task": "Make the area safe and preserve the scene",
+          "role": "Site supervisor",
+          "days": 1,
+          "evidence": "Initial notification"
+        },
+        {
+          "task": "Notify management and, where required, the regulator",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Notification copy"
+        },
+        {
+          "task": "Classify the injury and record days lost",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Incident register entry"
+        },
+        {
+          "task": "Collect evidence: photographs, statements, records",
+          "role": "Investigator",
+          "days": 3,
+          "evidence": "Evidence pack"
+        },
+        {
+          "task": "Investigate to immediate and underlying cause",
+          "role": "Investigator",
+          "days": 14,
+          "evidence": "Investigation report"
+        },
+        {
+          "task": "Agree corrective actions with owners and dates",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Share the lesson learned across the site",
+          "role": "EHS officer",
+          "days": 7,
+          "evidence": "Toolbox talk record"
+        },
+        {
+          "task": "Verify actions are effective, not just closed",
+          "role": "EHS manager",
+          "days": 60,
+          "evidence": "Verification note"
+        }
+      ]
+    },
+    {
+      "id": "saf-ptw",
+      "name": "Permit to work",
+      "area": "Safety",
+      "trigger": "High-risk work is planned",
+      "outcome": "The work is done under the controls the permit exists to guarantee",
+      "steps": [
+        {
+          "task": "Identify the permit types the task needs",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Permit application"
+        },
+        {
+          "task": "Task risk assessment and method statement approved",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Approved RAMS"
+        },
+        {
+          "task": "Isolations applied, locked and proved dead or zero-energy",
+          "role": "Authorised person",
+          "days": 1,
+          "evidence": "Isolation certificate"
+        },
+        {
+          "task": "Gas test or atmosphere check where required",
+          "role": "Competent tester",
+          "days": 1,
+          "evidence": "Gas test record"
+        },
+        {
+          "task": "Standby, rescue and emergency arrangements in place",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Rescue plan"
+        },
+        {
+          "task": "Permit issued and briefed to every worker on the job",
+          "role": "Permit issuer",
+          "days": 1,
+          "evidence": "Signed permit"
+        },
+        {
+          "task": "Work supervised and conditions re-checked at each break",
+          "role": "Supervisor",
+          "days": 1,
+          "evidence": "Permit continuation"
+        },
+        {
+          "task": "Permit closed, isolations removed, area handed back",
+          "role": "Permit issuer",
+          "days": 1,
+          "evidence": "Signed close-out"
+        }
+      ]
+    },
+    {
+      "id": "saf-inspection",
+      "name": "Planned inspection round",
+      "area": "Safety",
+      "trigger": "The inspection schedule falls due",
+      "outcome": "Findings are raised, owned and closed before the next round",
+      "steps": [
+        {
+          "task": "Confirm scope and the checklist for this round",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Inspection checklist"
+        },
+        {
+          "task": "Conduct the inspection with the area supervisor present",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Completed checklist"
+        },
+        {
+          "task": "Photograph each finding",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Photographs"
+        },
+        {
+          "task": "Grade findings and set closure targets",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Graded finding list"
+        },
+        {
+          "task": "Assign owners and agree dates",
+          "role": "EHS manager",
+          "days": 3,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Verify closure at the next round",
+          "role": "EHS officer",
+          "days": 30,
+          "evidence": "Verification record"
+        }
+      ]
+    },
+    {
+      "id": "saf-moc",
+      "name": "Management of change",
+      "area": "Safety",
+      "trigger": "Plant, process, people or method is to change",
+      "outcome": "The change is assessed and controlled before it happens, not after",
+      "steps": [
+        {
+          "task": "Change described and initiator recorded",
+          "role": "Originator",
+          "days": 1,
+          "evidence": "Change request"
+        },
+        {
+          "task": "Screen whether the change is minor or significant",
+          "role": "EHS manager",
+          "days": 3,
+          "evidence": "Screening record"
+        },
+        {
+          "task": "Risk assessment of the change",
+          "role": "EHS officer",
+          "days": 7,
+          "evidence": "Risk assessment"
+        },
+        {
+          "task": "Technical authority review and approval",
+          "role": "Engineering",
+          "days": 10,
+          "evidence": "Approval signature"
+        },
+        {
+          "task": "Update drawings, procedures and training material",
+          "role": "Document controller",
+          "days": 14,
+          "evidence": "Updated documents"
+        },
+        {
+          "task": "Brief affected workers before the change takes effect",
+          "role": "Supervisor",
+          "days": 3,
+          "evidence": "Briefing record"
+        },
+        {
+          "task": "Post-implementation review",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Review note"
+        }
+      ]
+    },
+    {
+      "id": "saf-emergency",
+      "name": "Emergency drill",
+      "area": "Safety",
+      "trigger": "The drill programme falls due, or a new scenario is identified",
+      "outcome": "The plan is tested, the gaps are known, and the gaps are closed",
+      "steps": [
+        {
+          "task": "Select the scenario and set objectives",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Drill plan"
+        },
+        {
+          "task": "Notify or deliberately do not notify participants",
+          "role": "EHS manager",
+          "days": 2,
+          "evidence": "Drill plan"
+        },
+        {
+          "task": "Involve external responders where the scenario needs them",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Correspondence"
+        },
+        {
+          "task": "Run the drill with observers at each station",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Observer notes"
+        },
+        {
+          "task": "Record times: alarm, assembly, roll call complete",
+          "role": "EHS officer",
+          "days": 1,
+          "evidence": "Timing record"
+        },
+        {
+          "task": "Debrief with participants the same day",
+          "role": "EHS manager",
+          "days": 1,
+          "evidence": "Debrief notes"
+        },
+        {
+          "task": "Raise actions for each gap found",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Update the emergency plan where the drill showed it was wrong",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Revised plan"
+        }
+      ]
+    },
+    {
+      "id": "per-renewal",
+      "name": "Permit renewal",
+      "area": "Permitting & legal",
+      "trigger": "A permit reaches 120 days from expiry",
+      "outcome": "The renewed permit is in hand before the current one lapses",
+      "steps": [
+        {
+          "task": "Confirm the renewal window and documents required",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Authority guidance"
+        },
+        {
+          "task": "Compile supporting documents and monitoring records",
+          "role": "EHS officer",
+          "days": 20,
+          "evidence": "Document pack"
+        },
+        {
+          "task": "Settle any outstanding compliance conditions first",
+          "role": "EHS manager",
+          "days": 30,
+          "evidence": "Evidence of closure"
+        },
+        {
+          "task": "Submit the application and pay the fee",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Submission receipt"
+        },
+        {
+          "task": "Track the application and respond to queries",
+          "role": "EHS officer",
+          "days": 30,
+          "evidence": "Correspondence"
+        },
+        {
+          "task": "Receive the permit and update the register and expiry date",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Permit copy"
+        },
+        {
+          "task": "Brief the site on any changed conditions",
+          "role": "EHS manager",
+          "days": 7,
+          "evidence": "Briefing record"
+        }
+      ]
+    },
+    {
+      "id": "per-legal-update",
+      "name": "Legal register review",
+      "area": "Permitting & legal",
+      "trigger": "The review cycle falls due, or an amendment is published",
+      "outcome": "The register reflects the law as it now stands, and any new duty has an owner",
+      "steps": [
+        {
+          "task": "Check each instrument against the current consolidated text",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Updated register"
+        },
+        {
+          "task": "Identify new or amended duties",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Gap list"
+        },
+        {
+          "task": "Assess what each new duty requires of this site",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Impact note"
+        },
+        {
+          "task": "Assign actions for anything not already in place",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Brief management on material changes",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Management review minute"
+        },
+        {
+          "task": "Record the review date and the next due date",
+          "role": "EHS officer",
+          "days": 2,
+          "evidence": "Register header"
+        }
+      ]
+    },
+    {
+      "id": "con-prequal",
+      "name": "Sub-contractor pre-qualification",
+      "area": "Contractor management",
+      "trigger": "A sub-contractor is proposed for award",
+      "outcome": "The contractor is approved, or approved with conditions that are tracked",
+      "steps": [
+        {
+          "task": "Issue the pre-qualification questionnaire",
+          "role": "Procurement",
+          "days": 3,
+          "evidence": "Issued questionnaire"
+        },
+        {
+          "task": "Verify licences, registration and insurance currency",
+          "role": "Procurement",
+          "days": 7,
+          "evidence": "Certificate copies"
+        },
+        {
+          "task": "Review three-year injury and enforcement history",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Disclosed history"
+        },
+        {
+          "task": "Review method statements and risk assessments for the scope",
+          "role": "EHS officer",
+          "days": 10,
+          "evidence": "Reviewed RAMS"
+        },
+        {
+          "task": "Verify worker competence and plant certification",
+          "role": "EHS officer",
+          "days": 10,
+          "evidence": "Certificates"
+        },
+        {
+          "task": "Agree the bridging document where both have systems",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Signed bridging document"
+        },
+        {
+          "task": "Approval decision recorded with any conditions",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Approval record"
+        },
+        {
+          "task": "Mobilisation induction before any work starts",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Induction register"
+        }
+      ]
+    },
+    {
+      "id": "con-review",
+      "name": "Sub-contractor performance review",
+      "area": "Contractor management",
+      "trigger": "The review interval falls due",
+      "outcome": "Performance is judged on evidence, and poor performance has consequences",
+      "steps": [
+        {
+          "task": "Compile the contractor's incident, hours and training data",
+          "role": "EHS officer",
+          "days": 5,
+          "evidence": "Data pack"
+        },
+        {
+          "task": "Calculate their frequency rates separately from yours",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Rate calculation"
+        },
+        {
+          "task": "Review open findings from inspections and audits",
+          "role": "EHS officer",
+          "days": 3,
+          "evidence": "Finding list"
+        },
+        {
+          "task": "Hold the review meeting with their management present",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Minutes"
+        },
+        {
+          "task": "Agree improvement actions with dates",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "CAPA entries"
+        },
+        {
+          "task": "Record the outcome against their pre-qualification status",
+          "role": "Procurement",
+          "days": 5,
+          "evidence": "Updated status"
+        }
+      ]
+    },
+    {
+      "id": "com-grievance",
+      "name": "Community grievance",
+      "area": "Community & social",
+      "trigger": "A community member raises a concern through any channel",
+      "outcome": "The concern is resolved or explained, and the complainant knows the outcome",
+      "steps": [
+        {
+          "task": "Log and acknowledge within the committed period",
+          "role": "Community liaison officer",
+          "days": 3,
+          "evidence": "Grievance register entry"
+        },
+        {
+          "task": "Assess whether it is project-related and how serious",
+          "role": "Community liaison officer",
+          "days": 5,
+          "evidence": "Assessment note"
+        },
+        {
+          "task": "Investigate on the ground with the complainant present",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Site visit record"
+        },
+        {
+          "task": "Agree a remedy or explain why none applies",
+          "role": "EHS manager",
+          "days": 14,
+          "evidence": "Agreed remedy"
+        },
+        {
+          "task": "Implement the remedy",
+          "role": "Responsible department",
+          "days": 30,
+          "evidence": "Evidence of completion"
+        },
+        {
+          "task": "Confirm the outcome with the complainant",
+          "role": "Community liaison officer",
+          "days": 7,
+          "evidence": "Signed acknowledgement"
+        },
+        {
+          "task": "Close out and report in the periodic report",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Report entry"
+        }
+      ]
+    },
+    {
+      "id": "com-engagement",
+      "name": "Planned community engagement",
+      "area": "Community & social",
+      "trigger": "The engagement plan falls due or a disruptive activity is scheduled",
+      "outcome": "The community was told in advance, heard, and what they said was acted on",
+      "steps": [
+        {
+          "task": "Identify who is affected and who must be present",
+          "role": "Community liaison officer",
+          "days": 10,
+          "evidence": "Stakeholder list"
+        },
+        {
+          "task": "Notify in the local language and through local channels",
+          "role": "Community liaison officer",
+          "days": 7,
+          "evidence": "Notice copies"
+        },
+        {
+          "task": "Hold the meeting at a time and place people can reach",
+          "role": "Community liaison officer",
+          "days": 1,
+          "evidence": "Attendance register"
+        },
+        {
+          "task": "Record issues raised verbatim, not summarised",
+          "role": "Community liaison officer",
+          "days": 2,
+          "evidence": "Minutes"
+        },
+        {
+          "task": "Assign an owner to each commitment made",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Commitment register"
+        },
+        {
+          "task": "Report back on the previous meeting's commitments",
+          "role": "Community liaison officer",
+          "days": 1,
+          "evidence": "Report-back record"
+        }
+      ]
+    },
+    {
+      "id": "min-blast",
+      "name": "Blast execution",
+      "area": "Mining & heavy industry",
+      "trigger": "A blast is scheduled",
+      "outcome": "The blast is fired safely, within limits, with the community notified",
+      "steps": [
+        {
+          "task": "Blast design approved by the licensed shotfirer",
+          "role": "Shotfirer",
+          "days": 2,
+          "evidence": "Blast design"
+        },
+        {
+          "task": "Explosives drawn and reconciled against the magazine register",
+          "role": "Magazine keeper",
+          "days": 1,
+          "evidence": "Issue record"
+        },
+        {
+          "task": "Community and neighbours notified in advance",
+          "role": "Community liaison officer",
+          "days": 2,
+          "evidence": "Notification record"
+        },
+        {
+          "task": "Exclusion zone established and sentries posted",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Sentry log"
+        },
+        {
+          "task": "Vibration and airblast monitors deployed at receptors",
+          "role": "Environmental officer",
+          "days": 1,
+          "evidence": "Monitor placement record"
+        },
+        {
+          "task": "Blast fired and all-clear given after inspection",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Blast record"
+        },
+        {
+          "task": "Misfire procedure applied if any charge failed",
+          "role": "Shotfirer",
+          "days": 1,
+          "evidence": "Misfire record"
+        },
+        {
+          "task": "Results compared against limits and reported",
+          "role": "Environmental officer",
+          "days": 5,
+          "evidence": "Monitoring result"
+        }
+      ]
+    },
+    {
+      "id": "min-tsf",
+      "name": "Tailings facility surveillance",
+      "area": "Mining & heavy industry",
+      "trigger": "The surveillance interval falls due",
+      "outcome": "The facility's condition is known and any trigger exceedance is acted on",
+      "steps": [
+        {
+          "task": "Read all instrumentation: piezometers, monuments, flows",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Instrument readings"
+        },
+        {
+          "task": "Measure freeboard and beach width against design",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Survey record"
+        },
+        {
+          "task": "Walk the embankment and record any seepage or cracking",
+          "role": "TSF operator",
+          "days": 1,
+          "evidence": "Inspection record with photographs"
+        },
+        {
+          "task": "Compare readings against trigger levels",
+          "role": "TSF engineer",
+          "days": 3,
+          "evidence": "Trend review"
+        },
+        {
+          "task": "Escalate to the Engineer of Record on any trigger exceedance",
+          "role": "TSF engineer",
+          "days": 1,
+          "evidence": "Escalation record"
+        },
+        {
+          "task": "Update the water balance",
+          "role": "TSF engineer",
+          "days": 5,
+          "evidence": "Water balance"
+        },
+        {
+          "task": "Report to management and record in the monthly return",
+          "role": "TSF engineer",
+          "days": 10,
+          "evidence": "Monthly return"
+        }
+      ]
+    },
+    {
+      "id": "ms-review",
+      "name": "Management review",
+      "area": "Management system",
+      "trigger": "The management review interval falls due",
+      "outcome": "Top management has seen the performance and decided what changes",
+      "steps": [
+        {
+          "task": "Compile performance data: rates, actions, audits, objectives",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "Data pack"
+        },
+        {
+          "task": "Review progress against last review's actions",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Action status"
+        },
+        {
+          "task": "Review legal compliance status and any enforcement",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Compliance report"
+        },
+        {
+          "task": "Review stakeholder and worker feedback",
+          "role": "EHS manager",
+          "days": 5,
+          "evidence": "Feedback summary"
+        },
+        {
+          "task": "Hold the review with top management present",
+          "role": "Site manager",
+          "days": 1,
+          "evidence": "Minutes with attendance"
+        },
+        {
+          "task": "Record decisions on resources, objectives and changes",
+          "role": "Site manager",
+          "days": 5,
+          "evidence": "Signed minutes"
+        },
+        {
+          "task": "Assign and track the actions arising",
+          "role": "EHS manager",
+          "days": 10,
+          "evidence": "CAPA entries"
+        }
+      ]
+    },
+    {
+      "id": "ms-doc",
+      "name": "Document control",
+      "area": "Management system",
+      "trigger": "A controlled document is created or revised",
+      "outcome": "The current version is the only one in use",
+      "steps": [
+        {
+          "task": "Draft or revise with the change clearly marked",
+          "role": "Author",
+          "days": 10,
+          "evidence": "Draft with change log"
+        },
+        {
+          "task": "Technical review by a competent reviewer",
+          "role": "Reviewer",
+          "days": 7,
+          "evidence": "Review comments"
+        },
+        {
+          "task": "Approval by the document owner",
+          "role": "Owner",
+          "days": 5,
+          "evidence": "Approval signature"
+        },
+        {
+          "task": "Version and date applied, register updated",
+          "role": "Document controller",
+          "days": 2,
+          "evidence": "Register entry"
+        },
+        {
+          "task": "Superseded copies withdrawn from the point of use",
+          "role": "Document controller",
+          "days": 3,
+          "evidence": "Withdrawal record"
+        },
+        {
+          "task": "Affected people briefed on what changed",
+          "role": "Supervisor",
+          "days": 7,
+          "evidence": "Briefing record"
+        }
+      ]
+    }
   ],
+
 
   // ---- Credit costs for AI/paid actions --------------------------------
   // ---- Report tables --------------------------------------------------------
@@ -10352,6 +11498,653 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       }
     ]
   },
+
+  // ---- Audit protocols -----------------------------------------------------
+  // Audit types beyond the per-sector EHS checklist: management system audits
+  // against the Annex SL clause structure the standards share, compliance and
+  // readiness audits, and the subject-specific protocols (tailings,
+  // accommodation, contractor) where the consequence of missing something is
+  // highest. `basis` says why the protocol is shaped the way it is.
+  auditProtocols: [
+    {
+      "id": "iso45001",
+      "name": "Management system audit — ISO 45001",
+      "group": "Management system",
+      "scope": "The OH&S management system against the standard's clauses",
+      "basis": "ISO 45001 follows the Annex SL structure: clauses 4 to 10. Auditing clause by clause is how a certification body will do it.",
+      "sections": [
+        {
+          "title": "4. Context of the organisation",
+          "items": [
+            "Internal and external issues affecting the OH&S system are identified and reviewed",
+            "Interested parties and their relevant requirements are determined",
+            "Scope of the management system is documented and defensible",
+            "Processes and their interactions are defined"
+          ]
+        },
+        {
+          "title": "5. Leadership and worker participation",
+          "items": [
+            "Top management demonstrates leadership, not just sign-off",
+            "OH&S policy is current, communicated and available to interested parties",
+            "Roles, responsibilities and authorities are assigned and understood",
+            "Workers are consulted on hazard identification and controls",
+            "Workers participate through a functioning committee with minutes",
+            "Barriers to participation (language, literacy, fear of reprisal) are removed"
+          ]
+        },
+        {
+          "title": "6. Planning",
+          "items": [
+            "Hazard identification is ongoing, not a one-off exercise",
+            "Risks and opportunities are assessed and recorded",
+            "Legal and other requirements are identified and kept current",
+            "OH&S objectives are measurable and have plans to achieve them"
+          ]
+        },
+        {
+          "title": "7. Support",
+          "items": [
+            "Resources for the system are determined and provided",
+            "Competence requirements are defined and evidenced per role",
+            "Workers are aware of the policy, hazards and their right to remove themselves from danger",
+            "Communication is planned: what, when, to whom, how",
+            "Documented information is controlled, versioned and available where used"
+          ]
+        },
+        {
+          "title": "8. Operation",
+          "items": [
+            "Operational controls follow the hierarchy: elimination before PPE",
+            "Management of change is applied before changes take effect",
+            "Procurement controls extend OH&S requirements to what is bought",
+            "Contractors are coordinated and their workers covered",
+            "Outsourced functions are controlled",
+            "Emergency preparedness is planned, tested and revised after tests"
+          ]
+        },
+        {
+          "title": "9. Performance evaluation",
+          "items": [
+            "Monitoring and measurement is defined, with calibrated equipment",
+            "Compliance with legal requirements is evaluated and recorded",
+            "Internal audits cover the whole system on a programme",
+            "Management review is held at planned intervals with the required inputs"
+          ]
+        },
+        {
+          "title": "10. Improvement",
+          "items": [
+            "Incidents and nonconformities are investigated to root cause",
+            "Corrective actions address the cause, not the symptom",
+            "Effectiveness of corrective action is verified",
+            "Continual improvement is demonstrable in the data"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "iso14001",
+      "name": "Management system audit — ISO 14001",
+      "group": "Management system",
+      "scope": "The environmental management system against the standard's clauses",
+      "basis": "ISO 14001 shares the Annex SL clause structure with ISO 45001, so a combined audit is normal — the evidence differs, the structure does not.",
+      "sections": [
+        {
+          "title": "4. Context",
+          "items": [
+            "Environmental conditions affected by, and affecting, the organisation are understood",
+            "Interested parties' environmental requirements are determined",
+            "Scope includes the activities, products and services with environmental aspects"
+          ]
+        },
+        {
+          "title": "5. Leadership",
+          "items": [
+            "Environmental policy includes commitment to protection and to compliance",
+            "Policy is available to interested parties, not just internally",
+            "Responsibilities for the EMS are assigned"
+          ]
+        },
+        {
+          "title": "6. Planning",
+          "items": [
+            "Environmental aspects are identified across the life cycle",
+            "Significance criteria are defined and applied consistently",
+            "Compliance obligations are identified and accessible",
+            "Environmental objectives are set with plans, resources and timeframes"
+          ]
+        },
+        {
+          "title": "7. Support",
+          "items": [
+            "Competence for those whose work affects environmental performance is evidenced",
+            "Awareness extends to the consequences of not conforming",
+            "Internal and external communication on environmental matters is planned"
+          ]
+        },
+        {
+          "title": "8. Operation",
+          "items": [
+            "Operational controls are established for significant aspects",
+            "Life-cycle perspective is applied to design, procurement and end of life",
+            "Requirements are communicated to external providers and contractors",
+            "Emergency preparedness covers environmental release scenarios"
+          ]
+        },
+        {
+          "title": "9. Performance evaluation",
+          "items": [
+            "Monitoring covers the parameters the obligations require",
+            "Compliance evaluation is documented with its frequency defined",
+            "Internal audit programme covers the EMS"
+          ]
+        },
+        {
+          "title": "10. Improvement",
+          "items": [
+            "Nonconformities including releases are corrected and investigated",
+            "Improvement in environmental performance is demonstrable"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "legal",
+      "name": "Legal compliance audit",
+      "group": "Compliance",
+      "scope": "Every permit, licence and statutory duty applicable to the site",
+      "basis": "Built around the jurisdiction register in Checklists. Compliance evaluation at a defined frequency is itself a requirement of both ISO standards.",
+      "sections": [
+        {
+          "title": "Permits and approvals",
+          "items": [
+            "Every required permit is identified for the activities actually carried out",
+            "Each permit is current and held on site",
+            "Permit conditions are extracted into a trackable register",
+            "Each condition has an owner and evidence of compliance",
+            "Renewals are diarised with enough lead time to complete them",
+            "Variations and changes of scope have been notified where required"
+          ]
+        },
+        {
+          "title": "Reporting obligations",
+          "items": [
+            "Periodic returns to the regulator are submitted on time",
+            "Monitoring results are reported at the required frequency",
+            "Incident notification thresholds are known and have been met",
+            "Annual environmental audit or equivalent has been submitted"
+          ]
+        },
+        {
+          "title": "Statutory registrations",
+          "items": [
+            "Workplace or factory registration is current",
+            "Statutory examinations of plant are in date",
+            "Professional registrations of practitioners are current",
+            "Workers' compensation insurance covers the actual headcount"
+          ]
+        },
+        {
+          "title": "Enforcement history",
+          "items": [
+            "Improvement or prohibition notices are closed out",
+            "Prosecutions or penalties are disclosed and their conditions met",
+            "Regulator correspondence is filed and actioned"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contractor",
+      "name": "Sub-contractor audit",
+      "group": "Contractor management",
+      "scope": "A sub-contractor's own arrangements, on their work, on your site",
+      "basis": "A principal is answerable for the people its contractors bring on site, so this is audited on evidence, not on assurances.",
+      "sections": [
+        {
+          "title": "Documentation and status",
+          "items": [
+            "Pre-qualification is current and any conditions are being met",
+            "Insurance covers the scope and the actual headcount",
+            "Bridging document is signed and understood by both parties",
+            "Sub-sub-contracting is within what was agreed"
+          ]
+        },
+        {
+          "title": "Workers",
+          "items": [
+            "Every worker on site appears on their register",
+            "Contracts, wages and hours comply with the labour code",
+            "No worker is under the legal minimum age",
+            "Induction and task training records exist for each worker",
+            "Competence certificates verified for licensed tasks",
+            "Their workers can raise a grievance without going through their supervisor"
+          ]
+        },
+        {
+          "title": "On the job",
+          "items": [
+            "Risk assessments and method statements match the work being done",
+            "Permits are obtained and followed",
+            "PPE is supplied by them, correct and worn",
+            "Plant and equipment certification is current and on site",
+            "Housekeeping and waste segregation in their areas"
+          ]
+        },
+        {
+          "title": "Performance",
+          "items": [
+            "Their incidents are reported to you, including near-misses",
+            "Their hours are reported so their rates can be calculated separately",
+            "Previous audit findings are closed",
+            "Their own supervision is present during work"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accommodation",
+      "name": "Workers' accommodation audit",
+      "group": "Welfare",
+      "scope": "Camps, guest houses and any accommodation provided to workers",
+      "basis": "Assessed against the IFC/EBRD workers' accommodation guidance, which lenders apply directly.",
+      "sections": [
+        {
+          "title": "Space and sleeping",
+          "items": [
+            "Floor area per person meets the standard",
+            "Beds are not shared or hot-bedded",
+            "Rooms have natural light and ventilation",
+            "Lockable personal storage per worker",
+            "Separate accommodation for women with lockable access"
+          ]
+        },
+        {
+          "title": "Sanitation and water",
+          "items": [
+            "Toilets and showers meet the ratio per person, separated by sex",
+            "Water supply is potable and tested at the required frequency",
+            "Adequate water quantity per person per day",
+            "Laundry facilities are provided",
+            "Waste water is disposed of without creating a nuisance"
+          ]
+        },
+        {
+          "title": "Food and kitchens",
+          "items": [
+            "Kitchens are separated from sleeping areas",
+            "Food handlers have current health certificates",
+            "Cold chain and temperature records are kept",
+            "Pest control programme operates with records",
+            "Dining space is adequate for the shift pattern"
+          ]
+        },
+        {
+          "title": "Safety and welfare",
+          "items": [
+            "Fire detection, extinguishers and marked escape routes",
+            "Evacuation drill has been held in the accommodation itself",
+            "Electrical installation inspected and safe",
+            "First aid provision and access to medical care",
+            "Rest and recreation space provided",
+            "Workers are free to leave the accommodation outside working hours",
+            "Accommodation is not a condition of employment in a way that traps workers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tsf",
+      "name": "Tailings facility audit",
+      "group": "Mining & heavy industry",
+      "scope": "The tailings storage facility, its governance and its surveillance",
+      "basis": "Structured around the Global Industry Standard on Tailings Management. A TSF failure is the highest-consequence event most mines carry.",
+      "sections": [
+        {
+          "title": "Governance and accountability",
+          "items": [
+            "Engineer of Record is appointed in writing and currently engaged",
+            "Accountable Executive is named and understands the role",
+            "Responsible Tailings Facility Engineer is appointed on site",
+            "Independent review has been carried out at the required interval",
+            "Review findings are tracked to closure with dates"
+          ]
+        },
+        {
+          "title": "Design and knowledge base",
+          "items": [
+            "Design basis report is current for the facility as it now stands",
+            "Site characterisation covers geotechnical, hydrological and seismic conditions",
+            "Consequence classification is current and justified",
+            "Deposition plan matches what is actually being deposited"
+          ]
+        },
+        {
+          "title": "Operation and surveillance",
+          "items": [
+            "Freeboard and beach width are within design at all times",
+            "Instrumentation is installed, read on schedule and trending reviewed",
+            "Trigger action response plan exists with defined trigger levels",
+            "Water balance is maintained and reconciled",
+            "Surveillance inspections are recorded with photographs",
+            "Seepage and drainage performance are monitored"
+          ]
+        },
+        {
+          "title": "Emergency and closure",
+          "items": [
+            "Emergency preparedness and response plan covers a breach scenario",
+            "Downstream communities are identified, informed and involved in planning",
+            "Inundation mapping has been carried out",
+            "Closure plan exists and is costed",
+            "Financial assurance for closure is in place at current value"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "emergency",
+      "name": "Emergency preparedness audit",
+      "group": "Safety",
+      "scope": "The emergency plan as it would actually perform, not as written",
+      "basis": "Audited against the scenarios the site genuinely faces, drawn from the risk register.",
+      "sections": [
+        {
+          "title": "Planning",
+          "items": [
+            "Emergency plan covers every credible scenario for this site",
+            "Roles are assigned by post, not by name, and cover every shift",
+            "Contact lists are current and have been called to test",
+            "External responders know the site and its hazards",
+            "Plan is available where an emergency would start, not only in the office"
+          ]
+        },
+        {
+          "title": "Equipment and provision",
+          "items": [
+            "Alarm is audible everywhere including high-noise areas",
+            "Assembly points are suitable, signed and reachable",
+            "Firefighting equipment is in place, serviced and accessible",
+            "First aid and medical equipment is stocked and in date",
+            "Emergency vehicles are available and maintained",
+            "Rescue equipment matches the rescue scenarios identified"
+          ]
+        },
+        {
+          "title": "Competence",
+          "items": [
+            "Emergency team members are trained and their training is current",
+            "First aiders cover every shift and location",
+            "Wardens know their sweep areas",
+            "Workers know what to do on hearing the alarm"
+          ]
+        },
+        {
+          "title": "Testing and learning",
+          "items": [
+            "Drills cover the full range of scenarios over the cycle",
+            "Drills include night shift and contractors",
+            "Times are recorded: alarm, assembly, roll call complete",
+            "Debriefs are held and gaps recorded",
+            "The plan has actually been revised as a result of a drill"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "waste",
+      "name": "Waste management audit",
+      "group": "Environment",
+      "scope": "The waste stream end to end: generation, storage, transfer, disposal",
+      "basis": "The audit follows the waste, not the paperwork — the paperwork is checked against where the waste actually went.",
+      "sections": [
+        {
+          "title": "Segregation and storage",
+          "items": [
+            "Segregation happens at the point of generation",
+            "Containers are labelled, correct and not overfilled",
+            "Hazardous waste is stored on impermeable bunded hardstanding, under cover",
+            "Incompatible wastes are stored apart",
+            "Storage time limits are observed",
+            "Areas are secure from scavenging and from weather"
+          ]
+        },
+        {
+          "title": "Transfer and disposal",
+          "items": [
+            "Carrier licences are verified and current for each stream",
+            "Receiving facility licences are verified",
+            "Waste transfer notes are complete, signed and retained",
+            "Quantities reconcile between generation, transfer and receipt",
+            "The disposal route has been physically verified at least once"
+          ]
+        },
+        {
+          "title": "Minimisation and reporting",
+          "items": [
+            "Waste quantities are recorded by stream with a running total",
+            "Diversion from landfill is measured and defined consistently",
+            "Reduction opportunities have been identified and acted on",
+            "Waste data is reported to the regulator where required"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ptw-audit",
+      "name": "Permit to work system audit",
+      "group": "Safety",
+      "scope": "Whether the permit system works in practice, not whether forms exist",
+      "basis": "Audited by following live permits into the field — a permit file that looks perfect and a job site that does not is the finding.",
+      "sections": [
+        {
+          "title": "System design",
+          "items": [
+            "Permit types cover every high-risk activity on site",
+            "Issuers and receivers are authorised and trained",
+            "Authorisation limits are defined and respected",
+            "Cross-referencing between simultaneous permits is required"
+          ]
+        },
+        {
+          "title": "Live permits in the field",
+          "items": [
+            "The work being done matches the work described on the permit",
+            "Isolations described on the permit are physically in place",
+            "Gas tests were done and recorded at the stated intervals",
+            "Every worker on the job has been briefed and signed on",
+            "Standby and rescue arrangements are physically present",
+            "The permit is at the worksite, not in the office"
+          ]
+        },
+        {
+          "title": "Close-out",
+          "items": [
+            "Permits are closed properly, not abandoned",
+            "Isolations are removed under control",
+            "Area is handed back in a safe state",
+            "Expired permits are not still being worked to"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hygiene",
+      "name": "Camp hygiene and food safety audit",
+      "group": "Welfare",
+      "scope": "Kitchens, canteens, water supply and sanitation",
+      "basis": "Foodborne illness on a remote site takes out a shift, and there is nowhere to send people.",
+      "sections": [
+        {
+          "title": "Food handling",
+          "items": [
+            "Food handlers hold current health certificates",
+            "Hand washing facilities with soap at the point of need",
+            "Raw and cooked food separated at every stage",
+            "Cooking and holding temperatures recorded",
+            "Cold chain maintained with alarms on the fridges",
+            "Leftovers policy is defined and followed"
+          ]
+        },
+        {
+          "title": "Premises",
+          "items": [
+            "Kitchen surfaces are cleanable and in good repair",
+            "Extraction is cleaned on schedule",
+            "Pest control with a current map and bait records",
+            "Waste is removed frequently and stored away from food",
+            "Cleaning schedule is signed off, not just posted"
+          ]
+        },
+        {
+          "title": "Water and sanitation",
+          "items": [
+            "Drinking water is tested at the required frequency",
+            "Water storage tanks are cleaned and covered",
+            "Toilets are clean, stocked and maintained",
+            "Sewage disposal does not contaminate water sources"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "premob",
+      "name": "Pre-mobilisation readiness audit",
+      "group": "Compliance",
+      "scope": "Whether the site is ready for work to start at all",
+      "basis": "Run before first mobilisation. Every line here is something that is expensive to fix once work has started.",
+      "sections": [
+        {
+          "title": "Approvals in place",
+          "items": [
+            "Environmental approval issued and conditions extracted",
+            "Construction or operating permit in hand",
+            "Land access and wayleaves settled",
+            "Workplace registration completed"
+          ]
+        },
+        {
+          "title": "Site establishment",
+          "items": [
+            "Site boundary defined and marked against the approved footprint",
+            "Access road and traffic arrangements agreed",
+            "Welfare, sanitation and water provision in place before workers arrive",
+            "Waste storage and removal arrangements contracted",
+            "Fuel and chemical storage bunded before delivery"
+          ]
+        },
+        {
+          "title": "People and systems",
+          "items": [
+            "EHS resource appointed and on site",
+            "Emergency plan written and responders identified",
+            "Induction programme ready to run",
+            "First aid provision and medevac route confirmed",
+            "Grievance mechanism publicised to the community before works begin"
+          ]
+        },
+        {
+          "title": "Baseline",
+          "items": [
+            "Pre-works condition survey of nearby structures completed",
+            "Environmental baseline monitoring completed before disturbance",
+            "Photographic record of pre-existing site condition taken"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "closure",
+      "name": "Closure and demobilisation readiness audit",
+      "group": "Compliance",
+      "scope": "Whether the site can be handed back without leaving liabilities",
+      "basis": "Run before demobilisation. What is not closed out before the team leaves usually never is.",
+      "sections": [
+        {
+          "title": "Physical closure",
+          "items": [
+            "Structures removed or formally handed over",
+            "Contaminated ground identified and remediated",
+            "Fuel and chemical storage decommissioned and areas tested",
+            "Waste removed with transfer notes retained",
+            "Borrow areas and stockpiles reinstated",
+            "Erosion control in place on reinstated ground"
+          ]
+        },
+        {
+          "title": "Ecological and land",
+          "items": [
+            "Reinstatement matches the approved restoration plan",
+            "Planting established and survival monitored",
+            "Land returned in the condition agreed with the owner",
+            "Post-closure monitoring plan agreed and funded"
+          ]
+        },
+        {
+          "title": "Administrative",
+          "items": [
+            "Permits surrendered or transferred",
+            "Final reports submitted to the regulator",
+            "Community commitments discharged and evidenced",
+            "Outstanding grievances closed",
+            "Workers' final dues settled and exit medicals completed",
+            "Records archived for the statutory retention period"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bbs",
+      "name": "Behavioural safety observation",
+      "group": "Safety",
+      "scope": "What people actually do, observed and discussed at the time",
+      "basis": "An observation is a conversation, not an inspection. Recording who was at fault defeats the purpose and stops the reporting.",
+      "sections": [
+        {
+          "title": "Position of people",
+          "items": [
+            "Line of fire: nobody between a load and a hard place",
+            "Working at the correct height and reach, not overstretching",
+            "Clear of moving plant and pinch points",
+            "Escape route from the work position is clear"
+          ]
+        },
+        {
+          "title": "Tools and equipment",
+          "items": [
+            "Correct tool for the task, in good condition",
+            "Guards in place and used",
+            "Equipment inspected before use"
+          ]
+        },
+        {
+          "title": "Procedures",
+          "items": [
+            "The procedure being followed is the current one",
+            "Permit conditions observed in practice",
+            "Shortcuts identified and the reason for them understood"
+          ]
+        },
+        {
+          "title": "PPE and housekeeping",
+          "items": [
+            "PPE correct for the task and correctly worn",
+            "Work area tidy, access clear",
+            "Waste and materials stored, not left where people walk"
+          ]
+        },
+        {
+          "title": "The conversation",
+          "items": [
+            "Observation discussed with the worker at the time",
+            "Worker's own view of the barriers was asked for and recorded",
+            "Anything the worker cannot fix themselves was escalated"
+          ]
+        }
+      ]
+    }
+  ],
 
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100

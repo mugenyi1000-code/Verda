@@ -109,8 +109,18 @@ sub-sections in the sidebar:
   normally expected come with it — then a 5×5 likelihood × severity matrix with automatic
   scoring and banding (Low/Medium/High/Critical), controls and owner per
   hazard, and a live matrix heatmap.
-- **Audits** — Auto EHS Audit (per-sector checklist, AI-assisted findings
-  summary) and ESIA Audit (against your own ESMP commitments).
+- **Audits** — **13 audit protocols, 246 items**, beyond the 21 sector
+  checklists and your own ESMP commitments: ISO 45001 and ISO 14001 management
+  system audits structured on the Annex SL clauses the standards share, legal
+  compliance, sub-contractor, workers' accommodation, tailings facility (built
+  on the Global Industry Standard on Tailings Management), emergency
+  preparedness, waste, permit-to-work system, camp hygiene and food safety,
+  pre-mobilisation readiness, closure and demobilisation readiness, and
+  behavioural safety observation. Conformance scores live as you assess;
+  the grade field unlocks only on a non-conformance and defaults sensibly;
+  and **every finding becomes a corrective action dated from its grade's own
+  closure target** — an audit whose findings have no owner and no date is an
+  audit that changed nothing.
 - **Inspections & Calculations** — an **equipment and machine register** whose
   next-due date is calculated from the last inspection and the statutory
   interval, sorted by what lapses first, with overdue examinations flagged
@@ -255,7 +265,18 @@ sub-sections in the sidebar:
   monitoring parameters with units, 28 waste streams with disposal routes,
   audit finding grades, 29 job roles, 30 document types, and every KPI
   definition. All downloadable.
-- **Workflows**, **Documents Library**, **Credits & Billing**.
+- **Workflows** — **22 procedures across 8 areas, 158 steps.** Each template
+  states what starts it and what "done" means, and each step carries the role
+  that owns it, the days it should take, and the evidence that closes it.
+  Starting a run computes every step's due date from the start date and the
+  step's own SLA, so a procedure that has stalled shows as stalled — which a
+  row of unticked boxes does not. Covers onboarding and separation, worker and
+  community grievances, monitoring, waste transfer, spill response, vegetation
+  clearance, incident investigation, permit to work, management of change,
+  emergency drills, permit renewal, legal register review, contractor
+  pre-qualification and review, blasting, tailings surveillance, management
+  review and document control.
+- **Documents Library**, **Credits & Billing**.
 
 **Grow — enablement, marketplace and community**
 - **Plans & Pricing** — how Verda is packaged and sold as a product
