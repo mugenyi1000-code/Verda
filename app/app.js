@@ -66,6 +66,8 @@
       credits: {},
       creditLedger: [],
       reports: [],
+      docs: {},              // in-progress ToR and ESIA content, per document type
+      docRecords: [],        // generated and submitted ToR/ESIA documents
       esiaDrafts: [],
       esiaSubmissions: [],
       audits: [],
@@ -93,7 +95,8 @@
   let state = load();
   // Saved states from before these registers existed must not crash on load.
   if (!state.ui || typeof state.ui !== "object") state.ui = {};
-  ["subcontractors", "workforce", "equipment"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
+  if (!state.docs || typeof state.docs !== "object") state.docs = {};
+  ["subcontractors", "workforce", "equipment", "docRecords"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
     try {
@@ -111,6 +114,8 @@
 
   /* ---------------------------- ICONS (inline SVG, no external deps) ---------------------------- */
   const ICON_PATHS = {
+    // a stamped page — terms of reference, the document that is approved first
+    tor: '<path d="M6 2.5h9l3.5 3.5V21a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V3a.5.5 0 0 1 .5-.5Z"/><path d="M15 2.5V6h3.5"/><path d="M9 11h6M9 14.5h6"/><circle cx="12" cy="18.5" r="2"/>',
     // calipers over a gauge — measurement and examination
     inspections: '<path d="M9 3v8a3 3 0 0 0 6 0V3"/><path d="M7 3h4M13 3h4"/><path d="M12 14v3"/><circle cx="12" cy="19.5" r="2.5"/>',
     dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
@@ -344,6 +349,7 @@
     // Manage — the programmes and deliverables that follow from it
     { id: "actions", group: "manage", label: () => T().actions, render: renderActions },
     { id: "reporting", group: "manage", label: () => T().reporting, render: renderReporting },
+    { id: "tor", group: "manage", label: () => T().tor, render: renderTor },
     { id: "esia", group: "manage", label: () => T().esia, render: renderEsia },
     { id: "training", group: "manage", label: () => T().training, render: renderTraining },
     { id: "workflows", group: "manage", label: () => T().workflows, render: renderWorkflows },
@@ -389,7 +395,7 @@
      leads with the hero and the pillar gallery instead. */
   const SECTION_ILLUS = {
     analytics: "governance", incidents: "safety", risk: "safety", audits: "audit",
-    inspections: "audit",
+    inspections: "audit", tor: "documents",
     records: "people", maps: "sitemap", actions: "audit", reporting: "documents",
     esia: "wildlife", training: "training", workflows: "governance", clients: "people",
     checklists: "industry", documents: "documents", credits: "governance", revenue: "governance", plans: "revenue",
@@ -1426,63 +1432,577 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  /* ============================ ToR & ESIA ============================ */
-  function renderEsia(main) {
+  /* ==================== ToR & ESIA DOCUMENT BUILDER ====================
+     The Terms of Reference and the ESIA are two different documents written
+     at two different times: the ToR scopes what the study must do and is
+     approved before any fieldwork starts; the ESIA reports what the study
+     found. They share a builder but never a screen.
+
+     Both take the same structured input as Verda Reporting — tables, figures,
+     photographs — plus coordinate tables, because an ESIA whose sampling
+     points and receptors have no coordinates cannot be verified or
+     re-measured, which is most of what a baseline is for. */
+
+  const DOC_TYPES = {
+    tor: {
+      key: "tor",
+      title: "Terms of Reference (ToR)",
+      lead: "The scoping document: what the ESIA must cover, who does it, by when and to what standard. Written and approved before fieldwork starts.",
+      sectionsKey: "torSections",
+      docTitle: "TERMS OF REFERENCE — ENVIRONMENTAL & SOCIAL IMPACT ASSESSMENT",
+      filePrefix: "ToR",
+      blocks: [{ key: "notes", label: "Content for this section" }]
+    },
+    esia: {
+      key: "esia",
+      title: "ESIA Report",
+      lead: "The assessment itself: baseline, impacts, alternatives, the ESMP and the monitoring plan — reported against the ToR that scoped it.",
+      sectionsKey: "esiaSections",
+      docTitle: "ENVIRONMENTAL & SOCIAL IMPACT ASSESSMENT REPORT",
+      filePrefix: "ESIA",
+      blocks: [{ key: "notes", label: "Content for this section" }]
+    }
+  };
+
+  const isCoordTable = (t) => !!t.map;
+  const validLat = (v) => Number.isFinite(Number(v)) && Math.abs(Number(v)) <= 90;
+  const validLng = (v) => Number.isFinite(Number(v)) && Math.abs(Number(v)) <= 180;
+
+  /* A coordinate plot drawn from the points themselves — no tiles, no network.
+     The Esri basemap is better when it loads, but a plot that disappears
+     without a connection is useless on the sites this is built for. */
+  function coordPlot(points, title) {
+    const pts = points.filter(p => validLat(p.lat) && validLng(p.lng))
+      .map(p => ({ lat: Number(p.lat), lng: Number(p.lng), label: p.label || "" }));
+    if (!pts.length) return `<p class="muted small">Add a latitude and longitude and the points appear here.</p>`;
+    const W = 560, H = 300, pad = 34;
+    const lats = pts.map(p => p.lat), lngs = pts.map(p => p.lng);
+    // A single point, or a row of points, still needs a box to sit in.
+    const span = (arr) => {
+      const lo = Math.min(...arr), hi = Math.max(...arr);
+      const d = hi - lo;
+      const m = d < 0.0005 ? 0.002 : d * 0.15;
+      return [lo - m, hi + m];
+    };
+    const [y0, y1] = span(lats), [x0, x1] = span(lngs);
+    const px = (lng) => pad + ((lng - x0) / (x1 - x0)) * (W - 2 * pad);
+    const py = (lat) => H - pad - ((lat - y0) / (y1 - y0)) * (H - 2 * pad);
+    const marks = pts.map((p, i) => `
+      <g><title>${esc(p.label)}: ${p.lat.toFixed(5)}, ${p.lng.toFixed(5)}</title>
+        <circle cx="${px(p.lng).toFixed(1)}" cy="${py(p.lat).toFixed(1)}" r="6"
+          style="fill:var(--chart-1)" stroke="var(--surface)" stroke-width="2"/>
+        <text x="${px(p.lng).toFixed(1)}" y="${(py(p.lat) - 11).toFixed(1)}" class="chart-value">${esc(shortLabel(p.label))}</text>
+      </g>`).join("");
+    const table = `<details class="chart-table"><summary>View coordinates</summary>
+      <div class="table-scroll"><table class="table"><thead><tr><th>Point</th><th class="num">Latitude</th><th class="num">Longitude</th></tr></thead>
+      <tbody>${pts.map(p => `<tr><td>${esc(p.label || "—")}</td><td class="num">${p.lat.toFixed(6)}</td><td class="num">${p.lng.toFixed(6)}</td></tr>`).join("")}</tbody>
+      </table></div></details>`;
+    return `<figure class="chart-figure">
+      <figcaption class="chart-title">${esc(title)} — ${pts.length} point${pts.length === 1 ? "" : "s"}</figcaption>
+      <svg class="chart coord-plot" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title)}">
+        <rect x="${pad}" y="${pad}" width="${W - 2 * pad}" height="${H - 2 * pad}" class="coord-frame"/>
+        <text x="${pad}" y="${H - 12}" class="chart-label" text-anchor="start">${x0.toFixed(4)}°E</text>
+        <text x="${W - pad}" y="${H - 12}" class="chart-label" text-anchor="end">${x1.toFixed(4)}°E</text>
+        <text x="${pad - 6}" y="${H - pad}" class="chart-label" text-anchor="end">${y0.toFixed(4)}°N</text>
+        <text x="${pad - 6}" y="${pad + 4}" class="chart-label" text-anchor="end">${y1.toFixed(4)}°N</text>
+        ${marks}
+      </svg>${table}</figure>`;
+  }
+
+  /* Capture a coordinate: from the map if tiles load, from the device's own
+     GPS, from the client's saved site location, or typed in. All four exist
+     because on a remote site at least one of them will not. */
+  function openCoordPicker(onPick) {
+    const client = currentClient();
+    const overlay = h(`<div class="modal-overlay"><div class="modal modal-wide">
+      <h2>Capture a coordinate</h2>
+      <p class="muted small">Click the map to drop a point, use this device's GPS, take the site's saved location, or type the figures in.</p>
+      <div id="pick-map" class="pick-map"></div>
+      <div class="form-row">
+        <label>Latitude<input id="pick-lat" type="number" step="any" placeholder="e.g. -12.8024" /></label>
+        <label>Longitude<input id="pick-lng" type="number" step="any" placeholder="e.g. 28.2132" /></label>
+      </div>
+      <p class="muted small" id="pick-status"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="pick-gps">Use this device's GPS</button>
+        ${client && client.lat && client.lng ? `<button type="button" class="btn btn-ghost" id="pick-site">Use ${esc(client.name)}'s saved location</button>` : ""}
+        <button type="button" class="btn btn-ghost" id="pick-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="pick-ok">Use this coordinate</button>
+      </div>
+    </div></div>`);
+    document.body.appendChild(overlay);
+    const latIn = overlay.querySelector("#pick-lat"), lngIn = overlay.querySelector("#pick-lng");
+    const status = overlay.querySelector("#pick-status");
+    const close = () => overlay.remove();
+
+    let marker = null, pickMap = null;
+    if (typeof L !== "undefined") {
+      const start = (client && client.lat && client.lng) ? [client.lat, client.lng] : [0.3476, 32.5825];
+      pickMap = L.map("pick-map").setView(start, client && client.lat ? 13 : 6);
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+        { attribution: "Tiles © Esri", maxZoom: 16 }).addTo(pickMap);
+      pickMap.on("click", (e) => {
+        latIn.value = e.latlng.lat.toFixed(6);
+        lngIn.value = e.latlng.lng.toFixed(6);
+        if (marker) marker.remove();
+        marker = L.marker(e.latlng).addTo(pickMap);
+        status.textContent = "Point taken from the map.";
+      });
+    } else {
+      overlay.querySelector("#pick-map").innerHTML =
+        `<div class="pick-map-fallback">Map tiles are unavailable offline or behind a restricted network.
+          Use the GPS button, the site's saved location, or type the coordinate below — all of which work without a connection.</div>`;
+    }
+
+    overlay.querySelector("#pick-gps").addEventListener("click", () => {
+      if (!navigator.geolocation) { status.textContent = "This browser does not offer location access."; return; }
+      status.textContent = "Asking this device for its location…";
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          latIn.value = pos.coords.latitude.toFixed(6);
+          lngIn.value = pos.coords.longitude.toFixed(6);
+          status.textContent = `Taken from GPS, accurate to about ${Math.round(pos.coords.accuracy)} m.`;
+          if (pickMap) { pickMap.setView([pos.coords.latitude, pos.coords.longitude], 15);
+            if (marker) marker.remove(); marker = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(pickMap); }
+        },
+        (err) => { status.textContent = "Location refused or unavailable — type the coordinate instead. (" + err.message + ")"; },
+        { enableHighAccuracy: true, timeout: 10000 });
+    });
+    const siteBtn = overlay.querySelector("#pick-site");
+    if (siteBtn) siteBtn.addEventListener("click", () => {
+      latIn.value = client.lat; lngIn.value = client.lng;
+      status.textContent = `Taken from ${client.name}'s saved site location.`;
+    });
+    overlay.querySelector("#pick-cancel").addEventListener("click", close);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector("#pick-ok").addEventListener("click", () => {
+      const lat = latIn.value, lng = lngIn.value;
+      if (!validLat(lat) || !validLng(lng)) {
+        status.textContent = "Latitude must be between -90 and 90, longitude between -180 and 180.";
+        return;
+      }
+      onPick(Number(lat).toFixed(6), Number(lng).toFixed(6));
+      close();
+    });
+  }
+
+  function renderTor(main) { renderDocument(main, DOC_TYPES.tor); }
+  function renderEsia(main) { renderDocument(main, DOC_TYPES.esia); }
+
+  function renderDocument(main, doc) {
+    const S = VERDA_SEED;
+    const sections = S[doc.sectionsKey];
+    const tablesFor = (id) => S.sectionTables[id] || [];
+    let guided = state.reportGuided !== false;
+    const store = state.docs[doc.key] || (state.docs[doc.key] = {});
+
+    function secModel(id) {
+      if (!store[id]) store[id] = { blocks: {}, tables: {}, photos: [] };
+      return store[id];
+    }
+    function tableRows(sectionId, t) {
+      const m = secModel(sectionId);
+      if (!m.tables[t.id]) m.tables[t.id] = (t.starterRows || []).map(r => Object.assign({}, r));
+      if (!m.tables[t.id].length) m.tables[t.id] = [{}];
+      return m.tables[t.id];
+    }
+
     main.appendChild(h(`
       <section>
-        <h1>ToR & ESIA Reporting</h1>
-        <p class="muted">Structured input following standard Terms of Reference / ESIA report structure. Draft with AI Assist, then submit for EEIS processing using credits.</p>
-        <div class="card">
-          <label>Project name<input id="esia-project" /></label>
-          <div id="esia-sections">
-            ${VERDA_SEED.esiaSections.map(s => `
-              <div class="seg-form">
-                <h4>${s.title}</h4>
-                <textarea data-esia="${s.id}" placeholder="Enter content for this section..."></textarea>
-              </div>`).join("")}
-          </div>
-          <div class="modal-actions">
-            <button class="btn" id="esia-draft">Generate Draft with AI Assist</button>
-            <button class="btn btn-primary" id="esia-submit">Submit for ESIA Processing (${VERDA_SEED.creditCosts.esiaSubmit} credits)</button>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>${esc(doc.title)}</h1>
+            <p class="muted">${esc(doc.lead)}</p>
           </div>
         </div>
-        <div id="esia-output"></div>
+        <div class="card doc-switch">
+          <span class="muted small">These are two separate documents:</span>
+          <a class="btn ${doc.key === "tor" ? "btn-primary" : "btn-ghost"}" href="#/tor">Terms of Reference</a>
+          <a class="btn ${doc.key === "esia" ? "btn-primary" : "btn-ghost"}" href="#/esia">ESIA Report</a>
+          <span class="muted small">${doc.key === "tor"
+            ? "The ToR comes first and is usually approved by the regulator before fieldwork begins."
+            : "Write the ESIA against the approved ToR — reviewers check the two against each other."}</span>
+        </div>
+
         <div class="card">
-          <h3>Submissions</h3>
-          <table class="table"><thead><tr><th>Project</th><th>Status</th><th>Submitted</th></tr></thead>
-            <tbody id="esia-subs"></tbody></table>
+          <div class="form-row">
+            <label>Project name<input id="doc-project" value="${esc(store.__project || "")}" placeholder="e.g. Kabaale 40 MW Solar Plant" /></label>
+            <label>Client / site<select id="doc-client">${clientOptions()}</select></label>
+            <label>Prepared by<input id="doc-author" value="${esc(store.__author || "")}" placeholder="Lead consultant or firm" /></label>
+            <label>Reference<input id="doc-ref" value="${esc(store.__ref || "")}" placeholder="Document reference" /></label>
+          </div>
+          <label class="switch"><input type="checkbox" id="doc-guided" ${guided ? "checked" : ""} />
+            <span>Guided mode — what each section is for, how to fill it, and example wording</span></label>
+        </div>
+
+        <div class="card">
+          <h3>Sections</h3>
+          <p class="muted small" id="doc-progress"></p>
+          <div class="seg-toggle-actions">
+            <button class="btn btn-ghost btn-sm" id="doc-all">Select all</button>
+            <button class="btn btn-ghost btn-sm" id="doc-none">Clear all</button>
+          </div>
+          <div id="doc-toggles"></div>
+        </div>
+
+        <div id="doc-forms"></div>
+
+        <div class="card">
+          <button class="btn btn-primary" id="doc-draft">Generate draft with AI Assist (${S.creditCosts.aiDraft} credits)</button>
+          <button class="btn" id="doc-submit">Submit for processing (${S.creditCosts.esiaSubmit} credits)</button>
+          <p class="muted small">Drafting turns what you entered into prose. Submission is a demo queue — connect a backend to route it to a reviewer.</p>
+        </div>
+        <div id="doc-output"></div>
+
+        <div class="card">
+          <h3>Saved ${esc(doc.filePrefix)} documents</h3>
+          <div class="table-scroll">
+            <table class="table"><thead><tr><th>Project</th><th>Client</th><th>Sections</th><th>Points</th><th>Photos</th><th>Generated</th><th></th></tr></thead>
+            <tbody id="doc-list"></tbody></table>
+          </div>
         </div>
       </section>
     `));
 
-    function refreshSubs() {
-      main.querySelector("#esia-subs").innerHTML = state.esiaSubmissions.slice().reverse().map(s =>
-        `<tr><td>${esc(s.project)}</td><td><span class="badge">${esc(s.status)}</span></td><td>${esc(s.date.slice(0,10))}</td></tr>`
-      ).join("") || `<tr><td colspan="3" class="muted">No submissions yet.</td></tr>`;
+    /* ---------- one table ---------- */
+    function tableHtml(sectionId, t) {
+      const rows = tableRows(sectionId, t);
+      const head = t.columns.map(c => `<th>${esc(c.label)}${c.unit ? ` <span class="muted">(${esc(c.unit)})</span>` : ""}</th>`).join("");
+      const body = rows.map((row, ri) => `<tr>${t.columns.map(c => {
+        const v = row[c.key] == null ? "" : String(row[c.key]);
+        if (c.type === "select") {
+          return `<td><select data-cell="${esc(c.key)}" data-row="${ri}"><option value="">—</option>${
+            c.options.map(o => `<option ${o === v ? "selected" : ""}>${esc(o)}</option>`).join("")}</select></td>`;
+        }
+        if (c.type === "coord") {
+          const bad = v !== "" && !(c.key === "lat" ? validLat(v) : validLng(v));
+          return `<td><input type="number" step="any" class="coord-cell${bad ? " cell-invalid" : ""}"
+            data-cell="${esc(c.key)}" data-row="${ri}" value="${esc(v)}" /></td>`;
+        }
+        const type = c.type === "number" ? "number" : c.type === "date" ? "date" : "text";
+        return `<td><input type="${type}" data-cell="${esc(c.key)}" data-row="${ri}" value="${esc(v)}" /></td>`;
+      }).join("")}${isCoordTable(t)
+        ? `<td class="row-actions"><button class="btn btn-ghost btn-sm" data-pick="${ri}" title="Capture from the map or GPS">📍 Map</button></td>` : ""}
+        <td class="row-actions"><button class="btn btn-ghost btn-sm" data-delrow="${ri}" aria-label="Remove row ${ri + 1}">✕</button></td></tr>`).join("");
+      return `<div class="report-table" data-table="${esc(t.id)}">
+        <div class="report-table-head"><h5>${esc(t.title)}</h5>
+          ${t.hint ? `<p class="muted small">${esc(t.hint)}</p>` : ""}</div>
+        <div class="table-scroll"><table class="table entry-table"><thead><tr>${head}${isCoordTable(t) ? "<th></th>" : ""}<th></th></tr></thead>
+        <tbody>${body}</tbody></table></div>
+        <button class="btn btn-ghost btn-sm" data-addrow="${esc(t.id)}">+ Add row</button>
+        <div class="chart-slot" data-chart="${esc(t.id)}">${chartFor(t, rows)}</div>
+      </div>`;
     }
-    refreshSubs();
+    const chartFor = (t, rows) => isCoordTable(t)
+      ? coordPlot(rows.map(r => ({ lat: r.lat, lng: r.lng, label: r[t.columns[0].key] })), t.title)
+      : (t.chart ? renderChartBlock(t, rows) : "");
 
-    function collectSections() {
-      return VERDA_SEED.esiaSections.map(s => ({ title: s.title, text: main.querySelector(`[data-esia="${s.id}"]`).value }));
+    /* ---------- one section ---------- */
+    function sectionHtml(sec) {
+      const m = secModel(sec.id);
+      const guide = S.sectionGuide[sec.id];
+      const guideHtml = (guided && guide) ? `<div class="guide-box">
+        <p><strong>What this section is for.</strong> ${esc(guide.what)}</p>
+        <p><strong>How to fill it.</strong> ${esc(guide.how)}</p>
+        <details><summary>Example wording</summary><p class="guide-example">${esc(guide.example)}</p>
+          <p class="muted small">Guidance only — describe this project, not the example.</p></details>
+      </div>` : "";
+      return `<div class="card seg-form" data-seg="${esc(sec.id)}">
+        <h4>${esc(sec.title)}</h4>
+        ${sec.hint ? `<p class="muted small">${esc(sec.hint)}</p>` : ""}
+        ${guideHtml}
+        ${tablesFor(sec.id).map(t => tableHtml(sec.id, t)).join("")}
+        <h5>Narrative</h5>
+        ${doc.blocks.map(b => `<label>${esc(b.label)}<textarea data-field="${esc(b.key)}" rows="4"
+          placeholder="Write this section in your own words.">${esc(m.blocks[b.key] || "")}</textarea></label>`).join("")}
+        <h5>Figures &amp; photographs</h5>
+        <div class="dropzone" data-drop="${esc(sec.id)}" tabindex="0" role="button" aria-label="Add images for ${esc(sec.title)}">
+          <p><strong>Drag images here</strong> — or click to choose, or paste.</p>
+          <p class="muted small">Site photos, maps, layout drawings, survey figures. Up to ${MAX_PHOTOS_PER_SECTION} per section, resized in your browser and stored on this device only.</p>
+          <input type="file" accept="image/*" multiple hidden data-file="${esc(sec.id)}" />
+        </div>
+        <div class="photo-grid" data-photos="${esc(sec.id)}"></div>
+      </div>`;
     }
 
-    main.querySelector("#esia-draft").addEventListener("click", () => {
-      const projectName = main.querySelector("#esia-project").value.trim() || "Untitled project";
-      const text = VerdaAI.generateEsiaDraft({ projectName, sections: collectSections() });
-      const rec = { id: uid("esia"), project: projectName, text, date: new Date().toISOString() };
-      state.esiaDrafts.push(rec); save();
-      main.querySelector("#esia-output").innerHTML = card("ToR / ESIA draft (preview)", `<pre class="report-pre">${esc(text)}</pre>
-        <div class="modal-actions"><button class="btn btn-primary" id="esia-dl">Download .txt</button></div>`);
-      main.querySelector("#esia-dl").addEventListener("click", () => downloadText(`ESIA-${projectName.replace(/\s+/g,"_")}.txt`, text));
+    /* ---------- photos ---------- */
+    function renderPhotos(sectionId) {
+      const grid = main.querySelector(`[data-photos="${sectionId}"]`);
+      if (!grid) return;
+      const photos = secModel(sectionId).photos;
+      grid.innerHTML = photos.map((p, i) => `<figure class="photo-card">
+        <img src="${p.src}" alt="${esc(p.caption || "Figure")}" />
+        <input class="photo-caption" data-caption="${i}" value="${esc(p.caption || "")}" placeholder="Figure caption" />
+        <button class="btn btn-ghost btn-sm" data-delphoto="${i}">Remove</button></figure>`).join("");
+      grid.querySelectorAll("[data-caption]").forEach(inp => inp.addEventListener("input",
+        () => { photos[Number(inp.dataset.caption)].caption = inp.value; save(); }));
+      grid.querySelectorAll("[data-delphoto]").forEach(btn => btn.addEventListener("click", () => {
+        photos.splice(Number(btn.dataset.delphoto), 1); save(); renderPhotos(sectionId); updateProgress();
+      }));
+    }
+    async function addFiles(sectionId, files) {
+      const m = secModel(sectionId);
+      const list = Array.from(files).filter(f => f.type.startsWith("image/"));
+      if (!list.length) { alert("That doesn't look like an image file."); return; }
+      const room = MAX_PHOTOS_PER_SECTION - m.photos.length;
+      if (room <= 0) { alert(`This section already holds ${MAX_PHOTOS_PER_SECTION} images.`); return; }
+      for (const f of list.slice(0, room)) {
+        try { m.photos.push({ src: await compressImage(f, 1100, 0.72), caption: f.name.replace(/\.[^.]+$/, "") }); }
+        catch (e) { alert(`Couldn't read "${f.name}".`); }
+      }
+      saveQuietly(); renderPhotos(sectionId); updateProgress();
+    }
+    // Images are the only thing big enough to fill browser storage; the work
+    // must survive a failed save rather than disappear with it.
+    function saveQuietly() {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+      catch (e) { alert("Browser storage is full. Your work is still on screen and will generate and download, but it may not be saved between visits — remove some images or download the document now."); }
+    }
+
+    /* ---------- wiring ---------- */
+    function wireTable(sec, t, wrap) {
+      const rows = tableRows(sec.id, t);
+      wrap.querySelectorAll("[data-cell]").forEach(el => {
+        el.addEventListener("input", () => {
+          rows[Number(el.dataset.row)][el.dataset.cell] = el.value;
+          if (el.classList.contains("coord-cell")) {
+            const ok = el.dataset.cell === "lat" ? validLat(el.value) : validLng(el.value);
+            el.classList.toggle("cell-invalid", el.value !== "" && !ok);
+          }
+          updateProgress(); saveQuietly();
+        });
+        el.addEventListener("change", () => refreshChart(sec, t));
+      });
+      wrap.querySelector("[data-addrow]").addEventListener("click", () => { rows.push({}); rerender(sec, t); });
+      wrap.querySelectorAll("[data-delrow]").forEach(b => b.addEventListener("click", () => {
+        rows.splice(Number(b.dataset.delrow), 1);
+        if (!rows.length) rows.push({});
+        rerender(sec, t);
+      }));
+      wrap.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", () => {
+        const ri = Number(b.dataset.pick);
+        openCoordPicker((lat, lng) => {
+          rows[ri].lat = lat; rows[ri].lng = lng;
+          rerender(sec, t); saveQuietly();
+        });
+      }));
+    }
+    function refreshChart(sec, t) {
+      const slot = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-chart="${t.id}"]`);
+      if (slot) slot.innerHTML = chartFor(t, tableRows(sec.id, t));
+    }
+    function rerender(sec, t) {
+      const wrap = main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`);
+      if (!wrap) return;
+      wrap.outerHTML = tableHtml(sec.id, t);
+      wireTable(sec, t, main.querySelector(`.seg-form[data-seg="${sec.id}"] [data-table="${t.id}"]`));
+      updateProgress();
+    }
+    function wireSection(sec) {
+      const form = main.querySelector(`.seg-form[data-seg="${sec.id}"]`);
+      if (!form) return;
+      const m = secModel(sec.id);
+      form.querySelectorAll("[data-field]").forEach(el => el.addEventListener("input", () => {
+        m.blocks[el.dataset.field] = el.value; updateProgress(); saveQuietly();
+      }));
+      tablesFor(sec.id).forEach(t => wireTable(sec, t, form.querySelector(`[data-table="${t.id}"]`)));
+      const dz = form.querySelector("[data-drop]"), picker = form.querySelector("[data-file]");
+      dz.addEventListener("click", () => picker.click());
+      dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); picker.click(); } });
+      picker.addEventListener("change", () => { addFiles(sec.id, picker.files); picker.value = ""; });
+      ["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.add("dropzone-active"); }));
+      ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dz.classList.remove("dropzone-active"); }));
+      dz.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files) addFiles(sec.id, e.dataTransfer.files); });
+      dz.addEventListener("paste", (e) => { const f = e.clipboardData && e.clipboardData.files; if (f && f.length) { e.preventDefault(); addFiles(sec.id, f); } });
+      renderPhotos(sec.id);
+    }
+
+    const checkedIds = () => Array.from(main.querySelectorAll(".seg-check:checked")).map(c => c.value);
+    function hasData(id) {
+      const m = store[id];
+      if (!m) return false;
+      if (Object.values(m.blocks).some(v => (v || "").trim())) return true;
+      if (m.photos.length) return true;
+      return Object.values(m.tables).some(rows => rows.some(r => Object.values(r).some(v => (v || "").toString().trim())));
+    }
+    function countPoints() {
+      let n = 0;
+      sections.forEach(sec => tablesFor(sec.id).filter(isCoordTable).forEach(t => {
+        ((store[sec.id] || {}).tables || {})[t.id]?.forEach(r => { if (validLat(r.lat) && validLng(r.lng)) n++; });
+      }));
+      return n;
+    }
+    function updateProgress() {
+      const ids = checkedIds(), done = ids.filter(hasData).length, pts = countPoints();
+      const el = main.querySelector("#doc-progress");
+      if (el) el.textContent = ids.length
+        ? `${done} of ${ids.length} selected section(s) have content · ${pts} coordinate${pts === 1 ? "" : "s"} captured.`
+        : "No sections selected — tick the ones this document needs.";
+      main.querySelectorAll(".seg-toggle").forEach(lab =>
+        lab.classList.toggle("seg-filled", hasData(lab.querySelector(".seg-check").value)));
+    }
+
+    function renderForms() {
+      const ids = checkedIds();
+      const chosen = sections.filter(s => ids.includes(s.id));
+      main.querySelector("#doc-forms").innerHTML = chosen.length
+        ? chosen.map(sectionHtml).join("")
+        : `<p class="muted">Tick a section above and its tables appear here.</p>`;
+      chosen.forEach(wireSection);
+      updateProgress();
+    }
+    function renderToggles() {
+      main.querySelector("#doc-toggles").innerHTML = sections.map(s =>
+        `<label class="seg-toggle"><input type="checkbox" class="seg-check" value="${esc(s.id)}" checked />
+          <span class="seg-toggle-label">${esc(s.title)}</span>
+          <span class="muted small">${esc(s.hint || "")}</span></label>`).join("");
+      main.querySelectorAll(".seg-check").forEach(cb => cb.addEventListener("change", renderForms));
+      renderForms();
+    }
+    renderToggles();
+
+    ["project", "author", "ref"].forEach(k => main.querySelector(`#doc-${k}`).addEventListener("input", (e) => {
+      store["__" + k] = e.target.value; saveQuietly();
+    }));
+    main.querySelector("#doc-client").addEventListener("change", (e) => setCurrentClient(e.target.value));
+    main.querySelector("#doc-all").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = true; }); renderForms();
+    });
+    main.querySelector("#doc-none").addEventListener("click", () => {
+      main.querySelectorAll(".seg-check").forEach(c => { c.checked = false; }); renderForms();
+    });
+    main.querySelector("#doc-guided").addEventListener("change", (e) => {
+      guided = e.target.checked; state.reportGuided = guided; save(); renderForms();
     });
 
-    main.querySelector("#esia-submit").addEventListener("click", () => {
-      const projectName = main.querySelector("#esia-project").value.trim() || "Untitled project";
-      if (!spendCredits(VERDA_SEED.creditCosts.esiaSubmit, "ESIA processing submission")) return;
-      state.esiaSubmissions.push({ id: uid("sub"), project: projectName, status: "Submitted for EEIS Review", date: new Date().toISOString(), sections: collectSections() });
-      save(); renderTopbar(); refreshSubs();
-      alert("Submitted. This is a demo queue — connect a backend workflow to route submissions to EEIS reviewers.");
+    /* ---------- collect, draft, submit ---------- */
+    function collect() {
+      const ids = checkedIds();
+      const out = { sections: [], photoCount: 0, points: countPoints() };
+      ids.forEach(id => {
+        const sec = sections.find(s => s.id === id);
+        const m = secModel(id);
+        const tables = {};
+        tablesFor(id).forEach(t => {
+          const rows = (m.tables[t.id] || []).filter(r => Object.values(r).some(v => (v || "").toString().trim()));
+          if (rows.length) tables[t.id] = rows;
+        });
+        out.photoCount += m.photos.length;
+        out.sections.push({ id, title: sec.title, text: m.blocks.notes || "", tables, photos: m.photos });
+      });
+      return out;
+    }
+    function meta() {
+      return {
+        project: main.querySelector("#doc-project").value.trim() || "Untitled project",
+        client: main.querySelector("#doc-client").value,
+        author: main.querySelector("#doc-author").value.trim(),
+        ref: main.querySelector("#doc-ref").value.trim()
+      };
+    }
+
+    function refreshList() {
+      const rows = state.docRecords.filter(r => r.kind === doc.key);
+      main.querySelector("#doc-list").innerHTML = rows.slice().reverse().map(r => `
+        <tr><td>${esc(r.project)}</td><td>${esc(r.client)}</td><td>${r.sectionCount}</td>
+        <td>${r.points || 0}</td><td>${r.photoCount || 0}</td><td>${r.date.slice(0, 10)}</td>
+        <td class="row-actions">
+          <button class="btn btn-ghost btn-sm" data-txt="${esc(r.id)}">.txt</button>
+          <button class="btn btn-ghost btn-sm" data-html="${esc(r.id)}">Full document</button>
+          ${r.status ? statusBadge(r.status, "warning") : ""}</td></tr>`).join("") ||
+        `<tr><td colspan="7" class="muted">Nothing generated yet.</td></tr>`;
+      main.querySelectorAll("[data-txt]").forEach(b => b.addEventListener("click", () => {
+        const r = state.docRecords.find(x => x.id === b.dataset.txt);
+        downloadText(`${doc.filePrefix}-${r.project.replace(/[^\w]+/g, "_")}.txt`, r.text);
+      }));
+      main.querySelectorAll("[data-html]").forEach(b => b.addEventListener("click", () => {
+        const r = state.docRecords.find(x => x.id === b.dataset.html);
+        downloadHtml(`${doc.filePrefix}-${r.project.replace(/[^\w]+/g, "_")}.html`, docHtml(doc, r));
+      }));
+    }
+    refreshList();
+
+    main.querySelector("#doc-draft").addEventListener("click", () => {
+      const data = collect();
+      if (!data.sections.length) { alert("Tick at least one section."); return; }
+      if (!spendCredits(S.creditCosts.aiDraft, `${doc.filePrefix} draft`)) return;
+      const m = meta();
+      const text = VerdaAI.generateEsiaDraft({
+        projectName: m.project, docTitle: doc.docTitle, meta: m,
+        sections: data.sections, tableDefs: S.sectionTables
+      });
+      const rec = Object.assign({
+        id: uid("doc"), kind: doc.key, text, date: new Date().toISOString(),
+        sectionCount: data.sections.length, photoCount: data.photoCount, points: data.points,
+        full: { docTitle: doc.docTitle, meta: m, sections: data.sections }
+      }, m);
+      state.docRecords.push(rec);
+      saveQuietly();
+      const out = main.querySelector("#doc-output");
+      out.innerHTML = card(`${doc.title} — draft`, `
+        <p class="muted small">A draft assembled from what you entered. Read every line: this document carries your name to a regulator.</p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="doc-dl-html">Download full document (.html)</button>
+          <button class="btn btn-ghost" id="doc-dl-txt">Download .txt</button>
+        </div>
+        <div class="report-preview">${docHtml(doc, rec, true)}</div>`);
+      out.querySelector("#doc-dl-html").addEventListener("click", () =>
+        downloadHtml(`${doc.filePrefix}-${m.project.replace(/[^\w]+/g, "_")}.html`, docHtml(doc, rec)));
+      out.querySelector("#doc-dl-txt").addEventListener("click", () =>
+        downloadText(`${doc.filePrefix}-${m.project.replace(/[^\w]+/g, "_")}.txt`, text));
+      out.scrollIntoView({ behavior: "smooth", block: "start" });
+      renderTopbar(); refreshList();
     });
+
+    main.querySelector("#doc-submit").addEventListener("click", () => {
+      const data = collect();
+      if (!data.sections.length) { alert("Tick at least one section before submitting."); return; }
+      if (!spendCredits(S.creditCosts.esiaSubmit, `${doc.filePrefix} processing submission`)) return;
+      const m = meta();
+      state.docRecords.push(Object.assign({
+        id: uid("doc"), kind: doc.key, text: "", date: new Date().toISOString(),
+        sectionCount: data.sections.length, photoCount: data.photoCount, points: data.points,
+        status: "Submitted for review", full: { docTitle: doc.docTitle, meta: m, sections: data.sections }
+      }, m));
+      saveQuietly(); renderTopbar(); refreshList();
+      alert("Submitted to the demo queue. Connect a backend workflow to route submissions to a reviewer.");
+    });
+  }
+
+  // The document as a document: narrative, tables, coordinate plots, figures.
+  function docHtml(doc, rec, inline) {
+    const f = rec.full;
+    if (!f) return `<pre class="report-pre">${esc(rec.text)}</pre>`;
+    const defs = (id) => VERDA_SEED.sectionTables[id] || [];
+    const body = f.sections.map(sec => {
+      const tables = defs(sec.id).map(t => {
+        const rows = (sec.tables || {})[t.id];
+        if (!rows || !rows.length) return "";
+        const head = t.columns.map(c => `<th>${esc(c.label)}${c.unit ? ` (${esc(c.unit)})` : ""}</th>`).join("");
+        const tb = rows.map(r => `<tr>${t.columns.map(c => `<td>${esc(r[c.key] == null ? "" : String(r[c.key]))}</td>`).join("")}</tr>`).join("");
+        const fig = t.map
+          ? coordPlot(rows.map(r => ({ lat: r.lat, lng: r.lng, label: r[t.columns[0].key] })), t.title)
+          : (t.chart ? renderChartBlock(t, rows) : "");
+        return `<h4>${esc(t.title)}</h4><div class="table-scroll"><table class="table"><thead><tr>${head}</tr></thead><tbody>${tb}</tbody></table></div>${fig}`;
+      }).join("");
+      const text = (sec.text || "").trim();
+      const photos = (sec.photos || []).length ? `<h4>Figures</h4><div class="photo-grid report-photos">${
+        sec.photos.map(p => `<figure class="photo-card"><img src="${p.src}" alt="${esc(p.caption || "Figure")}"/>
+          <figcaption>${esc(p.caption || "")}</figcaption></figure>`).join("")}</div>` : "";
+      return `<section class="report-section"><h3>${esc(sec.title)}</h3>
+        ${text ? `<p>${esc(text).replace(/\n/g, "<br/>")}</p>` : `<p class="muted">Not yet written.</p>`}
+        ${tables}${photos}</section>`;
+    }).join("");
+    const m = f.meta || {};
+    const head = `<header class="report-head"><h1>${esc(f.docTitle)}</h1>
+      <table class="table kv-table"><tbody>
+        <tr><th>Project</th><td>${esc(m.project || rec.project)}</td></tr>
+        <tr><th>Client / site</th><td>${esc(m.client || rec.client)}</td></tr>
+        ${m.author ? `<tr><th>Prepared by</th><td>${esc(m.author)}</td></tr>` : ""}
+        ${m.ref ? `<tr><th>Reference</th><td>${esc(m.ref)}</td></tr>` : ""}
+        <tr><th>Generated</th><td>${rec.date.slice(0, 10)}</td></tr>
+      </tbody></table></header>`;
+    return inline ? `<div class="report-doc">${head}${body}</div>` : head + body;
   }
 
   /* ============================ AUDITS ============================ */

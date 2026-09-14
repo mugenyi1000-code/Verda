@@ -123,14 +123,41 @@ Generated: ${new Date().toISOString().slice(0, 10)}
     return `${head}\n\n${body}${summary}`;
   }
 
-  function generateEsiaDraft({ projectName, sections }) {
+  /* The ToR and the ESIA are separate documents with separate titles. Both
+     render their tables into the text version, because the plain-text copy is
+     what gets pasted into an email or a regulator's portal and a table that
+     only exists in the HTML is a table the reviewer never sees. */
+  function generateEsiaDraft({ projectName, docTitle, meta, sections, tableDefs }) {
+    const m = meta || {};
     const header =
-`TERMS OF REFERENCE / ESIA REPORT DRAFT
+`${docTitle || "TERMS OF REFERENCE / ESIA REPORT"}
 Project: ${projectName || "—"}
+Client / site: ${m.client || "—"}${m.author ? "\nPrepared by: " + m.author : ""}${m.ref ? "\nReference: " + m.ref : ""}
 Generated: ${new Date().toISOString().slice(0, 10)}
 -----------------------------------------------------------------------\n`;
-    const body = sections.map(s => `${s.title}\n${s.text && s.text.trim() ? s.text.trim() : "[Not yet completed — add input for this section.]"}`).join("\n\n");
-    return header + body;
+
+    const body = sections.map(sec => {
+      let out = `\n${sec.title}\n${"-".repeat(Math.min(sec.title.length, 71))}\n`;
+      const text = (sec.text || "").trim();
+      out += text ? text + "\n" : "[Not yet written — this section must be completed before the document is issued.]\n";
+      const defs = (tableDefs || {})[sec.id] || [];
+      out += tablesBlock(sec.tables, defs);
+      const photos = (sec.photos || []).length;
+      if (photos) out += `\n  [${photos} figure(s) attached to this section — see the full document.]\n`;
+      return out;
+    }).join("");
+
+    const counts = sections.reduce((a, s) => {
+      Object.values(s.tables || {}).forEach(rows => rows.forEach(r => {
+        if (r.lat !== undefined && r.lng !== undefined && String(r.lat).trim() && String(r.lng).trim()) a.points++;
+      }));
+      return a;
+    }, { points: 0 });
+
+    const footer = `\n-----------------------------------------------------------------------
+${sections.length} section(s)${counts.points ? `; ${counts.points} coordinate(s) recorded` : ""}.
+Review every section before issue. Sections marked as not yet written must be completed.\n`;
+    return header + body + footer;
   }
 
   function generateAuditSummary({ industry, findings }) {

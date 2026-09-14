@@ -329,6 +329,18 @@ th.num { text-align: right; }
 .site-filter p { margin: 22px 0 0; flex: 1; min-width: 240px; }
 .calc-invalid { color: var(--warn); font-size: .86rem; font-weight: 600; margin: 8px 0 0; }
 
+/* ---- ToR / ESIA document builder ---- */
+.doc-switch { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.doc-switch .btn { text-decoration: none; }
+.doc-switch .small { flex: 1; min-width: 220px; }
+.coord-cell { min-width: 108px; }
+.cell-invalid { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 8%, transparent); }
+.coord-plot { background: var(--surface); }
+.coord-frame { fill: var(--bg); stroke: var(--border); stroke-width: 1; }
+.modal-wide { width: 640px; max-width: 94vw; }
+.pick-map { height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); margin: 10px 0; }
+.pick-map-fallback { padding: 24px; text-align: center; color: var(--muted); font-size: .88rem; line-height: 1.5; }
+
 /* ---- Risk matrix ---- */
 .risk-matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
 .risk-matrix th { font-size: .75rem; color: var(--muted); font-weight: 700; width: 16%; text-align: center; }

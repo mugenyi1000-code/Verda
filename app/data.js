@@ -1816,6 +1816,74 @@ const VERDA_SEED = {
       ] }
   ],
 
+  // ---- Terms of Reference --------------------------------------------------
+  // The ToR is a different document from the ESIA and is written first: it
+  // scopes what the ESIA must do, who does it, by when and to what standard.
+  // Merging the two hides that the ToR is what the regulator approves before
+  // any study starts.
+  torSections: [
+    {
+      "id": "tor-intro",
+      "title": "1. Introduction & Background",
+      "hint": "Who the developer is, why the project exists, and why an ESIA is being commissioned"
+    },
+    {
+      "id": "tor-objectives",
+      "title": "2. Objectives of the Assignment",
+      "hint": "What the ESIA must achieve — stated so completion can be judged against it"
+    },
+    {
+      "id": "tor-project",
+      "title": "3. Project Description (as known at scoping)",
+      "hint": "Components, capacity, footprint, phases and alternatives still open"
+    },
+    {
+      "id": "tor-area",
+      "title": "4. Study Area & Area of Influence",
+      "hint": "Direct and indirect area of influence, with boundary coordinates"
+    },
+    {
+      "id": "tor-legal",
+      "title": "5. Policy, Legal & Institutional Framework to be Addressed",
+      "hint": "National law, permits, lender standards and conventions the study must cover"
+    },
+    {
+      "id": "tor-scope",
+      "title": "6. Scope of Work & Tasks",
+      "hint": "Task by task, what the consultant will do"
+    },
+    {
+      "id": "tor-method",
+      "title": "7. Methodology & Baseline Studies Required",
+      "hint": "Surveys, sampling, modelling and their seasons, frequencies and standards"
+    },
+    {
+      "id": "tor-stakeholder",
+      "title": "8. Stakeholder Engagement Requirements",
+      "hint": "Who must be consulted, how, when, and how it will be evidenced"
+    },
+    {
+      "id": "tor-deliverables",
+      "title": "9. Deliverables & Reporting Schedule",
+      "hint": "Each report, its due date, format and number of copies"
+    },
+    {
+      "id": "tor-team",
+      "title": "10. Expertise & Team Composition",
+      "hint": "Disciplines required, registration of experts, minimum experience"
+    },
+    {
+      "id": "tor-duration",
+      "title": "11. Duration, Programme & Budget",
+      "hint": "Timeline by task, and how the assignment is priced and paid"
+    },
+    {
+      "id": "tor-qa",
+      "title": "12. Quality Assurance, Supervision & Approval",
+      "hint": "Who reviews, who approves, and against what criteria"
+    }
+  ],
+
   // ---- ToR / ESIA structure ---------------------------------------------
   esiaSections: [
     { id: "background", title: "1. Project Description & Background" },
@@ -1930,7 +1998,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   translations: {
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
       nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
-      dashboard: "Dashboard", reporting: "Verda Reporting", esia: "ToR & ESIA Reporting",
+      dashboard: "Dashboard", reporting: "Verda Reporting", esia: "ESIA Reporting", tor: "Terms of Reference",
       revenue: "Revenue Planner",
       plans: "Plans & Pricing",
       analytics: "Analytics", incidents: "Incidents", risk: "Risk Register", actions: "Actions (CAPA)", training: "Training & Competency",
@@ -1941,7 +2009,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Log in", signup: "Free Sign Up", logout: "Log out" },
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
       nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
-      dashboard: "Dashibodi", reporting: "Ripoti ya Verda", esia: "ToR na Ripoti ya ESIA",
+      dashboard: "Dashibodi", reporting: "Ripoti ya Verda", esia: "Ripoti ya ESIA", tor: "Hadidu za Rejea",
       revenue: "Mpango wa Mapato",
       plans: "Mipango na Bei",
       analytics: "Uchambuzi", incidents: "Matukio", risk: "Rejista ya Hatari", actions: "Hatua (CAPA)", training: "Mafunzo na Umahiri",
@@ -1952,7 +2020,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Ingia", signup: "Jisajili Bure", logout: "Toka" },
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
       nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
-      dashboard: "Tableau de bord", reporting: "Rapport Verda", esia: "TdR et Rapport EIES",
+      dashboard: "Tableau de bord", reporting: "Rapport Verda", esia: "Rapport EIES", tor: "Termes de Référence",
       revenue: "Planificateur de Revenus",
       plans: "Offres et Tarifs",
       analytics: "Analytique", incidents: "Incidents", risk: "Registre des Risques", actions: "Actions (CAPA)", training: "Formation et Compétences",
@@ -1963,7 +2031,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Connexion", signup: "Inscription Gratuite", logout: "Déconnexion" },
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
       nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
-      dashboard: "Painel", reporting: "Relatório Verda", esia: "ToR e Relatório AIAS",
+      dashboard: "Painel", reporting: "Relatório Verda", esia: "Relatório AIAS", tor: "Termos de Referência",
       revenue: "Planeador de Receitas",
       plans: "Planos e Preços",
       analytics: "Análises", incidents: "Incidentes", risk: "Registo de Riscos", actions: "Ações (CAPA)", training: "Formação e Competências",
@@ -1974,7 +2042,7 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" },
     zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
       nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
-      dashboard: "仪表板", reporting: "Verda 报告", esia: "职责范围与 ESIA 报告",
+      dashboard: "仪表板", reporting: "Verda 报告", esia: "环境社会影响评价报告", tor: "职责范围 (ToR)",
       revenue: "收入测算",
       plans: "方案与定价",
       analytics: "数据分析", incidents: "事件", risk: "风险登记册", actions: "整改措施 (CAPA)", training: "培训与能力",
@@ -2156,6 +2224,1278 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   // table's `chart` block says how. `starterRows` pre-fill the label column so
   // a first-time user sees the expected rows rather than an empty grid.
   sectionTables: {
+  "tor-intro": [
+    {
+      "id": "tor-proponent",
+      "title": "Project proponent and parties",
+      "hint": "Everyone with a role in commissioning or approving the study.",
+      "columns": [
+        {
+          "key": "party",
+          "label": "Party",
+          "type": "text"
+        },
+        {
+          "key": "role",
+          "label": "Role",
+          "type": "select",
+          "options": [
+            "Developer / proponent",
+            "Financier / lender",
+            "Regulator",
+            "Consultant",
+            "Implementing agency",
+            "Landowner"
+          ]
+        },
+        {
+          "key": "contact",
+          "label": "Contact",
+          "type": "text"
+        },
+        {
+          "key": "notes",
+          "label": "Notes",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "tor-objectives": [
+    {
+      "id": "tor-obj",
+      "title": "Objectives and how completion is judged",
+      "hint": "An objective nobody can test is not an objective.",
+      "columns": [
+        {
+          "key": "objective",
+          "label": "Objective",
+          "type": "text"
+        },
+        {
+          "key": "evidence",
+          "label": "Evidence of completion",
+          "type": "text"
+        },
+        {
+          "key": "priority",
+          "label": "Priority",
+          "type": "select",
+          "options": [
+            "Essential",
+            "Important",
+            "Desirable"
+          ]
+        }
+      ]
+    }
+  ],
+  "tor-project": [
+    {
+      "id": "tor-components",
+      "title": "Project components",
+      "hint": "Each physical component with its size and phase.",
+      "columns": [
+        {
+          "key": "component",
+          "label": "Component",
+          "type": "text"
+        },
+        {
+          "key": "capacity",
+          "label": "Capacity / size",
+          "type": "text"
+        },
+        {
+          "key": "unit",
+          "label": "Unit",
+          "type": "text"
+        },
+        {
+          "key": "area",
+          "label": "Footprint (ha)",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "phase",
+          "label": "Phase",
+          "type": "select",
+          "options": [
+            "Construction",
+            "Operation",
+            "Decommissioning",
+            "All phases"
+          ]
+        }
+      ],
+      "chart": {
+        "labelKey": "component",
+        "valueKeys": [
+          "area"
+        ],
+        "title": "Footprint by component",
+        "valueLabel": "Hectares"
+      }
+    },
+    {
+      "id": "tor-alternatives",
+      "title": "Alternatives to be assessed",
+      "hint": "Including the no-project alternative — its absence is a standard finding.",
+      "columns": [
+        {
+          "key": "alternative",
+          "label": "Alternative",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "text"
+        },
+        {
+          "key": "assess",
+          "label": "To be assessed",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No — justify in the report"
+          ]
+        }
+      ]
+    }
+  ],
+  "tor-area": [
+    {
+      "id": "tor-boundary",
+      "title": "Study area boundary coordinates",
+      "hint": "Corner or vertex points defining the area of influence. Capture them on the map or enter them directly.",
+      "columns": [
+        {
+          "key": "point",
+          "label": "Point ref",
+          "type": "text"
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "type",
+          "label": "Boundary",
+          "type": "select",
+          "options": [
+            "Project footprint",
+            "Direct area of influence",
+            "Indirect area of influence",
+            "Buffer zone"
+          ]
+        },
+        {
+          "key": "notes",
+          "label": "Notes",
+          "type": "text"
+        }
+      ],
+      "map": true
+    }
+  ],
+  "tor-legal": [
+    {
+      "id": "tor-legal-reg",
+      "title": "Instruments and approvals the study must address",
+      "hint": "Pulled from the jurisdiction register — add anything project-specific.",
+      "columns": [
+        {
+          "key": "instrument",
+          "label": "Instrument / standard",
+          "type": "text"
+        },
+        {
+          "key": "authority",
+          "label": "Authority",
+          "type": "text"
+        },
+        {
+          "key": "relevance",
+          "label": "Why it applies",
+          "type": "text"
+        },
+        {
+          "key": "addressed",
+          "label": "To be addressed",
+          "type": "select",
+          "options": [
+            "Yes",
+            "Screening only",
+            "Not applicable"
+          ]
+        }
+      ]
+    }
+  ],
+  "tor-scope": [
+    {
+      "id": "tor-tasks",
+      "title": "Tasks",
+      "hint": "Numbered tasks the consultant is contracted to perform.",
+      "columns": [
+        {
+          "key": "no",
+          "label": "Task no.",
+          "type": "text"
+        },
+        {
+          "key": "task",
+          "label": "Task",
+          "type": "text"
+        },
+        {
+          "key": "output",
+          "label": "Output",
+          "type": "text"
+        },
+        {
+          "key": "weeks",
+          "label": "Duration (weeks)",
+          "type": "number",
+          "chart": true
+        }
+      ],
+      "chart": {
+        "labelKey": "no",
+        "valueKeys": [
+          "weeks"
+        ],
+        "title": "Duration by task",
+        "valueLabel": "Weeks"
+      }
+    }
+  ],
+  "tor-method": [
+    {
+      "id": "tor-baseline",
+      "title": "Baseline studies required",
+      "hint": "Each discipline, its method, season and standard.",
+      "columns": [
+        {
+          "key": "discipline",
+          "label": "Discipline",
+          "type": "select",
+          "options": [
+            "Air quality",
+            "Noise & vibration",
+            "Surface water",
+            "Groundwater",
+            "Soils & geology",
+            "Biodiversity — flora",
+            "Biodiversity — fauna",
+            "Aquatic ecology",
+            "Socio-economic",
+            "Health",
+            "Cultural heritage",
+            "Traffic",
+            "Landscape & visual",
+            "Climate & GHG"
+          ]
+        },
+        {
+          "key": "method",
+          "label": "Method / standard",
+          "type": "text"
+        },
+        {
+          "key": "season",
+          "label": "Season / timing",
+          "type": "text"
+        },
+        {
+          "key": "duration",
+          "label": "Survey duration",
+          "type": "text"
+        },
+        {
+          "key": "samples",
+          "label": "Sampling points",
+          "type": "number",
+          "chart": true
+        }
+      ],
+      "chart": {
+        "labelKey": "discipline",
+        "valueKeys": [
+          "samples"
+        ],
+        "title": "Sampling points by discipline",
+        "valueLabel": "Points"
+      }
+    },
+    {
+      "id": "tor-sampling",
+      "title": "Proposed sampling and monitoring locations",
+      "hint": "Coordinates for each proposed point — capture on the map.",
+      "columns": [
+        {
+          "key": "ref",
+          "label": "Point ref",
+          "type": "text"
+        },
+        {
+          "key": "medium",
+          "label": "Medium",
+          "type": "select",
+          "options": [
+            "Air",
+            "Noise",
+            "Surface water",
+            "Groundwater",
+            "Soil",
+            "Ecology transect",
+            "Social — settlement",
+            "Traffic count"
+          ]
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "rationale",
+          "label": "Why here",
+          "type": "text"
+        }
+      ],
+      "map": true
+    }
+  ],
+  "tor-stakeholder": [
+    {
+      "id": "tor-stakeholders",
+      "title": "Stakeholders to be consulted",
+      "hint": "Who, at what stage, and by what method.",
+      "columns": [
+        {
+          "key": "stakeholder",
+          "label": "Stakeholder / group",
+          "type": "text"
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "select",
+          "options": [
+            "Affected community",
+            "Local authority",
+            "National regulator",
+            "NGO / civil society",
+            "Traditional / cultural authority",
+            "Business / worker",
+            "Vulnerable group"
+          ]
+        },
+        {
+          "key": "method",
+          "label": "Method",
+          "type": "select",
+          "options": [
+            "Public meeting",
+            "Focus group",
+            "Key informant interview",
+            "Household survey",
+            "Written submission",
+            "Disclosure only"
+          ]
+        },
+        {
+          "key": "stage",
+          "label": "Stage",
+          "type": "select",
+          "options": [
+            "Scoping",
+            "Baseline",
+            "Draft disclosure",
+            "Final disclosure"
+          ]
+        },
+        {
+          "key": "language",
+          "label": "Language",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "tor-deliverables": [
+    {
+      "id": "tor-deliv",
+      "title": "Deliverables",
+      "hint": "Every report, when it is due, and in what form.",
+      "columns": [
+        {
+          "key": "deliverable",
+          "label": "Deliverable",
+          "type": "text"
+        },
+        {
+          "key": "due",
+          "label": "Due (weeks from start)",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "format",
+          "label": "Format",
+          "type": "text"
+        },
+        {
+          "key": "copies",
+          "label": "Copies",
+          "type": "text"
+        },
+        {
+          "key": "recipient",
+          "label": "Submitted to",
+          "type": "text"
+        }
+      ],
+      "chart": {
+        "labelKey": "deliverable",
+        "valueKeys": [
+          "due"
+        ],
+        "title": "Delivery schedule",
+        "valueLabel": "Weeks from start"
+      }
+    }
+  ],
+  "tor-team": [
+    {
+      "id": "tor-experts",
+      "title": "Team and expertise required",
+      "hint": "Registration of experts is a legal requirement in most jurisdictions.",
+      "columns": [
+        {
+          "key": "role",
+          "label": "Role / discipline",
+          "type": "text"
+        },
+        {
+          "key": "qualification",
+          "label": "Minimum qualification",
+          "type": "text"
+        },
+        {
+          "key": "experience",
+          "label": "Minimum experience (years)",
+          "type": "number"
+        },
+        {
+          "key": "registration",
+          "label": "Registration required",
+          "type": "text"
+        },
+        {
+          "key": "days",
+          "label": "Input (days)",
+          "type": "number",
+          "chart": true
+        }
+      ],
+      "chart": {
+        "labelKey": "role",
+        "valueKeys": [
+          "days"
+        ],
+        "title": "Input by role",
+        "valueLabel": "Days"
+      }
+    }
+  ],
+  "tor-duration": [
+    {
+      "id": "tor-programme",
+      "title": "Programme and payment schedule",
+      "hint": "Milestones tied to payment keep an assignment on track.",
+      "columns": [
+        {
+          "key": "milestone",
+          "label": "Milestone",
+          "type": "text"
+        },
+        {
+          "key": "week",
+          "label": "Week",
+          "type": "number"
+        },
+        {
+          "key": "payment",
+          "label": "Payment (%)",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "condition",
+          "label": "Payment condition",
+          "type": "text"
+        }
+      ],
+      "chart": {
+        "labelKey": "milestone",
+        "valueKeys": [
+          "payment"
+        ],
+        "title": "Payment by milestone",
+        "valueLabel": "% of fee"
+      }
+    }
+  ],
+  "tor-qa": [
+    {
+      "id": "tor-review",
+      "title": "Review and approval steps",
+      "hint": "Who signs off what, and how long they have.",
+      "columns": [
+        {
+          "key": "step",
+          "label": "Review step",
+          "type": "text"
+        },
+        {
+          "key": "reviewer",
+          "label": "Reviewer",
+          "type": "text"
+        },
+        {
+          "key": "days",
+          "label": "Turnaround (days)",
+          "type": "number"
+        },
+        {
+          "key": "criteria",
+          "label": "Approval criteria",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "background": [
+    {
+      "id": "esia-components",
+      "title": "Project components and footprint",
+      "hint": "What is being built or operated, at what scale.",
+      "columns": [
+        {
+          "key": "component",
+          "label": "Component",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "text"
+        },
+        {
+          "key": "capacity",
+          "label": "Capacity",
+          "type": "text"
+        },
+        {
+          "key": "area",
+          "label": "Area (ha)",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "phase",
+          "label": "Phase",
+          "type": "select",
+          "options": [
+            "Construction",
+            "Operation",
+            "Decommissioning"
+          ]
+        }
+      ],
+      "chart": {
+        "labelKey": "component",
+        "valueKeys": [
+          "area"
+        ],
+        "title": "Footprint by component",
+        "valueLabel": "Hectares"
+      }
+    }
+  ],
+  "legal": [
+    {
+      "id": "esia-legal",
+      "title": "Legal and institutional framework applied",
+      "hint": "Each instrument, what it requires, and how the project complies.",
+      "columns": [
+        {
+          "key": "instrument",
+          "label": "Instrument / standard",
+          "type": "text"
+        },
+        {
+          "key": "authority",
+          "label": "Authority",
+          "type": "text"
+        },
+        {
+          "key": "requirement",
+          "label": "Requirement",
+          "type": "text"
+        },
+        {
+          "key": "compliance",
+          "label": "Project position",
+          "type": "select",
+          "options": [
+            "Complies",
+            "Complies with conditions",
+            "Gap — action required",
+            "Not applicable"
+          ]
+        }
+      ],
+      "chart": {
+        "labelKey": "compliance",
+        "valueKeys": [
+          "count"
+        ],
+        "title": "Compliance position",
+        "valueLabel": "Instruments",
+        "count": true,
+        "status": true
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "id": "esia-sampling",
+      "title": "Baseline sampling locations",
+      "hint": "Every point where baseline data was collected, with its coordinates.",
+      "columns": [
+        {
+          "key": "ref",
+          "label": "Point ref",
+          "type": "text"
+        },
+        {
+          "key": "medium",
+          "label": "Medium",
+          "type": "select",
+          "options": [
+            "Air",
+            "Noise",
+            "Surface water",
+            "Groundwater",
+            "Soil",
+            "Ecology",
+            "Social",
+            "Traffic",
+            "Cultural heritage"
+          ]
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "date",
+          "label": "Date sampled",
+          "type": "date"
+        },
+        {
+          "key": "notes",
+          "label": "Notes",
+          "type": "text"
+        }
+      ],
+      "map": true
+    },
+    {
+      "id": "esia-results",
+      "title": "Baseline results against standards",
+      "hint": "The measured condition before the project, judged against the applicable standard.",
+      "columns": [
+        {
+          "key": "parameter",
+          "label": "Parameter",
+          "type": "text"
+        },
+        {
+          "key": "location",
+          "label": "Location",
+          "type": "text"
+        },
+        {
+          "key": "result",
+          "label": "Result",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "standard",
+          "label": "Standard",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "unit",
+          "label": "Unit",
+          "type": "text"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            "Within standard",
+            "Above standard",
+            "No standard set"
+          ]
+        }
+      ],
+      "chart": {
+        "labelKey": "parameter",
+        "valueKeys": [
+          "result",
+          "standard"
+        ],
+        "title": "Baseline against standard",
+        "valueLabel": "Value"
+      }
+    },
+    {
+      "id": "esia-receptors",
+      "title": "Sensitive receptors",
+      "hint": "Homes, schools, clinics, water sources and habitats near the project.",
+      "columns": [
+        {
+          "key": "receptor",
+          "label": "Receptor",
+          "type": "text"
+        },
+        {
+          "key": "type",
+          "label": "Type",
+          "type": "select",
+          "options": [
+            "Settlement",
+            "School",
+            "Health facility",
+            "Place of worship",
+            "Water source",
+            "Protected area",
+            "Habitat",
+            "Cultural site",
+            "Business"
+          ]
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "distance",
+          "label": "Distance from works (m)",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "sensitivity",
+          "label": "Sensitivity",
+          "type": "select",
+          "options": [
+            "Low",
+            "Medium",
+            "High"
+          ]
+        }
+      ],
+      "map": true,
+      "chart": {
+        "labelKey": "receptor",
+        "valueKeys": [
+          "distance"
+        ],
+        "title": "Distance from works",
+        "valueLabel": "Metres"
+      }
+    }
+  ],
+  "scope": [
+    {
+      "id": "esia-scope",
+      "title": "Scope and assessment boundaries",
+      "hint": "What is in and out of the assessment, and why.",
+      "columns": [
+        {
+          "key": "aspect",
+          "label": "Aspect",
+          "type": "text"
+        },
+        {
+          "key": "included",
+          "label": "In scope",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "key": "justification",
+          "label": "Justification",
+          "type": "text"
+        },
+        {
+          "key": "method",
+          "label": "Assessment method",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "impacts": [
+    {
+      "id": "esia-impacts",
+      "title": "Impact assessment",
+      "hint": "Each impact rated before and after mitigation — the difference is what mitigation buys.",
+      "columns": [
+        {
+          "key": "impact",
+          "label": "Impact",
+          "type": "text"
+        },
+        {
+          "key": "receptor",
+          "label": "Receptor affected",
+          "type": "text"
+        },
+        {
+          "key": "phase",
+          "label": "Phase",
+          "type": "select",
+          "options": [
+            "Construction",
+            "Operation",
+            "Decommissioning",
+            "Cumulative"
+          ]
+        },
+        {
+          "key": "nature",
+          "label": "Nature",
+          "type": "select",
+          "options": [
+            "Adverse",
+            "Beneficial"
+          ]
+        },
+        {
+          "key": "preScore",
+          "label": "Significance before mitigation",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "postScore",
+          "label": "Residual significance",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "rating",
+          "label": "Residual rating",
+          "type": "select",
+          "options": [
+            "Negligible",
+            "Minor",
+            "Moderate",
+            "Major",
+            "Critical"
+          ]
+        }
+      ],
+      "chart": {
+        "labelKey": "impact",
+        "valueKeys": [
+          "preScore",
+          "postScore"
+        ],
+        "title": "Significance before and after mitigation",
+        "valueLabel": "Score"
+      }
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "esia-alts",
+      "title": "Analysis of alternatives",
+      "hint": "Including the no-project option, compared on the same criteria.",
+      "columns": [
+        {
+          "key": "alternative",
+          "label": "Alternative",
+          "type": "text"
+        },
+        {
+          "key": "envScore",
+          "label": "Environmental score",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "socScore",
+          "label": "Social score",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "costScore",
+          "label": "Cost / feasibility score",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "selected",
+          "label": "Selected",
+          "type": "select",
+          "options": [
+            "Yes",
+            "No"
+          ]
+        },
+        {
+          "key": "reason",
+          "label": "Reason",
+          "type": "text"
+        }
+      ],
+      "chart": {
+        "labelKey": "alternative",
+        "valueKeys": [
+          "envScore",
+          "socScore",
+          "costScore"
+        ],
+        "title": "Alternatives compared",
+        "valueLabel": "Score"
+      }
+    }
+  ],
+  "mitigation": [
+    {
+      "id": "esia-esmp",
+      "title": "ESMP — mitigation measures",
+      "hint": "The management plan itself: measure, owner, timing, cost and how it is verified.",
+      "columns": [
+        {
+          "key": "impact",
+          "label": "Impact addressed",
+          "type": "text"
+        },
+        {
+          "key": "measure",
+          "label": "Mitigation measure",
+          "type": "text"
+        },
+        {
+          "key": "phase",
+          "label": "Phase",
+          "type": "select",
+          "options": [
+            "Pre-construction",
+            "Construction",
+            "Operation",
+            "Decommissioning"
+          ]
+        },
+        {
+          "key": "owner",
+          "label": "Responsible party",
+          "type": "text"
+        },
+        {
+          "key": "cost",
+          "label": "Cost estimate",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "indicator",
+          "label": "Verification indicator",
+          "type": "text"
+        }
+      ],
+      "chart": {
+        "labelKey": "impact",
+        "valueKeys": [
+          "cost"
+        ],
+        "title": "Mitigation cost by impact",
+        "valueLabel": "Cost"
+      }
+    }
+  ],
+  "engagement": [
+    {
+      "id": "esia-consult",
+      "title": "Consultation undertaken",
+      "hint": "Date, place, who attended and what they said. Attendance registers belong in the appendices.",
+      "columns": [
+        {
+          "key": "date",
+          "label": "Date",
+          "type": "date"
+        },
+        {
+          "key": "activity",
+          "label": "Activity",
+          "type": "select",
+          "options": [
+            "Public meeting",
+            "Focus group",
+            "Key informant interview",
+            "Household survey",
+            "Disclosure",
+            "Written submission"
+          ]
+        },
+        {
+          "key": "location",
+          "label": "Location",
+          "type": "text"
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "attendees",
+          "label": "Attendees",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "female",
+          "label": "Of which female",
+          "type": "number"
+        }
+      ],
+      "map": true,
+      "chart": {
+        "labelKey": "activity",
+        "valueKeys": [
+          "attendees",
+          "female"
+        ],
+        "title": "Attendance by activity",
+        "valueLabel": "People"
+      }
+    },
+    {
+      "id": "esia-issues",
+      "title": "Issues raised and how they were addressed",
+      "hint": "An issue recorded without a response is a finding waiting to happen.",
+      "columns": [
+        {
+          "key": "issue",
+          "label": "Issue raised",
+          "type": "text"
+        },
+        {
+          "key": "raisedBy",
+          "label": "Raised by",
+          "type": "text"
+        },
+        {
+          "key": "response",
+          "label": "How it was addressed",
+          "type": "text"
+        },
+        {
+          "key": "where",
+          "label": "Where addressed in the report",
+          "type": "text"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "select",
+          "options": [
+            "Addressed",
+            "Partly addressed",
+            "Outside project scope",
+            "Open"
+          ]
+        }
+      ]
+    }
+  ],
+  "monitoring": [
+    {
+      "id": "esia-monitoring",
+      "title": "Monitoring plan",
+      "hint": "Parameter, location, frequency, limit and who does it.",
+      "columns": [
+        {
+          "key": "parameter",
+          "label": "Parameter",
+          "type": "text"
+        },
+        {
+          "key": "location",
+          "label": "Location",
+          "type": "text"
+        },
+        {
+          "key": "lat",
+          "label": "Latitude",
+          "type": "coord"
+        },
+        {
+          "key": "lng",
+          "label": "Longitude",
+          "type": "coord"
+        },
+        {
+          "key": "frequency",
+          "label": "Frequency",
+          "type": "select",
+          "options": [
+            "Continuous",
+            "Daily",
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Bi-annual",
+            "Annual"
+          ]
+        },
+        {
+          "key": "limit",
+          "label": "Limit / standard",
+          "type": "text"
+        },
+        {
+          "key": "responsible",
+          "label": "Responsible",
+          "type": "text"
+        }
+      ],
+      "map": true
+    }
+  ],
+  "institutional": [
+    {
+      "id": "esia-budget",
+      "title": "Institutional arrangements and budget",
+      "hint": "Who implements each part of the ESMP, and what it costs.",
+      "columns": [
+        {
+          "key": "item",
+          "label": "Item",
+          "type": "text"
+        },
+        {
+          "key": "responsible",
+          "label": "Responsible party",
+          "type": "text"
+        },
+        {
+          "key": "year1",
+          "label": "Year 1 cost",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "annual",
+          "label": "Annual recurring cost",
+          "type": "number",
+          "chart": true
+        },
+        {
+          "key": "source",
+          "label": "Funding source",
+          "type": "text"
+        }
+      ],
+      "chart": {
+        "labelKey": "item",
+        "valueKeys": [
+          "year1",
+          "annual"
+        ],
+        "title": "ESMP budget",
+        "valueLabel": "Cost"
+      }
+    }
+  ],
+  "conclusion": [
+    {
+      "id": "esia-conditions",
+      "title": "Recommended conditions of approval",
+      "hint": "What the regulator should attach to the certificate.",
+      "columns": [
+        {
+          "key": "condition",
+          "label": "Recommended condition",
+          "type": "text"
+        },
+        {
+          "key": "rationale",
+          "label": "Rationale",
+          "type": "text"
+        },
+        {
+          "key": "timing",
+          "label": "Timing",
+          "type": "select",
+          "options": [
+            "Before construction",
+            "During construction",
+            "Before operation",
+            "Ongoing"
+          ]
+        }
+      ]
+    }
+  ],
+
     "safety": [
       {
         "id": "incidents",
@@ -4725,6 +6065,122 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   // wording. The example is guidance to read, never text the app inserts —
   // a compliance report must say what actually happened on the user's site.
   sectionGuide: {
+  "tor-intro": {
+    "what": "Sets up who wants the study and why it is needed.",
+    "how": "Name the developer, the financier and the regulator, and say what triggered the ESIA requirement.",
+    "example": "XYZ Ltd proposes a 40 MW solar plant at Kabaale. An ESIA is required under the National Environment Act before a certificate of approval can issue, and by the lender under its E&S policy."
+  },
+  "tor-objectives": {
+    "what": "What the consultant is being paid to achieve.",
+    "how": "Write each objective so a reviewer can tell whether it was met. Avoid 'assess impacts' — say which impacts, to what standard.",
+    "example": "To characterise baseline air, noise, water and biodiversity conditions across two seasons; to assess impacts against national standards and IFC PS1–PS8; and to produce an ESMP costed to line-item level."
+  },
+  "tor-project": {
+    "what": "The project as understood at scoping — it will change.",
+    "how": "Give sizes and footprints even if provisional, and list which alternatives are still genuinely open.",
+    "example": "Solar array 62 ha, 33/132 kV substation 1.4 ha, 9 km access road. Layout alternatives A and B remain open; the no-project alternative is to be assessed."
+  },
+  "tor-area": {
+    "what": "Defines how far the study must look.",
+    "how": "Direct area of influence is where works happen; indirect covers downstream, downwind and access routes. Put the boundary coordinates in the table so the area is unambiguous.",
+    "example": "Direct area of influence is the 62 ha footprint plus a 500 m buffer. Indirect extends to the Wambabya river 4 km downstream and the Kabaale–Buseruka access road."
+  },
+  "tor-legal": {
+    "what": "What law and which standards the study must apply.",
+    "how": "List national instruments, lender standards and any conventions. Verda's jurisdiction register is the starting point.",
+    "example": "National Environment Act 2019 and the ESA Regulations 2020; Water Act Cap 152; IFC Performance Standards 1–8; and the Equator Principles as applied by the lender."
+  },
+  "tor-scope": {
+    "what": "The task list the consultant is contracted to deliver.",
+    "how": "Number the tasks and give each one an output. A task without an output cannot be invoiced or checked.",
+    "example": "Task 3: conduct two-season biodiversity surveys. Output: baseline biodiversity report with species lists, habitat mapping and a critical habitat screening."
+  },
+  "tor-method": {
+    "what": "How the work will actually be done.",
+    "how": "Name the method, the standard, the season and the number of sampling points. Seasonality is the most common gap — one dry-season survey is rarely enough.",
+    "example": "Air quality: 24-hour PM2.5 and PM10 at four receptors, wet and dry season, to the national ambient standard. Noise: day and night LAeq at the same receptors."
+  },
+  "tor-stakeholder": {
+    "what": "Who must be consulted and how it will be evidenced.",
+    "how": "Name the groups, the method for each, and the stage. Include vulnerable groups explicitly — 'the community' is not a stakeholder list.",
+    "example": "Two public meetings in Runyoro and English at Kabaale and Nyamasoga; focus groups with women and with youth; key informant interviews with the sub-county and the health centre."
+  },
+  "tor-deliverables": {
+    "what": "What gets handed over and when.",
+    "how": "Tie each deliverable to a week number and say how many copies and in what format the regulator requires.",
+    "example": "Inception report week 3; baseline report week 12; draft ESIA week 20; final ESIA week 26 — ten hard copies and one electronic copy to the regulator."
+  },
+  "tor-team": {
+    "what": "The expertise the assignment requires.",
+    "how": "Most jurisdictions require registered or certified practitioners — state the registration, not just the discipline.",
+    "example": "Team leader: registered environmental practitioner, 10 years. Plus an ecologist, a hydrologist, a social scientist and an air-quality specialist."
+  },
+  "tor-duration": {
+    "what": "Time and money.",
+    "how": "Tie payments to milestones, not to elapsed time. A schedule with no payment condition slips.",
+    "example": "26 weeks from contract signature. Payments: 20% on inception, 30% on baseline, 30% on draft, 20% on regulator acceptance."
+  },
+  "tor-qa": {
+    "what": "Who checks the work before it goes to the regulator.",
+    "how": "Name the reviewer and the turnaround. A review step with no deadline becomes the critical path.",
+    "example": "Developer review 10 working days; lender's independent consultant 15 working days; regulator statutory review per the ESA Regulations."
+  },
+  "background": {
+    "what": "Describes the project and why it is proposed.",
+    "how": "Give the components, capacity and footprint as they are now, not as at scoping. Note any change since the ToR.",
+    "example": "The project comprises a 62 ha solar array, a 1.4 ha substation and a 9 km access road, constructed over 18 months and operating for 25 years."
+  },
+  "legal": {
+    "what": "The law and standards the assessment is made against.",
+    "how": "Set out each instrument and state the project's position against it plainly — a gap disclosed is manageable, a gap found by the regulator is not.",
+    "example": "Fourteen instruments apply. Twelve are complied with, one complies with conditions (waste transporter licensing), and one gap remains on the water abstraction permit, which is applied for."
+  },
+  "baseline": {
+    "what": "The condition of the environment before the project.",
+    "how": "Sampling locations with coordinates, results against standards, and the sensitive receptors nearby. A baseline without coordinates cannot be re-measured later — which is the whole point of a baseline.",
+    "example": "Baseline PM2.5 averaged 22 µg/m³ across four receptors, within the national standard. The nearest settlement is 340 m from the works and the Wambabya river 4 km downstream."
+  },
+  "scope": {
+    "what": "What the assessment covers and what it leaves out.",
+    "how": "Justify every exclusion. An aspect scoped out without reasoning is the first thing a reviewer challenges.",
+    "example": "Marine ecology is scoped out — the project has no coastal or marine interface. Transboundary impacts are scoped out; the nearest border is 180 km away."
+  },
+  "impacts": {
+    "what": "What the project will do, and how bad it is after mitigation.",
+    "how": "Score before and after mitigation so the value of each measure is visible. Residual impacts are what the decision is actually made on.",
+    "example": "Dust during construction scores Major before mitigation and Minor after, with suppression and sealed haul roads. Habitat loss remains Moderate residual across 62 ha."
+  },
+  "alternatives": {
+    "what": "Whether a better option was available.",
+    "how": "Compare on the same criteria, and include the no-project alternative. An alternatives chapter with one option is not an analysis.",
+    "example": "Layout B was selected: it avoids the seasonal wetland entirely at a 4% cost increase. The no-project alternative forgoes 40 MW of generation."
+  },
+  "mitigation": {
+    "what": "The ESMP — what will actually be done about the impacts.",
+    "how": "Each measure needs an owner, a timing, a cost and an indicator. A measure with no owner does not happen.",
+    "example": "Dust suppression: water bowsers twice daily on unsealed roads during construction, contractor responsible, verified by weekly boundary dust monitoring against the standard."
+  },
+  "engagement": {
+    "what": "Who was consulted, what they said, and what changed as a result.",
+    "how": "Record issues and your response to each. Consultation that changes nothing reads as a formality, and reviewers say so.",
+    "example": "Six consultation events reached 412 people, 38% women. The main issues were access road dust and local employment; the layout was amended to move the haul route 200 m from Kabaale village."
+  },
+  "monitoring": {
+    "what": "How compliance will be checked once the project is running.",
+    "how": "Parameter, location with coordinates, frequency, limit and who does it. This table becomes the client's monthly reporting obligation.",
+    "example": "Quarterly effluent sampling at the outfall against the national discharge standard, continuous noise at two receptors during construction, annual biodiversity monitoring."
+  },
+  "institutional": {
+    "what": "Who implements the ESMP and what it costs.",
+    "how": "Budget it properly. An ESMP without a budget is a statement of intent, and lenders treat it as one.",
+    "example": "ESMP implementation is budgeted at USD 340,000 in year one and USD 85,000 annually, funded from the project operating budget, with a full-time E&S officer appointed before construction."
+  },
+  "conclusion": {
+    "what": "Your recommendation to the regulator.",
+    "how": "State the conditions you think should attach to the approval. Being specific here is what makes the report useful rather than descriptive.",
+    "example": "The project is recommended for approval subject to eight conditions, including a pre-construction biodiversity survey, a grievance mechanism operating before mobilisation, and quarterly reporting."
+  },
+
     "safety": {
       "what": "Shows whether people are getting hurt and what you did about it.",
       "how": "Log every incident and near-miss, even ones with no injury. Fill the training table from your attendance sheets. If nothing happened, leave the log empty — that reports zero, it doesn't look like you forgot.",

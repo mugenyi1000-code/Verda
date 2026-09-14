@@ -193,9 +193,30 @@ sub-sections in the sidebar:
   prints the returns as an aligned block above each narrative, and follows
   the ESSR convention of reporting "no change" explicitly rather than
   leaving a section blank.
-- **ToR & ESIA Reporting** — structured input following the standard
-  ESIA/ToR outline, with an AI-assisted draft and a credits-based "submit
-  for EEIS processing" step.
+- **Terms of Reference** and **ESIA Reporting** — **two separate documents,
+  because that is what they are.** The ToR is the scoping document approved
+  before fieldwork starts: 12 sections covering objectives, study area, scope
+  of work, methodology and baseline studies required, stakeholder
+  requirements, deliverables, team, programme and QA. The ESIA is the
+  assessment itself: 11 sections from baseline through impacts, alternatives,
+  the ESMP and the monitoring plan. Each has its own screen, its own saved
+  documents and its own draft; a switch at the top moves between them.
+
+  Both take the same structured input as Verda Reporting — **28 data tables**
+  with add/remove rows, automatic charts, per-section drag-and-drop figures
+  and photographs, guided mode, and .txt plus standalone .html downloads.
+  ESIA impacts are scored before and after mitigation so the chart shows what
+  each measure actually buys.
+
+  **Coordinates are linked to the map.** Six tables take latitude and
+  longitude — study area boundary, proposed and actual sampling points,
+  sensitive receptors, consultation locations and monitoring points. Each row
+  has a **Map** button offering four ways to capture a point: click the Esri
+  basemap, take the device's GPS, use the client's saved site location, or
+  type it in. Values are range-validated and flagged when wrong, and every
+  coordinate table plots its points as an inline SVG that needs **no tiles and
+  no network** — the basemap is better when it loads, but a plot that vanishes
+  without a connection is useless at a quarry with no signal.
 - **Training & Competency** — a **95-course catalogue** across induction,
   emergency, high-risk work, plant, chemical and health, mining, environment,
   management systems, social and sector-specific streams. Each carries its
