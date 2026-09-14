@@ -457,6 +457,14 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
+  /* An empty table is the first thing a new user meets on half these screens.
+     Give it the module's own illustration and a sentence naming the next
+     action, rather than a line of grey text that explains nothing. */
+  function emptyState(illusName, message, cols) {
+    const inner = `<div class="empty-state">${illustration(illusName)}<p>${message}</p></div>`;
+    return cols ? `<tr><td colspan="${cols}">${inner}</td></tr>` : inner;
+  }
+
   function card(title, bodyHtml, extraClass) {
     return `<div class="card ${extraClass || ""}"><h3>${title}</h3>${bodyHtml}</div>`;
   }
@@ -1260,7 +1268,7 @@
           <button class="btn btn-ghost btn-sm" data-dl="${esc(r.id)}">.txt</button>
           <button class="btn btn-ghost btn-sm" data-dlhtml="${esc(r.id)}">Full report</button>
         </td></tr>`).join("") ||
-        `<tr><td colspan="7" class="muted">No reports generated yet.</td></tr>`;
+        emptyState("documents", "No reports yet. Pick a format above, tick the sections that apply, and <strong>Generate</strong> — the tables and photographs come with it.", 7);
       const base = (r) => `${REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting"}-${r.clientName.replace(/\s+/g, "_")}-${String(r.period).replace(/\s+/g, "_")}`;
       main.querySelectorAll("[data-dl]").forEach(btn => btn.addEventListener("click", () => {
         const r = state.reports.find(x => x.id === btn.dataset.dl);
@@ -1912,7 +1920,7 @@
           <button class="btn btn-ghost btn-sm" data-txt="${esc(r.id)}">.txt</button>
           <button class="btn btn-ghost btn-sm" data-html="${esc(r.id)}">Full document</button>
           ${r.status ? statusBadge(r.status, "warning") : ""}</td></tr>`).join("") ||
-        `<tr><td colspan="7" class="muted">Nothing generated yet.</td></tr>`;
+        emptyState("documents", "Nothing generated yet. Fill the sections that apply and Verda assembles the document.", 7);
       main.querySelectorAll("[data-txt]").forEach(b => b.addEventListener("click", () => {
         const r = state.docRecords.find(x => x.id === b.dataset.txt);
         downloadText(`${doc.filePrefix}-${r.project.replace(/[^\w]+/g, "_")}.txt`, r.text);
@@ -2245,7 +2253,7 @@
             <td class="row-actions">
               <button class="btn btn-ghost btn-sm" data-done="${esc(e.id)}" title="Record an inspection today">Inspected</button>
               <button class="btn btn-ghost btn-sm" data-del="${esc(e.id)}">Remove</button></td></tr>`).join("") ||
-          `<tr><td colspan="10" class="muted">No equipment registered yet. Add the plant and machines that carry a statutory examination — that is where a lapse costs most.</td></tr>`;
+          emptyState("audit", "No equipment registered. Add the plant and machines carrying a statutory examination — <strong>that is where a lapse costs most</strong>.", 10);
 
         const overdue = rows.filter(r => r.st.status === "critical").length;
         const soon = rows.filter(r => r.st.status === "warning").length;
@@ -2978,7 +2986,7 @@
               days !== null && days < 0 ? " (expired)" : expiring ? ` (${days}d)` : ""}</td>
             <td>${esc(sc.contact || "—")}</td>
             <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(sc.id)}">Remove</button></td></tr>`;
-        }).join("") || `<tr><td colspan="7" class="muted">No sub-contractors registered yet. Every company that brings workers on site belongs here.</td></tr>`;
+        }).join("") || emptyState("people", "No sub-contractors registered. <strong>Every company that brings workers on site belongs here</strong> — their injuries count in your rates.", 7);
         panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
           state.subcontractors = state.subcontractors.filter(x => x.id !== b.dataset.del);
           save(); refresh();
@@ -3046,7 +3054,7 @@
           <td>${esc(w.employer || "—")}</td><td>${Number(w.headcount) || 0}</td><td>${Number(w.female) || 0}</td>
           <td>${(Number(w.hours) || 0).toLocaleString()}</td>
           <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(w.id)}">Remove</button></td></tr>`).join("") ||
-          `<tr><td colspan="8" class="muted">No hours recorded yet — until there are, every frequency rate shows a dash.</td></tr>`;
+          emptyState("governance", "No hours recorded. Until they are, every frequency rate shows a dash rather than a zero — because a zero would read as good news.", 8);
         const tot = exposure();
         panel.querySelector("#wf-total").innerHTML = state.workforce.length
           ? `<tr><th colspan="4">Total</th><th>${tot.headcount}</th><th>${tot.female}</th><th>${tot.hours.toLocaleString()}</th><th></th></tr>` : "";
@@ -4050,7 +4058,7 @@
         return `<tr><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.role || "—")}</td>
           <td>${esc(t.employer || t.employerType || "—")}</td><td>${esc(t.course)}</td>
           <td>${esc(t.completed)}</td><td>${esc(t.expires)}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
-      }).join("") || `<tr><td colspan="8" class="muted">No training records yet.</td></tr>`;
+      }).join("") || emptyState("training", "No training recorded. Choose a course and Verda sets the refresher date from its validity period.", 8);
     }
     refresh();
 

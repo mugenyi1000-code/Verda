@@ -282,6 +282,36 @@ one is available today:
    need real auth, multi-tenancy and a payment gateway first; the planner
    is a plan, not a forecast.
 
+## Design
+
+The screens are scanned and operated, not read, so the craft is information
+design rather than typography-as-decoration.
+
+**Type.** IBM Plex Sans for the interface; **IBM Plex Mono for anything that is
+a measurement or a reference** — KPI values, coordinates, permit numbers, m³,
+kWh, LTIFR, table numerals. An ESSR is mostly readings, and they belong in a
+face that lines up in a column and reads like instrument output. Plex was drawn
+for an engineering company, which is closer to this subject than the usual
+product-UI faces. A full system fallback stack is declared, so the app is
+legible before the webfont lands or if it never does.
+
+**Elevation by role, not by habit.** A card is a hairline container on a
+surface. Shadow means "this floats above the page", which is true of a modal,
+the coordinate picker, the recommended plan and the generated-document
+preview — and of nothing else. Three radii separate a control from a card from
+a feature panel, instead of one radius stamped on everything.
+
+**State encoded as form, not only colour.** Status badges carry a dot as well
+as a label; overdue rows carry a left severity stripe that survives a greyscale
+print and a colour-blind reader; the four themes each declare a complete
+palette so no colour is inherited from a block that may not apply. Slate is
+designed as a dark theme in its own right rather than an inversion.
+
+**Empty states** use the module's own illustration and name the next action —
+half these screens start empty, and a line of grey text explains nothing.
+
+**Print** styles are included, because the generated report is the deliverable.
+
 Other platform features: free sign-up with starter credits then buy more
 (demo billing), a colour theme switcher (Forest/Ocean/Amber/Slate — also
 drives the map basemap), a language switcher (English/Kiswahili/Français/

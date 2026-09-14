@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
   const page = await b.newPage({ viewport: { width: 1280, height: 1000 } });
   const errs = [];
   page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
-  page.on('console', m => { if (m.type() === 'error' && !/ERR_TUNNEL|404|ERR_BLOCKED|ERR_NAME/.test(m.text())) errs.push('CONSOLE: ' + m.text()); });
+  page.on('console', m => { if (m.type() === 'error' && !/ERR_TUNNEL|404|ERR_BLOCKED|ERR_NAME|ERR_CERT|fonts\.googleapis/.test(m.text())) errs.push('CONSOLE: ' + m.text()); });
   page.on('dialog', d => { errs.push('DIALOG: ' + d.message()); d.dismiss(); });
 
   const target = 'file://' + require('path').resolve(__dirname, '..', 'dist', 'verda-demo.html');
