@@ -26,6 +26,8 @@ client relationship in-house.
 - **`docs/outreach-emails/`** — personalized pitch emails for the five warm leads already scoped (Abubaker Technical, Cosmic Investments, Kaletex Ventures, Lusango Real Uganda, Crested Crane Timber).
 - **`tools/build-single-file.js`** — bundles `app/` into `dist/verda-demo.html`, one self-contained file. It extracts the page shell from `app/index.html` rather than keeping its own copy, and fails the build if `init()` looks up an element the shell does not contain.
 - **`tools/check-build.js`** — smoke-tests the *built* file in a headless browser: that it renders at all, every section, all five jurisdictions, and the reporting screen. Run it after every build — passing against `app/` is not evidence the bundle works.
+- **`docs/design-system.md`** — the design system written out: the four theme palettes, the type ramp, component anatomy and the rules behind them. Written to be handed to a designer or pasted into a prompt-driven builder.
+- **`design/`** — a generator for eight hi-fi artboards (dashboard, ESSR builder, analytics, inspections, audits, workflow run, phone field-capture, and the system sheet), matched value-for-value to `app/styles.css`. `node design/build-artboards.mjs`.
 - **`app/`** — **Verda**, a static (no-backend) web app that runs the whole compliance care plan offer day-to-day. Open `app/index.html` in a browser. See below for what it does.
 
 ## Fastest path to first invoice
@@ -332,6 +334,11 @@ designed as a dark theme in its own right rather than an inversion.
 half these screens start empty, and a line of grey text explains nothing.
 
 **Print** styles are included, because the generated report is the deliverable.
+
+**The system is written down.** `docs/design-system.md` states every token, the
+type ramp, each component's anatomy and states, and the eight rules the screens
+are held to. `design/` generates hi-fi artboards from the same tokens, so the
+mockups and the running app cannot quietly drift apart.
 
 Other platform features: free sign-up with starter credits then buy more
 (demo billing), a colour theme switcher (Forest/Ocean/Amber/Slate — also
