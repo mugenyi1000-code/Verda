@@ -13,7 +13,14 @@ client into a compliance care plan client. Before sending:
 4. If they say yes verbally, follow up same day with
    `../compliance-care-plan-agreement-template.md` filled in — don't let momentum cool.
 
-The five files here (Abubaker Technical, Cosmic Investments, Kaletex
-Ventures, Lusango Real Uganda, Crested Crane Timber) share the same
-structure with light tailoring by likely facility type. Adjust the
-tailoring if it doesn't match what EEIS actually scoped for that client.
+Two templates, differing only in the moment they are sent:
+
+- `template-post-approval.md` — sent just after an ESIA certificate is
+  issued, when the compliance clock has started and nobody has yet been
+  made responsible for it.
+- `template-renewal-ahead.md` — sent to a client already holding a
+  certificate, framed around the next renewal date.
+
+Neither names a client. Every client-specific detail is a `[bracket]`,
+because a pitch that reads as a mail-merge is worse than no pitch: fill in
+the facility, the approval date and the tier from that client's own file.

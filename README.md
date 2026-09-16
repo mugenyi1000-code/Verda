@@ -23,9 +23,9 @@ client relationship in-house.
 - **`docs/exit-strategy.md`** — Verda built backwards from an acquisition: what a $5M and a $10M outcome actually require, who the realistic buyers are and what each pays for, and which value drivers are reachable before a backend exists.
 - **`docs/service-scope-checklist.md`** — what a quarterly visit actually covers (effluent/air sampling, waste audit, permit tracking) so delivery stays consistent and billable.
 - **`docs/compliance-care-plan-agreement-template.md`** — a short-form service agreement to get a signature fast (not a substitute for legal review).
-- **`docs/outreach-emails/`** — personalized pitch emails for the five warm leads already scoped (Abubaker Technical, Cosmic Investments, Kaletex Ventures, Lusango Real Uganda, Crested Crane Timber).
+- **`docs/outreach-emails/`** — two pitch templates for converting an existing ESIA/ESMP client into a compliance care plan: one for just after a certificate is issued, one framed around the next renewal. Client details are `[brackets]`, filled in per client.
 - **`tools/build-single-file.js`** — bundles `app/` into `dist/verda-demo.html`, one self-contained file. It extracts the page shell from `app/index.html` rather than keeping its own copy, and fails the build if `init()` looks up an element the shell does not contain.
-- **`tools/check-build.js`** — smoke-tests the *built* file in a headless browser: that it renders at all, every section, all five jurisdictions, and the reporting screen. Run it after every build — passing against `app/` is not evidence the bundle works.
+- **`tools/check-build.js`** — smoke-tests the *built* file in a headless browser: that it renders at all, every section, all six jurisdictions, and the reporting screen. Run it after every build — passing against `app/` is not evidence the bundle works.
 - **`docs/design-system.md`** — the design system written out: the four theme palettes, the type ramp, component anatomy and the rules behind them. Written to be handed to a designer or pasted into a prompt-driven builder.
 - **`design/`** — a generator for eight hi-fi artboards (dashboard, ESSR builder, analytics, inspections, audits, workflow run, phone field-capture, and the system sheet), matched value-for-value to `app/styles.css`. `node design/build-artboards.mjs`.
 - **`app/`** — **Verda**, a static (no-backend) web app that runs the whole compliance care plan offer day-to-day. Open `app/index.html` in a browser. See below for what it does.
@@ -61,7 +61,7 @@ mercury and the Minamata Convention, OECD due diligence and chain-of-custody
 for 3TG and cobalt), **mineral processing, smelting and refining**, and
 **quarrying and aggregates**.
 
-**Five jurisdictions: Uganda, Kenya, Tanzania, DR Congo and Zambia.** A
+**Six jurisdictions: Uganda, Kenya, Tanzania, Rwanda, DR Congo and Zambia.** A
 jurisdiction selector in the top bar drives a per-country regulatory register
 — the regulators and what each one actually regulates, the principal
 instruments with their citations, and the permits and approvals with their

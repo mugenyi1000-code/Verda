@@ -1156,7 +1156,7 @@ place("System.dc.html", COL[0] + 700, 4900);
 const canvas = {
   artboards: boards.map(b => at[b.file]),
   annotations: [
-    { id: "brief", x: 0, y: -300, w: 330, text: "Verda \u2014 EHS and E&S compliance monitoring for industrial sites in Uganda, Kenya, Tanzania, DR Congo and Zambia. Static hi-fi mockups, matched value-for-value to app/styles.css." },
+    { id: "brief", x: 0, y: -300, w: 330, text: "Verda \u2014 EHS and E&S compliance monitoring for industrial sites in Uganda, Kenya, Tanzania, Rwanda, DR Congo and Zambia. Static hi-fi mockups, matched value-for-value to app/styles.css." },
     { id: "row-monitor", x: 420, y: -220, w: 300, text: "Row 1 \u2014 Monitor: what is happening on site now. The dashboard, the auto-KPI engine, the equipment inspection register." },
     { id: "row-manage", x: 420, y: 1620, w: 300, text: "Row 2 \u2014 Manage: the deliverables. The ESSR builder with tables, photographs and carried-forward figures; an audit protocol being worked; a procedure in progress." },
     { id: "row-system", x: 0, y: 4640, w: 330, text: "Row 3 \u2014 the phone screen used standing on a bench, and the design system every board above is built from." }

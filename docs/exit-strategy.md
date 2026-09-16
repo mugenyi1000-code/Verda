@@ -123,14 +123,14 @@ operations, and whether it is reachable today.
 | **Recurring revenue** | Annual contracts billed up front, not per-report credits. Credits are a demo mechanic and a bad basis for valuation — they are usage revenue, which is discounted against subscription revenue | **Blocked** — needs a backend and a payment gateway |
 | **Low churn** | The cumulative figures (§4). Also: annual terms, and the report archive becoming the client's system of record | **Partly now** — carry-forward is buildable today |
 | **100s of enterprise customers** | Self-serve onboarding, multi-tenancy, per-tenant data isolation | **Blocked** — needs a backend |
-| **Multi-country compliance** | Every checklist, permit list and limit tagged with a jurisdiction, a legal source and a review date | **Done** — Uganda, Kenya, Tanzania, DR Congo and Zambia, each with regulators, instruments and permits, under a dated review cycle |
+| **Multi-country compliance** | Every checklist, permit list and limit tagged with a jurisdiction, a legal source and a review date | **Done** — Uganda, Kenya, Tanzania, Rwanda, DR Congo and Zambia, each with regulators, instruments and permits, under a dated review cycle |
 | **Strong customer data** | The accumulated columns, the photo evidence archive, the permit expiry register. This is the asset, not the UI | **Partly now** |
 | **Integrations** | Read from what clients already run: accounting for fuel and energy, HR for headcount, lab portals for results. Each integration is a switching cost | **Blocked** — needs a backend |
 | **AI-assisted compliance** | Right now this is a documented deterministic template engine, and the README says so. An acquirer's technical diligence *will* open `app/ai.js`. Overclaiming here is the fastest way to lose a deal | **Blocked** — needs an API proxy |
 | **Proprietary workflows** | The ESSR structure, the three-block section pattern, the cumulative carry-forward. Already the most defensible thing in the repo | **Now** |
 | **High switching costs** | See §4 — this is the single highest-leverage item and it is available today |  **Now** |
 | **Strong brand** | Being *the* name for lender-mandated E&S monitoring reporting in the region beats being a generic EHS suite nobody has heard of | **Now** — it is a positioning choice |
-| **Clear regulatory knowledge** | The content library, with sources and review dates, maintained on a schedule | **Done for five countries** — kept current is now an operating commitment, not a build task |
+| **Clear regulatory knowledge** | The content library, with sources and review dates, maintained on a schedule | **Done for six countries** — kept current is now an operating commitment, not a build task |
 | **Documented IP** | Clean licence, clear ownership, no copied content, dependency provenance, and a written record of what was authored when | **Now** |
 
 Note the pattern: **seven of the twelve are reachable without a backend**, and

@@ -1,5 +1,5 @@
-**To:** [Abubaker Technical contact name]
-**Subject:** Keeping [Abubaker Technical] compliant after your NEMA approval — a simple next step
+**To:** [Contact name], [Client name]
+**Subject:** Keeping [Client name] compliant after your NEMA approval — a simple next step
 
 Dear [Name],
 
@@ -9,7 +9,7 @@ effluent/air monitoring, waste-handling records, and the renewal deadline
 all need to be tracked on an ongoing basis.
 
 Rather than scrambling for support when a deadline or inspection comes up,
-we'd like to offer [Abubaker Technical] a straightforward compliance
+we'd like to offer [Client name] a straightforward
 compliance care plan: a fixed-fee quarterly site visit, a short compliance report, and
 proactive tracking of your permit renewal dates — delivered by the same
 team that already knows your site and your approval conditions.

@@ -15,9 +15,9 @@ The canvas of hi-fi artboards built from this system lives in `design/`
 ## 0. What the product is, in one paragraph
 
 Verda is environmental, health and safety compliance monitoring for industrial
-sites — mines, quarries, factories, construction — in Uganda, Kenya, Tanzania,
-DR Congo and Zambia. Its users are E&S consultants and site SHE officers
-producing lender-mandated monthly reports (ESSRs), running audits and
+sites — mines, quarries, factories, construction — in Uganda, Kenya,
+Tanzania, Rwanda, DR Congo and Zambia. Its users are E&S consultants and site
+SHE officers producing lender-mandated monthly reports (ESSRs), running audits and
 inspections, and tracking permits that expire. **The screens are scanned and
 operated, not read.** That single fact sets everything that follows:
 information design over decoration, state readable at a glance, figures that

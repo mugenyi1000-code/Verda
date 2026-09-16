@@ -48,14 +48,10 @@ compliance as a cost of keeping their NEMA certificate.
 The single biggest cost in professional services is customer acquisition.
 This compliance care plan has none, because the buyer already exists:
 
-- Abubaker Technical
-- Cosmic Investments
-- Kaletex Ventures
-- Lusango Real Uganda
-- Crested Crane Timber
+every client whose ESIA or ESMP EEIS has already completed or has in
+progress. Keep that list where client records are kept, not in a repository.
 
-Each is a completed or in-progress ESIA/ESMP client. Each is a warm lead for
-a compliance care plan, not a cold pitch — the ask is "let us keep you compliant" at
+Each of them is a warm lead for a compliance care plan, not a cold pitch — the ask is "let us keep you compliant" at
 the moment they're already signing something (contract close, final report
 handover, or a check-in call).
 
@@ -64,7 +60,8 @@ handover, or a check-in call).
 **Week 1**
 - Finalize the three pricing tiers (`pricing-tiers.md`) against actual site
   risk category and travel distance.
-- Send the personalized email for each of the five warm leads.
+- Send the relevant template from `outreach-emails/` to each warm lead,
+  filled in from that client's own file.
 
 **Weeks 2–4**
 - Convert verbal interest to signature using the short-form agreement.

@@ -755,6 +755,7 @@ td .empty-state { padding: 26px 16px; }
         <option value="tz">🇹🇿 Tanzania</option>
         <option value="cd">🇨🇩 DR Congo</option>
         <option value="zm">🇿🇲 Zambia</option>
+        <option value="rw">🇷🇼 Rwanda</option>
       </select>
       <select id="lang-select" title="Language">
         <option value="en">English</option>
@@ -804,7 +805,7 @@ const VERDA_SEED = {
   // below records when this register was last written and who should check
   // it. Amendments, statutory instruments and fee schedules change often.
   contentReview: { compiled: "2026-09", verifyBy: "2027-03", owner: "EHS content lead", linksChecked: "2026-09",
-    note: "Regulator sites and e-permitting portals were checked in September 2026. Government portals are rebuilt and renamed often — if a link fails, start from the regulator's own home page. Verify every instrument, permit and authority against the current law of the jurisdiction before relying on it. Where a client operates across borders, the stricter requirement governs unless a local legal opinion says otherwise." },
+    note: "Regulator sites and e-permitting portals were checked in September 2026. Government portals are rebuilt and renamed often — if a link fails, start from the regulator's own home page. Verify every instrument, permit and authority against the current law of the jurisdiction before relying on it. Where a client operates across borders, the stricter requirement governs unless a local legal opinion says otherwise. Rwanda was added in September 2026 and carries the same warning twice over: two of its instruments are cited by year rather than by number (the 2016 air quality law and the 2024 mining law) because the number could not be confirmed from an official source — get the citation from the Official Gazette or RwandaLII before quoting either in a report." },
 
   countries: [
     {
@@ -1741,6 +1742,204 @@ const VERDA_SEED = {
           "when": "Where sources are used"
         }
       ]
+    },
+    {
+      "id": "rw",
+      "name": "Rwanda",
+      "languages": [
+        "Kinyarwanda",
+        "English",
+        "French",
+        "Swahili"
+      ],
+      "currency": "RWF",
+      "reportingLanguage": "English",
+      "regulators": [
+        {
+          "name": "Rwanda Environment Management Authority",
+          "abbr": "REMA",
+          "url": "https://www.rema.gov.rw/",
+          "remit": "EIA certificates, environmental audit certification, pollution and air quality control"
+        },
+        {
+          "name": "Rwanda Development Board",
+          "abbr": "RDB",
+          "url": "https://rdb.rw/",
+          "remit": "Reviews EIA reports, runs site visits and public hearings; investment registration; national parks"
+        },
+        {
+          "name": "Rwanda Water Resources Board",
+          "abbr": "RWB",
+          "url": "https://www.rwb.rw/",
+          "remit": "Water use permits — abstraction, discharge, catchment management"
+        },
+        {
+          "name": "Rwanda Mines, Petroleum and Gas Board",
+          "abbr": "RMB",
+          "url": "https://www.rmb.gov.rw/",
+          "remit": "Mineral and quarry licensing, mine inspection, blasting recommendations"
+        },
+        {
+          "name": "Ministry of Public Service and Labour",
+          "abbr": "MIFOTRA",
+          "url": "https://mifotra.gov.rw/",
+          "remit": "Labour inspection, occupational safety and health, workplace safety committees"
+        },
+        {
+          "name": "Rwanda Forestry Authority",
+          "abbr": "RFA",
+          "url": "https://www.rfa.rw/",
+          "remit": "Forest reserves, tree cutting authorisation, forest management"
+        },
+        {
+          "name": "Rwanda Standards Board",
+          "abbr": "RSB",
+          "remit": "National standards, product and service certification, metrology"
+        },
+        {
+          "name": "Rwanda National Police — Fire and Rescue",
+          "abbr": "—",
+          "remit": "Fire safety inspection and certification"
+        }
+      ],
+      "laws": [
+        {
+          "title": "Law on Environment",
+          "instrument": "N° 48/2018 of 13/08/2018",
+          "covers": "Framework environmental law; environmental assessment under Article 32"
+        },
+        {
+          "title": "Ministerial Order establishing the list of projects that must undergo environmental impact assessment",
+          "instrument": "N° 001/2019 of 15/04/2019",
+          "covers": "Which projects require a full EIA before authorisation"
+        },
+        {
+          "title": "Ministerial Order establishing the list of projects that must undergo environmental audit",
+          "instrument": "N° 001/2021 of 08/02/2021",
+          "covers": "Audit obligation for listed ongoing projects, instructions and procedure"
+        },
+        {
+          "title": "Law regulating labour in Rwanda",
+          "instrument": "N° 66/2018 of 30/08/2018",
+          "covers": "Employment, working conditions, employer health and safety duties"
+        },
+        {
+          "title": "Ministerial Order on occupational safety and health",
+          "instrument": "N° 02/MIFOTRA/22 of 30/08/2022",
+          "covers": "Workplace OSH requirements and safety committees"
+        },
+        {
+          "title": "Law establishing Rwanda Forestry Authority",
+          "instrument": "N° 72/2019 of 29/01/2020",
+          "covers": "Forest resource management, protection and authorisations"
+        },
+        {
+          "title": "Air quality and prevention of air pollution law",
+          "instrument": "2016",
+          "covers": "Air pollution control; mandates REMA to regulate air quality"
+        },
+        {
+          "title": "Mining and quarry law",
+          "instrument": "2024",
+          "covers": "Exploration, mining, processing, trade and export of minerals; licence conditions"
+        }
+      ],
+      "portals": [
+        {
+          "name": "REMA online application portal",
+          "what": "Environmental assessment and audit applications, ToR and report submission",
+          "url": "https://applications.rema.gov.rw/",
+          "verified": true
+        },
+        {
+          "name": "REMA — services",
+          "what": "What each certificate covers and what the application requires",
+          "url": "https://www.rema.gov.rw/services",
+          "verified": true
+        },
+        {
+          "name": "RDB Business Procedures — EIA certificate",
+          "what": "The EIA certificate procedure step by step, with fees and timelines",
+          "url": "https://businessprocedures.rdb.rw/procedure/212?l=en",
+          "verified": true
+        },
+        {
+          "name": "RWater Permit — water concession portal",
+          "what": "Apply for, track and manage a water use permit",
+          "url": "https://waterpermit.rwb.rw/",
+          "verified": true
+        },
+        {
+          "name": "Rwanda Water Portal",
+          "what": "Catchment and water resource data",
+          "url": "https://waterportal.rwb.rw/",
+          "verified": true
+        },
+        {
+          "name": "RMB — licensing",
+          "what": "Mining, quarry and mineral trading licence requirements",
+          "url": "https://www.rmb.gov.rw/1/licensing",
+          "verified": true
+        },
+        {
+          "name": "IremboGov",
+          "what": "The national e-service portal many permits are applied for through",
+          "url": "https://irembo.gov.rw/",
+          "verified": true
+        }
+      ],
+      "permits": [
+        {
+          "permit": "EIA Certificate",
+          "authority": "REMA (RDB reviews and runs the public hearing)",
+          "when": "Before implementing a project on the MO N° 001/2019 list"
+        },
+        {
+          "permit": "Environmental audit certificate",
+          "authority": "REMA",
+          "when": "For ongoing projects on the MO N° 001/2021 list"
+        },
+        {
+          "permit": "Water use permit",
+          "authority": "RWB",
+          "when": "Before abstracting from any natural source, or discharging — includes mineral washing and industrial use"
+        },
+        {
+          "permit": "Mining or quarry licence",
+          "authority": "RMB",
+          "when": "Before exploration or extraction; renewed and maintained on fee"
+        },
+        {
+          "permit": "Blasting materials recommendation",
+          "authority": "RMB",
+          "when": "Before using explosives"
+        },
+        {
+          "permit": "Investment certificate / project registration",
+          "authority": "RDB",
+          "when": "At project set-up, through the One Stop Centre"
+        },
+        {
+          "permit": "Tree cutting / forest use authorisation",
+          "authority": "RFA",
+          "when": "Before clearing trees or working in a forest reserve"
+        },
+        {
+          "permit": "Protected area consent",
+          "authority": "RDB",
+          "when": "For work in or near Volcanoes, Akagera or Nyungwe national parks"
+        },
+        {
+          "permit": "Fire safety inspection",
+          "authority": "Rwanda National Police — Fire and Rescue",
+          "when": "Before occupation and periodically thereafter"
+        },
+        {
+          "permit": "Product / service certification",
+          "authority": "RSB",
+          "when": "Where a national standard applies to what is produced"
+        }
+      ]
     }
   ],
 
@@ -1904,7 +2103,8 @@ const VERDA_SEED = {
       "countryNotes": {
         "zm": "Environmental Protection Fund contribution and Mine Safety Department inspections are the two Zambian requirements most often missed.",
         "cd": "Mining projects are approved through DPEM rather than ACE, and all submissions are made in French.",
-        "tz": "Mining Commission licensing plus NEMC environmental certification are separate obligations — holding one does not satisfy the other."
+        "tz": "Mining Commission licensing plus NEMC environmental certification are separate obligations — holding one does not satisfy the other.",
+        "rw": "RMB holds the licence and REMA holds the EIA certificate — and the water use permit for mineral washing is a third, separate application to RWB."
       }
     },
     {
@@ -12067,7 +12267,33 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
         "licence": "Government data",
         "note": "Several Zambian wetlands are Game Management Areas — a separate consent regime again."
       }
-    ]
+    ],
+    "rw": [
+        {
+          "name": "REMA",
+          "what": "Wetland, environmental and assessment spatial data",
+          "url": "https://www.rema.gov.rw/",
+          "format": "Request",
+          "licence": "Government data",
+          "note": "Rwanda's wetlands are regulated tightly and some are designated Ramsar sites — the Rugezi Marsh among them. Check the Ramsar Sites Information Service for the current designated list as well as REMA."
+        },
+        {
+          "name": "Rwanda Water Resources Board (RWB)",
+          "what": "Catchment boundaries and water resource data",
+          "url": "https://waterportal.rwb.rw/",
+          "format": "Portal / request",
+          "licence": "Government data",
+          "note": "Abstraction from or discharge to a wetland needs an RWB water use permit independently of any REMA decision."
+        },
+        {
+          "name": "Rwanda Development Board (RDB)",
+          "what": "National park boundaries — Volcanoes, Akagera, Nyungwe",
+          "url": "https://rdb.rw/",
+          "format": "Request",
+          "licence": "Government data",
+          "note": "RDB manages the national parks, so proximity to one is a separate consent question from the EIA itself."
+        }
+      ]
   },
 
   // ---- Statutory officer roles --------------------------------------------
@@ -12274,7 +12500,51 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
         "remit": "Mine safety inspection under the Mines and Minerals Development Act.",
         "find": "Mine Safety Department, Ministry of Mines"
       }
-    ]
+    ],
+    "rw": [
+        {
+          "role": "District Environmental Officer",
+          "level": "District",
+          "remit": "District-level environmental compliance, inspection and nuisance control.",
+          "find": "District office"
+        },
+        {
+          "role": "REMA Environmental Inspector",
+          "level": "National",
+          "remit": "REMA inspection and enforcement; assessment and audit compliance.",
+          "find": "REMA head office"
+        },
+        {
+          "role": "District Urban Planner / One Stop Centre officer",
+          "level": "District",
+          "remit": "Development control, building and construction permits through the district One Stop Centre.",
+          "find": "District One Stop Centre"
+        },
+        {
+          "role": "District Forest and Natural Resources Officer",
+          "level": "District",
+          "remit": "Forest reserves, tree cutting authorisation, natural resource use.",
+          "find": "District office / RFA"
+        },
+        {
+          "role": "RWB Catchment Officer",
+          "level": "Catchment",
+          "remit": "Water use permitting and catchment management.",
+          "find": "RWB catchment office"
+        },
+        {
+          "role": "Labour Inspector",
+          "level": "District / national",
+          "remit": "Labour inspection, occupational safety and health, workplace safety committees.",
+          "find": "MIFOTRA / district labour inspectorate"
+        },
+        {
+          "role": "Mine Inspector",
+          "level": "National",
+          "remit": "Mine and quarry inspection, licence conditions, blasting.",
+          "find": "RMB"
+        }
+      ]
   },
 
   // ---- Audit protocols -----------------------------------------------------

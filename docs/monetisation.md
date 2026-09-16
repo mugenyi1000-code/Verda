@@ -51,9 +51,9 @@ In the order they pay off:
 - **Coverage:** 21 sectors and 423 checklist items, not one vertical — with
   mining covered to the depth a lender actually asks for (tailings, ASM due
   diligence, closure liability), which the generalist suites do not do.
-- **Five jurisdictions with their own regulatory register:** Uganda, Kenya,
-  Tanzania, DR Congo and Zambia — regulators, instruments and permits per
-  country. This is the content asset an acquirer cannot quickly rebuild.
+- **Six jurisdictions with their own regulatory register:** Uganda, Kenya,
+  Tanzania, Rwanda, DR Congo and Zambia — regulators, instruments and permits
+  per country. This is the content asset an acquirer cannot quickly rebuild.
 - **Three reporting frameworks:** Verda's modular national (NEMA-style)
   segments, IFC PS1–PS8 (which matters to every lender-financed client), and
   the full 23-section monthly ESSR self-monitoring format that large

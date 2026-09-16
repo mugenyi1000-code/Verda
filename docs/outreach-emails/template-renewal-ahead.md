@@ -1,10 +1,10 @@
-**To:** [Cosmic Investments contact name]
+**To:** [Contact name], [Client name]
 **Subject:** A fixed-fee way to stay ahead of NEMA compliance at [site name]
 
 Dear [Name],
 
-With [project/facility name]'s ESIA/ESMP now approved, [Cosmic
-Investments] holds a NEMA certificate — and with it, an ongoing obligation
+With [project/facility name]'s ESIA/ESMP now approved, [Client
+name] holds a NEMA certificate — and with it, an ongoing obligation
 to monitor and report on compliance rather than a one-time box to tick.
 
 We'd like to propose a compliance care plan: a fixed quarterly

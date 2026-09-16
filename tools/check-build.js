@@ -46,7 +46,7 @@ const { chromium } = require('playwright');
   console.log('sections rendered in built file: ' + ids.length);
 
   // jurisdiction switching works in the built file
-  for (const cc of ['ug','ke','tz','cd','zm']) {
+  for (const cc of ['ug','ke','tz','cd','zm','rw']) {
     await page.selectOption('#country-select', cc);
     await page.evaluate(() => { location.hash = '#/checklists'; });
     await page.waitForTimeout(250);
