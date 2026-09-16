@@ -251,6 +251,9 @@ sub-sections in the sidebar:
   insurance expiry with overdue flagging, EHS contact) and the **workforce &
   hours register** that every safety rate is calculated from, entered per
   employer so the direct/sub-contractor split is real rather than assumed.
+  Verda ships with **no clients on the books** — the register is yours to fill.
+  Until the first one is added, every screen that files a record against a site
+  says so and sends you here rather than filing it against nothing.
 - **Officer contacts** — the statutory posts that exist in each country
   (district/county environment officer, natural resources officer, physical
   planner, and the rest), what each is responsible for, and where the current

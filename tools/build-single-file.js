@@ -36,7 +36,13 @@ appJs = appJs.replace(
   "Site mapping runs on Leaflet with ArcGIS/Esri basemaps. Third-party map tiles are blocked in this embedded preview — run the full app from app/index.html to see the live map."
 );
 
-// 3. example data, so the first look shows the platform working
+// 3. Example data, so the first look shows the platform working.
+//
+// Only site-agnostic records are seeded — risks, corrective actions. Incidents
+// and training used to be seeded too, but each one is filed against a named
+// client, and Verda no longer ships with any client on the books: the register
+// is the user's to fill. Seeding a record against a site that does not exist
+// would also be a record the app itself now refuses to create.
 const seedScript = `
 (function seedExampleData() {
   var KEY = "verda_state_v2";
@@ -47,20 +53,6 @@ const seedScript = `
   function monthsAhead(n) { var d = new Date(); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); }
 
   var state = {
-    incidents: [
-      { id: "inc_x1", date: monthsAgo(4), client: "Kaletex Ventures", type: "Near-miss", severity: "Medium",
-        desc: "Example: pallet shifted on racking during offload; area cordoned, no injuries.", status: "Closed" },
-      { id: "inc_x2", date: monthsAgo(3), client: "Cosmic Investments", type: "Environmental spill / release", severity: "High",
-        desc: "Example: hydraulic hose failure on excavator released ~15L oil; spill kit deployed, soil removed.", status: "Closed" },
-      { id: "inc_x3", date: monthsAgo(2), client: "Abubaker Technical", type: "First aid case", severity: "Low",
-        desc: "Example: minor laceration to hand during blade change; treated on site.", status: "Closed" },
-      { id: "inc_x4", date: monthsAgo(1), client: "Crested Crane Timber", type: "Near-miss", severity: "Medium",
-        desc: "Example: operator bypassed guard interlock on planer; machine locked out pending retraining.", status: "Under investigation" },
-      { id: "inc_x5", date: daysAgo(9), client: "Lusango Real Uganda", type: "Vehicle incident", severity: "Medium",
-        desc: "Example: reversing tipper contacted site fencing; no injuries, banksman procedure reviewed.", status: "Under investigation" },
-      { id: "inc_x6", date: daysAgo(3), client: "Kaletex Ventures", type: "Near-miss", severity: "Low",
-        desc: "Example: unsecured cable across walkway reported by operator; rerouted same shift.", status: "Open" }
-    ],
     risks: [
       { id: "risk_x1", hazard: "Example: unguarded conveyor drive", area: "Packing line", likelihood: 4, severity: 4,
         controls: "Fixed guard, LOTO procedure, pre-start check", owner: "Plant Engineer" },
@@ -92,14 +84,6 @@ const seedScript = `
         due: daysAgo(28), priority: "Low", status: "Closed", created: daysAgo(50) },
       { id: "act_x8", title: "Example: update ESMP monitoring log template", source: "Audit finding", owner: "EHS Manager",
         due: daysAgo(35), priority: "Low", status: "Closed", created: daysAgo(60) }
-    ],
-    training: [
-      { id: "tr_x1", person: "Example: John Okello", client: "Kaletex Ventures", course: "General EHS Induction", completed: monthsAgo(4), expires: monthsAhead(8) },
-      { id: "tr_x2", person: "Example: Sarah Nabirye", client: "Kaletex Ventures", course: "First Aid at Work", completed: monthsAgo(10), expires: monthsAhead(14) },
-      { id: "tr_x3", person: "Example: Peter Mugisha", client: "Cosmic Investments", course: "Working at Height", completed: monthsAgo(22), expires: monthsAhead(2) },
-      { id: "tr_x4", person: "Example: Grace Auma", client: "Abubaker Technical", course: "Fire Safety & Evacuation", completed: monthsAgo(11), expires: monthsAhead(1) },
-      { id: "tr_x5", person: "Example: David Kato", client: "Crested Crane Timber", course: "Hazardous Chemicals / SDS Awareness", completed: monthsAgo(26), expires: monthsAgo(2) },
-      { id: "tr_x6", person: "Example: Ruth Nakimuli", client: "Lusango Real Uganda", course: "Emergency Response / Spill Response", completed: monthsAgo(14), expires: monthsAgo(2) }
     ]
   };
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* preview still works without it */ }

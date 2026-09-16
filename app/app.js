@@ -27,10 +27,29 @@
     if (c && state.ui.clientId !== c.id) { state.ui.clientId = c.id; save(); }
   }
   // Options for a client picker, with the site in context pre-selected.
+  // With no clients on the books the picker must not be a silently empty
+  // select: an empty select still submits, and a record filed against no site
+  // is worse than one that was never filed. The placeholder carries value ""
+  // so requireClient() below can refuse it.
   function clientOptions() {
+    if (!state.clients.length) {
+      return `<option value="" disabled selected>— add a client first —</option>`;
+    }
     const cur = currentClient();
     return state.clients.map(c =>
       `<option value="${esc(c.name)}" ${cur && c.name === cur.name ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+  }
+  // Read a client picker, refusing the empty placeholder. Returns "" when there
+  // is nothing to file against, having told the user where to go.
+  function requireClient(root, id) {
+    const el = root.querySelector("#" + id);
+    const value = el ? el.value : "";
+    if (!value) {
+      alert("Add a client on the Clients screen first — every record is filed against a site.");
+      location.hash = "#/clients";
+      return "";
+    }
+    return value;
   }
 
   // External links open in a new tab and never hand the opener to the target.
@@ -1941,6 +1960,7 @@
     main.querySelector("#doc-draft").addEventListener("click", () => {
       const data = collect();
       if (!data.sections.length) { alert("Tick at least one section."); return; }
+      if (!requireClient(main, "doc-client")) return;
       if (!spendCredits(S.creditCosts.aiDraft, `${doc.filePrefix} draft`)) return;
       const m = meta();
       const text = VerdaAI.generateEsiaDraft({
@@ -2168,6 +2188,7 @@
         const rows = collect();
         const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
         if (!assessed.length) { alert("Assess at least one item before saving."); return; }
+        if (!requireClient(panel, "ap-client")) return;
         const findings = rows.filter(r => r.grade && r.grade !== "Positive practice");
         const date = panel.querySelector("#ap-date").value || today();
         const client = panel.querySelector("#ap-client").value;
@@ -2556,6 +2577,7 @@
       panel.querySelector("#eq-add").addEventListener("click", () => {
         const assetId = panel.querySelector("#eq-id").value.trim();
         if (!assetId) { alert("Give the asset an ID or description so it can be found on site."); return; }
+        if (!requireClient(panel, "eq-client")) return;
         state.equipment.push({
           id: uid("eq"), assetId, regime: Number(panel.querySelector("#eq-type").value),
           client: panel.querySelector("#eq-client").value,
@@ -3195,6 +3217,7 @@
 
       panel.querySelector("#wf-start").addEventListener("click", () => {
         const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        if (!requireClient(panel, "wf-start-client")) return;
         setCurrentClient(panel.querySelector("#wf-start-client").value);
         state.workflowRuns.push({
           id: uid("run"), templateId: tpl.id,
@@ -3437,6 +3460,7 @@
       panel.querySelector("#sc-add").addEventListener("click", () => {
         const name = panel.querySelector("#sc-name").value.trim();
         if (!name) { alert("Enter the sub-contractor's name."); return; }
+        if (!requireClient(panel, "sc-client")) return;
         state.subcontractors.push({
           id: uid("sc"), name, client: panel.querySelector("#sc-client").value,
           scope: panel.querySelector("#sc-scope").value.trim(),
@@ -3520,6 +3544,7 @@
         const period = panel.querySelector("#wf-period").value.trim();
         const hours = Number(panel.querySelector("#wf-hours").value);
         if (!period) { alert("Enter the period this covers, e.g. October 2026."); return; }
+        if (!requireClient(panel, "wf-client")) return;
         if (!hours) { alert("Enter the hours worked — without them no frequency rate can be calculated."); return; }
         state.workforce.push({
           id: uid("wf"), period, client: panel.querySelector("#wf-client").value,
@@ -4258,6 +4283,7 @@
     main.querySelector("#inc-add").addEventListener("click", () => {
       const desc = main.querySelector("#inc-desc").value.trim();
       if (!desc) { alert("Describe what happened."); return; }
+      if (!requireClient(main, "inc-client")) return;
       state.incidents.push({
         id: uid("inc"), date: main.querySelector("#inc-date").value || today(),
         client: main.querySelector("#inc-client").value, type: main.querySelector("#inc-type").value,
@@ -4507,6 +4533,7 @@
     main.querySelector("#tr-add").addEventListener("click", () => {
       const person = main.querySelector("#tr-person").value.trim();
       if (!person) { alert("Enter the person's name."); return; }
+      if (!requireClient(main, "tr-client")) return;
       const courseName = main.querySelector("#tr-course").value;
       const course = S.trainingCatalogue.find(c => c.name === courseName);
       const completed = main.querySelector("#tr-date").value || today();

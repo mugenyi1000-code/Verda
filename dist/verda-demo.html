@@ -787,18 +787,13 @@ td .empty-state { padding: 26px 16px; }
 
 const VERDA_SEED = {
 
-  // ---- Clients (warm leads already scoped by EEIS) -------------------------
-  clients: [
-    { id: "c1", name: "Abubaker Technical", industry: "Manufacturing / Factories", country: "ug", site: "Kampala Industrial Area", plan: "Quarterly", nextVisit: "2026-10-15", permitExpiry: "2027-03-01", status: "Active" },
-    { id: "c2", name: "Cosmic Investments", industry: "Quarrying & Aggregates", country: "ug", site: "Mukono Quarry Site", plan: "Quarterly", nextVisit: "2026-09-28", permitExpiry: "2026-12-20", status: "Active" },
-    { id: "c3", name: "Kaletex Ventures", industry: "Textiles & Apparel", country: "ug", site: "Namanve Industrial Park", plan: "Monthly", nextVisit: "2026-09-20", permitExpiry: "2027-01-10", status: "Active" },
-    { id: "c4", name: "Lusango Real Uganda", industry: "Construction & Contracting", country: "ug", site: "Multiple project sites", plan: "Quarterly", nextVisit: "2026-11-05", permitExpiry: "2026-10-30", status: "Active" },
-    { id: "c5", name: "Crested Crane Timber", industry: "Timber & Wood Processing", country: "ug", site: "Jinja Processing Yard", plan: "Monthly", nextVisit: "2026-09-25", permitExpiry: "2027-02-14", status: "Active" },
-    { id: "c6", name: "Example: Rift Valley Aggregates", industry: "Quarrying & Aggregates", country: "ke", site: "Machakos County", plan: "Quarterly", nextVisit: "2026-10-08", permitExpiry: "2027-04-30", status: "Active" },
-    { id: "c7", name: "Example: Lake Zone Gold", industry: "Mining — Large Scale (Open Pit & Underground)", country: "tz", site: "Geita Region", plan: "Monthly", nextVisit: "2026-09-30", permitExpiry: "2027-06-15", status: "Active" },
-    { id: "c8", name: "Example: Katanga Cobalt Cooperative", industry: "Artisanal & Small-Scale Mining (ASM)", country: "cd", site: "Kolwezi, Lualaba", plan: "Monthly", nextVisit: "2026-10-02", permitExpiry: "2026-11-28", status: "Active" },
-    { id: "c9", name: "Example: Copperbelt Smelting", industry: "Mineral Processing, Smelting & Refining", country: "zm", site: "Kitwe, Copperbelt", plan: "Monthly", nextVisit: "2026-10-12", permitExpiry: "2027-02-01", status: "Active" }
-  ],
+  // ---- Clients ------------------------------------------------------------
+  // Deliberately empty. Verda ships with no client on the books: the sites you
+  // monitor are yours, and a named example company in someone else's register
+  // is at best noise and at worst a real business appearing in a demo that was
+  // never asked. Add the first client on the Clients screen — every other
+  // screen that files a record against a site waits for that and says so.
+  clients: [],
 
   // ---- Country / jurisdiction register ------------------------------------
   // The regulators, principal instruments and permits that apply in each
@@ -13153,20 +13148,6 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
   function monthsAhead(n) { var d = new Date(); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); }
 
   var state = {
-    incidents: [
-      { id: "inc_x1", date: monthsAgo(4), client: "Kaletex Ventures", type: "Near-miss", severity: "Medium",
-        desc: "Example: pallet shifted on racking during offload; area cordoned, no injuries.", status: "Closed" },
-      { id: "inc_x2", date: monthsAgo(3), client: "Cosmic Investments", type: "Environmental spill / release", severity: "High",
-        desc: "Example: hydraulic hose failure on excavator released ~15L oil; spill kit deployed, soil removed.", status: "Closed" },
-      { id: "inc_x3", date: monthsAgo(2), client: "Abubaker Technical", type: "First aid case", severity: "Low",
-        desc: "Example: minor laceration to hand during blade change; treated on site.", status: "Closed" },
-      { id: "inc_x4", date: monthsAgo(1), client: "Crested Crane Timber", type: "Near-miss", severity: "Medium",
-        desc: "Example: operator bypassed guard interlock on planer; machine locked out pending retraining.", status: "Under investigation" },
-      { id: "inc_x5", date: daysAgo(9), client: "Lusango Real Uganda", type: "Vehicle incident", severity: "Medium",
-        desc: "Example: reversing tipper contacted site fencing; no injuries, banksman procedure reviewed.", status: "Under investigation" },
-      { id: "inc_x6", date: daysAgo(3), client: "Kaletex Ventures", type: "Near-miss", severity: "Low",
-        desc: "Example: unsecured cable across walkway reported by operator; rerouted same shift.", status: "Open" }
-    ],
     risks: [
       { id: "risk_x1", hazard: "Example: unguarded conveyor drive", area: "Packing line", likelihood: 4, severity: 4,
         controls: "Fixed guard, LOTO procedure, pre-start check", owner: "Plant Engineer" },
@@ -13198,14 +13179,6 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         due: daysAgo(28), priority: "Low", status: "Closed", created: daysAgo(50) },
       { id: "act_x8", title: "Example: update ESMP monitoring log template", source: "Audit finding", owner: "EHS Manager",
         due: daysAgo(35), priority: "Low", status: "Closed", created: daysAgo(60) }
-    ],
-    training: [
-      { id: "tr_x1", person: "Example: John Okello", client: "Kaletex Ventures", course: "General EHS Induction", completed: monthsAgo(4), expires: monthsAhead(8) },
-      { id: "tr_x2", person: "Example: Sarah Nabirye", client: "Kaletex Ventures", course: "First Aid at Work", completed: monthsAgo(10), expires: monthsAhead(14) },
-      { id: "tr_x3", person: "Example: Peter Mugisha", client: "Cosmic Investments", course: "Working at Height", completed: monthsAgo(22), expires: monthsAhead(2) },
-      { id: "tr_x4", person: "Example: Grace Auma", client: "Abubaker Technical", course: "Fire Safety & Evacuation", completed: monthsAgo(11), expires: monthsAhead(1) },
-      { id: "tr_x5", person: "Example: David Kato", client: "Crested Crane Timber", course: "Hazardous Chemicals / SDS Awareness", completed: monthsAgo(26), expires: monthsAgo(2) },
-      { id: "tr_x6", person: "Example: Ruth Nakimuli", client: "Lusango Real Uganda", course: "Emergency Response / Spill Response", completed: monthsAgo(14), expires: monthsAgo(2) }
     ]
   };
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* preview still works without it */ }
@@ -13242,10 +13215,29 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     if (c && state.ui.clientId !== c.id) { state.ui.clientId = c.id; save(); }
   }
   // Options for a client picker, with the site in context pre-selected.
+  // With no clients on the books the picker must not be a silently empty
+  // select: an empty select still submits, and a record filed against no site
+  // is worse than one that was never filed. The placeholder carries value ""
+  // so requireClient() below can refuse it.
   function clientOptions() {
+    if (!state.clients.length) {
+      return `<option value="" disabled selected>— add a client first —</option>`;
+    }
     const cur = currentClient();
     return state.clients.map(c =>
       `<option value="${esc(c.name)}" ${cur && c.name === cur.name ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+  }
+  // Read a client picker, refusing the empty placeholder. Returns "" when there
+  // is nothing to file against, having told the user where to go.
+  function requireClient(root, id) {
+    const el = root.querySelector("#" + id);
+    const value = el ? el.value : "";
+    if (!value) {
+      alert("Add a client on the Clients screen first — every record is filed against a site.");
+      location.hash = "#/clients";
+      return "";
+    }
+    return value;
   }
 
   // External links open in a new tab and never hand the opener to the target.
@@ -15156,6 +15148,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     main.querySelector("#doc-draft").addEventListener("click", () => {
       const data = collect();
       if (!data.sections.length) { alert("Tick at least one section."); return; }
+      if (!requireClient(main, "doc-client")) return;
       if (!spendCredits(S.creditCosts.aiDraft, `${doc.filePrefix} draft`)) return;
       const m = meta();
       const text = VerdaAI.generateEsiaDraft({
@@ -15383,6 +15376,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         const rows = collect();
         const assessed = rows.filter(r => r.result && r.result !== "Not applicable");
         if (!assessed.length) { alert("Assess at least one item before saving."); return; }
+        if (!requireClient(panel, "ap-client")) return;
         const findings = rows.filter(r => r.grade && r.grade !== "Positive practice");
         const date = panel.querySelector("#ap-date").value || today();
         const client = panel.querySelector("#ap-client").value;
@@ -15771,6 +15765,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       panel.querySelector("#eq-add").addEventListener("click", () => {
         const assetId = panel.querySelector("#eq-id").value.trim();
         if (!assetId) { alert("Give the asset an ID or description so it can be found on site."); return; }
+        if (!requireClient(panel, "eq-client")) return;
         state.equipment.push({
           id: uid("eq"), assetId, regime: Number(panel.querySelector("#eq-type").value),
           client: panel.querySelector("#eq-client").value,
@@ -16410,6 +16405,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
       panel.querySelector("#wf-start").addEventListener("click", () => {
         const tpl = S.workflowTemplates.find(t => t.id === panel.querySelector("#wf-start-tpl").value);
+        if (!requireClient(panel, "wf-start-client")) return;
         setCurrentClient(panel.querySelector("#wf-start-client").value);
         state.workflowRuns.push({
           id: uid("run"), templateId: tpl.id,
@@ -16652,6 +16648,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
       panel.querySelector("#sc-add").addEventListener("click", () => {
         const name = panel.querySelector("#sc-name").value.trim();
         if (!name) { alert("Enter the sub-contractor's name."); return; }
+        if (!requireClient(panel, "sc-client")) return;
         state.subcontractors.push({
           id: uid("sc"), name, client: panel.querySelector("#sc-client").value,
           scope: panel.querySelector("#sc-scope").value.trim(),
@@ -16735,6 +16732,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
         const period = panel.querySelector("#wf-period").value.trim();
         const hours = Number(panel.querySelector("#wf-hours").value);
         if (!period) { alert("Enter the period this covers, e.g. October 2026."); return; }
+        if (!requireClient(panel, "wf-client")) return;
         if (!hours) { alert("Enter the hours worked — without them no frequency rate can be calculated."); return; }
         state.workforce.push({
           id: uid("wf"), period, client: panel.querySelector("#wf-client").value,
@@ -17473,6 +17471,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     main.querySelector("#inc-add").addEventListener("click", () => {
       const desc = main.querySelector("#inc-desc").value.trim();
       if (!desc) { alert("Describe what happened."); return; }
+      if (!requireClient(main, "inc-client")) return;
       state.incidents.push({
         id: uid("inc"), date: main.querySelector("#inc-date").value || today(),
         client: main.querySelector("#inc-client").value, type: main.querySelector("#inc-type").value,
@@ -17722,6 +17721,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     main.querySelector("#tr-add").addEventListener("click", () => {
       const person = main.querySelector("#tr-person").value.trim();
       if (!person) { alert("Enter the person's name."); return; }
+      if (!requireClient(main, "tr-client")) return;
       const courseName = main.querySelector("#tr-course").value;
       const course = S.trainingCatalogue.find(c => c.name === courseName);
       const completed = main.querySelector("#tr-date").value || today();

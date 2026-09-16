@@ -4,18 +4,13 @@
 
 const VERDA_SEED = {
 
-  // ---- Clients (warm leads already scoped by EEIS) -------------------------
-  clients: [
-    { id: "c1", name: "Abubaker Technical", industry: "Manufacturing / Factories", country: "ug", site: "Kampala Industrial Area", plan: "Quarterly", nextVisit: "2026-10-15", permitExpiry: "2027-03-01", status: "Active" },
-    { id: "c2", name: "Cosmic Investments", industry: "Quarrying & Aggregates", country: "ug", site: "Mukono Quarry Site", plan: "Quarterly", nextVisit: "2026-09-28", permitExpiry: "2026-12-20", status: "Active" },
-    { id: "c3", name: "Kaletex Ventures", industry: "Textiles & Apparel", country: "ug", site: "Namanve Industrial Park", plan: "Monthly", nextVisit: "2026-09-20", permitExpiry: "2027-01-10", status: "Active" },
-    { id: "c4", name: "Lusango Real Uganda", industry: "Construction & Contracting", country: "ug", site: "Multiple project sites", plan: "Quarterly", nextVisit: "2026-11-05", permitExpiry: "2026-10-30", status: "Active" },
-    { id: "c5", name: "Crested Crane Timber", industry: "Timber & Wood Processing", country: "ug", site: "Jinja Processing Yard", plan: "Monthly", nextVisit: "2026-09-25", permitExpiry: "2027-02-14", status: "Active" },
-    { id: "c6", name: "Example: Rift Valley Aggregates", industry: "Quarrying & Aggregates", country: "ke", site: "Machakos County", plan: "Quarterly", nextVisit: "2026-10-08", permitExpiry: "2027-04-30", status: "Active" },
-    { id: "c7", name: "Example: Lake Zone Gold", industry: "Mining — Large Scale (Open Pit & Underground)", country: "tz", site: "Geita Region", plan: "Monthly", nextVisit: "2026-09-30", permitExpiry: "2027-06-15", status: "Active" },
-    { id: "c8", name: "Example: Katanga Cobalt Cooperative", industry: "Artisanal & Small-Scale Mining (ASM)", country: "cd", site: "Kolwezi, Lualaba", plan: "Monthly", nextVisit: "2026-10-02", permitExpiry: "2026-11-28", status: "Active" },
-    { id: "c9", name: "Example: Copperbelt Smelting", industry: "Mineral Processing, Smelting & Refining", country: "zm", site: "Kitwe, Copperbelt", plan: "Monthly", nextVisit: "2026-10-12", permitExpiry: "2027-02-01", status: "Active" }
-  ],
+  // ---- Clients ------------------------------------------------------------
+  // Deliberately empty. Verda ships with no client on the books: the sites you
+  // monitor are yours, and a named example company in someone else's register
+  // is at best noise and at worst a real business appearing in a demo that was
+  // never asked. Add the first client on the Clients screen — every other
+  // screen that files a record against a site waits for that and says so.
+  clients: [],
 
   // ---- Country / jurisdiction register ------------------------------------
   // The regulators, principal instruments and permits that apply in each
