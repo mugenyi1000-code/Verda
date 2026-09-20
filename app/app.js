@@ -109,6 +109,8 @@
       risks: [],
       actions: [],
       training: [],
+      monitors: [],           // practitioners and firms, with the capacities they registered
+      screening: null,        // the free screening tool's working answers
       ui: { checklistIndustry: null, clientId: null, kpiClient: "" },
       platformRevenue: null
     };
@@ -118,7 +120,7 @@
   // Saved states from before these registers existed must not crash on load.
   if (!state.ui || typeof state.ui !== "object") state.ui = {};
   if (!state.docs || typeof state.docs !== "object") state.docs = {};
-  ["subcontractors", "workforce", "equipment", "docRecords", "geoLayers", "officerContacts"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
+  ["subcontractors", "workforce", "equipment", "docRecords", "geoLayers", "officerContacts", "monitors"].forEach(k => { if (!Array.isArray(state[k])) state[k] = []; });
 
   function load() {
     try {
@@ -166,7 +168,13 @@
     actions: '<path d="M4 12.5 9 17.5 20 6.5"/><path d="M4 6.5h8"/>',
     training: '<path d="M12 4 2.5 8.2 12 12.4l9.5-4.2L12 4Z"/><path d="M6.5 10.4V15c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.6"/><path d="M21.5 8.2v5.1"/>',
     revenue: '<path d="M3.5 20.5h17"/><path d="M6 17V9.5M11 17V5.5M16 17v-5M21 17V3.5"/><path d="M17.8 6.2 21 3.5M21 3.5h-3.4M21 3.5v3.3"/>',
-    plans: '<path d="M20.5 12.7 12.8 20.4a1.7 1.7 0 0 1-2.4 0l-7-7A1.7 1.7 0 0 1 2.9 12V4.6a1.7 1.7 0 0 1 1.7-1.7H12c.45 0 .88.18 1.2.5l7.3 7.3a1.7 1.7 0 0 1 0 2.4Z"/><circle cx="7.6" cy="7.6" r="1.3"/>'
+    plans: '<path d="M20.5 12.7 12.8 20.4a1.7 1.7 0 0 1-2.4 0l-7-7A1.7 1.7 0 0 1 2.9 12V4.6a1.7 1.7 0 0 1 1.7-1.7H12c.45 0 .88.18 1.2.5l7.3 7.3a1.7 1.7 0 0 1 0 2.4Z"/><circle cx="7.6" cy="7.6" r="1.3"/>',
+    // a funnel — a question set that narrows to one answer
+    screening: '<path d="M3.5 4.5h17l-6.5 8v7l-4 2v-9Z"/>',
+    // a person inside a locating ring — finding the practitioner for the job
+    monitors: '<circle cx="12" cy="9.5" r="3"/><path d="M6.5 19a5.5 5.5 0 0 1 11 0"/><circle cx="12" cy="12" r="9.5"/>',
+    // a slide rule / calculator keypad
+    toolbox: '<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M7.5 7h9"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01M8 18.5h8"/>'
   };
   function icon(name, cls) {
     const path = ICON_PATHS[name];
@@ -387,11 +395,19 @@
     { id: "resources", group: "grow", label: () => T().resources, render: renderResources },
     { id: "supplies", group: "grow", label: () => T().supplies, render: renderSupplies },
     { id: "iec", group: "grow", label: () => T().iec, render: renderIec },
-    { id: "skills", group: "grow", label: () => T().skills, render: renderSkills }
+    { id: "skills", group: "grow", label: () => T().skills, render: renderSkills },
+
+    // Free — open to anyone, no account. The screening tool is the front door:
+    // someone with a plot of land and a question finds out what the law asks of
+    // them, and only then meets the people who can do the work.
+    { id: "screening", group: "free", label: () => T().screening, render: renderScreening },
+    { id: "monitors", group: "free", label: () => T().monitors, render: renderMonitors },
+    { id: "toolbox", group: "free", label: () => T().toolbox, render: renderToolbox }
   ];
 
   function buildNav() {
     const groups = [
+      { id: "free", label: T().nav_free },
       { id: "monitor", label: T().nav_monitor },
       { id: "manage", label: T().nav_manage },
       { id: "grow", label: T().nav_grow }
@@ -422,7 +438,8 @@
     esia: "wildlife", training: "training", workflows: "governance", clients: "people",
     checklists: "industry", documents: "documents", credits: "governance", revenue: "governance", plans: "revenue",
     solutions: "industry", resources: "training", supplies: "supplies",
-    iec: "health", skills: "training"
+    iec: "health", skills: "training",
+    screening: "sitemap", monitors: "people", toolbox: "audit"
   };
 
   /* Give every module page a picture without touching 20 render functions:
@@ -2459,11 +2476,24 @@
   }
 
   // Whole numbers print whole — "18 toilets", not "18.0 toilets".
+  //
+  // Small non-zero figures get significant digits rather than two decimals.
+  // 86.4 m³/day is 0.001 m³/s, and printing that as "0.00" is the same failure
+  // as printing a wrong number: it reads as nothing when it is something.
   const fmtNum = (v) => {
     if (v === null) return "—";
     if (Number.isInteger(v)) return v.toLocaleString();
-    if (Math.abs(v) >= 1000) return Math.round(v).toLocaleString();
-    return Math.abs(v) >= 10 ? v.toFixed(1) : v.toFixed(2);
+    const abs = Math.abs(v);
+    if (abs >= 1000) return Math.round(v).toLocaleString();
+    if (abs >= 10) return v.toFixed(1);
+    if (abs >= 0.01) return v.toFixed(2);
+    if (abs > 0) {
+      // toPrecision gives exponent form below 1e-6; at that point it is the
+      // honest rendering, so let it through rather than showing a row of zeros.
+      const p = v.toPrecision(3);
+      return p.includes("e") ? p : p.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
+    }
+    return v.toFixed(2);
   };
 
   function renderInspections(main) {
@@ -2635,88 +2665,7 @@
     }
 
     /* ---------------- Calculators ---------------- */
-    function calcPanel() {
-      const groups = [...new Set(S.calculators.map(c => c.group))];
-      panel.innerHTML = `
-        <div class="card notice-card">
-          <h3>Enter a quantity, get the figure the standard asks for</h3>
-          <p>Every calculation updates as you type. Every factor is shown and editable, and every calculator states where its
-            basis comes from — a compliance figure whose origin nobody can explain is worse than no figure at all.</p>
-          <p class="small">Where a factor depends on your permit, your grid or your national regulation, Verda asks you for it
-            rather than supplying a default that would look authoritative and be wrong.</p>
-        </div>
-        ${groups.map(g => `
-          <h3 class="calc-group">${esc(g)}</h3>
-          ${S.calculators.filter(c => c.group === g).map(c => `
-            <div class="card calc-card" data-calc="${esc(c.id)}">
-              <h4>${esc(c.name)}</h4>
-              <p class="muted small">${esc(c.basis)}</p>
-              <div class="field-grid">
-                ${c.inputs.map(inp => inp.factorTable
-                  ? `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
-                       <select data-factor="${esc(inp.key)}">${inp.factorTable.map((f, i) =>
-                         `<option value="${f.factor}" ${f.factor === inp.default ? "selected" : ""}>${esc(f.name)} — ${f.factor} ${esc(f.unit)}</option>`).join("")}</select>
-                       <input type="number" step="any" data-in="${esc(inp.key)}" value="${inp.default}" />
-                     </label>`
-                  : `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
-                       <input type="number" step="any" data-in="${esc(inp.key)}" ${inp.default !== undefined ? `value="${inp.default}"` : ""} placeholder="${inp.default === undefined ? "enter a value" : ""}" />
-                     </label>`).join("")}
-              </div>
-              <div class="calc-out" data-out></div>
-              ${c.note ? `<p class="muted small calc-note">${esc(c.note)}</p>` : ""}
-            </div>`).join("")}`).join("")}`;
-
-      S.calculators.forEach(c => {
-        const card = panel.querySelector(`[data-calc="${c.id}"]`);
-        if (!card) return;
-        const read = () => {
-          const vars = {};
-          c.inputs.forEach(inp => {
-            const el = card.querySelector(`[data-in="${inp.key}"]`);
-            vars[inp.key] = el && el.value !== "" ? Number(el.value) : NaN;
-          });
-          return vars;
-        };
-        const compute = () => {
-          const vars = read();
-          const missing = c.inputs.filter(inp => !Number.isFinite(vars[inp.key]));
-          if (missing.length) {
-            card.querySelector("[data-out]").innerHTML =
-              `<p class="muted small">Enter ${missing.map(m => esc(m.label.toLowerCase())).join(" and ")} to calculate.</p>`;
-            return;
-          }
-          // A negative quantity, headcount or duration is not a small number —
-          // it is a typo. Computing from it produces a confident wrong answer,
-          // which is the worst thing a compliance calculator can do.
-          const negative = c.inputs.filter(inp => vars[inp.key] < 0);
-          if (negative.length) {
-            card.querySelector("[data-out]").innerHTML =
-              `<p class="calc-invalid">${esc(negative.map(m => m.label).join(" and "))} cannot be negative — check the figure you entered.</p>`;
-            return;
-          }
-          card.querySelector("[data-out]").innerHTML = c.outputs.map(o => {
-            const v = evalFormula(o.expr, vars);
-            let badge = "";
-            if (o.compare && o.compare.limit !== undefined && v !== null) {
-              const over = o.compare.good === "lower" ? v > o.compare.limit : v < o.compare.limit;
-              badge = statusBadge(over ? "Above the limit you entered" : "Within the limit you entered", over ? "critical" : "good");
-            }
-            return `<div class="calc-result">
-              <span class="calc-figure">${fmtNum(v)}</span>
-              <span class="calc-unit">${esc(o.unit)}</span>
-              <span class="calc-name">${esc(o.label)}</span> ${badge}</div>`;
-          }).join("");
-        };
-        card.querySelectorAll("[data-in]").forEach(el => el.addEventListener("input", compute));
-        // A factor table writes the chosen factor into its own number field,
-        // which stays editable so a site-specific factor can be used instead.
-        card.querySelectorAll("[data-factor]").forEach(sel => sel.addEventListener("change", () => {
-          const target = card.querySelector(`[data-in="${sel.dataset.factor}"]`);
-          target.value = sel.value; compute();
-        }));
-        compute();
-      });
-    }
+    const calcPanel = () => calculatorPanel(panel);
 
     const panels = { register: registerPanel, regimes: regimesPanel, calc: calcPanel };
     registerPanel();
@@ -4012,6 +3961,714 @@
   }
 
   /* ============================ SKILLS ADVISOR ============================ */
+
+  /* =========================================================================
+     FREE PROJECT SCREENING
+
+     The question a person with a plot of land actually has is "do I need an
+     ESIA?", and the honest answer is "here is the tier your project falls in,
+     here is why, and here is the schedule that decides it". That is what this
+     produces.
+
+     The engine is a published decision tree, not a model. It takes the highest
+     tier produced by three things — the sector, the scale, and the sensitivity
+     triggers — and it reports every answer that raised the outcome, so the
+     reasoning can be read back and argued with. A screening opinion nobody can
+     reproduce is worth nothing to a regulator.
+
+     It is not a determination. Only the regulator screens a project.
+     ========================================================================= */
+  const TIER_ORDER = { none: 0, brief: 1, esia: 2 };
+  const tierMax = (a, b) => (TIER_ORDER[b] > TIER_ORDER[a] ? b : a);
+
+  function screeningState() {
+    if (!state.screening) state.screening = { sector: "", scale: "", triggers: [], photos: [], coords: null, projectName: "", notes: "" };
+    if (!Array.isArray(state.screening.photos)) state.screening.photos = [];
+    if (!Array.isArray(state.screening.triggers)) state.screening.triggers = [];
+    return state.screening;
+  }
+
+  // The band a scale figure falls in. Returns null when the sector is not
+  // screened on scale at all, so the result can say so rather than imply a
+  // threshold that does not exist.
+  function scaleBandFor(sector, value) {
+    const spec = VERDA_SEED.screeningScaleBands[sector.scale];
+    if (!spec || !Number.isFinite(value)) return null;
+    const band = spec.bands.find(b => b.max === null || value <= b.max);
+    return band ? { tier: band.tier, spec } : null;
+  }
+
+  function screeningOutcome(ans, countryId) {
+    const S = VERDA_SEED;
+    const framework = S.screeningFramework[countryId];
+    const sector = S.screeningSectors.find(x => x.id === ans.sector);
+    if (!sector || !framework) return null;
+
+    const reasons = [], flags = [];
+    let tier = sector.mandatory ? "esia" : (sector.floor || "none");
+    if (sector.mandatory) {
+      reasons.push({ what: sector.label, why: "This sector sits on the mandatory list in every one of the six schedules Verda covers — the upper-tier study is the starting point, not the exception." });
+    } else if (tier !== "none") {
+      reasons.push({ what: sector.label, why: "This sector does not fall below the lower tier on its own, whatever its size." });
+    }
+    if (sector.note) flags.push(sector.note);
+
+    const value = Number(ans.scale);
+    const band = scaleBandFor(sector, value);
+    if (band) {
+      const before = tier;
+      tier = tierMax(tier, band.tier);
+      if (TIER_ORDER[band.tier] > TIER_ORDER[before]) {
+        reasons.push({ what: `${fmtNum(value)} ${band.spec.unit}`, why: "At this scale the project moves up a tier in the bands a practitioner would apply. Confirm the figure against the schedule, which may use a different unit." });
+      }
+    }
+
+    ans.triggers.forEach(id => {
+      const t = S.screeningTriggers.find(x => x.id === id);
+      if (!t) return;
+      const before = tier;
+      tier = tierMax(tier, t.tier);
+      if (TIER_ORDER[t.tier] > TIER_ORDER[before]) reasons.push({ what: t.label, why: t.why });
+      else reasons.push({ what: t.label, why: t.why, supporting: true });
+      (t.flags || []).forEach(f => { if (!flags.includes(f)) flags.push(f); });
+    });
+
+    return { tier, reasons, flags, framework, sector, band, country: countryName(countryId), countryId };
+  }
+
+  // Which registered monitors could actually take this on. Service need follows
+  // from the tier; sector and country must match what the monitor registered.
+  function monitorsFor(outcome) {
+    const need = outcome.tier === "esia" ? "esia" : outcome.tier === "brief" ? "projectbrief" : "screening";
+    return (state.monitors || []).filter(m =>
+      (m.countries || []).includes(outcome.countryId) &&
+      ((m.services || []).includes(need) || (m.services || []).includes("esia")));
+  }
+
+  const TIER_COPY = {
+    none: { badge: "good", head: "No environmental study is indicated",
+            lead: "Nothing you have told us puts this project on the screening schedule. That is not the same as needing no permits — it means the environmental study is not the gate." },
+    brief: { badge: "warning", head: "The lower tier applies",
+             lead: "This project looks like it needs the shorter submission, not the full study. The regulator can still ask for more after reading it." },
+    esia: { badge: "critical", head: "A full study is indicated",
+            lead: "This project falls in the upper tier. Budget for a full study with stakeholder consultation — it is the long path, and starting it late is what delays projects." }
+  };
+
+  function renderScreening(main) {
+    const S = VERDA_SEED;
+    const ans = screeningState();
+    let step = 0;
+
+    main.appendChild(h(`
+      <section>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>${T().screening}</h1>
+            <p class="muted">Free, and no account needed. Answer a few questions about what you are planning and where, and Verda
+              tells you which environmental submission your project needs, why, and who is registered to do it.</p>
+          </div>
+        </div>
+        <div class="card notice-card">
+          <h4>What this is, and what it is not</h4>
+          <p class="small">This is a published decision tree over the screening schedules of ${S.countries.length} countries — every answer that changes the outcome is reported back to you with the reason. It is
+          <strong>not a determination and not legal advice</strong>. Only the regulator screens a project, and the schedules are amended often. Use this to know what you are walking into, then confirm it.</p>
+        </div>
+        <div id="scr-panel"></div>
+      </section>`));
+
+    const panel = main.querySelector("#scr-panel");
+    const STEPS = ["What you are planning", "How big", "Where it is", "Pictures and maps", "Your result"];
+
+    function progress() {
+      return `<div class="card" style="padding:14px 18px">
+        <div class="wf-bar"><span style="width:${Math.round((step / (STEPS.length - 1)) * 100)}%"></span></div>
+        <p class="small muted" style="margin:6px 0 0">Step <span class="mono">${step + 1}</span> of <span class="mono">${STEPS.length}</span> — ${esc(STEPS[step])}</p>
+      </div>`;
+    }
+    const navBtns = (backOk, nextLabel, nextId) => `
+      <div class="modal-actions" style="justify-content:space-between">
+        <button class="btn btn-ghost" id="scr-back" ${backOk ? "" : "disabled"}>Back</button>
+        <button class="btn btn-primary" id="${nextId || "scr-next"}">${esc(nextLabel || "Continue")}</button>
+      </div>`;
+
+    function draw() {
+      panel.innerHTML = progress() + `<div class="card" id="scr-body"></div>`;
+      const body = panel.querySelector("#scr-body");
+      [stepSector, stepScale, stepWhere, stepEvidence, stepResult][step](body);
+      const back = panel.querySelector("#scr-back");
+      if (back) back.addEventListener("click", () => { step = Math.max(0, step - 1); draw(); });
+      const next = panel.querySelector("#scr-next");
+      if (next) next.addEventListener("click", () => { if (validate()) { step = Math.min(STEPS.length - 1, step + 1); save(); draw(); } });
+    }
+
+    function validate() {
+      if (step === 0 && !ans.sector) { alert("Pick what you are planning — the whole screening follows from it."); return false; }
+      return true;
+    }
+
+    /* ---- 1. sector ---- */
+    function stepSector(body) {
+      const groups = [...new Set(S.screeningSectors.map(x => x.group))];
+      body.innerHTML = `
+        <h3>What are you planning to build or operate?</h3>
+        <p class="muted small">Pick the closest match. If two fit, pick the one with the larger footprint — screening works on the whole project, not its smallest part.</p>
+        <label>Project name (optional, used on the note you can download)
+          <input id="scr-name" value="${esc(ans.projectName || "")}" placeholder="e.g. Warehouse at plot 14" /></label>
+        <label>Country — the schedule that applies
+          <select id="scr-country">${S.countries.map(c =>
+            `<option value="${esc(c.id)}" ${c.id === state.country ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+        ${groups.map(g => `
+          <h5 style="margin:18px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">${esc(g)}</h5>
+          <div class="sector-chips">
+            ${S.screeningSectors.filter(x => x.group === g).map(x => `
+              <button class="sector-chip${ans.sector === x.id ? " seg-filled" : ""}" data-sector="${esc(x.id)}">${esc(x.label)}</button>`).join("")}
+          </div>`).join("")}
+        ${navBtns(false)}`;
+      body.querySelectorAll("[data-sector]").forEach(b => b.addEventListener("click", () => {
+        ans.sector = b.dataset.sector; ans.scale = ""; save(); draw();
+      }));
+      body.querySelector("#scr-name").addEventListener("input", e => { ans.projectName = e.target.value; });
+      body.querySelector("#scr-country").addEventListener("change", e => {
+        state.country = e.target.value; save(); renderTopbar(); draw();
+      });
+    }
+
+    /* ---- 2. scale ---- */
+    function stepScale(body) {
+      const sector = S.screeningSectors.find(x => x.id === ans.sector);
+      const spec = S.screeningScaleBands[sector.scale];
+      body.innerHTML = spec ? `
+        <h3>${esc(spec.label)}</h3>
+        <p class="muted small">An estimate is fine at this stage. Screening is about the order of magnitude, not the survey.</p>
+        <label>${esc(spec.label)} <span class="muted">(${esc(spec.unit)})</span>
+          <input id="scr-scale" type="number" step="any" min="0" value="${esc(ans.scale || "")}" placeholder="enter a number" /></label>
+        <p class="small muted" id="scr-scale-hint"></p>
+        ${sector.note ? `<div class="guide-box"><p>${esc(sector.note)}</p></div>` : ""}
+        ${navBtns(true)}` : `
+        <h3>Scale does not decide this one</h3>
+        <p>A ${esc(sector.label.toLowerCase())} is screened on what it does and where it is rather than how big it is, so there is no size question here.</p>
+        ${navBtns(true)}`;
+      const inp = body.querySelector("#scr-scale");
+      if (inp) {
+        const hint = body.querySelector("#scr-scale-hint");
+        const upd = () => {
+          ans.scale = inp.value;
+          const v = Number(inp.value);
+          if (inp.value === "") { hint.textContent = ""; return; }
+          if (v < 0) { hint.innerHTML = `<span class="calc-invalid">A size cannot be negative.</span>`; return; }
+          const band = scaleBandFor(sector, v);
+          hint.textContent = band
+            ? (band.tier === "esia" ? "At this scale, expect the upper tier on size alone."
+              : band.tier === "brief" ? "At this scale, size alone points at the lower tier."
+              : "At this scale, size alone does not trigger a study — where it is may still.")
+            : "";
+        };
+        inp.addEventListener("input", upd); upd();
+      }
+    }
+
+    /* ---- 3. where ---- */
+    function stepWhere(body) {
+      body.innerHTML = `
+        <h3>Where is it, and what is around it?</h3>
+        <p class="muted small">This is the part that changes the answer most often. A small project in a wetland is screened harder than a large one on bare ground.</p>
+        <div class="form-row">
+          <label>Latitude<input id="scr-lat" class="coord-cell mono" value="${esc(ans.coords ? ans.coords.lat : "")}" placeholder="0.3476" /></label>
+          <label>Longitude<input id="scr-lng" class="coord-cell mono" value="${esc(ans.coords ? ans.coords.lng : "")}" placeholder="32.5825" /></label>
+          <button class="btn" id="scr-pick" style="flex:0 0 auto;align-self:flex-end">${icon("maps")}Pick on a map</button>
+        </div>
+        <p class="small muted">Coordinates are optional, and they stay in this browser. They are used to put a location on the note you download.</p>
+        <h5 style="margin:20px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Tick everything that is true</h5>
+        <ul class="checklist">
+          ${S.screeningTriggers.map(t => `
+            <li><label><input type="checkbox" data-trig="${esc(t.id)}" ${ans.triggers.includes(t.id) ? "checked" : ""} /> ${esc(t.label)}</label></li>`).join("")}
+        </ul>
+        <label>Anything else worth noting (optional)
+          <textarea id="scr-notes" placeholder="Existing use of the land, anything unusual nearby, how long the works will run...">${esc(ans.notes || "")}</textarea></label>
+        ${navBtns(true)}`;
+      body.querySelectorAll("[data-trig]").forEach(cb => cb.addEventListener("change", () => {
+        const id = cb.dataset.trig;
+        ans.triggers = cb.checked ? [...new Set([...ans.triggers, id])] : ans.triggers.filter(x => x !== id);
+        save();
+      }));
+      const lat = body.querySelector("#scr-lat"), lng = body.querySelector("#scr-lng");
+      const setCoords = () => {
+        const a = parseFloat(lat.value), b = parseFloat(lng.value);
+        ans.coords = (Number.isFinite(a) && Number.isFinite(b)) ? { lat: a, lng: b } : null;
+      };
+      lat.addEventListener("input", setCoords); lng.addEventListener("input", setCoords);
+      body.querySelector("#scr-notes").addEventListener("input", e => { ans.notes = e.target.value; });
+      body.querySelector("#scr-pick").addEventListener("click", () => openCoordPicker((la, ln) => {
+        lat.value = la; lng.value = ln; setCoords(); save();
+      }));
+    }
+
+    /* ---- 4. evidence ---- */
+    function stepEvidence(body) {
+      body.innerHTML = `
+        <h3>Add pictures or a map of the area</h3>
+        <p class="muted small">Optional, and they never leave this browser — they are downscaled here and stored locally. A photograph of the site and a sketch of the boundary are what a practitioner asks for first.</p>
+        <div class="dropzone" id="scr-drop" tabindex="0">
+          <p><strong>Drop photographs or a map here</strong> — or click to choose files</p>
+          <p class="muted">JPG or PNG. Site photographs, a screenshot of the plot on a map, a survey sketch.</p>
+        </div>
+        <input type="file" id="scr-file" accept="image/*" multiple hidden />
+        <div class="photo-grid" id="scr-photos"></div>
+        ${navBtns(true, "See the result")}`;
+      const grid = body.querySelector("#scr-photos");
+      const paint = () => {
+        grid.innerHTML = ans.photos.map((ph, i) => `
+          <figure class="photo-card"><img src="${ph.src}" alt="${esc(ph.caption || "Site photograph")}" />
+            <input class="photo-caption" data-cap="${i}" value="${esc(ph.caption || "")}" placeholder="What this shows" />
+            <button class="btn btn-ghost btn-sm" data-rm="${i}" style="margin-top:6px">Remove</button></figure>`).join("")
+          || `<p class="muted small">No pictures added.</p>`;
+        grid.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => {
+          ans.photos.splice(Number(b.dataset.rm), 1); save(); paint();
+        }));
+        grid.querySelectorAll("[data-cap]").forEach(inp => inp.addEventListener("input", () => {
+          ans.photos[Number(inp.dataset.cap)].caption = inp.value; save();
+        }));
+      };
+      const take = async (files) => {
+        for (const f of [...files].slice(0, 8 - ans.photos.length)) {
+          try { ans.photos.push({ src: await compressImage(f, 900, 0.7), caption: "" }); }
+          catch (e) { alert("That file could not be read as an image."); }
+        }
+        save(); paint();
+      };
+      const drop = body.querySelector("#scr-drop"), file = body.querySelector("#scr-file");
+      drop.addEventListener("click", () => file.click());
+      drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); file.click(); } });
+      file.addEventListener("change", e => take(e.target.files));
+      drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("dropzone-active"); });
+      drop.addEventListener("dragleave", () => drop.classList.remove("dropzone-active"));
+      drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("dropzone-active"); take(e.dataTransfer.files); });
+      paint();
+    }
+
+    /* ---- 5. result ---- */
+    function stepResult(body) {
+      const out = screeningOutcome(ans, state.country);
+      if (!out) { body.innerHTML = `<p class="muted">Pick a sector first.</p>${navBtns(true)}`; return; }
+      const copy = TIER_COPY[out.tier];
+      const study = out.tier === "esia" ? out.framework.upper : out.tier === "brief" ? out.framework.lower : null;
+      const matches = monitorsFor(out);
+
+      body.innerHTML = `
+        <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <span class="badge badge-${copy.badge}">${esc(copy.head)}</span>
+            <h3 style="margin:10px 0 4px">${esc(study ? study.name : "No study indicated")}</h3>
+            <p>${esc(copy.lead)}</p>
+          </div>
+        </div>
+
+        ${study ? `<div class="calc-result"><span class="calc-name"><strong>${esc(out.framework.authority)}</strong> decides this. Basis: ${esc(study.basis)}</span></div>` : ""}
+
+        <h5 style="margin:22px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Why — every answer that shaped this</h5>
+        ${out.reasons.length ? `<table class="table"><thead><tr><th>Your answer</th><th>What it does</th></tr></thead><tbody>
+          ${out.reasons.map(r => `<tr><td>${esc(r.what)}${r.supporting ? ` <span class="badge">supporting</span>` : ""}</td><td class="muted">${esc(r.why)}</td></tr>`).join("")}
+        </tbody></table>` : `<p class="muted">Nothing you told us raised the outcome above the starting point for this sector.</p>`}
+
+        ${out.flags.length ? `
+          <h5 style="margin:22px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Other consents this flags</h5>
+          <ul class="checklist">${out.flags.map(f => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}
+
+        <div class="guide-box">
+          <p><strong>Confirm it here.</strong> ${esc(out.framework.checkAt)}</p>
+          <p><strong>Who may sign it.</strong> ${esc(out.framework.practitioner)}</p>
+        </div>
+
+        <h5 style="margin:22px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Who can do this work</h5>
+        ${matches.length ? `<table class="table"><thead><tr><th>Monitor</th><th>Grade</th><th>Sectors</th><th>Contact</th></tr></thead><tbody>
+          ${matches.map(m => `<tr><td><strong>${esc(m.name)}</strong></td><td>${esc((S.monitorCapacities.grades.find(g => g.id === m.grade) || {}).label || "—")}</td>
+            <td class="muted small">${esc((m.sectors || []).join(", ") || "All sectors")}</td><td class="small">${esc(m.contact || "—")}</td></tr>`).join("")}
+        </tbody></table>` : emptyState("people",
+          "<strong>No monitor is registered for this country yet.</strong> The directory is filled by the practitioners who use Verda — register your practice and screening results like this one will route to you.", 4)}
+        <a class="btn" href="#/monitors">${icon("monitors")}Open the monitor directory</a>
+
+        <div class="modal-actions" style="justify-content:space-between;margin-top:20px">
+          <button class="btn btn-ghost" id="scr-back">Back</button>
+          <span>
+            <button class="btn" id="scr-restart">Start again</button>
+            <button class="btn btn-primary" id="scr-dl">${icon("download")}Download this screening note</button>
+          </span>
+        </div>
+        <p class="small muted" style="margin-top:14px">This note records what you told Verda and what the decision tree made of it. It is a starting position for a conversation with ${esc(out.framework.authority)} or a registered practitioner — it is not a screening decision, and it does not bind anyone.</p>`;
+
+      body.querySelector("#scr-restart").addEventListener("click", () => {
+        state.screening = { sector: "", scale: "", triggers: [], photos: [], coords: null, projectName: "", notes: "" };
+        save(); step = 0; draw();
+      });
+      body.querySelector("#scr-dl").addEventListener("click", () => downloadText(
+        `Screening-note-${(ans.projectName || "project").replace(/[^\w]+/g, "_")}.txt`, screeningNote(ans, out)));
+    }
+
+    draw();
+  }
+
+  function screeningNote(ans, out) {
+    const S = VERDA_SEED;
+    const study = out.tier === "esia" ? out.framework.upper : out.tier === "brief" ? out.framework.lower : null;
+    const sector = out.sector;
+    const L = [];
+    L.push("INDICATIVE PROJECT SCREENING NOTE");
+    L.push("Produced by Verda — free screening tool. Not a screening decision.");
+    L.push("");
+    L.push(`Project:      ${ans.projectName || "(unnamed)"}`);
+    L.push(`Country:      ${out.country}`);
+    L.push(`Sector:       ${sector.label}`);
+    if (ans.scale) L.push(`Scale:        ${ans.scale} ${(S.screeningScaleBands[sector.scale] || {}).unit || ""}`);
+    if (ans.coords) L.push(`Location:     ${ans.coords.lat}, ${ans.coords.lng}`);
+    L.push(`Date:         ${today()}`);
+    L.push("");
+    L.push("OUTCOME");
+    L.push(`  ${study ? study.name : "No environmental study indicated"}`);
+    L.push(`  Decided by: ${out.framework.authority}`);
+    if (study) L.push(`  Basis:      ${study.basis}`);
+    L.push("");
+    L.push("WHY");
+    out.reasons.forEach(r => { L.push(`  • ${r.what}${r.supporting ? " (supporting)" : ""}`); L.push(`      ${r.why}`); });
+    if (out.flags.length) {
+      L.push("");
+      L.push("OTHER CONSENTS FLAGGED");
+      out.flags.forEach(f => L.push(`  • ${f}`));
+    }
+    if (ans.notes) { L.push(""); L.push("NOTES FROM THE APPLICANT"); L.push(`  ${ans.notes}`); }
+    if (ans.photos.length) {
+      L.push("");
+      L.push(`PICTURES ATTACHED IN THE BROWSER: ${ans.photos.length}`);
+      ans.photos.forEach((p, i) => L.push(`  ${i + 1}. ${p.caption || "(no caption)"}`));
+    }
+    L.push("");
+    L.push("CONFIRM AGAINST");
+    L.push(`  ${out.framework.checkAt}`);
+    L.push(`  ${out.framework.practitioner}`);
+    L.push("");
+    L.push("This note is an indicative screening produced by a published decision tree.");
+    L.push("It is not a determination, not legal advice, and it binds nobody. Only the");
+    L.push("regulator screens a project, and the schedules are amended often.");
+    return L.join("\n");
+  }
+
+
+  /* The calculator engine. Lives at module level because two screens use it:
+     Inspections, where the figures feed a statutory submission, and the free
+     toolbox, which is open without an account. One copy, so a corrected factor
+     is corrected in both places. */
+  function calculatorPanel(panel) {
+    const S = VERDA_SEED;
+    const groups = [...new Set(S.calculators.map(c => c.group))];
+    panel.innerHTML = `
+      <div class="card notice-card">
+        <h3>Enter a quantity, get the figure the standard asks for</h3>
+        <p>Every calculation updates as you type. Every factor is shown and editable, and every calculator states where its
+          basis comes from — a compliance figure whose origin nobody can explain is worse than no figure at all.</p>
+        <p class="small">Where a factor depends on your permit, your grid or your national regulation, Verda asks you for it
+          rather than supplying a default that would look authoritative and be wrong.</p>
+      </div>
+      ${groups.map(g => `
+        <h3 class="calc-group">${esc(g)}</h3>
+        ${S.calculators.filter(c => c.group === g).map(c => `
+          <div class="card calc-card" data-calc="${esc(c.id)}">
+            <h4>${esc(c.name)}</h4>
+            <p class="muted small">${esc(c.basis)}</p>
+            <div class="field-grid">
+              ${c.inputs.map(inp => inp.factorTable
+                ? `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
+                     <select data-factor="${esc(inp.key)}">${inp.factorTable.map((f, i) =>
+                       `<option value="${f.factor}" ${f.factor === inp.default ? "selected" : ""}>${esc(f.name)} — ${f.factor} ${esc(f.unit)}</option>`).join("")}</select>
+                     <input type="number" step="any" data-in="${esc(inp.key)}" value="${inp.default}" />
+                   </label>`
+                : `<label class="field-sm">${esc(inp.label)} <span class="muted">(${esc(inp.unit)})</span>
+                     <input type="number" step="any" data-in="${esc(inp.key)}" ${inp.default !== undefined ? `value="${inp.default}"` : ""} placeholder="${inp.default === undefined ? "enter a value" : ""}" />
+                   </label>`).join("")}
+            </div>
+            <div class="calc-out" data-out></div>
+            ${c.note ? `<p class="muted small calc-note">${esc(c.note)}</p>` : ""}
+          </div>`).join("")}`).join("")}`;
+
+    S.calculators.forEach(c => {
+      const card = panel.querySelector(`[data-calc="${c.id}"]`);
+      if (!card) return;
+      const read = () => {
+        const vars = {};
+        c.inputs.forEach(inp => {
+          const el = card.querySelector(`[data-in="${inp.key}"]`);
+          vars[inp.key] = el && el.value !== "" ? Number(el.value) : NaN;
+        });
+        return vars;
+      };
+      const compute = () => {
+        const vars = read();
+        const missing = c.inputs.filter(inp => !Number.isFinite(vars[inp.key]));
+        if (missing.length) {
+          card.querySelector("[data-out]").innerHTML =
+            `<p class="muted small">Enter ${missing.map(m => esc(m.label.toLowerCase())).join(" and ")} to calculate.</p>`;
+          return;
+        }
+        // A negative quantity, headcount or duration is not a small number —
+        // it is a typo. Computing from it produces a confident wrong answer,
+        // which is the worst thing a compliance calculator can do.
+        const negative = c.inputs.filter(inp => vars[inp.key] < 0);
+        if (negative.length) {
+          card.querySelector("[data-out]").innerHTML =
+            `<p class="calc-invalid">${esc(negative.map(m => m.label).join(" and "))} cannot be negative — check the figure you entered.</p>`;
+          return;
+        }
+        card.querySelector("[data-out]").innerHTML = c.outputs.map(o => {
+          const v = evalFormula(o.expr, vars);
+          let badge = "";
+          if (o.compare && o.compare.limit !== undefined && v !== null) {
+            const over = o.compare.good === "lower" ? v > o.compare.limit : v < o.compare.limit;
+            badge = statusBadge(over ? "Above the limit you entered" : "Within the limit you entered", over ? "critical" : "good");
+          }
+          return `<div class="calc-result">
+            <span class="calc-figure">${fmtNum(v)}</span>
+            <span class="calc-unit">${esc(o.unit)}</span>
+            <span class="calc-name">${esc(o.label)}</span> ${badge}</div>`;
+        }).join("");
+      };
+      card.querySelectorAll("[data-in]").forEach(el => el.addEventListener("input", compute));
+      // A factor table writes the chosen factor into its own number field,
+      // which stays editable so a site-specific factor can be used instead.
+      card.querySelectorAll("[data-factor]").forEach(sel => sel.addEventListener("change", () => {
+        const target = card.querySelector(`[data-in="${sel.dataset.factor}"]`);
+        target.value = sel.value; compute();
+      }));
+      compute();
+    });
+  }
+
+  /* =========================================================================
+     MONITOR DIRECTORY
+
+     Who can actually do the work, and what each one is registered for. The
+     register ships empty and stays that way until practitioners fill it —
+     seeding it with invented firms would put made-up names in front of someone
+     deciding who to trust with a statutory submission.
+     ========================================================================= */
+  function renderMonitors(main) {
+    const S = VERDA_SEED;
+    const CAP = S.monitorCapacities;
+
+    main.appendChild(h(`
+      <section>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>${T().monitors}</h1>
+            <p class="muted">Practitioners and firms, and the capacities each one is registered for. Screening results route
+              here: when someone's project needs a study, Verda shows them the monitors registered for that country and that work.</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="find">Find a monitor</button>
+          <button class="tab-btn" data-tab="register">Register a practice</button>
+          <button class="tab-btn" data-tab="capacities">What the capacities mean</button>
+        </div>
+        <div id="mon-panel"></div>
+      </section>`));
+    const panel = main.querySelector("#mon-panel");
+
+    /* ---------------- find ---------------- */
+    function findPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <div class="form-row">
+            <label>Country<select id="mf-country"><option value="">Any country</option>${S.countries.map(c =>
+              `<option value="${esc(c.id)}" ${c.id === state.country ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+            <label>Service needed<select id="mf-service"><option value="">Any service</option>${CAP.services.map(x =>
+              `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join("")}</select></label>
+            <label>Sector<select id="mf-sector"><option value="">Any sector</option>${[...new Set(S.industries.map(i => i.name))].map(n =>
+              `<option>${esc(n)}</option>`).join("")}</select></label>
+          </div>
+        </div>
+        <div class="card"><div class="table-scroll"><table class="table">
+          <thead><tr><th>Monitor</th><th>Grade</th><th>Countries</th><th>Registered for</th><th>Sectors</th><th>Contact</th><th></th></tr></thead>
+          <tbody id="mf-rows"></tbody></table></div></div>`;
+
+      function refresh() {
+        const country = panel.querySelector("#mf-country").value;
+        const service = panel.querySelector("#mf-service").value;
+        const sector = panel.querySelector("#mf-sector").value;
+        const rows = (state.monitors || []).filter(m =>
+          (!country || (m.countries || []).includes(country)) &&
+          (!service || (m.services || []).includes(service)) &&
+          (!sector || !(m.sectors || []).length || (m.sectors || []).includes(sector)));
+        panel.querySelector("#mf-rows").innerHTML = rows.map(m => `
+          <tr>
+            <td><strong>${esc(m.name)}</strong>${m.registration ? `<div class="small muted mono">${esc(m.registration)}</div>` : ""}</td>
+            <td>${esc((CAP.grades.find(g => g.id === m.grade) || {}).label || "—")}</td>
+            <td class="small">${esc((m.countries || []).map(countryName).join(", ") || "—")}</td>
+            <td class="small muted">${esc((m.services || []).map(id => (CAP.services.find(x => x.id === id) || {}).label).filter(Boolean).join(" · ") || "—")}</td>
+            <td class="small muted">${esc((m.sectors || []).join(", ") || "All sectors")}</td>
+            <td class="small">${esc(m.contact || "—")}</td>
+            <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(m.id)}">Remove</button></td>
+          </tr>`).join("") || emptyState("people",
+            "<strong>No monitor registered yet.</strong> The directory is filled by the practitioners who use Verda — open <em>Register a practice</em> to add the first one.", 7);
+        panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          state.monitors = state.monitors.filter(x => x.id !== b.dataset.del); save(); refresh();
+        }));
+      }
+      ["#mf-country", "#mf-service", "#mf-sector"].forEach(sel =>
+        panel.querySelector(sel).addEventListener("change", refresh));
+      refresh();
+    }
+
+    /* ---------------- register ---------------- */
+    function registerPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Register a practice</h3>
+          <p class="muted small">What you enter stays in this browser. Verda has no backend yet, so this register is local to
+            whoever is using this copy — it is the shape the directory takes, not a live national register.</p>
+          <div class="form-row">
+            <label>Name of practitioner or firm<input id="mr-name" placeholder="Name as registered" /></label>
+            <label>Registration number (optional)<input id="mr-reg" class="mono" placeholder="Regulator's registration ref" /></label>
+            <label>Grade<select id="mr-grade">${CAP.grades.map(g => `<option value="${esc(g.id)}">${esc(g.label)}</option>`).join("")}</select></label>
+            <label>Contact<input id="mr-contact" placeholder="Email or phone" /></label>
+          </div>
+          <h5 style="margin:20px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Countries registered in</h5>
+          <div class="sector-chips">${S.countries.map(c =>
+            `<label class="sector-chip"><input type="checkbox" data-country="${esc(c.id)}" style="width:auto;margin:0 6px 0 0" />${esc(c.name)}</label>`).join("")}</div>
+          <h5 style="margin:20px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Services offered</h5>
+          <ul class="checklist compact-list">${CAP.services.map(x =>
+            `<li><label><input type="checkbox" data-service="${esc(x.id)}" /> ${esc(x.label)}</label></li>`).join("")}</ul>
+          <h5 style="margin:20px 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:5px">Sectors — leave all unticked to mean "any sector"</h5>
+          <ul class="checklist compact-list">${S.industries.map(i =>
+            `<li><label><input type="checkbox" data-sector="${esc(i.name)}" /> ${esc(i.name)}</label></li>`).join("")}</ul>
+          <button class="btn btn-primary" id="mr-add" style="margin-top:16px">${icon("plus")}Add to the directory</button>
+        </div>`;
+      panel.querySelector("#mr-add").addEventListener("click", () => {
+        const name = panel.querySelector("#mr-name").value.trim();
+        if (!name) { alert("Enter the name of the practitioner or firm."); return; }
+        const picked = (attr) => [...panel.querySelectorAll(`[data-${attr}]:checked`)].map(el => el.dataset[attr]);
+        const countries = picked("country");
+        if (!countries.length) { alert("Tick at least one country — the directory routes on it."); return; }
+        const services = picked("service");
+        if (!services.length) { alert("Tick at least one service, or a screening result has nothing to match on."); return; }
+        state.monitors.push({
+          id: uid("mon"), name, registration: panel.querySelector("#mr-reg").value.trim(),
+          grade: panel.querySelector("#mr-grade").value, contact: panel.querySelector("#mr-contact").value.trim(),
+          countries, services, sectors: picked("sector"), added: today()
+        });
+        save();
+        alert(`${name} added to the directory.`);
+        panel.querySelectorAll(".tab-btn")[0];
+        main.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === "find"));
+        findPanel();
+      });
+    }
+
+    /* ---------------- capacities ---------------- */
+    function capacitiesPanel() {
+      panel.innerHTML = `
+        <div class="card">
+          <h3>Grades</h3>
+          <p class="muted small">What a monitor may sign follows from the grade, and it is the regulator's register that decides it — not this directory.</p>
+          <table class="table"><thead><tr><th>Grade</th><th>What it means</th></tr></thead><tbody>
+            ${CAP.grades.map(g => `<tr><td><strong>${esc(g.label)}</strong></td><td class="muted">${esc(g.note)}</td></tr>`).join("")}
+          </tbody></table>
+        </div>
+        <div class="card">
+          <h3>Services</h3>
+          <p class="muted small">The ${CAP.services.length} capacities a monitor can register against. A screening result asks
+            for the one its tier needs, then shows who holds it in that country.</p>
+          <ul class="checklist compact-list">${CAP.services.map(x => `<li>${esc(x.label)}</li>`).join("")}</ul>
+        </div>
+        <div class="card">
+          <h3>Sectors</h3>
+          <p class="muted small">The ${S.industries.length} sectors Verda carries checklists for. A monitor with no sector ticked
+            is treated as available for any of them.</p>
+          <ul class="checklist compact-list">${S.industries.map(i => `<li>${esc(i.name)} <span class="muted small">— ${esc(i.group)}</span></li>`).join("")}</ul>
+        </div>`;
+    }
+
+    const tabs = { find: findPanel, register: registerPanel, capacities: capacitiesPanel };
+    main.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+      tabs[b.dataset.tab]();
+    }));
+    findPanel();
+  }
+
+  /* =========================================================================
+     FREE TOOLBOX — calculators and converters
+
+     The same calculator engine the Inspections module uses, opened up without
+     an account, plus straight unit conversion. Every factor is shown and
+     editable, and every calculator states where its basis comes from.
+     ========================================================================= */
+  function renderToolbox(main) {
+    const S = VERDA_SEED;
+    main.appendChild(h(`
+      <section>
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>${T().toolbox}</h1>
+            <p class="muted">Free, no account. ${S.calculators.length} environmental, forestry and HSE calculators and
+              ${S.converters.length} unit converters — the arithmetic a site officer does on the back of an envelope, done
+              consistently and with its basis on screen.</p>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="calc">Calculators</button>
+          <button class="tab-btn" data-tab="conv">Converters</button>
+        </div>
+        <div id="tb-panel"></div>
+      </section>`));
+    const panel = main.querySelector("#tb-panel");
+
+    function convPanel() {
+      const groups = [...new Set(S.converters.map(c => c.group))];
+      panel.innerHTML = `
+        <div class="card notice-card">
+          <h4>Conversion factors, not estimates</h4>
+          <p class="small">Every factor here is an exact or standard definition. Where two units are only interchangeable under
+            an assumption — mg/l and ppm, which match only in dilute water — the converter says so rather than hiding it.</p>
+        </div>
+        ${groups.map(g => `
+          <h3 class="calc-group">${esc(g)}</h3>
+          ${S.converters.filter(c => c.group === g).map(c => `
+            <div class="card calc-card" data-conv="${esc(c.id)}">
+              <h4>${esc(c.label)}</h4>
+              <div class="form-row">
+                <label>Value<input type="number" step="any" data-cv value="1" /></label>
+                <label>From<select data-cf>${c.units.map(u => `<option value="${esc(u.id)}">${esc(u.label)}</option>`).join("")}</select></label>
+              </div>
+              <div data-cout></div>
+              ${c.note ? `<p class="muted small calc-note">${esc(c.note)}</p>` : ""}
+            </div>`).join("")}`).join("")}`;
+
+      S.converters.forEach(c => {
+        const cardEl = panel.querySelector(`[data-conv="${c.id}"]`);
+        if (!cardEl) return;
+        const compute = () => {
+          const raw = cardEl.querySelector("[data-cv]").value;
+          const from = c.units.find(u => u.id === cardEl.querySelector("[data-cf]").value);
+          const out = cardEl.querySelector("[data-cout]");
+          if (raw === "" || !Number.isFinite(Number(raw))) { out.innerHTML = `<p class="muted small">Enter a value to convert.</p>`; return; }
+          // Every unit carries a factor relative to the group's base unit, so a
+          // conversion is base = value / from.f, then base * to.f.
+          const base = Number(raw) / from.f;
+          out.innerHTML = c.units.filter(u => u.id !== from.id).map(u => `
+            <div class="calc-result"><span class="calc-figure">${fmtNum(base * u.f)}</span>
+              <span class="calc-unit">${esc(u.label)}</span></div>`).join("");
+        };
+        cardEl.querySelector("[data-cv]").addEventListener("input", compute);
+        cardEl.querySelector("[data-cf]").addEventListener("change", compute);
+        compute();
+      });
+    }
+
+    const tabs = { calc: () => calculatorPanel(panel), conv: convPanel };
+    main.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+      main.querySelectorAll(".tab-btn").forEach(x => x.classList.toggle("active", x === b));
+      tabs[b.dataset.tab]();
+    }));
+    calculatorPanel(panel);
+  }
+
   function renderSkills(main) {
     main.appendChild(h(`
       <section>

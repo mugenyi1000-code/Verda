@@ -2191,7 +2191,8 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
   // ---- Translations (partial coverage — nav & key UI strings) ------------
   translations: {
     en: { app_name: "Verda", tagline: "Environmental, Health & Safety Compliance — Simplified.",
-      nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow",
+      nav_monitor: "Monitor", nav_manage: "Manage", nav_grow: "Grow", nav_free: "Free tools",
+      screening: "Project Screening", monitors: "Find a Monitor", toolbox: "Calculators & Converters",
       dashboard: "Dashboard", reporting: "Verda Reporting", esia: "ESIA Reporting", tor: "Terms of Reference",
       revenue: "Revenue Planner",
       plans: "Plans & Pricing",
@@ -2202,7 +2203,8 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       resources: "Resources Hub", supplies: "Supplies & Hire", iec: "IEC Materials", solutions: "Solutions",
       login: "Log in", signup: "Free Sign Up", logout: "Log out" },
     sw: { app_name: "Verda", tagline: "Uzingatiaji wa Mazingira, Afya na Usalama — Kwa Urahisi.",
-      nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua",
+      nav_monitor: "Fuatilia", nav_manage: "Simamia", nav_grow: "Kua", nav_free: "Zana za bure",
+      screening: "Uchunguzi wa Mradi", monitors: "Tafuta Mkaguzi", toolbox: "Vikokotoo na Vibadilishaji",
       dashboard: "Dashibodi", reporting: "Ripoti ya Verda", esia: "Ripoti ya ESIA", tor: "Hadidu za Rejea",
       revenue: "Mpango wa Mapato",
       plans: "Mipango na Bei",
@@ -2213,7 +2215,8 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       resources: "Kituo cha Rasilimali", supplies: "Vifaa na Ukodishaji", iec: "Nyenzo za IEC", solutions: "Suluhisho",
       login: "Ingia", signup: "Jisajili Bure", logout: "Toka" },
     fr: { app_name: "Verda", tagline: "Conformité Environnementale, Santé & Sécurité — Simplifiée.",
-      nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer",
+      nav_monitor: "Surveiller", nav_manage: "Gérer", nav_grow: "Développer", nav_free: "Outils gratuits",
+      screening: "Présélection de projet", monitors: "Trouver un expert", toolbox: "Calculateurs et convertisseurs",
       dashboard: "Tableau de bord", reporting: "Rapport Verda", esia: "Rapport EIES", tor: "Termes de Référence",
       revenue: "Planificateur de Revenus",
       plans: "Offres et Tarifs",
@@ -2224,7 +2227,8 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       resources: "Centre de Ressources", supplies: "Fournitures et Location", iec: "Matériel IEC", solutions: "Solutions",
       login: "Connexion", signup: "Inscription Gratuite", logout: "Déconnexion" },
     pt: { app_name: "Verda", tagline: "Conformidade Ambiental, Saúde e Segurança — Simplificada.",
-      nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer",
+      nav_monitor: "Monitorar", nav_manage: "Gerir", nav_grow: "Crescer", nav_free: "Ferramentas gratuitas",
+      screening: "Triagem de Projeto", monitors: "Encontrar um Monitor", toolbox: "Calculadoras e Conversores",
       dashboard: "Painel", reporting: "Relatório Verda", esia: "Relatório AIAS", tor: "Termos de Referência",
       revenue: "Planeador de Receitas",
       plans: "Planos e Preços",
@@ -2235,7 +2239,8 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       resources: "Centro de Recursos", supplies: "Suprimentos e Aluguer", iec: "Materiais IEC", solutions: "Soluções",
       login: "Entrar", signup: "Inscrição Gratuita", logout: "Sair" },
     zh: { app_name: "Verda", tagline: "环境、健康与安全合规 — 化繁为简。",
-      nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展",
+      nav_monitor: "监控", nav_manage: "管理", nav_grow: "拓展", nav_free: "免费工具",
+      screening: "项目筛查", monitors: "查找监测机构", toolbox: "计算器与换算器",
       dashboard: "仪表板", reporting: "Verda 报告", esia: "环境社会影响评价报告", tor: "职责范围 (ToR)",
       revenue: "收入测算",
       plans: "方案与定价",
@@ -12409,6 +12414,816 @@ licensed waste transporter. Keep waste transfer records for every collection.` }
       ]
     }
   ],
+
+
+  /* ==================================================================
+     FREE SCREENING TOOL
+
+     The screening tool answers one question — does this project need an
+     environmental study, and which one — and it answers it the way a
+     practitioner does: by reading the project against the schedule that
+     governs it in that country.
+
+     It is a published decision tree, not a model. Every outcome names the
+     answers that produced it and the instrument to confirm it against, so
+     the reasoning can be checked and argued with. A screening opinion that
+     nobody can reproduce is worth nothing to a regulator.
+
+     It is NOT a determination. Only the regulator screens a project. The
+     thresholds below are bands a practitioner would recognise, not
+     quotations from the schedules — the schedules use different units and
+     tests in each country, and they are amended often.
+     ================================================================== */
+
+  screeningFramework: {
+  "ug": {
+    "authority": "NEMA Uganda",
+    "lower": {
+      "name": "Project Brief",
+      "basis": "National Environment Act No. 5 of 2019, Schedule 4 — Part I projects go to NEMA, Part II to the lead agency"
+    },
+    "upper": {
+      "name": "Environmental and Social Impact Assessment (ESIA)",
+      "basis": "National Environment Act No. 5 of 2019, Schedule 5 — the categories for which an ESIA is mandatory"
+    },
+    "practitioner": "The study must be led by a practitioner registered with NEMA; the developer cannot self-certify.",
+    "checkAt": "Schedule 4 and Schedule 5 of the National Environment Act No. 5 of 2019 (Cap 181)"
+  },
+  "ke": {
+    "authority": "NEMA Kenya",
+    "lower": {
+      "name": "Project Report (summary)",
+      "basis": "EMCA Second Schedule as amended by Legal Notice No. 31 of 2019 — low and medium risk projects submit a summary project report"
+    },
+    "upper": {
+      "name": "ESIA Study Report",
+      "basis": "EMCA Second Schedule as amended by Legal Notice No. 31 of 2019 — high risk projects submit a full ESIA study report"
+    },
+    "practitioner": "The report must be prepared by an EIA/EA expert registered with NEMA Kenya.",
+    "checkAt": "The Second Schedule to EMCA, as amended by Legal Notice No. 31 of 2019 (low / medium / high risk)"
+  },
+  "tz": {
+    "authority": "NEMC Tanzania",
+    "lower": {
+      "name": "Project Brief",
+      "basis": "EIA and Audit Regulations 2005 — projects screened under the Second Schedule; category B2 submits a project brief"
+    },
+    "upper": {
+      "name": "Full Environmental Impact Assessment",
+      "basis": "EIA and Audit Regulations 2005, First Schedule — the mandatory list, which includes extractive industry"
+    },
+    "practitioner": "The study must be carried out by an expert registered under the Environmental Management (Registration and Practice of Environmental Experts) Regulations 2021.",
+    "checkAt": "The First and Second Schedules to the EIA and Audit Regulations 2005 (GN 349)"
+  },
+  "rw": {
+    "authority": "REMA (RDB reviews the report and runs the public hearing)",
+    "lower": {
+      "name": "Partial / simplified environmental impact assessment",
+      "basis": "Ministerial Order N° 001/2019 of 15/04/2019 — the list of projects that must undergo an EIA sets the level of study"
+    },
+    "upper": {
+      "name": "Full Environmental Impact Assessment → EIA Certificate",
+      "basis": "Law N° 48/2018 on environment, Article 32, with Ministerial Order N° 001/2019"
+    },
+    "practitioner": "The study must be done by an environmental practitioner approved to work in Rwanda; REMA issues the certificate.",
+    "checkAt": "Ministerial Order N° 001/2019 of 15/04/2019 and Law N° 48/2018"
+  },
+  "zm": {
+    "authority": "ZEMA",
+    "lower": {
+      "name": "Environmental Project Brief (EPB)",
+      "basis": "Environmental Impact Assessment Regulations, SI No. 28 of 1997, First Schedule"
+    },
+    "upper": {
+      "name": "Environmental Impact Statement (EIS)",
+      "basis": "Environmental Impact Assessment Regulations, SI No. 28 of 1997, Second Schedule — ZEMA may also require an EIS after reviewing an EPB"
+    },
+    "practitioner": "The study must be prepared by a consultant acceptable to ZEMA.",
+    "checkAt": "The First and Second Schedules to SI No. 28 of 1997"
+  },
+  "cd": {
+    "authority": "ACE — or DPEM where the project is a mining project",
+    "lower": {
+      "name": "Étude d'Impact Environnemental et Social (EIES) simplifiée + PGES",
+      "basis": "Décret n° 14/019 du 2 août 2014 fixant les règles de fonctionnement des mécanismes procéduraux de la protection de l'environnement"
+    },
+    "upper": {
+      "name": "EIES complète + Plan de Gestion Environnementale et Sociale (PGES)",
+      "basis": "Décret n° 14/019 de 2014; for mining, the Règlement Minier (Décret n° 038/2003 révisé par Décret n° 18/024)"
+    },
+    "practitioner": "The study must be carried out by a bureau d'études agréé; submissions are made in French.",
+    "checkAt": "Décret n° 14/019 de 2014 — and the Règlement Minier if the project is a mining project"
+  }
+},
+
+  screeningSectors: [
+  {
+    "id": "housing",
+    "label": "Housing, apartments or an estate",
+    "group": "Buildings & settlement",
+    "floor": "none",
+    "scale": "units",
+    "note": "Housing crosses into the upper tier on unit count in several of these schedules — Kenya's amended Second Schedule names estates above one hundred units as high risk."
+  },
+  {
+    "id": "commercial",
+    "label": "Offices, shops, a hotel or a warehouse",
+    "group": "Buildings & settlement",
+    "floor": "none",
+    "scale": "area"
+  },
+  {
+    "id": "institution",
+    "label": "School, clinic or hospital",
+    "group": "Buildings & settlement",
+    "floor": "brief",
+    "scale": "beds",
+    "note": "Health facilities are treated as higher risk than their size suggests, because of clinical and hazardous waste. Kenya's 2019 amendment classes hospitals as high risk."
+  },
+  {
+    "id": "roads",
+    "label": "Road, bridge or other transport infrastructure",
+    "group": "Infrastructure",
+    "floor": "brief",
+    "scale": "length"
+  },
+  {
+    "id": "power",
+    "label": "Power generation, transmission or a substation",
+    "group": "Infrastructure",
+    "floor": "brief",
+    "scale": "mw"
+  },
+  {
+    "id": "dam",
+    "label": "Dam, reservoir or major water abstraction scheme",
+    "group": "Infrastructure",
+    "mandatory": true,
+    "scale": "volume"
+  },
+  {
+    "id": "water-supply",
+    "label": "Water supply, sewerage or a treatment works",
+    "group": "Infrastructure",
+    "floor": "brief",
+    "scale": "volume"
+  },
+  {
+    "id": "waste",
+    "label": "Waste facility — landfill, transfer, treatment or incineration",
+    "group": "Waste & hazardous",
+    "mandatory": true,
+    "scale": "tonnes"
+  },
+  {
+    "id": "mining-lsm",
+    "label": "Mining — open pit or underground",
+    "group": "Extractive",
+    "mandatory": true,
+    "scale": "area"
+  },
+  {
+    "id": "mining-asm",
+    "label": "Artisanal or small-scale mining",
+    "group": "Extractive",
+    "floor": "brief",
+    "scale": "area",
+    "note": "Formalisation status matters as much as scale here: a licence or cooperative membership, and whether the site sits inside a large-scale concession or a protected area."
+  },
+  {
+    "id": "quarry",
+    "label": "Quarry, sand or aggregate extraction",
+    "group": "Extractive",
+    "mandatory": true,
+    "scale": "area"
+  },
+  {
+    "id": "oilgas",
+    "label": "Oil, gas or petroleum storage and handling",
+    "group": "Extractive",
+    "mandatory": true,
+    "scale": "volume"
+  },
+  {
+    "id": "manufacturing",
+    "label": "Factory or manufacturing plant",
+    "group": "Industry",
+    "floor": "brief",
+    "scale": "area"
+  },
+  {
+    "id": "agroprocessing",
+    "label": "Agro-processing — milling, coffee, tea, abattoir, tannery",
+    "group": "Industry",
+    "floor": "brief",
+    "scale": "area",
+    "note": "Tanneries, abattoirs and coffee washing carry high-strength effluent, which is usually what moves them up a tier rather than their footprint."
+  },
+  {
+    "id": "agriculture",
+    "label": "Farming, plantation or irrigation scheme",
+    "group": "Land use",
+    "floor": "none",
+    "scale": "area"
+  },
+  {
+    "id": "forestry",
+    "label": "Forestry, logging or a timber plantation",
+    "group": "Land use",
+    "floor": "brief",
+    "scale": "area"
+  },
+  {
+    "id": "aquaculture",
+    "label": "Fish farming or aquaculture",
+    "group": "Land use",
+    "floor": "brief",
+    "scale": "area"
+  },
+  {
+    "id": "tourism",
+    "label": "Lodge, camp or tourism development",
+    "group": "Land use",
+    "floor": "brief",
+    "scale": "beds",
+    "note": "Tourism developments are usually screened on where they are rather than how big they are — most sit in or beside a protected area."
+  },
+  {
+    "id": "telecom",
+    "label": "Telecom mast, tower or data centre",
+    "group": "Infrastructure",
+    "floor": "none",
+    "scale": "none"
+  },
+  {
+    "id": "other",
+    "label": "Something else",
+    "group": "Other",
+    "floor": "none",
+    "scale": "none"
+  }
+],
+
+  screeningScaleBands: {
+  "units": {
+    "label": "How many dwelling units?",
+    "unit": "units",
+    "bands": [
+      {
+        "max": 20,
+        "tier": "none"
+      },
+      {
+        "max": 100,
+        "tier": "brief"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "area": {
+    "label": "Roughly how large is the site?",
+    "unit": "hectares",
+    "bands": [
+      {
+        "max": 1,
+        "tier": "none"
+      },
+      {
+        "max": 20,
+        "tier": "brief"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "beds": {
+    "label": "How many beds or rooms?",
+    "unit": "beds / rooms",
+    "bands": [
+      {
+        "max": 20,
+        "tier": "brief"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "length": {
+    "label": "How long is the route?",
+    "unit": "kilometres",
+    "bands": [
+      {
+        "max": 1,
+        "tier": "brief"
+      },
+      {
+        "max": 10,
+        "tier": "brief"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "mw": {
+    "label": "What is the installed capacity?",
+    "unit": "MW",
+    "bands": [
+      {
+        "max": 1,
+        "tier": "brief"
+      },
+      {
+        "max": 10,
+        "tier": "esia"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "volume": {
+    "label": "What volume or throughput is involved?",
+    "unit": "m³ per day (or m³ stored)",
+    "bands": [
+      {
+        "max": 50,
+        "tier": "brief"
+      },
+      {
+        "max": 1000,
+        "tier": "esia"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "tonnes": {
+    "label": "How much material will the facility handle?",
+    "unit": "tonnes per day",
+    "bands": [
+      {
+        "max": 1,
+        "tier": "brief"
+      },
+      {
+        "max": null,
+        "tier": "esia"
+      }
+    ]
+  },
+  "none": null
+},
+
+  screeningTriggers: [
+  {
+    "id": "wetland",
+    "label": "In, or draining directly into, a wetland, swamp or marsh",
+    "tier": "esia",
+    "why": "Wetlands are protected in their own right in all six jurisdictions, and a wetland location moves almost any project into the upper tier regardless of its size.",
+    "flags": [
+      "Wetland use or alteration permission is usually a separate consent from the environmental approval."
+    ]
+  },
+  {
+    "id": "protected",
+    "label": "Inside or bordering a national park, forest reserve or other protected area",
+    "tier": "esia",
+    "why": "Work in or beside a protected area brings the protected-area authority in as a second decision-maker alongside the environmental regulator.",
+    "flags": [
+      "Expect a separate consent from the protected-area authority, and possibly a biodiversity assessment."
+    ]
+  },
+  {
+    "id": "water",
+    "label": "Within about 100 m of a river, lake or shoreline",
+    "tier": "esia",
+    "why": "Riparian and lakeshore setbacks are set by law in these jurisdictions, and encroachment is one of the most common reasons an approval is refused.",
+    "flags": [
+      "Confirm the statutory riparian setback for the watercourse before fixing the layout."
+    ]
+  },
+  {
+    "id": "groundwater",
+    "label": "Will abstract groundwater or surface water",
+    "tier": "brief",
+    "why": "Abstraction needs its own permit from the water authority, which is a separate application from the environmental approval.",
+    "flags": [
+      "A water abstraction or water use permit is required in addition to the environmental decision."
+    ]
+  },
+  {
+    "id": "effluent",
+    "label": "Will discharge effluent or wastewater",
+    "tier": "brief",
+    "why": "A discharge consent is a separate permit, and effluent quality is one of the first things a monitoring programme has to evidence.",
+    "flags": [
+      "A discharge or effluent permit is required, with monitoring at the permitted frequency."
+    ]
+  },
+  {
+    "id": "air",
+    "label": "Will have a stack, kiln, furnace or significant dust",
+    "tier": "brief",
+    "why": "Point-source emissions bring air quality standards and, in most of these jurisdictions, an emission licence.",
+    "flags": [
+      "Expect emission limits and a stack testing obligation."
+    ]
+  },
+  {
+    "id": "hazardous",
+    "label": "Will store, use or generate hazardous materials or waste",
+    "tier": "esia",
+    "why": "Hazardous materials attract a separate licensing regime and are a standing reason to require the full study.",
+    "flags": [
+      "Hazardous waste generation, storage and transport are separately licensed end to end."
+    ]
+  },
+  {
+    "id": "explosives",
+    "label": "Will use explosives or blasting",
+    "tier": "esia",
+    "why": "Blasting brings an explosives licence, a licensed blaster, and vibration and airblast limits at the nearest receptor.",
+    "flags": [
+      "An explosives licence, magazine licence and blast monitoring programme will be needed."
+    ]
+  },
+  {
+    "id": "resettlement",
+    "label": "People will have to move, or land will be acquired",
+    "tier": "esia",
+    "why": "Physical or economic displacement is the single clearest trigger for a full study, and it brings a resettlement instrument with it.",
+    "flags": [
+      "A Resettlement Action Plan (or Livelihood Restoration Plan) will normally be required alongside the study.",
+      "Lender-financed projects are also held to IFC Performance Standard 5."
+    ]
+  },
+  {
+    "id": "clearing",
+    "label": "Vegetation or trees will be cleared",
+    "tier": "brief",
+    "why": "Clearance is assessed on what is being cleared, not just how much — indigenous or reserve trees need a separate authorisation.",
+    "flags": [
+      "A tree cutting or forest use authorisation may be needed from the forestry authority."
+    ]
+  },
+  {
+    "id": "settlement",
+    "label": "Homes, schools or a market are within about 500 m",
+    "tier": "brief",
+    "why": "Nearby receptors turn noise, dust and traffic from a design detail into a consent condition, and bring community consultation forward.",
+    "flags": [
+      "Expect noise and dust limits measured at the nearest receptor, and a grievance mechanism as a condition."
+    ]
+  },
+  {
+    "id": "heritage",
+    "label": "A cultural, burial or archaeological site is present or suspected",
+    "tier": "esia",
+    "why": "Cultural heritage is assessed separately from environmental impact and carries its own consent and chance-find obligations.",
+    "flags": [
+      "A chance-finds procedure is normally a condition; an assessment by the antiquities authority may be required."
+    ]
+  },
+  {
+    "id": "transboundary",
+    "label": "Effects could cross a national border",
+    "tier": "esia",
+    "why": "Transboundary effects bring obligations to neighbouring states and, for lender-financed work, to the lender.",
+    "flags": [
+      "Notification to the affected state may be required before approval."
+    ]
+  }
+],
+
+  // ---- Monitor capacities -------------------------------------------
+  // The vocabulary a monitor registers against. No practitioner or firm is
+  // ever seeded here: the register is the operator's to fill.
+  monitorCapacities: {
+  "services": [
+    {
+      "id": "screening",
+      "label": "Screening and scoping opinions"
+    },
+    {
+      "id": "projectbrief",
+      "label": "Project briefs / project reports"
+    },
+    {
+      "id": "esia",
+      "label": "Full ESIA / EIS studies"
+    },
+    {
+      "id": "esmp",
+      "label": "ESMP and management plan preparation"
+    },
+    {
+      "id": "audit",
+      "label": "Environmental audits (statutory and due diligence)"
+    },
+    {
+      "id": "monitoring",
+      "label": "Periodic compliance monitoring and reporting"
+    },
+    {
+      "id": "essr",
+      "label": "Lender-format monthly E&S reporting (ESSR)"
+    },
+    {
+      "id": "sampling",
+      "label": "Effluent, air, noise and soil sampling"
+    },
+    {
+      "id": "occhygiene",
+      "label": "Occupational hygiene surveys"
+    },
+    {
+      "id": "hse",
+      "label": "HSE management systems and training"
+    },
+    {
+      "id": "social",
+      "label": "Social assessment, resettlement and livelihood restoration"
+    },
+    {
+      "id": "biodiversity",
+      "label": "Biodiversity and ecological assessment"
+    },
+    {
+      "id": "forestry",
+      "label": "Forestry inventory, management and restoration"
+    },
+    {
+      "id": "tailings",
+      "label": "Tailings and mine waste review"
+    },
+    {
+      "id": "closure",
+      "label": "Mine closure and rehabilitation planning"
+    },
+    {
+      "id": "gis",
+      "label": "GIS, mapping and remote sensing"
+    }
+  ],
+  "grades": [
+    {
+      "id": "lead",
+      "label": "Lead expert / registered practitioner",
+      "note": "Registered with the national regulator and able to sign off a study."
+    },
+    {
+      "id": "associate",
+      "label": "Associate expert",
+      "note": "Registered, working under a lead expert."
+    },
+    {
+      "id": "technician",
+      "label": "Technician / field officer",
+      "note": "Sampling, monitoring and field data collection."
+    },
+    {
+      "id": "firm",
+      "label": "Registered firm",
+      "note": "A practice holding a firm-level registration."
+    }
+  ]
+},
+
+  monitors: [],
+
+  // ---- Unit converters ----------------------------------------------
+  // Factors are exact or standard definitions, not estimates.
+  converters: [
+  {
+    "group": "Area & length",
+    "id": "area",
+    "label": "Area",
+    "units": [
+      {
+        "id": "ha",
+        "label": "hectares",
+        "f": 1
+      },
+      {
+        "id": "m2",
+        "label": "square metres",
+        "f": 10000
+      },
+      {
+        "id": "km2",
+        "label": "square kilometres",
+        "f": 0.01
+      },
+      {
+        "id": "ac",
+        "label": "acres",
+        "f": 2.47105
+      }
+    ]
+  },
+  {
+    "group": "Area & length",
+    "id": "length",
+    "label": "Length",
+    "units": [
+      {
+        "id": "m",
+        "label": "metres",
+        "f": 1
+      },
+      {
+        "id": "km",
+        "label": "kilometres",
+        "f": 0.001
+      },
+      {
+        "id": "ft",
+        "label": "feet",
+        "f": 3.28084
+      },
+      {
+        "id": "mi",
+        "label": "miles",
+        "f": 0.000621371
+      }
+    ]
+  },
+  {
+    "group": "Volume & flow",
+    "id": "volume",
+    "label": "Volume",
+    "units": [
+      {
+        "id": "m3",
+        "label": "cubic metres",
+        "f": 1
+      },
+      {
+        "id": "l",
+        "label": "litres",
+        "f": 1000
+      },
+      {
+        "id": "gal",
+        "label": "US gallons",
+        "f": 264.172
+      },
+      {
+        "id": "impgal",
+        "label": "imperial gallons",
+        "f": 219.969
+      }
+    ]
+  },
+  {
+    "group": "Volume & flow",
+    "id": "flow",
+    "label": "Flow rate",
+    "units": [
+      {
+        "id": "m3d",
+        "label": "m³ per day",
+        "f": 1
+      },
+      {
+        "id": "m3h",
+        "label": "m³ per hour",
+        "f": 0.041666666666666664
+      },
+      {
+        "id": "ls",
+        "label": "litres per second",
+        "f": 0.011574074074074073
+      },
+      {
+        "id": "m3s",
+        "label": "m³ per second",
+        "f": 1.1574074074074073e-05
+      }
+    ]
+  },
+  {
+    "group": "Mass",
+    "id": "mass",
+    "label": "Mass",
+    "units": [
+      {
+        "id": "t",
+        "label": "tonnes",
+        "f": 1
+      },
+      {
+        "id": "kg",
+        "label": "kilograms",
+        "f": 1000
+      },
+      {
+        "id": "lb",
+        "label": "pounds",
+        "f": 2204.62
+      },
+      {
+        "id": "ton_us",
+        "label": "US short tons",
+        "f": 1.10231
+      }
+    ]
+  },
+  {
+    "group": "Concentration",
+    "id": "conc",
+    "label": "Concentration in water",
+    "units": [
+      {
+        "id": "mgl",
+        "label": "mg/l",
+        "f": 1
+      },
+      {
+        "id": "ppm",
+        "label": "ppm (dilute aqueous)",
+        "f": 1
+      },
+      {
+        "id": "ugl",
+        "label": "µg/l",
+        "f": 1000
+      },
+      {
+        "id": "gl",
+        "label": "g/l",
+        "f": 0.001
+      }
+    ],
+    "note": "mg/l and ppm are interchangeable only for dilute aqueous solutions, where 1 litre weighs about 1 kg. They are not interchangeable in air."
+  },
+  {
+    "group": "Energy",
+    "id": "energy",
+    "label": "Energy",
+    "units": [
+      {
+        "id": "kwh",
+        "label": "kWh",
+        "f": 1
+      },
+      {
+        "id": "mj",
+        "label": "megajoules",
+        "f": 3.6
+      },
+      {
+        "id": "gj",
+        "label": "gigajoules",
+        "f": 0.0036
+      },
+      {
+        "id": "mwh",
+        "label": "MWh",
+        "f": 0.001
+      }
+    ]
+  },
+  {
+    "group": "Pressure",
+    "id": "pressure",
+    "label": "Pressure",
+    "units": [
+      {
+        "id": "bar",
+        "label": "bar",
+        "f": 1
+      },
+      {
+        "id": "kpa",
+        "label": "kPa",
+        "f": 100
+      },
+      {
+        "id": "psi",
+        "label": "psi",
+        "f": 14.5038
+      },
+      {
+        "id": "atm",
+        "label": "atmospheres",
+        "f": 0.986923
+      }
+    ]
+  }
+],
 
   creditCosts: { aiDraft: 20, esiaSubmit: 50, auditAiSummary: 15 },
   freeSignupCredits: 100

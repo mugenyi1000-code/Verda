@@ -26,6 +26,7 @@ client relationship in-house.
 - **`docs/outreach-emails/`** — two pitch templates for converting an existing ESIA/ESMP client into a compliance care plan: one for just after a certificate is issued, one framed around the next renewal. Client details are `[brackets]`, filled in per client.
 - **`tools/build-single-file.js`** — bundles `app/` into `dist/verda-demo.html`, one self-contained file. It extracts the page shell from `app/index.html` rather than keeping its own copy, and fails the build if `init()` looks up an element the shell does not contain.
 - **`tools/check-build.js`** — smoke-tests the *built* file in a headless browser: that it renders at all, every section, all six jurisdictions, and the reporting screen. Run it after every build — passing against `app/` is not evidence the bundle works.
+- **Free tools (no account):** a **project screening tool** that tells anyone with a project which environmental submission it needs and why, a **monitor directory** it routes them to, and **calculators and converters** open to everyone. See below.
 - **`docs/design-system.md`** — the design system written out: the four theme palettes, the type ramp, component anatomy and the rules behind them. Written to be handed to a designer or pasted into a prompt-driven builder.
 - **`design/`** — a generator for eight hi-fi artboards (dashboard, ESSR builder, analytics, inspections, audits, workflow run, phone field-capture, and the system sheet), matched value-for-value to `app/styles.css`. `node design/build-artboards.mjs`.
 - **`app/`** — **Verda**, a static (no-backend) web app that runs the whole compliance care plan offer day-to-day. Open `app/index.html` in a browser. See below for what it does.
@@ -307,6 +308,48 @@ one is available today:
    organisations. Model it in **Revenue Planner → Platform**. Subscriptions
    need real auth, multi-tenancy and a payment gateway first; the planner
    is a plan, not a forecast.
+
+## The free screening tool
+
+The question someone with a plot of land actually has is *"do I need an ESIA?"*.
+Verda answers it without an account, and the answer is the front door to
+everything else.
+
+**How it works.** Five steps — what you are planning, how big, where it is and
+what is around it, optional pictures and maps, then the result. The engine takes
+the highest tier produced by three things: the sector, the scale, and the
+sensitivity triggers you tick. A 0.5-hectare shop on bare ground needs nothing;
+the same shop in a wetland needs the full study, and the tool says which answer
+did that.
+
+**It is a published decision tree, not a model.** Every answer that raised the
+outcome is reported back with its reason, so the reasoning can be read and
+argued with. An opinion nobody can reproduce is worth nothing to a regulator.
+There is no backend and no model call — the logic is in `screeningFramework`,
+`screeningSectors`, `screeningScaleBands` and `screeningTriggers` in
+`app/data.js`, and anyone can read it.
+
+**What it is not.** It is not a determination and not legal advice. Only the
+regulator screens a project. Every result names the instrument to confirm it
+against — Uganda's Schedules 4 and 5, Kenya's Second Schedule as amended by
+Legal Notice No. 31 of 2019, Tanzania's First and Second Schedules, Rwanda's
+Ministerial Order N° 001/2019, Zambia's SI No. 28 of 1997, DR Congo's Décret
+n° 14/019 — and who may sign the study in that country. The size bands are
+bands a practitioner would recognise, **not quotations from the schedules**,
+which use different units and tests in each country and are amended often.
+
+**Where it leads.** A result routes to the **monitor directory**: practitioners
+and firms with the countries, services and sectors each is registered for, so
+someone who needs a study meets the people who can do it. The directory ships
+empty — it is filled by the practitioners who use Verda, because seeding it with
+invented firms would put made-up names in front of someone choosing who to trust
+with a statutory submission.
+
+**Calculators and converters** are open without an account too: the same
+engine Inspections uses, so a corrected factor is corrected in both places.
+Every calculator states its basis, every factor is editable, and conversion
+factors are exact definitions — where two units match only under an assumption
+(mg/l and ppm, equal only in dilute water) the converter says so.
 
 ## Design
 
