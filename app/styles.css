@@ -740,3 +740,145 @@ td .empty-state { padding: 26px 16px; }
 .audit-item-controls select, .audit-item-controls input { margin: 0; font-size: .83rem; padding: 6px 9px; }
 .audit-item-controls select:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 760px) { .audit-item-controls { grid-template-columns: 1fr; } }
+
+/* ============================================================================
+   MARKETING SURFACES
+
+   A signed-out visitor was landing on an empty admin shell — a 28-item sidebar
+   and three tiles reading zero. Zeros are the worst possible first impression:
+   they say the product is empty rather than that the visitor is new.
+
+   So the signed-out dashboard is a landing page now, and it is allowed a
+   different register from the working screens: more elevation, more colour,
+   larger type. That is a deliberate split, not a drift. A marketing surface is
+   read once and has to persuade; a working screen is operated every day and has
+   to get out of the way. The tokens are shared, the restraint is not.
+   ========================================================================= */
+
+/* ---- Hero ---------------------------------------------------------------- */
+.hero-lg {
+  position: relative; overflow: hidden;
+  background: linear-gradient(145deg, var(--solid-1) 0%, var(--solid-2) 58%, var(--solid-1) 120%);
+  color: #fff; border-radius: var(--r-feature); padding: 52px 48px 48px; margin-bottom: 22px;
+  box-shadow: var(--shadow-float);
+}
+/* Two soft light sources and a hairline grid: depth without a stock photo, and
+   it re-colours with the theme instead of fighting it. */
+.hero-lg::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 80% at 92% -20%, rgba(255,255,255,.26), transparent 60%),
+    radial-gradient(ellipse 50% 60% at -10% 110%, rgba(255,255,255,.14), transparent 55%);
+}
+.hero-lg::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .13;
+  background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 75% 90% at 78% 15%, #000 20%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 90% at 78% 15%, #000 20%, transparent 72%);
+}
+.hero-lg > * { position: relative; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .74rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.28);
+  padding: 6px 14px; border-radius: var(--r-pill); margin-bottom: 20px;
+  backdrop-filter: blur(3px);
+}
+.hero-eyebrow .icon { width: 15px; height: 15px; }
+.hero-lg h1 {
+  color: #fff; font-size: 2.9rem; line-height: 1.06; letter-spacing: -.032em;
+  margin: 0 0 16px; max-width: 19ch; font-weight: 600;
+}
+.hero-lead { font-size: 1.12rem; line-height: 1.55; opacity: .93; max-width: 56ch; margin: 0 0 28px; }
+.hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+/* On a saturated ground the primary action is the white one — inverting the
+   usual rule, because contrast is what makes a call to action read as one. */
+.btn-invert {
+  background: #fff; color: var(--solid-1); border-color: #fff; font-weight: 600;
+  padding: 12px 22px; font-size: .92rem;
+}
+.btn-invert:hover { background: rgba(255,255,255,.9); border-color: rgba(255,255,255,.9); color: var(--solid-1); }
+.btn-on-dark {
+  background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.42);
+  padding: 12px 22px; font-size: .92rem; backdrop-filter: blur(3px);
+}
+.btn-on-dark:hover { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.6); color: #fff; }
+.hero-note { margin: 18px 0 0; font-size: .84rem; opacity: .82; }
+
+/* ---- Proof strip: real figures, not adjectives --------------------------- */
+.proof-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: var(--r-card); overflow: hidden; margin-bottom: 26px;
+}
+.proof-item { background: var(--surface); padding: 18px 20px; }
+.proof-value {
+  font-family: var(--font-data); font-size: 1.7rem; font-weight: 500;
+  letter-spacing: -.04em; color: var(--brand-1); line-height: 1.1;
+}
+.proof-label {
+  font-size: .73rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--muted); margin-top: 5px;
+}
+@media (max-width: 900px) { .proof-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .proof-strip { grid-template-columns: 1fr; } }
+
+/* ---- Section headings on marketing surfaces ------------------------------ */
+.mk-head { margin: 38px 0 4px; }
+.mk-eyebrow {
+  font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--brand-1); margin-bottom: 7px;
+}
+.mk-head h2 { font-size: 1.62rem; letter-spacing: -.02em; margin: 0 0 6px; }
+.mk-head p { color: var(--muted); margin: 0 0 18px; max-width: 64ch; }
+
+/* ---- The free-tool cards: the actual hook -------------------------------- */
+.free-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
+@media (max-width: 1000px) { .free-grid { grid-template-columns: 1fr; } }
+.free-card {
+  display: block; text-decoration: none; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
+  padding: 22px 22px 20px; position: relative; overflow: hidden;
+  transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.free-card:hover { border-color: var(--brand-2); box-shadow: var(--shadow-float); transform: translateY(-2px); }
+.free-card-icon {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--brand-3); color: var(--brand-1);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+}
+.free-card-icon .icon { width: 22px; height: 22px; }
+.free-card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+.free-card p { margin: 0; font-size: .88rem; color: var(--muted); }
+.free-card .badge { margin-bottom: 12px; }
+.free-card-go { margin-top: 14px; font-size: .85rem; font-weight: 600; color: var(--brand-1); }
+
+/* ---- Closing call to action ---------------------------------------------- */
+.cta-band {
+  background: var(--brand-3); border: 1px solid var(--border); border-radius: var(--r-feature);
+  padding: 34px 36px; margin: 34px 0 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 26px; flex-wrap: wrap;
+}
+.cta-band h3 { margin: 0 0 6px; font-size: 1.32rem; letter-spacing: -.018em; }
+.cta-band p { margin: 0; color: var(--muted); max-width: 58ch; }
+.cta-band .btn-primary { padding: 12px 24px; font-size: .92rem; }
+
+/* ---- Narrow screens ------------------------------------------------------ */
+@media (max-width: 760px) {
+  .hero-lg { padding: 36px 24px 32px; }
+  .hero-lg h1 { font-size: 2.05rem; }
+  .hero-lead { font-size: 1rem; }
+  .cta-band { padding: 26px 22px; }
+}
+
+/* ---- Top bar: the sign-up action must never wrap -------------------------- */
+/* "Free Sign Up" was breaking onto three lines in a 42px-wide button. */
+#topbar-auth .btn { white-space: nowrap; }
+/* The top bar is a flex row; with a credits pill, three selects, a name and two
+   buttons it was squeezing the selects until "Uganda" rendered as "Ugand". The
+   control that drives the whole regulatory register does not get to be clipped,
+   so the selects hold their intrinsic width and the row wraps instead. */
+.topbar-right select { flex: 0 0 auto; width: auto; padding-right: 26px; }
+.topbar { gap: 12px; flex-wrap: wrap; }
+.topbar-right { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }

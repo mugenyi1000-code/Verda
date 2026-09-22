@@ -625,62 +625,198 @@
   }
 
   /* ============================ DASHBOARD ============================ */
+  /* The dashboard is two different screens wearing one name.
+     Signed out, a visitor is deciding whether this product is for them, and a
+     working dashboard full of zeros answers "no". Signed in, they have work to
+     do and marketing is in the way. So: a landing page for the first, the
+     working dashboard for the second. */
   function renderDashboard(main) {
-    const upcoming = [...state.clients].sort((a, b) => a.nextVisit.localeCompare(b.nextVisit)).slice(0, 5);
+    if (!state.user) { renderLanding(main); return; }
+    renderWorkDashboard(main);
+  }
+
+  /* Figures a visitor can check, rather than adjectives they cannot. */
+  function proofFigures() {
+    const S = VERDA_SEED;
+    const checklistItems = S.industries.reduce((n, i) => n + i.checklist.length, 0);
+    return [
+      { value: S.countries.length, label: "Jurisdictions covered" },
+      { value: S.industries.length, label: "Sectors with checklists" },
+      { value: checklistItems.toLocaleString(), label: "Compliance checkpoints" },
+      { value: S.inspectionRegimes.length, label: "Inspection regimes" }
+    ];
+  }
+
+  function renderLanding(main) {
+    const S = VERDA_SEED;
+    const countryList = S.countries.map(c => c.name).join(" · ");
+    main.appendChild(h(`
+      <section>
+        <div class="hero-lg">
+          <span class="hero-eyebrow">${icon("globe")}${esc(countryList)}</span>
+          <h1>Know what the law asks of your site. Before it asks.</h1>
+          <p class="hero-lead">Verda is environmental, health and safety compliance monitoring for industrial
+            sites — mines, quarries, factories and construction — across East and Central Africa. Screening,
+            permits, inspections, audits and the monthly report a lender actually accepts, in one place.</p>
+          <div class="hero-cta">
+            <a class="btn btn-invert" href="#/screening">${icon("screening")}Screen a project — free</a>
+            <a class="btn btn-on-dark" href="#/dashboard" id="hero-signup">${T().signup}</a>
+          </div>
+          <p class="hero-note">No account needed for screening, the monitor directory, or the calculators.</p>
+        </div>
+
+        <div class="proof-strip">
+          ${proofFigures().map(f => `
+            <div class="proof-item">
+              <div class="proof-value">${esc(String(f.value))}</div>
+              <div class="proof-label">${esc(f.label)}</div>
+            </div>`).join("")}
+        </div>
+
+        <div class="mk-head">
+          <div class="mk-eyebrow">Start here — no account</div>
+          <h2>Three tools that cost nothing</h2>
+          <p>Most people arrive with one question. Answer it first, and decide about the rest afterwards.</p>
+        </div>
+        <div class="free-grid">
+          <a class="free-card" href="#/screening">
+            <div class="free-card-icon">${icon("screening")}</div>
+            <span class="badge badge-good">Free</span>
+            <h3>Do I need an ESIA?</h3>
+            <p>Answer a few questions about what you are planning and where. Verda tells you which
+              environmental submission it needs, which answer decided that, and the schedule to confirm it against.</p>
+            <div class="free-card-go">Screen a project →</div>
+          </a>
+          <a class="free-card" href="#/monitors">
+            <div class="free-card-icon">${icon("monitors")}</div>
+            <span class="badge badge-good">Free</span>
+            <h3>Who can do the work?</h3>
+            <p>Practitioners and firms with the countries, services and sectors each is registered for —
+              so a project that needs a study meets someone who can sign it.</p>
+            <div class="free-card-go">Open the directory →</div>
+          </a>
+          <a class="free-card" href="#/toolbox">
+            <div class="free-card-icon">${icon("toolbox")}</div>
+            <span class="badge badge-good">Free</span>
+            <h3>Run the numbers</h3>
+            <p>${S.calculators.length} environmental, forestry and HSE calculators and ${S.converters.length}
+              unit converters. Every factor is shown, editable, and states where its basis comes from.</p>
+            <div class="free-card-go">Open the toolbox →</div>
+          </a>
+        </div>
+
+        <div class="mk-head">
+          <div class="mk-eyebrow">The platform</div>
+          <h2>What Verda covers</h2>
+          <p>Six disciplines that usually live in six different spreadsheets.</p>
+        </div>
+        <div class="focus-grid">
+          ${S.pillars.map(p => `
+            <a class="focus-card" href="#/${p.link}">${illustration(p.illus)}<h4>${p.name}</h4><p class="muted small">${p.blurb}</p></a>
+          `).join("")}
+        </div>
+
+        <div class="mk-head">
+          <div class="mk-eyebrow">Every sector</div>
+          <h2>Pick yours and jump straight in</h2>
+          <p>${S.industries.length} sectors, each with its own compliance checklist written for that industry —
+            not a generic list with the industry's name on top.</p>
+        </div>
+        <div class="sector-groups">
+          ${[...new Set(S.industries.map(i => i.group))].map(group => `
+            <div class="sector-group">
+              <div class="sector-group-header">
+                ${illustration(SECTOR_GROUP_ILLUS[group] || "industry", "sector-group-illus")}
+                <div class="sector-group-title">${esc(group)}</div>
+              </div>
+              <div class="sector-chips">
+                ${S.industries.filter(i => i.group === group).map(i =>
+                  `<button class="sector-chip" data-sector="${esc(i.id)}">${esc(i.name)}</button>`).join("")}
+              </div>
+            </div>`).join("")}
+        </div>
+
+        <div class="cta-band">
+          <div>
+            <h3>Ready to run a site on it?</h3>
+            <p>Signing up is free and takes an email. You get ${S.freeSignupCredits} credits to try the
+              reporting and drafting tools, and the free tools stay free either way.</p>
+          </div>
+          <a class="btn btn-primary" href="#/dashboard" id="cta-signup">${T().signup}</a>
+        </div>
+
+        <div class="card notice-card" style="margin-top:22px">
+          <h4>What this build is</h4>
+          <p class="small">Verda runs entirely in your browser — your data is saved on this device and goes
+            nowhere else. AI drafting, payments and multi-user sign-in are simulated pending backend
+            integration, and the app says so wherever it matters. The regulatory content is a starting
+            register compiled from public sources, with a dated review cycle: verify every instrument and
+            permit against the current law before relying on it.</p>
+        </div>
+      </section>
+    `));
+
+    ["hero-signup", "cta-signup"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("signup"); });
+    });
+    wireSectorChips(main);
+  }
+
+  function renderWorkDashboard(main) {
+    const upcoming = [...state.clients].sort((a, b) => (a.nextVisit || "").localeCompare(b.nextVisit || "")).slice(0, 5);
     const permitsSoon = state.clients.filter(c => new Date(c.permitExpiry) < new Date(Date.now() + 60 * 86400000));
     main.appendChild(h(`
       <section>
-        <div class="hero">
-          <h1>Welcome to Verda</h1>
-          <p>${T().tagline}</p>
-          ${!state.user ? `<div class="hero-actions">
-            <a class="btn btn-primary" href="#/dashboard" id="hero-signup">${T().signup}</a>
-            <a class="btn btn-ghost" href="#/dashboard" id="hero-login">${T().login}</a>
-          </div>` : `<p>Signed in as <strong>${esc(state.user.name)}</strong> · ${esc(state.user.role) || ""} · ${creditBalance()} credits</p>`}
+        <div class="page-header">
+          <div class="page-header-text">
+            <!-- Not the first token: "A. Nakato" greeted as "Welcome back, A." -->
+            <h1>Welcome back, ${esc(state.user.name || "")}</h1>
+            <p class="muted">${esc(state.user.role) || "Signed in"} · ${creditBalance()} credits ·
+              jurisdiction: ${esc(countryName(state.country))}</p>
+          </div>
         </div>
         <div class="grid grid-3">
           ${statCard("clients", "Active Compliance Care Plans", state.clients.length, "Recurring clients under a Verda compliance care plan.")}
           ${statCard("warn", "Permits due within 60 days", permitsSoon.length, "Check Checklists → Permits for the full list.", permitsSoon.length > 0)}
           ${statCard("reporting", "Reports generated", state.reports.length, "Verda Reporting drafts created so far.")}
         </div>
-        <h3>What Verda covers</h3>
-        <div class="focus-grid">
-          ${VERDA_SEED.pillars.map(p => `
-            <a class="focus-card" href="#/${p.link}">${illustration(p.illus)}<h4>${p.name}</h4><p class="muted small">${p.blurb}</p></a>
-          `).join("")}
-        </div>
-        <h3>Every sector, one platform</h3>
-        <p class="muted small">${VERDA_SEED.industries.length} sectors with their own compliance checklists — pick yours to jump straight in.</p>
-        <div class="sector-groups">
-          ${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(group => `
-            <div class="sector-group">
-              <div class="sector-group-header">
-                ${illustration(SECTOR_GROUP_ILLUS[group] || "industry", "sector-group-illus")}
-                <div class="sector-group-title">${group}</div>
-              </div>
-              <div class="sector-chips">
-                ${VERDA_SEED.industries.filter(i => i.group === group).map(i =>
-                  `<button class="sector-chip" data-sector="${i.id}">${i.name}</button>`).join("")}
-              </div>
-            </div>`).join("")}
-        </div>
         <div class="grid grid-2">
-          ${card("Upcoming site visits", `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
-            upcoming.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(c.nextVisit)}</td></tr>`).join("")
-          }</tbody></table>`)}
+          ${card("Upcoming site visits", state.clients.length ? `<table class="table"><thead><tr><th>Client</th><th>Industry</th><th>Next visit</th></tr></thead><tbody>${
+            upcoming.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td class="mono small">${esc(c.nextVisit)}</td></tr>`).join("")
+          }</tbody></table>` : emptyState("people",
+            "<strong>No client on the books yet.</strong> Add the first one on Clients &amp; Compliance Care Plans — every record in Verda is filed against a site.", 3))}
           ${card("Quick actions", `<div class="quick-actions">
+            <a class="btn" href="#/clients">${icon("clients")}<span>Add a client</span></a>
             <a class="btn" href="#/reporting">${icon("reporting")}<span>New Verda Report</span></a>
             <a class="btn" href="#/esia">${icon("esia")}<span>New ToR / ESIA Draft</span></a>
             <a class="btn" href="#/audits">${icon("audits")}<span>Run an Audit</span></a>
             <a class="btn" href="#/records">${icon("records")}<span>Add a Record / Photo</span></a>
           </div>`)}
         </div>
+        <div class="mk-head">
+          <div class="mk-eyebrow">Every sector</div>
+          <h2>Jump into a sector checklist</h2>
+        </div>
+        <div class="sector-groups">
+          ${[...new Set(VERDA_SEED.industries.map(i => i.group))].map(group => `
+            <div class="sector-group">
+              <div class="sector-group-header">
+                ${illustration(SECTOR_GROUP_ILLUS[group] || "industry", "sector-group-illus")}
+                <div class="sector-group-title">${esc(group)}</div>
+              </div>
+              <div class="sector-chips">
+                ${VERDA_SEED.industries.filter(i => i.group === group).map(i =>
+                  `<button class="sector-chip" data-sector="${esc(i.id)}">${esc(i.name)}</button>`).join("")}
+              </div>
+            </div>`).join("")}
+        </div>
       </section>
     `));
-    const su = document.getElementById("hero-signup"), li = document.getElementById("hero-login");
-    if (su) su.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("signup"); });
-    if (li) li.addEventListener("click", (e) => { e.preventDefault(); openAuthModal("login"); });
+    wireSectorChips(main);
+  }
 
+  function wireSectorChips(main) {
     main.querySelectorAll("[data-sector]").forEach(btn => btn.addEventListener("click", () => {
       state.ui.checklistIndustry = btn.dataset.sector;
       save();

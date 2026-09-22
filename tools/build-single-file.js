@@ -103,11 +103,10 @@ if (!bodyMatch) {
 const body = bodyMatch[1]
   // Scripts are inlined further down, so drop the tags that load them.
   .replace(/\n?\s*<script\b[\s\S]*?<\/script>/g, "")
-  // Single-file builds have no origin, so the preview footer says so.
-  .replace(
-    "Prototype build: AI drafting, payments and multi-user auth are simulated in-browser pending backend integration.",
-    "Preview build: example records are pre-loaded and marked \u201CExample:\u201D; AI drafting, payments and multi-user sign-in are simulated in the browser pending backend integration."
-  );
+  // The shell's own footer is already accurate for the single-file build, and
+  // the claim this used to substitute ("example records are pre-loaded") stopped
+  // being true when the client register was emptied. One footer, one truth.
+  ;
 
 // Guard against the drift this extraction is meant to prevent: every element
 // init() looks up must exist in the shell we are about to ship. Only init() is
