@@ -14759,13 +14759,42 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
 
   /* ---------------------------- helpers ---------------------------------- */
   function h(str) { const d = document.createElement("div"); d.innerHTML = str.trim(); return d.firstElementChild; }
-  function downloadText(filename, text) {
-    const blob = new Blob([text], { type: "text/plain" });
+  /* Handing the user a file, wherever Verda is running.
+     Opened from a file or a web server, an anchor with `download` is the whole
+     story. Published as a Claude artifact, the page runs in a frame that never
+     grants plain downloads — an anchor there silently does nothing, which is
+     the worst outcome: the user clicks, believes they have the report, and
+     leaves without it. The frame's runtime mediates saving instead, so try
+     that first and fall back to the anchor when there is no runtime. */
+  async function saveFile(filename, data, mime) {
+    const blob = data instanceof Blob ? data : new Blob([data], { type: mime || "text/plain" });
+    if (typeof window.claude === "object" && window.claude && typeof window.claude.use === "function") {
+      try {
+        const downloads = await window.claude.use("downloads");
+        if (downloads) {
+          await downloads.save({ filename, data: blob });
+          return true;
+        }
+      } catch (err) {
+        // The viewer saying no is an answer, not a failure: never nag, never
+        // retry. Anything else is worth naming, because the user is standing
+        // there waiting for a file that is not coming.
+        const code = err && err.code;
+        if (code === "declined") return false;
+        if (code === "rate_limited") { alert("A save prompt is already open — finish that one first."); return false; }
+        alert("That file could not be saved here (" + (code || "unknown error") + "). Open Verda from app/index.html to download it.");
+        return false;
+      }
+    }
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return true;
+  }
+  function downloadText(filename, text) {
+    return saveFile(filename, text, "text/plain");
   }
   /* An empty table is the first thing a new user meets on half these screens.
      Give it the module's own illustration and a sentence naming the next
@@ -15749,12 +15778,7 @@ const VerdaMap = { init: function () { return null; }, setBasemap: function () {
     const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width,initial-scale=1"/>
       <title>${esc(filename.replace(/\.html$/, ""))}</title><style>${css}</style></head><body>${inner}</body></html>`;
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    return saveFile(filename, html, "text/html");
   }
 
   /* ==================== ToR & ESIA DOCUMENT BUILDER ====================
