@@ -619,6 +619,8 @@ textarea { min-height: 74px; resize: vertical; }
 .checklist li { padding: 7px 0; border-bottom: 1px dashed var(--border); }
 .checklist label { display: flex; align-items: center; gap: 8px; color: var(--text); font-weight: 500; margin: 0; }
 .checklist input { width: auto; }
+.checklist li.row-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.checklist li.row-line > span { min-width: 0; overflow-wrap: anywhere; }
 
 /* ---- Structured report inputs ----
    The numeric returns a section's KPI tables ask for, laid out compactly so

@@ -52,7 +52,204 @@
     return value;
   }
 
-  // External links open in a new tab and never hand the opener to the target.
+  // Every register needs a way out as well as a way in. A row typed in error
+  // that cannot be removed makes the register less trustworthy than the paper
+  // it replaced, so one confirm-and-delete path is shared by all of them.
+  function removeBtn(label) {
+    return `<button class="btn btn-ghost btn-sm" data-vdel title="Remove" aria-label="Remove ${esc(label || "entry")}">✕</button>`;
+  }
+  // Wire every removeBtn() inside `root`. `listName` is the state array; the
+  // row's id is read from the closest [data-vdel-id], so a row only needs the
+  // id once however many actions it carries.
+  function wireRemove(root, listName, describe, after) {
+    root.querySelectorAll("[data-vdel]").forEach(btn => btn.addEventListener("click", () => {
+      const holder = btn.closest("[data-vdel-id]");
+      const id = holder ? holder.getAttribute("data-vdel-id") : null;
+      const list = state[listName] || [];
+      const i = list.findIndex(x => x.id === id);
+      if (i < 0) return;
+      const what = describe ? describe(list[i]) : "this entry";
+      if (!confirm(`Remove ${what}? This cannot be undone.`)) return;
+      const [gone] = list.splice(i, 1);
+      queueDelete(listName, gone);
+      save();
+      if (after) after();
+    }));
+  }
+
+  /* ------------------------- SERVER, WHEN THERE IS ONE -------------------
+     Verda works with no server at all: state lives in this browser. When a
+     deployment sets window.VERDA_API, the same screens talk to it instead of
+     pretending. Nothing here assumes the server answers — a monitor standing
+     in a quarry with one bar of signal still has to be able to work. */
+  const api = () => (typeof window !== "undefined" && window.VerdaApi) || null;
+  const apiOn = () => !!(api() && api().isEnabled());
+  // true when the call failed because nothing answered, as opposed to the
+  // server answering "no". The first is a reason to fall back; the second
+  // never is.
+  const unreachable = (err) => !err || !err.status;
+
+  /* Take a server session and make the local app reflect it. Every screen
+     reads state.user / state.credits, so the server's answer is copied into
+     those rather than threaded through all of them: one place to change as
+     screens move fully server-side. */
+  async function adoptServerSession(res, extra) {
+    const u = (res && res.user) || null;
+    if (!u) return false;
+    const user = Object.assign({ id: u.id, name: u.name, email: u.email, server: true }, extra || {});
+    // Keep a local shadow so the app behaves the same offline, but never keep
+    // the password: the server holds the only copy that matters.
+    delete user.password;
+    const i = state.users.findIndex(x => x.email === user.email);
+    if (i >= 0) state.users[i] = Object.assign({}, state.users[i], user); else state.users.push(user);
+    state.user = Object.assign({}, state.users.find(x => x.email === user.email));
+
+    // Which organisation, and what it actually holds in credits — asked, not
+    // assumed. A stale local number is worse than no number.
+    let orgs = [];
+    try { const me = await api().auth.me(); orgs = (me && me.orgs) || []; } catch (err) { /* carry on */ }
+    const orgId = res.orgId || (orgs[0] && orgs[0].id) || null;
+    const found = orgs.find(o => o.id === orgId) || {};
+    state.org = orgId ? { id: orgId, name: found.name || "", role: found.role || "" } : null;
+    if (orgId) {
+      try {
+        const org = await api().orgs.get(orgId);
+        if (org) {
+          state.org.name = org.name || state.org.name;
+          state.org.role = org.role || state.org.role;
+          if (typeof org.credits === "number") state.credits[user.email] = org.credits;
+        }
+      } catch (err) { /* the balance stays as it was */ }
+    }
+    if (state.credits[user.email] === undefined) state.credits[user.email] = 0;
+    save();
+    return true;
+  }
+
+  /* ------------------------------ OUTBOUND SYNC ---------------------------
+     Local state stays the source of truth while the connection is unreliable:
+     a monitor in a pit records the incident now and the server hears about it
+     when there is signal. Every row that has not reached the server carries
+     pendingSync, and syncPending() walks them. Rows deleted locally before
+     they ever reached the server are simply dropped — there is nothing there
+     to delete. */
+  const syncable = () => apiOn() && state.user && state.user.server && state.org && state.org.id;
+
+  // Which local list maps to which server shape. Sites are their own endpoint;
+  // everything else is a record with a kind the server accepts.
+  const RECORD_KINDS = {
+    incidents: { kind: "incident", title: (i) => `${i.type} at ${i.client}`, on: (i) => i.date },
+    risks: { kind: "risk", title: (r) => r.hazard, on: () => null },
+    actions: { kind: "action", title: (a) => a.title, on: (a) => a.due },
+    training: { kind: "training", title: (t) => `${t.person} — ${t.course}`, on: (t) => t.completed },
+    equipment: { kind: "equipment", title: (e) => e.assetId || e.id, on: (e) => e.lastInspected },
+    subcontractors: { kind: "subcontractor", title: (sc) => sc.name, on: () => null },
+    workforce: { kind: "workforce", title: (w) => `${w.period} — ${w.employer || w.type}`, on: () => null }
+  };
+
+  // The server's site id for a local client name, where one exists.
+  const siteIdFor = (name) => {
+    const c = state.clients.find(x => x.name === name);
+    return (c && c.serverId) || null;
+  };
+
+  async function pushClient(client) {
+    if (!syncable() || client.serverId) return false;
+    const site = await api().sites.create(state.org.id, {
+      name: client.name, country: client.country, industry: client.industry,
+      location: client.site || null,
+      meta: { plan: client.plan, nextVisit: client.nextVisit, permitExpiry: client.permitExpiry, status: client.status }
+    });
+    client.serverId = site.id;
+    delete client.pendingSync;
+    save();
+    return true;
+  }
+
+  async function pushRecord(listName, item) {
+    const def = RECORD_KINDS[listName];
+    if (!syncable() || !def || item.serverId) return false;
+    const rec = await api().records.create(state.org.id, {
+      kind: def.kind,
+      siteId: siteIdFor(item.client) || null,
+      occurredOn: def.on(item) || null,
+      status: item.status || null,
+      severity: item.severity || item.priority || null,
+      title: String(def.title(item) || "").slice(0, 200),
+      payload: item
+    });
+    item.serverId = rec.id;
+    delete item.pendingSync;
+    save();
+    return true;
+  }
+
+  // Fire-and-forget from an add handler: the row is already saved locally, so a
+  // failed push is a flag, never an error the user has to deal with mid-entry.
+  function queuePush(listName, item) {
+    if (!syncable()) return;
+    const push = listName === "clients" ? pushClient(item) : pushRecord(listName, item);
+    Promise.resolve(push).catch(() => { item.pendingSync = true; save(); });
+  }
+
+  function pendingRows() {
+    const out = [];
+    if (state.clients) state.clients.forEach(c => { if (!c.serverId) out.push(["clients", c]); });
+    Object.keys(RECORD_KINDS).forEach(k => (state[k] || []).forEach(it => { if (!it.serverId) out.push([k, it]); }));
+    return out;
+  }
+
+  // Sites go first: a record that names a site the server has never heard of
+  // would arrive with no site attached.
+  async function syncPending() {
+    if (!syncable()) return { pushed: 0, failed: 0, total: 0 };
+    const rows = pendingRows().sort((a, b) => (a[0] === "clients" ? -1 : 0) - (b[0] === "clients" ? -1 : 0));
+    let pushed = 0, failed = 0;
+    for (const [listName, item] of rows) {
+      try {
+        if (listName === "clients") await pushClient(item); else await pushRecord(listName, item);
+        pushed++;
+      } catch (err) {
+        item.pendingSync = true;
+        failed++;
+        if (unreachable(err)) break;   // nothing is answering; stop hammering it
+      }
+    }
+    save();
+    return { pushed, failed, total: rows.length };
+  }
+
+  // A server copy has to be removed too, or the register the office reads
+  // disagrees with the one on the device.
+  function queueDelete(listName, item) {
+    if (!syncable() || !item.serverId) return;
+    const call = listName === "clients"
+      ? api().sites.remove(state.org.id, item.serverId)
+      : api().records.remove(state.org.id, item.serverId);
+    Promise.resolve(call).catch(() => { /* the local row is gone; the server copy is tidied on the next sync */ });
+  }
+
+  // A server session outlives the tab, so on load ask whether one is still
+  // valid rather than trusting the local record of who is signed in.
+  async function restoreServerSession() {
+    if (!apiOn()) return;
+    try {
+      const me = await api().auth.me();
+      if (me && me.user) {
+        await adoptServerSession(me);
+        renderTopbar(); route();
+        syncPending().catch(() => { /* reported on the Credits screen */ });
+      }
+    } catch (err) {
+      if (!unreachable(err) && state.user && state.user.server) {
+        // The server says the session is over. Do not keep showing a signed-in
+        // shell whose every call the server will refuse.
+        state.user = null; state.org = null; save(); renderTopbar(); route();
+      }
+    }
+  }
+
+
   function extLink(url, text) {
     return `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(text)} ↗</a>`;
   }
@@ -80,6 +277,7 @@
       theme: "forest",
       country: "ug",            // active jurisdiction — drives permits and the regulatory register
       user: null,
+      org: null,                // the organisation a server session belongs to
       users: [],
       clients: JSON.parse(JSON.stringify(VERDA_SEED.clients)),
       credits: {},
@@ -828,7 +1026,9 @@
   function openAuthModal(mode) {
     const overlay = h(`<div class="modal-overlay"><div class="modal">
       <h2>${mode === "signup" ? T().signup : T().login}</h2>
-      <p class="muted small">Prototype authentication — stored in this browser only. Wire up a real identity provider before production use.</p>
+      <p class="muted small">${apiOn()
+        ? "Your account is held on the Verda server — the password is hashed there and the session is an httpOnly cookie this page cannot read."
+        : "No server is configured for this deployment, so the account is held in this browser only. Set window.VERDA_API to point Verda at a Verda server."}</p>
       <form id="auth-form">
         ${mode === "signup" ? `
           <label>Full name<input required name="name" /></label>
@@ -852,10 +1052,49 @@
     document.body.appendChild(overlay);
     overlay.querySelector("#auth-cancel").addEventListener("click", () => overlay.remove());
     overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.remove(); });
-    overlay.querySelector("#auth-form").addEventListener("submit", (e) => {
+    overlay.querySelector("#auth-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
       const email = fd.get("email").trim().toLowerCase();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+
+      if (apiOn()) {
+        submitBtn.disabled = true;
+        const label = submitBtn.textContent;
+        submitBtn.textContent = "Working\u2026";
+        try {
+          const payload = mode === "signup"
+            ? { name: fd.get("name"), email, password: fd.get("password"),
+                orgName: (fd.get("company") || "").trim() || fd.get("name") }
+            : { email, password: fd.get("password") };
+          const res = mode === "signup"
+            ? await api().auth.signup(payload)
+            : await api().auth.login(payload);
+          await adoptServerSession(res, {
+            company: fd.get("company"), industry: fd.get("industry"), role: fd.get("role")
+          });
+          overlay.remove();
+          renderTopbar();
+          route();
+          // Anything entered on this device before the server existed, or while
+          // it was unreachable, goes up now.
+          syncPending().catch(() => { /* the Credits screen shows what is waiting */ });
+          return;
+        } catch (err) {
+          if (!unreachable(err)) {
+            // The server answered. Its answer is the answer — do not quietly
+            // create a second, local account that would diverge from it.
+            alert(err.message || "The server refused that sign-in.");
+            submitBtn.disabled = false; submitBtn.textContent = label;
+            return;
+          }
+          // Nothing answered. Carry on locally and say so, rather than
+          // blocking someone who has work to record.
+          alert("The Verda server could not be reached, so you are signed in on this device only. Your records stay in this browser until the server is back.");
+          submitBtn.disabled = false; submitBtn.textContent = label;
+        }
+      }
+
       if (mode === "signup") {
         if (state.users.some(u => u.email === email)) { alert("An account with that email already exists — log in instead."); return; }
         const user = { name: fd.get("name"), email, company: fd.get("company"), industry: fd.get("industry"), role: fd.get("role"), password: fd.get("password") };
@@ -878,7 +1117,12 @@
     const box = document.getElementById("topbar-auth");
     if (state.user) {
       box.innerHTML = `<span class="muted small">${esc(state.user.name)}</span> <button class="btn btn-ghost" id="logout-btn">${T().logout}</button>`;
-      document.getElementById("logout-btn").addEventListener("click", () => { state.user = null; save(); renderTopbar(); route(); });
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        // Best effort: a failed server logout must not strand someone in a
+        // session they asked to end on this device.
+        if (apiOn()) { try { await api().auth.logout(); } catch (err) { /* local sign-out proceeds */ } }
+        state.user = null; state.org = null; save(); renderTopbar(); route();
+      });
     } else {
       box.innerHTML = `<button class="btn btn-ghost" id="login-btn">${T().login}</button><button class="btn btn-primary" id="signup-btn">${T().signup}</button>`;
       document.getElementById("login-btn").addEventListener("click", () => openAuthModal("login"));
@@ -1085,8 +1329,8 @@
     let prior = null;                    // previous report for this client + format
     function refreshPrior() {
       const sel = main.querySelector("#rep-client");
-      const client = sel && state.clients.find(c => c.id === sel.value);
-      prior = client ? priorReportFor(client.name, standard.id) : null;
+      const name = sel ? sel.value : "";
+      prior = name ? priorReportFor(name, standard.id) : null;
     }
 
     // Starter rows pre-fill a label column so the expected rows are visible.
@@ -1128,8 +1372,7 @@
               <select id="rep-standard">${VERDA_SEED.reportStandards.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("")}</select>
             </label>
             <label>Client
-              <select id="rep-client">${state.clients.map(c =>
-                `<option value="${esc(c.id)}" ${currentClient() && c.id === currentClient().id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select>
+              <select id="rep-client">${clientOptions()}</select>
             </label>
             <label>Reporting period<input id="rep-period" placeholder="e.g. October 2026 / Q3 2026" /></label>
           </div>
@@ -1244,6 +1487,10 @@
         ${tables}
         <h5>Narrative</h5>
         ${narrative}
+        ${apiOn() && state.org ? `<div class="modal-actions" style="justify-content:flex-start">
+          <button class="btn btn-ghost btn-sm" data-ai-draft="${esc(sec.id)}">Draft this section with Claude</button>
+          <span class="small muted" data-ai-msg="${esc(sec.id)}"></span>
+        </div>` : ""}
         <h5>Photographs</h5>
         <div class="dropzone" data-drop="${esc(sec.id)}" tabindex="0" role="button"
              aria-label="Add photographs for ${esc(sec.label)}">
@@ -1253,6 +1500,52 @@
         </div>
         <div class="photo-grid" data-photos="${esc(sec.id)}"></div>
       </div>`;
+    }
+
+    /* ---- AI drafting, server-side ---- */
+    // The API key lives on the server, so drafting is a server call or it does
+    // not happen. Nothing here falls back to a local model: there isn't one.
+    async function draftSection(sectionId, btn, msgEl) {
+      const sec = segs.find(x => x.id === sectionId);
+      const m = sectionModel(sectionId);
+      const figures = {};
+      (sec.fields || []).forEach(f => { if (m.inputs[f.key]) figures[f.label] = m.inputs[f.key]; });
+      tablesFor(sectionId).forEach(t => {
+        const rows = filledRows(sectionId, t);
+        if (rows.length) figures[t.label || t.id] = rows;
+      });
+      const blocks = standard.blocks || DEFAULT_BLOCKS;
+      const notes = blocks.map(b => m.blocks[b.key]).filter(Boolean).join("\n\n");
+      if (!Object.keys(figures).length && !notes) {
+        alert("Enter the figures or a few notes for this section first — the draft is written from what you supply, not invented.");
+        return;
+      }
+      btn.disabled = true;
+      msgEl.textContent = "Drafting\u2026";
+      try {
+        const res = await api().ai.draft(state.org.id, {
+          section: sec.label, figures, notes,
+          standard: standard.shortName || standard.name,
+          period: main.querySelector("#rep-period").value.trim() || "Current period",
+          siteName: main.querySelector("#rep-client").value || ""
+        });
+        const text = (res && res.text) || "";
+        if (!text) { msgEl.textContent = "The server returned no text."; btn.disabled = false; return; }
+        const first = main.querySelector(`[data-seg="${sectionId}"] textarea[data-field]`);
+        if (first) {
+          first.value = text;
+          m.blocks[first.dataset.field] = text;
+          save();
+        }
+        msgEl.textContent = (typeof res.balance === "number" ? `Drafted (${res.creditsCharged} credits, ${res.balance} left). ` : "Drafted. ")
+          + "Read it and edit it before it leaves your hands.";
+        if (typeof res.balance === "number" && state.user) { state.credits[state.user.email] = res.balance; save(); renderTopbar(); }
+      } catch (err) {
+        msgEl.textContent = err && err.status
+          ? err.message
+          : "The Verda server could not be reached, so nothing was drafted and nothing was charged.";
+      }
+      btn.disabled = false;
     }
 
     /* ---- photos ---- */
@@ -1299,6 +1592,12 @@
         el.addEventListener("input", () => { m.inputs[el.dataset.input] = el.value; updateProgress(); }));
       form.querySelectorAll("[data-field]").forEach(el =>
         el.addEventListener("input", () => { m.blocks[el.dataset.field] = el.value; updateProgress(); }));
+
+      const aiBtn = form.querySelector("[data-ai-draft]");
+      if (aiBtn) {
+        aiBtn.addEventListener("click", () =>
+          draftSection(sec.id, aiBtn, form.querySelector(`[data-ai-msg="${sec.id}"]`)));
+      }
 
       tablesFor(sec.id).forEach(t => {
         const wrap = form.querySelector(`[data-table="${t.id}"]`);
@@ -1450,7 +1749,7 @@
     renderHeaderFields();
     renderSegToggles();
     main.querySelector("#rep-client").addEventListener("change", (e) => {
-      const c = state.clients.find(x => x.id === e.target.value);
+      const c = state.clients.find(x => x.name === e.target.value);
       if (c) setCurrentClient(c.id);
       refreshPrior();
       renderSegForms();
@@ -1468,12 +1767,13 @@
     /* ---- past reports ---- */
     function refreshList() {
       main.querySelector("#reports-list").innerHTML = state.reports.slice().reverse().map(r => `
-        <tr><td>${esc(r.clientName)}</td>
+        <tr data-vdel-id="${esc(r.id)}"><td>${esc(r.clientName)}</td>
         <td>${statusBadge(esc(r.standardName || "Verda"), STANDARD_BADGE[r.standard] || "good")}</td>
         <td>${esc(r.period)}</td><td>${r.segments.length}</td><td>${r.photoCount || 0}</td><td>${r.date.slice(0, 10)}</td>
         <td class="row-actions">
           <button class="btn btn-ghost btn-sm" data-dl="${esc(r.id)}">.txt</button>
           <button class="btn btn-ghost btn-sm" data-dlhtml="${esc(r.id)}">Full report</button>
+          ${removeBtn(r.clientName + " " + r.period)}
         </td></tr>`).join("") ||
         emptyState("documents", "No reports yet. Pick a format above, tick the sections that apply, and <strong>Generate</strong> — the tables and photographs come with it.", 7);
       const base = (r) => `${REPORT_FILE_PREFIX[r.standard] || "Verda-Reporting"}-${r.clientName.replace(/\s+/g, "_")}-${String(r.period).replace(/\s+/g, "_")}`;
@@ -1486,12 +1786,17 @@
         if (!r.full) { alert("This report was generated before tables and photos were stored. Generate it again to get the full version."); return; }
         downloadHtml(`${base(r)}.html`, buildReportHtml(r));
       }));
+      wireRemove(main, "reports", r => `the ${r.standardName || "Verda"} report for ${r.clientName} (${r.period})`, () => {
+        refreshList(); refreshPrior();
+      });
     }
     refreshList();
 
     /* ---- generate ---- */
     main.querySelector("#gen-report").addEventListener("click", () => {
-      const client = state.clients.find(c => c.id === main.querySelector("#rep-client").value);
+      const clientName = requireClient(main, "rep-client");
+      if (!clientName) return;
+      const client = state.clients.find(c => c.name === clientName) || { name: clientName };
       const period = main.querySelector("#rep-period").value.trim() || "Current period";
       const segments = checkedIds();
       if (!segments.length) { alert("Tick at least one section to include."); return; }
@@ -2758,7 +3063,10 @@
           e.last = today(); save(); refresh();
         }));
         panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          const row = state.equipment.find(x => x.id === b.dataset.del);
+          if (!row || !confirm(`Remove ${row.assetId} from the inspection register? This cannot be undone.`)) return;
           state.equipment = state.equipment.filter(x => x.id !== b.dataset.del);
+          queueDelete("equipment", row);
           save(); refresh();
         }));
       }
@@ -2776,6 +3084,7 @@
           last: panel.querySelector("#eq-last").value || today(),
           cert: panel.querySelector("#eq-cert").value.trim()
         });
+        queuePush("equipment", state.equipment[state.equipment.length - 1]);
         save(); refresh();
         panel.querySelector("#eq-id").value = ""; panel.querySelector("#eq-cert").value = "";
       });
@@ -2847,7 +3156,7 @@
           <label>Category<select id="rec-cat">${cats.map(c => `<option>${c}</option>`).join("")}</select></label>
           <label>Description<input id="rec-desc" placeholder="e.g. PPE issued to site crew, tree planting event..." /></label>
           <label>Site / client
-            <select id="rec-client">${state.clients.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("")}</select>
+            <select id="rec-client">${clientOptions()}</select>
           </label>
           <label>Photo (optional)<input id="rec-photo" type="file" accept="image/*" /></label>
           <button class="btn btn-primary" id="rec-add">Add record</button>
@@ -2857,19 +3166,23 @@
     `));
     function refresh() {
       main.querySelector("#rec-gallery").innerHTML = state.records.slice().reverse().map(r => `
-        <div class="record-card">
+        <div class="record-card" data-vdel-id="${esc(r.id)}">
           ${r.photo ? `<img src="${esc(r.photo)}" alt="" />` : `<div class="record-noimg">No photo</div>`}
           <div class="record-body">
             <span class="badge">${esc(r.category)}</span>
             <p>${esc(r.desc)}</p>
             <p class="muted small">${esc(r.client)} · ${esc(r.date.slice(0,10))}</p>
+            <div class="row-actions">${removeBtn(r.desc)}</div>
           </div>
-        </div>`).join("") || `<p class="muted">No records yet.</p>`;
+        </div>`).join("") || emptyState("people", "No records yet. Pick a category, describe what happened and attach the photograph — that is the evidence an inspector asks for.");
+      wireRemove(main, "records", r => `"${r.desc}"`, refresh);
     }
     refresh();
     main.querySelector("#rec-add").addEventListener("click", async () => {
       const desc = main.querySelector("#rec-desc").value.trim();
       if (!desc) { alert("Add a description."); return; }
+      const recClient = requireClient(main, "rec-client");
+      if (!recClient) return;
       const fileInput = main.querySelector("#rec-photo");
       let photo = null;
       if (fileInput.files[0]) {
@@ -2877,7 +3190,7 @@
       }
       state.records.push({
         id: uid("rec"), category: main.querySelector("#rec-cat").value, desc,
-        client: main.querySelector("#rec-client").value, photo, date: new Date().toISOString()
+        client: recClient, photo, date: new Date().toISOString()
       });
       save();
       main.querySelector("#rec-desc").value = ""; fileInput.value = "";
@@ -3374,6 +3687,7 @@
             }).join("")}</tbody></table></div>
           <div class="modal-actions">
             <button class="btn btn-ghost btn-sm" data-wf-dl="${esc(run.id)}">Download run record</button>
+            <button class="btn btn-ghost btn-sm" data-wf-del="${esc(run.id)}">Delete run</button>
             ${pct === 100 && !run.closed ? `<button class="btn btn-primary btn-sm" data-wf-close="${esc(run.id)}">Close this run</button>` : ""}
           </div>
         </div>`;
@@ -3391,6 +3705,9 @@
         save();
       }));
       box.querySelectorAll("[data-wf-del]").forEach(b => b.addEventListener("click", () => {
+        const run = state.workflowRuns.find(r => r.id === b.dataset.wfDel);
+        if (!run) return;
+        if (!confirm(`Delete this workflow run? Its step record cannot be recovered.`)) return;
         state.workflowRuns = state.workflowRuns.filter(r => r.id !== b.dataset.wfDel);
         save(); runsPanel();
       }));
@@ -3487,16 +3804,21 @@
         <div class="card">
           <div class="table-scroll">
             <table class="table">
-              <thead><tr><th>Client</th><th>Industry</th><th>Country</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th></tr></thead>
+              <thead><tr><th>Client</th><th>Industry</th><th>Country</th><th>Site</th><th>Care Plan</th><th>Next visit</th><th>Permit expiry</th><th>Status</th><th></th></tr></thead>
               <tbody id="cl-rows"></tbody>
             </table>
           </div>
         </div>`;
       function refresh() {
         panel.querySelector("#cl-rows").innerHTML = state.clients.map(c => `
-          <tr><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(countryName(c.country))}</td>
+          <tr data-vdel-id="${esc(c.id)}"><td>${esc(c.name)}</td><td>${esc(c.industry)}</td><td>${esc(countryName(c.country))}</td>
           <td>${esc(c.site)}</td><td>${esc(c.plan)}</td><td>${esc(c.nextVisit)}</td>
-          <td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td></tr>`).join("");
+          <td>${esc(c.permitExpiry)}</td><td><span class="badge">${esc(c.status)}</span></td>
+          <td class="row-actions">${removeBtn(c.name)}</td></tr>`).join("")
+          || `<tr><td colspan="9" class="muted">No clients yet. Add the first one above — every record in Verda is filed against a site.</td></tr>`;
+        wireRemove(panel, "clients", c => `"${c.name}" and leave its records filed against a site that is no longer listed`, () => {
+          refresh(); renderTopbar();
+        });
       }
       refresh();
       panel.querySelector("#cl-add").addEventListener("click", () => {
@@ -3508,6 +3830,7 @@
           plan: panel.querySelector("#cl-plan").value, nextVisit: panel.querySelector("#cl-nextvisit").value || "TBD",
           permitExpiry: panel.querySelector("#cl-permit").value || "TBD", status: "Active"
         });
+        queuePush("clients", state.clients[state.clients.length - 1]);
         save(); refresh();
         panel.querySelector("#cl-name").value = ""; panel.querySelector("#cl-site").value = "";
       });
@@ -3561,7 +3884,10 @@
             <td class="row-actions"><button class="btn btn-ghost btn-sm" data-del="${esc(sc.id)}">Remove</button></td></tr>`;
         }).join("") || emptyState("people", "No sub-contractors registered. <strong>Every company that brings workers on site belongs here</strong> — their injuries count in your rates.", 7);
         panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          const row = state.subcontractors.find(x => x.id === b.dataset.del);
+          if (!row || !confirm(`Remove ${row.name} from the sub-contractor register? This cannot be undone.`)) return;
           state.subcontractors = state.subcontractors.filter(x => x.id !== b.dataset.del);
+          queueDelete("subcontractors", row);
           save(); refresh();
         }));
       }
@@ -3577,6 +3903,7 @@
           insurance: panel.querySelector("#sc-insurance").value,
           contact: panel.querySelector("#sc-contact").value.trim()
         });
+        queuePush("subcontractors", state.subcontractors[state.subcontractors.length - 1]);
         save(); refresh();
         panel.querySelector("#sc-name").value = ""; panel.querySelector("#sc-scope").value = "";
       });
@@ -3633,7 +3960,10 @@
         panel.querySelector("#wf-total").innerHTML = state.workforce.length
           ? `<tr><th colspan="4">Total</th><th>${tot.headcount}</th><th>${tot.female}</th><th>${tot.hours.toLocaleString()}</th><th></th></tr>` : "";
         panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          const row = state.workforce.find(x => x.id === b.dataset.del);
+          if (!row || !confirm(`Remove the ${row.period} hours for ${row.employer || row.employerType}? Every frequency rate recalculates without them.`)) return;
           state.workforce = state.workforce.filter(x => x.id !== b.dataset.del);
+          queueDelete("workforce", row);
           save(); refresh();
         }));
         // hours by employer, biggest first
@@ -3663,6 +3993,7 @@
           female: Number(panel.querySelector("#wf-female").value) || 0,
           hours
         });
+        queuePush("workforce", state.workforce[state.workforce.length - 1]);
         save(); refresh();
         panel.querySelector("#wf-hours").value = ""; panel.querySelector("#wf-head").value = "";
         panel.querySelector("#wf-female").value = "";
@@ -4103,8 +4434,62 @@
           <p class="muted small">Demo billing — no real payment gateway is connected. Wire up Stripe/Flutterwave/Mobile Money on the buy action for production.</p>
         </div>
         <div class="card"><h3>Transaction history</h3><table class="table"><thead><tr><th>Date</th><th>Reason</th><th>Amount</th></tr></thead><tbody id="cr-ledger"></tbody></table></div>
+        <div class="card" id="cr-server"><h3>Where your data lives</h3><p class="muted">Checking…</p></div>
       </section>
     `));
+
+    /* People are entitled to know whether their site records are on this
+       device or on a server, and whether that server is answering. Said
+       plainly, not implied by whether a button works. */
+    function serverPanel() {
+      const box = main.querySelector("#cr-server");
+      if (!apiOn()) {
+        box.innerHTML = `<h3>Where your data lives</h3>
+          <p>No server is configured for this copy of Verda, so <strong>everything you enter stays in this browser</strong>
+             under one storage key. Clearing site data, or opening Verda in a different browser, means starting again.</p>
+          <p class="muted small">To put it on a server, deploy the Verda server in <code>server/</code> and set
+             <code>window.VERDA_API</code> to its address before <code>app.js</code> loads. The same screens then read
+             and write there, and keep working when the connection drops.</p>`;
+        return;
+      }
+      box.innerHTML = `<h3>Where your data lives</h3><p class="muted">Checking ${esc(api().baseUrl())}…</p>`;
+      api().health().then(() => {
+        box.innerHTML = `<h3>Where your data lives</h3>
+          <p>${statusBadge("Server reachable", "good")} <code>${esc(api().baseUrl())}</code></p>
+          ${state.user && state.user.server
+            ? `<p>Signed in on the server as <strong>${esc(state.user.email)}</strong>${state.org && state.org.name ? ` for <strong>${esc(state.org.name)}</strong>${state.org.role ? ` (${esc(state.org.role)})` : ""}` : ""}.
+                 Your credit balance above is the server's figure.</p>`
+            : `<p>You are signed in on this device only. Log out and back in to attach this browser to the server session.</p>`}
+          ${syncable() ? `<p>${pendingRows().length
+              ? `${statusBadge(pendingRows().length + " row(s) not yet on the server", "warning")} \u2014 they are safe in this browser.`
+              : statusBadge("Everything has reached the server", "good")}</p>
+            <button class="btn" id="cr-sync">Sync now</button>
+            <p class="small muted" id="cr-sync-msg"></p>`
+            : ""}
+          <p class="muted small">Sites, incidents, risks, actions, training, equipment, sub-contractors and workforce hours
+             are pushed to the server as you enter them, and queued here when it cannot be reached. Reports and photographs
+             stay on this device for now.</p>`;
+        const syncBtn = box.querySelector("#cr-sync");
+        if (syncBtn) {
+          syncBtn.addEventListener("click", async () => {
+            const msg = box.querySelector("#cr-sync-msg");
+            syncBtn.disabled = true; msg.textContent = "Syncing\u2026";
+            const r = await syncPending();
+            msg.textContent = r.total === 0
+              ? "Nothing was waiting."
+              : `${r.pushed} of ${r.total} pushed${r.failed ? `, ${r.failed} still waiting` : ""}.`;
+            syncBtn.disabled = false;
+            if (r.pushed) setTimeout(serverPanel, 1200);
+          });
+        }
+      }).catch(() => {
+        box.innerHTML = `<h3>Where your data lives</h3>
+          <p>${statusBadge("Server not answering", "critical")} <code>${esc(api().baseUrl())}</code></p>
+          <p>Verda is working from this browser's copy. Nothing is lost — records you enter now stay here until the
+             server answers again.</p>`;
+      });
+    }
+    serverPanel();
     function refresh() {
       main.querySelector("#cr-ledger").innerHTML = state.creditLedger.filter(t => state.user && t.user === state.user.email).slice().reverse()
         .map(t => `<tr><td>${esc(t.date.slice(0,10))}</td><td>${esc(t.reason)}</td><td>${t.amount > 0 ? "+" : ""}${esc(t.amount)}</td></tr>`).join("")
@@ -4447,6 +4832,17 @@
           "<strong>No monitor is registered for this country yet.</strong> The directory is filled by the practitioners who use Verda — register your practice and screening results like this one will route to you.", 4)}
         <a class="btn" href="#/monitors">${icon("monitors")}Open the monitor directory</a>
 
+        ${apiOn() ? `<div class="card" id="scr-send-card" style="margin-top:18px">
+          <h3>Pass this to a practitioner</h3>
+          <p class="muted small">Optional. Verda keeps the answers you gave and your email so a registered practitioner for ${esc(out.framework.authority ? countryName(state.country) : countryName(state.country))} can pick it up. Nothing is sent unless you press the button, and your result above does not depend on it.</p>
+          <div class="form-row">
+            <label>Your email<input id="scr-email" type="email" placeholder="you@example.com" /></label>
+            <label>Project name<input id="scr-proj" value="${esc(ans.projectName || "")}" placeholder="Optional" /></label>
+          </div>
+          <button class="btn btn-primary" id="scr-send">Send this screening</button>
+          <p class="small muted" id="scr-send-msg"></p>
+        </div>` : ""}
+
         <div class="modal-actions" style="justify-content:space-between;margin-top:20px">
           <button class="btn btn-ghost" id="scr-back">Back</button>
           <span>
@@ -4462,6 +4858,37 @@
       });
       body.querySelector("#scr-dl").addEventListener("click", () => downloadText(
         `Screening-note-${(ans.projectName || "project").replace(/[^\w]+/g, "_")}.txt`, screeningNote(ans, out)));
+
+      const sendBtn = body.querySelector("#scr-send");
+      if (sendBtn) {
+        sendBtn.addEventListener("click", async () => {
+          const msg = body.querySelector("#scr-send-msg");
+          const email = body.querySelector("#scr-email").value.trim();
+          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            alert("Enter the email a practitioner should reply to.");
+            return;
+          }
+          sendBtn.disabled = true;
+          msg.textContent = "Sending\u2026";
+          try {
+            await api().screenings.submit({
+              country: state.country, sector: ans.sector, scale: ans.scale,
+              triggers: ans.triggers, outcomeTier: out.tier,
+              outcome: { label: TIER_COPY[out.tier].label, reasons: out.reasons, flags: out.flags },
+              projectName: body.querySelector("#scr-proj").value.trim() || null,
+              contactEmail: email,
+              lat: ans.coords ? ans.coords.lat : null, lng: ans.coords ? ans.coords.lng : null
+            });
+            msg.textContent = "Sent. A registered practitioner for this country can now pick this up.";
+            sendBtn.textContent = "Sent";
+          } catch (err) {
+            sendBtn.disabled = false;
+            msg.textContent = err && err.status === 429
+              ? "That was too quick after the last one \u2014 wait a few seconds and try again."
+              : (err && err.status ? err.message : "The Verda server could not be reached. Your screening result above is unaffected \u2014 download the note and send it yourself.");
+          }
+        });
+      }
     }
 
     draw();
@@ -4667,6 +5094,8 @@
           </tr>`).join("") || emptyState("people",
             "<strong>No monitor registered yet.</strong> The directory is filled by the practitioners who use Verda — open <em>Register a practice</em> to add the first one.", 7);
         panel.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+          const row = state.monitors.find(x => x.id === b.dataset.del);
+          if (!row || !confirm(`Remove ${row.name} from the directory?`)) return;
           state.monitors = state.monitors.filter(x => x.id !== b.dataset.del); save(); refresh();
         }));
       }
@@ -4895,14 +5324,18 @@
         <button class="btn btn-primary" id="ev-add">Add</button></div></div>
         <div class="grid grid-2" id="ev-list"></div>`;
       function refresh() {
-        panel.querySelector("#ev-list").innerHTML = state.events.map(e => card(esc(e.title), `<p>${esc(e.desc)}</p><p class="muted small">${esc(e.date)}</p>`)).join("");
+        panel.querySelector("#ev-list").innerHTML = state.events.map(e => card(esc(e.title), `<p>${esc(e.desc)}</p><p class="muted small">${esc(e.date)}</p>`)).join("")
+          || `<p class="muted">No events yet — add the first one above.</p>`;
       }
       refresh();
       panel.querySelector("#ev-add").addEventListener("click", () => {
-        const title = panel.querySelector("#ev-title").value.trim();
-        if (!title) return;
+        const titleEl = panel.querySelector("#ev-title");
+        const title = titleEl.value.trim();
+        if (!title) { alert("Give the event a title."); titleEl.focus(); return; }
         state.events.push({ id: uid("ev"), title, date: panel.querySelector("#ev-date").value || "TBD", desc: panel.querySelector("#ev-desc").value });
         save(); refresh();
+        titleEl.value = ""; panel.querySelector("#ev-date").value = ""; panel.querySelector("#ev-desc").value = "";
+        titleEl.focus();
       });
     }
     function communityPanel() {
@@ -4912,14 +5345,17 @@
         <div id="cm-list"></div>`;
       function refresh() {
         panel.querySelector("#cm-list").innerHTML = state.forumPosts.slice().reverse().map(p =>
-          card(esc(p.author), `<p>${esc(p.text)}</p><p class="muted small">${esc(p.date.slice(0,10))}</p>`)).join("");
+          card(esc(p.author), `<p>${esc(p.text)}</p><p class="muted small">${esc(p.date.slice(0,10))}</p>`)).join("")
+          || `<p class="muted">Nothing posted yet — start the first thread above.</p>`;
       }
       refresh();
       panel.querySelector("#cm-post").addEventListener("click", () => {
-        const text = panel.querySelector("#cm-text").value.trim();
-        if (!text) return;
+        const textEl = panel.querySelector("#cm-text");
+        const text = textEl.value.trim();
+        if (!text) { alert("Write something before posting."); textEl.focus(); return; }
         state.forumPosts.push({ id: uid("post"), author: state.user ? state.user.name : "Guest", text, date: new Date().toISOString() });
         save(); refresh();
+        textEl.value = "";
       });
     }
     demoPanel();
@@ -4940,7 +5376,7 @@
         <div class="card">
           <h3>Add an item to a category</h3>
           <div class="form-row">
-            <select id="sp-cat">${state.supplies.map(c => `<option>${esc(c.category)}</option>`).join("")}</select>
+            <select id="sp-cat">${state.supplies.map(c => `<option>${esc(c.category)}</option>`).join("")}<option value="Uncategorised">Uncategorised</option></select>
             <input id="sp-item" placeholder="Item name" />
             <button class="btn btn-primary" id="sp-add">Add</button>
           </div>
@@ -4948,16 +5384,45 @@
       </section>
     `));
     function refresh() {
-      main.querySelector("#supply-list").innerHTML = state.supplies.map(c => card(esc(c.category), `<ul class="checklist">${c.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`)).join("");
+      main.querySelector("#supply-list").innerHTML = state.supplies.map(c => card(esc(c.category),
+        c.items.length
+          ? `<ul class="checklist">${c.items.map(i =>
+              `<li class="row-line"><span>${esc(i)}</span><button class="btn btn-ghost btn-sm" data-sp-del="${esc(i)}" data-sp-cat="${esc(c.category)}">Remove</button></li>`).join("")}</ul>`
+          : `<p class="muted small">Nothing listed yet — add the first item below.</p>`)).join("")
+        || `<p class="muted">No categories yet. Add an item below and the category is created with it.</p>`;
     }
     refresh();
     main.querySelector("#sp-add").addEventListener("click", () => {
-      const item = main.querySelector("#sp-item").value.trim();
-      if (!item) return;
-      const cat = state.supplies.find(c => c.category === main.querySelector("#sp-cat").value);
+      const input = main.querySelector("#sp-item");
+      const item = input.value.trim();
+      if (!item) { alert("Type the item name first."); input.focus(); return; }
+      const wanted = main.querySelector("#sp-cat").value;
+      let cat = state.supplies.find(c => c.category === wanted);
+      // The category list is seed data, but a cleared store or a hand-edited
+      // one can leave it empty. Create the category rather than throwing on
+      // a push into nothing.
+      if (!cat) {
+        cat = { category: wanted || "Uncategorised", items: [] };
+        state.supplies.push(cat);
+      }
+      if (cat.items.some(i => i.toLowerCase() === item.toLowerCase())) {
+        alert(`"${item}" is already listed under ${cat.category}.`);
+        return;
+      }
       cat.items.push(item);
       save(); refresh();
-      main.querySelector("#sp-item").value = "";
+      input.value = "";
+      input.focus();
+    });
+    main.querySelector("#supply-list").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-sp-del]");
+      if (!btn) return;
+      const cat = state.supplies.find(c => c.category === btn.dataset.spCat);
+      if (!cat) return;
+      const item = btn.dataset.spDel;
+      if (!confirm(`Remove "${item}" from ${cat.category}?`)) return;
+      cat.items = cat.items.filter(i => i !== item);
+      save(); refresh();
     });
   }
 
@@ -5060,7 +5525,7 @@
         </div>
         <div class="card">
           <h3>Incident register</h3>
-          <div class="table-scroll"><table class="table"><thead><tr><th>Date</th><th>Site</th><th>Type</th><th>Class</th><th>Employer</th><th>Days lost</th><th>Severity</th><th>Status</th><th></th></tr></thead>
+          <div class="table-scroll"><table class="table"><thead><tr><th>Date</th><th>Site</th><th>Type</th><th>Class</th><th>Employer</th><th>Days lost</th><th>Severity</th><th>Status</th><th></th><th></th></tr></thead>
           <tbody id="inc-rows"></tbody></table></div>
         </div>
       </section>`));
@@ -5068,7 +5533,7 @@
     const SEV_STATUS = { Low: "good", Medium: "warning", High: "serious", Critical: "critical" };
     function refresh() {
       main.querySelector("#inc-rows").innerHTML = state.incidents.slice().reverse().map(i => `
-        <tr>
+        <tr data-vdel-id="${esc(i.id)}">
           <td>${esc(i.date)}</td><td>${esc(i.client)}</td><td>${esc(i.type)}</td>
           <td>${esc(i.classification || "—")}</td>
           <td>${esc(i.employer || i.employerType || "—")}</td>
@@ -5076,7 +5541,9 @@
           <td>${statusBadge(i.severity, SEV_STATUS[i.severity])}</td>
           <td><select class="inc-status" data-id="${i.id}">${S.incidentStatuses.map(s => `<option ${s === i.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
           <td><button class="btn btn-ghost btn-sm" data-raise="${i.id}">Raise action</button></td>
-        </tr>`).join("") || `<tr><td colspan="6" class="muted">No incidents logged yet.</td></tr>`;
+          <td class="row-actions">${removeBtn(i.type + " at " + i.client)}</td>
+        </tr>`).join("") || `<tr><td colspan="10" class="muted">No incidents logged yet.</td></tr>`;
+      wireRemove(main, "incidents", i => `the ${i.type} logged at ${i.client} on ${i.date}`, refresh);
 
       main.querySelectorAll(".inc-status").forEach(sel => sel.addEventListener("change", () => {
         const inc = state.incidents.find(x => x.id === sel.dataset.id);
@@ -5112,6 +5579,7 @@
         causeImmediate: main.querySelector("#inc-cause-i").value,
         causeUnderlying: main.querySelector("#inc-cause-u").value
       });
+      queuePush("incidents", state.incidents[state.incidents.length - 1]);
       save();
       main.querySelector("#inc-desc").value = "";
       main.querySelector("#inc-employer").value = "";
@@ -5173,7 +5641,7 @@
         </div>
         <div class="card">
           <h3>Register</h3>
-          <table class="table"><thead><tr><th>Hazard</th><th>Area</th><th>Score</th><th>Band</th><th>Controls</th><th>Owner</th></tr></thead>
+          <table class="table"><thead><tr><th>Hazard</th><th>Area</th><th>Score</th><th>Band</th><th>Controls</th><th>Owner</th><th></th></tr></thead>
           <tbody id="risk-rows"></tbody></table>
         </div>
       </section>`));
@@ -5223,9 +5691,11 @@
 
       main.querySelector("#risk-rows").innerHTML = state.risks.slice().reverse().map(r => {
         const score = r.likelihood * r.severity, band = riskBandFor(score);
-        return `<tr><td>${esc(r.hazard)}</td><td>${esc(r.area)}</td><td>${score}</td>
-          <td>${statusBadge(band.label, band.status)}</td><td>${esc(r.controls) || "—"}</td><td>${esc(r.owner) || "—"}</td></tr>`;
-      }).join("") || `<tr><td colspan="6" class="muted">No hazards recorded yet.</td></tr>`;
+        return `<tr data-vdel-id="${esc(r.id)}"><td>${esc(r.hazard)}</td><td>${esc(r.area)}</td><td>${score}</td>
+          <td>${statusBadge(band.label, band.status)}</td><td>${esc(r.controls) || "—"}</td><td>${esc(r.owner) || "—"}</td>
+          <td class="row-actions">${removeBtn(r.hazard)}</td></tr>`;
+      }).join("") || `<tr><td colspan="7" class="muted">No hazards recorded yet.</td></tr>`;
+      wireRemove(main, "risks", r => `"${r.hazard}" from the register`, refresh);
     }
     refresh();
 
@@ -5238,6 +5708,7 @@
         severity: parseInt(main.querySelector("#risk-s").value, 10),
         controls: main.querySelector("#risk-controls").value, owner: main.querySelector("#risk-owner").value
       });
+      queuePush("risks", state.risks[state.risks.length - 1]);
       save();
       main.querySelector("#risk-hazard").value = ""; main.querySelector("#risk-area").value = "";
       refresh();
@@ -5264,7 +5735,7 @@
         </div>
         <div class="card">
           <h3>Action tracker</h3>
-          <table class="table"><thead><tr><th>Action</th><th>Source</th><th>Owner</th><th>Due</th><th>Priority</th><th>Status</th></tr></thead>
+          <table class="table"><thead><tr><th>Action</th><th>Source</th><th>Owner</th><th>Due</th><th>Priority</th><th>Status</th><th></th></tr></thead>
           <tbody id="act-rows"></tbody></table>
         </div>
       </section>`));
@@ -5273,13 +5744,15 @@
     function refresh() {
       main.querySelector("#act-rows").innerHTML = state.actions.slice().reverse().map(a => {
         const overdue = a.status !== "Closed" && daysUntil(a.due) < 0;
-        return `<tr class="${overdue ? "row-overdue" : ""}">
+        return `<tr class="${overdue ? "row-overdue" : ""}" data-vdel-id="${esc(a.id)}">
           <td>${esc(a.title)}</td><td>${esc(a.source)}</td><td>${esc(a.owner) || "—"}</td>
           <td>${esc(a.due) || "—"} ${overdue ? statusBadge("Overdue", "critical") : ""}</td>
           <td>${statusBadge(a.priority, PRI_STATUS[a.priority])}</td>
           <td><select class="act-status" data-id="${a.id}">${S.actionStatuses.map(s => `<option ${s === a.status ? "selected" : ""}>${s}</option>`).join("")}</select></td>
+          <td class="row-actions">${removeBtn(a.title)}</td>
         </tr>`;
-      }).join("") || `<tr><td colspan="6" class="muted">No actions yet — raise one here or from an incident.</td></tr>`;
+      }).join("") || `<tr><td colspan="7" class="muted">No actions yet — raise one here or from an incident.</td></tr>`;
+      wireRemove(main, "actions", a => `"${a.title}"`, refresh);
 
       main.querySelectorAll(".act-status").forEach(sel => sel.addEventListener("change", () => {
         state.actions.find(a => a.id === sel.dataset.id).status = sel.value;
@@ -5296,6 +5769,7 @@
         owner: main.querySelector("#act-owner").value, due: main.querySelector("#act-due").value,
         priority: main.querySelector("#act-priority").value, status: "Open", created: today()
       });
+      queuePush("actions", state.actions[state.actions.length - 1]);
       save();
       main.querySelector("#act-title").value = ""; main.querySelector("#act-owner").value = "";
       refresh();
@@ -5331,7 +5805,7 @@
         </div>
         <div class="card">
           <h3>Competency matrix</h3>
-          <div class="table-scroll"><table class="table"><thead><tr><th>Person</th><th>Site</th><th>Role</th><th>Employer</th><th>Course</th><th>Completed</th><th>Expires</th><th>Status</th></tr></thead>
+          <div class="table-scroll"><table class="table"><thead><tr><th>Person</th><th>Site</th><th>Role</th><th>Employer</th><th>Course</th><th>Completed</th><th>Expires</th><th>Status</th><th></th></tr></thead>
           <tbody id="tr-rows"></tbody></table></div>
         </div>
       </section>`));
@@ -5339,10 +5813,12 @@
     function refresh() {
       main.querySelector("#tr-rows").innerHTML = state.training.slice().reverse().map(t => {
         const st = trainingStatus(t.expires);
-        return `<tr><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.role || "—")}</td>
+        return `<tr data-vdel-id="${esc(t.id)}"><td>${esc(t.person)}</td><td>${esc(t.client)}</td><td>${esc(t.role || "—")}</td>
           <td>${esc(t.employer || t.employerType || "—")}</td><td>${esc(t.course)}</td>
-          <td>${esc(t.completed)}</td><td>${esc(t.expires)}</td><td>${statusBadge(st.label, st.status)}</td></tr>`;
-      }).join("") || emptyState("training", "No training recorded. Choose a course and Verda sets the refresher date from its validity period.", 8);
+          <td>${esc(t.completed)}</td><td>${esc(t.expires)}</td><td>${statusBadge(st.label, st.status)}</td>
+          <td class="row-actions">${removeBtn(t.person + " — " + t.course)}</td></tr>`;
+      }).join("") || emptyState("training", "No training recorded. Choose a course and Verda sets the refresher date from its validity period.", 9);
+      wireRemove(main, "training", t => `${t.person}'s ${t.course} record`, refresh);
     }
     refresh();
 
@@ -5361,6 +5837,7 @@
         employer: main.querySelector("#tr-employer").value.trim(),
         course: courseName, completed, expires: addMonths(completed, course.validityMonths)
       });
+      queuePush("training", state.training[state.training.length - 1]);
       save();
       main.querySelector("#tr-person").value = "";
       refresh();
@@ -5478,7 +5955,9 @@
         <p class="muted">How Verda is sold as a product — the packaging a prospect sees. Separate from the compliance care plans EEIS sells as a service.</p>
         <div class="card notice-card">
           <strong>Packaging proposal, not a live billing system.</strong>
-          <p class="muted small">These prices are a starting point to test with buyers. Nothing here can actually be charged until the backend, real authentication and a payment gateway are built — see <code>docs/monetisation.md</code> for the sequence.</p>
+          <p class="muted small">The server, accounts and credit ledger are built (<code>server/</code>); the payment gateway is not.
+            These prices are a starting point to test with buyers, and every button below records the enquiry and opens an
+            email rather than taking a card.</p>
         </div>
         <div class="plan-grid">
           ${plans.map(p => `
@@ -5513,8 +5992,35 @@
         </div>
       </section>`));
 
+    /* No payment provider is connected, and a button that pretends otherwise
+       is worse than one that says so. What it can do honestly is record the
+       enquiry and open the email that would have been sent. */
+    if (!state.planEnquiries) state.planEnquiries = [];
     main.querySelectorAll("[data-plan]").forEach(btn => btn.addEventListener("click", () => {
-      alert("Billing isn't connected yet — this is the packaging, not a checkout. Connect a payment provider to make this button real.");
+      const plan = VERDA_SEED.platformPlans.find(p => p.id === btn.dataset.plan);
+      if (!plan) return;
+      const custom = plan.price === null;
+      state.planEnquiries.push({
+        id: uid("enq"), plan: plan.id, planName: plan.name,
+        who: state.user ? state.user.email : null, date: new Date().toISOString()
+      });
+      save();
+      const subject = custom
+        ? `Verda — enterprise enquiry (${plan.name})`
+        : `Verda — ${plan.name} plan enquiry`;
+      const body = [
+        `Plan: ${plan.name}${custom ? " (custom pricing)" : plan.price === 0 ? " — free tier" : ` — $${plan.price}/${plan.per || "month"}`}`,
+        state.user ? `Account: ${state.user.name} <${state.user.email}>` : "Account: not signed in",
+        `Jurisdiction: ${COUNTRY().name}`,
+        "",
+        "What we need:",
+        ""
+      ].join("\n");
+      alert(custom
+        ? `Noted — ${plan.name} is priced per deployment. Your email client will open with the details filled in; send it and a human replies.`
+        : `Noted. Card payment is not connected on this deployment, so ${plan.name} is arranged by email. Your email client will open with the plan and your details filled in.`);
+      // A mailto is the one outbound route that needs no server and no key.
+      window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }));
   }
 
@@ -5939,6 +6445,17 @@
     buildNav();
     renderTopbar();
     route();
+
+    // Paint first, then ask the server who is signed in. The page must never
+    // wait on a network call to become usable.
+    restoreServerSession();
+
+    // Signal comes back mid-shift far more often than someone reloads the page,
+    // so the queue drains on the browser's own online event rather than waiting
+    // for a reload or for someone to find the Sync button.
+    window.addEventListener("online", () => {
+      syncPending().catch(() => { /* still queued; the Credits screen says so */ });
+    });
 
     window.addEventListener("hashchange", () => { window.__verdaMapActive = false; buildNav(); route(); });
 

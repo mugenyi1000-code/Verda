@@ -133,6 +133,10 @@ if (missing.length) {
 
 
 const html = `<title>Verda EHS Platform</title>
+<meta name="theme-color" content="#1f7a4d" />
+<!-- Inline, because a single file has nowhere to fetch an icon from. A host
+     that supplies its own tab icon simply overrides this. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%231f7a4d'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3EV%3C/text%3E%3C/svg%3E" />
 <style>
 ${css}
 </style>

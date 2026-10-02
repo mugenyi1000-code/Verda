@@ -12,6 +12,11 @@
 --    deleted: rows carry deleted_at and the audit log records who did what.
 --    "We deleted it" is not an answer to "show me the record as it stood".
 
+-- Case-insensitive email. Addresses differing only in case are the same
+-- address to every mail server, so they must be the same row here; a unique
+-- index on plain text would happily store both.
+create extension if not exists citext;
+
 create table orgs (
   id            text primary key,
   name          text not null,

@@ -43,6 +43,12 @@ npm start
 Any Postgres works — Railway, Render, Neon, RDS, or one on a VPS. `npm start`
 runs pending migrations first, so a deploy is `git push` plus a restart.
 
+The first migration runs `create extension if not exists citext`, so the role in
+`DATABASE_URL` needs rights to create an extension on that database the first
+time only (every managed Postgres above ships `citext` available). Email is
+`citext` because two addresses differing only in case are the same address to
+every mail server, and must therefore be the same row here.
+
 ### Tests
 
 ```bash
@@ -66,6 +72,25 @@ Serve `app/` and set the API base before the other scripts load:
 With it unset — which includes the single-file build — `VerdaApi.isEnabled()` is
 false and the app runs entirely in the browser, exactly as it always has. A
 monitor on a site with no signal must still be able to work.
+
+### What the browser app does with a server, once it has one
+
+| In the app | On the server |
+|---|---|
+| Sign up / log in / log out | real account, hashed password, httpOnly session cookie; the modal says which it is |
+| Page load | `GET /api/auth/me` restores the session, or clears a stale local one |
+| Adding a client | `POST .../sites`, and the site id is kept on the local row |
+| Incidents, risks, actions, training, equipment, sub-contractors, workforce hours | `POST .../records` with the matching `kind`, linked to the site |
+| Removing any of those | the server copy is removed too |
+| Anything entered while the server was unreachable | queued locally, pushed on the next sign-in or from **Credits & Billing → Sync now** |
+| **Draft this section with Claude** in the report builder | `POST .../ai/draft`, debited and audited server-side; the key never reaches the browser |
+| The free screening tool's **Send this screening** | `POST /api/screenings`, so a registered practitioner can pick the lead up |
+| Credit balance in the top bar | the server's figure, not a local count |
+
+Local state stays the source of truth while the connection is unreliable: the
+row is saved in the browser first and pushed after, so a failed push is a flag on
+**Credits & Billing**, never an error in the middle of recording an incident.
+Reports and photographs are still browser-only — see the list below.
 
 `ALLOWED_ORIGINS` on the server must name the origin the app is served from.
 There is no wildcard: credentials travel with these requests, and `*` would let
@@ -118,6 +143,12 @@ unbuilt one.
 - **File storage.** The `attachments` table holds pointers; nothing writes the
   bytes yet. Photographs still live in the browser. S3 or R2 plus presigned
   uploads is the next piece, and it is what makes the evidence archive real.
+- **Reports on the server.** `/reports` and its revision/submit logic are built
+  and tested, but the report builder still keeps generated reports locally,
+  because a report carries its photographs and those have nowhere to go yet.
+- **Pulling back down.** The sync is one-way: the browser pushes. Opening the
+  same account in a second browser shows that browser's local rows, not the
+  server's. A read-back pass belongs with file storage.
 - **Email.** No invitations, no password reset, no verification. `POST
   /members` therefore requires the person to have signed up already.
 - **Rate limiting beyond the screening endpoint**, and it is per-instance

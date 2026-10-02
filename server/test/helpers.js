@@ -9,7 +9,7 @@
  * What these tests DO prove is the thing that matters most here: that a request
  * from one organisation cannot reach another organisation's rows.
  */
-import { newDb } from "pg-mem";
+import { newDb, DataType } from "pg-mem";
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,6 +29,18 @@ export async function freshApp() {
   const adapter = mem.adapters.createPg();
   const pool = new adapter.Pool();
   setPool(pool);
+
+  // pg-mem has no citext. Register it as plain text so the schema loads; the
+  // case-insensitive comparison itself is therefore NOT under test here, which
+  // is exactly the fidelity gap the header warns about — it is proven against a
+  // real server via DATABASE_URL.
+  mem.registerExtension("citext", (schema) => {
+    schema.registerEquivalentType({
+      name: "citext",
+      equivalentTo: DataType.text,
+      isValid: (v) => typeof v === "string"
+    });
+  });
 
   const sql = await readFile(join(SRC, "migrations", "001_init.sql"), "utf8");
   await pool.query(sql);

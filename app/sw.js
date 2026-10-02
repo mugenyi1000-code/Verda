@@ -3,11 +3,12 @@
    cache when the network is unavailable. Data itself lives in localStorage
    and is already offline-first (no network round-trip required to use it). */
 
-const CACHE_NAME = "verda-shell-v1";
+const CACHE_NAME = "verda-shell-v2";
 const SHELL_FILES = [
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./api.js",
   "./data.js",
   "./ai.js",
   "./map.js",
