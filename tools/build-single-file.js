@@ -23,6 +23,17 @@ const css = read("styles.css");
 let appJs = read("app.js");
 const dataJs = read("data.js");
 const aiJs = read("ai.js");
+const apiJs = read("api.js");
+
+// Inlining a file inside <script> means any literal closing tag in it — even in
+// a comment — ends the script early and breaks the whole bundle, with a syntax
+// error that points nowhere near the cause. Catch it at build time instead.
+for (const [name, src] of [["app.js", appJs], ["data.js", dataJs], ["ai.js", aiJs], ["api.js", apiJs]]) {
+  if (/<\/script/i.test(src)) {
+    console.error(`build: ${name} contains a literal </script, which would end the inlined tag early`);
+    process.exit(1);
+  }
+}
 
 // 1. no service worker in a single-file build
 appJs = appJs.replace(
@@ -126,6 +137,12 @@ const html = `<title>Verda EHS Platform</title>
 ${css}
 </style>
 ${body}
+<script>
+/* The API client ships in the bundle too, so the single file has the same
+   capabilities as the served app. With no window.VERDA_API set — and the single
+   file sets none — isEnabled() is false and everything runs in the browser. */
+${apiJs}
+</script>
 <script>
 ${dataJs}
 </script>
