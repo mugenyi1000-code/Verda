@@ -8,18 +8,20 @@ Open `kibanja-smartcare.html` in a browser. It is one self-contained file
 with no build step and no server. Everything runs on example households
 dated 22 Oct 2026, and **Reset demo** puts them back.
 
-## The eight screens
+## The ten screens
 
 | Screen | What it shows |
 |---|---|
 | Overview | Model A (emergency card) and Model B (essentials credit line) side by side, the household's year on the platform, and the one number to check first |
-| Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, reporting an emergency, the monthly allowance, the credit ladder and repayments |
-| Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash: emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
-| Plans and discounts | Weekly (UGX 32,000), monthly (135,000) and annual (1.5M) plans with editable prices, member discount and grace days; what each discount leaves of the store margin; product offers you can add, pause and remove, funded by Kibanja or a supplier |
+| How it works | The plain-language explainer: six steps for a family, where every shilling is held and what Kibanja earns from it, who does what, and common questions |
+| Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, Kibanja points, a one-time pay code for when the card is at home, Kibanja Loan repayments, reporting an emergency, the monthly allowance, the credit ladder and repayments |
+| Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash, by card or pay code: points (if the member chooses), emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
+| Plans and discounts | Weekly (UGX 32,000), monthly (135,000) and annual (1.5M) plans with editable prices, member discount and grace days; what each discount leaves of the store margin; product offers you can add, pause and remove, funded by Kibanja or a supplier; points settings (earn rate per plan, value, spend threshold) |
+| Kibanja Loan | School fees (paid to the school), farm inputs (taken as goods at a hub), business stock and quick cash. Limits come from a Kibanja score built only from the household's record on the platform, with every component shown. Repayment calculator with full cost, a 30%-of-income affordability check, one loan at a time, no lending during an emergency, and a loan book with approvals and late loans |
 | Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
 | Underwriting | The three-year table rebuilt from the plan's assumptions: 96% of households on a monthly credit line, 10M card spend a year, 6% supermarket rebate, 2.5% processing fee per cycle, 4% claiming an average 20M. Lands within 1% of the original (net 1.19B / 6.6B / 20.6B vs 1.2B / 6.65B / 20.75B; the gap is the fee charged only on credit users). Inputs for credit losses and cost of funds, a stress grid, and findings |
 | Rollout | Phase 1 in detail, flagship store set-up costs, and the licences and partners to line up first |
-| Investors | The pitch, the three advantages (float, data, zero-waste integration) each with live figures and the questions diligence will ask, the 10-year expansion (Kampala → Ugandan regional → East Africa) with gates between phases, fundraising by stage, and a data-room checklist |
+| Investors | The pitch, a comparison with Uganda's supermarket cards (Carrefour MyCLUB, Fraine, older points schemes), the three advantages (float, data, zero-waste integration) each with live figures and the questions diligence will ask, the 10-year expansion (Kampala → Ugandan regional → East Africa) with gates between phases, fundraising by stage, and a data-room checklist |
 
 The screens share state: a claim filed in the family app appears in
 Operations; approving it unlocks the card; charging a basket at the till
