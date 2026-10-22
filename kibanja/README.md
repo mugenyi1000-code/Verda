@@ -8,7 +8,7 @@ Open `kibanja-smartcare.html` in a browser. It is one self-contained file
 with no build step and no server. Everything runs on example households
 dated 22 Oct 2026, and **Reset demo** puts them back.
 
-## The eleven screens
+## The twelve screens
 
 | Screen | What it shows |
 |---|---|
@@ -17,8 +17,9 @@ dated 22 Oct 2026, and **Reset demo** puts them back.
 | Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, Kibanja points, a one-time pay code for when the card is at home, Kibanja Loan repayments, reporting an emergency, the monthly allowance, the credit ladder and repayments |
 | Food and producers | The price-locked Kibanja Food Basket (UGX 169,000 a month for a family of five, 15% under shelf price), the Ugandan-made share of sales against the Buy Uganda Build Uganda shelf targets, the partner directory (Made in Uganda as a proposed partner; producers and manufacturers as clearly marked examples), what partners get, and the monthly volumes producers can plan on |
 | Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash, by card or pay code: points (if the member chooses), emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
-| Plans and discounts | Weekly (UGX 32,000), monthly (135,000) and annual (1.5M) plans with editable prices, member discount and grace days; what each discount leaves of the store margin; product offers you can add, pause and remove, funded by Kibanja or a supplier; points settings (earn rate per plan, value, spend threshold) |
-| Kibanja Loan | School fees (paid to the school), farm inputs (taken as goods at a hub), business stock and quick cash. Limits come from a Kibanja score built only from the household's record on the platform, with every component shown. Repayment calculator with full cost, a 30%-of-income affordability check, one loan at a time, no lending during an emergency, and a loan book with approvals and late loans |
+| Plans and discounts | Six named plans by household size: Kibanja Starter (free: card, wallet, points, Food Basket prices), Solo (1 person, UGX 2,500 a week), Duo (2, 4,500), Family (up to 5, 8,500), Family Plus (up to 8, 12,500) and Premier (the original UGX 1.5M a year / 50M design). Each payable weekly, monthly or annually, with editable prices and cover, an affordability check per plan (expected claims against price, cover against what the household eats), discount and points by payment frequency, margin check, and product offers |
+| Kibanja Loan | Food-system loans only: farm inputs, poultry and livestock, storage and drying, and food-trade stock, paid to suppliers or as hub stock rather than cash, and repayable in produce. Limits come from an explainable Kibanja score; full-cost calculator, 30%-of-income affordability check, one loan per book, no lending during an emergency, and a loan book with approvals and late loans |
+| Boda and fuel loans | The same engine and score for motorcycles (up to UGX 7M, 20% deposit, 52–104 weeks, repaid weekly, bike registered to the lender with a tracker) and fuel (up to UGX 150,000 as fuel credit at partner stations, 1–4 weeks). Tied to the food system: riders deliver Food Baskets and can repay from delivery pay |
 | Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
 | Underwriting | The three-year table rebuilt from the plan's assumptions: 96% of households on a monthly credit line, 10M card spend a year, 6% supermarket rebate, 2.5% processing fee per cycle, 4% claiming an average 20M. Lands within 1% of the original (net 1.19B / 6.6B / 20.6B vs 1.2B / 6.65B / 20.75B; the gap is the fee charged only on credit users). Inputs for credit losses and cost of funds, a stress grid, and findings |
 | Rollout | Phase 1 in detail, flagship store set-up costs, and the licences and partners to line up first |
@@ -39,6 +40,14 @@ reduces the household's allowance or credit.
   new goes on credit and no repayments fall due, so a shock never turns
   into debt. No Kibanja Loans during an emergency either.
 - **Ugandan-made goods earn double points**, and producers pay no shelf fees.
+- **Cover sized to the household.** Solo to Family Plus size the emergency
+  allowance to what a household of that size eats (5–9 times the Food Basket
+  cost), which keeps plans at UGX 2,500–12,500 a week. Expected claims are
+  about 48% of the price at the plan's 4% claim rate. Premier keeps the
+  original UGX 1.5M / 50M design.
+- **Free Starter plan** so anyone can join the network and upgrade later.
+- **Loans stay inside the food system** for now; school fees and other
+  needs wait until the food book has a track record.
 
 - **90-day waiting period** on emergency claims, so cover can't be bought the week a
   layoff is already known.
