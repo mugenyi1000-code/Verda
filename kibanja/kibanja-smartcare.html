@@ -266,6 +266,9 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
 /* One card and food */
 .onecard { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .feat { gap: 6px; align-content: start; }
+table.t.inv td:nth-child(5) { min-width: 260px; }
+table.t.inv select.in { min-width: 140px; padding: 6px 8px; }
+.btn.chip[aria-pressed="true"] { background: var(--leaf); color: var(--on-leaf); border-color: var(--leaf); }
 .tag.ug { color: var(--ink); background: var(--sun-soft); padding: 1px 5px; border-radius: 4px; }
 .target { position: relative; height: 14px; border-radius: 99px; background: var(--sunk); }
 .target > i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--leaf); }
@@ -306,7 +309,6 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
       <button class="tab" role="tab" data-a="tab" data-v="food">Food and producers</button>
       <button class="tab" role="tab" data-a="tab" data-v="plans">Packages</button>
       <button class="tab" role="tab" data-a="tab" data-v="loans">Kibanja Loan</button>
-      <button class="tab" role="tab" data-a="tab" data-v="move">Boda and fuel loans</button>
       <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
       <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
       <button class="tab" role="tab" data-a="tab" data-v="rollout">Rollout</button>
@@ -507,7 +509,7 @@ const earnRate = m => tierOf(m).free ? 1 : S.plans[m.sub.plan].pts;
 const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 let S = seed();
-const ui = { corp: { staff: 40, pkg: 'staff', freq: 'monthly' }, uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanBook: 'food', loanDraft: { food: { product: 'farm', amount: 500000, n: 4 }, move: { product: 'boda', amount: 2500000, n: 104 } }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const ui = { invFilter: 'all', corp: { staff: 40, pkg: 'staff', freq: 'monthly' }, uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanBook: 'food', loanDraft: { food: { product: 'farm', amount: 500000, n: 4 }, move: { product: 'boda', amount: 2500000, n: 104 } }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
 const M0 = { fam: [1000, 5000, 15000], mixW: 0, mixM: 0, discPct: 0, ptsPct: 0, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
 const M = JSON.parse(JSON.stringify(M0));
 const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
@@ -611,7 +613,7 @@ V.overview = () => `
     <article class="panel feat"><h3>Package Protection</h3><p class="small">If the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and credit repayments freeze.</p></article>
     <article class="panel feat"><h3>Shopping balance and points</h3><p class="small">Package payments and top-ups land here and pay for anything. Every payment earns points; Ugandan-made goods earn double.</p></article>
     <article class="panel feat"><h3>Food Basket</h3><p class="small">A month of staples for a family of five at a locked price, bought straight from Ugandan producers.</p></article>
-    <article class="panel feat"><h3>Kibanja Loan</h3><p class="small">Farm inputs, poultry, storage and food-trade stock, sized to what the household can repay. Boda and fuel loans keep food moving.</p></article>
+    <article class="panel feat"><h3>Kibanja Loan</h3><p class="small">Farm inputs, poultry, storage, food-trade stock, motorcycles and fuel, sized to what the household can repay.</p></article>
   </div>
   <p class="muted" style="max-width:72ch">In the financial plan about 96% of households use the card mainly as a food credit line, and roughly 4% a year are hit by a shock and draw the emergency allowance, budgeted at an average of UGX 20M paid as capped monthly amounts. Both are on every card; the household doesn't choose between them.</p>
 </section>
@@ -624,8 +626,7 @@ V.overview = () => `
     <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">The cashier scans the card and the whole basket is paid without cash, with discounts applied.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="plans"><h4>Packages</h4><span class="muted small">Individual, family and corporate packages paid weekly, monthly or yearly, bonuses, points and product offers.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="food"><h4>Food and producers</h4><span class="muted small">The price-locked Food Basket, producer and manufacturer partners, Made in Uganda, and the Ugandan-made share of sales.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="loans"><h4>Kibanja Loan</h4><span class="muted small">Food-system loans: farm inputs, poultry and livestock, storage and food-trade stock, priced from the household's own record.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="move"><h4>Boda and fuel loans</h4><span class="muted small">Motorcycles and fuel that keep food moving, on the same score and rules, repaid weekly.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="loans"><h4>Kibanja Loan</h4><span class="muted small">Loans that grow, store, sell and move food: farm inputs, poultry, storage, food-trade stock, motorcycles and fuel.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The first year in detail, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
@@ -1316,6 +1317,10 @@ V.investors = () => {
   </div>
 </section>
 
+${investorTable()}
+
+${nameIdeas()}
+
 <section class="stack">
   <h2>Against Uganda's supermarket cards</h2>
   <div class="tablewrap"><table class="t"><thead><tr><th>Programme</th><th>What members get</th><th>What it doesn't do</th></tr></thead><tbody>
@@ -1350,7 +1355,7 @@ V.investors = () => {
     <ul class="stages">
       <li><b>Pre-seed · now</b><span class="small">Founders, angels, grants and impact accelerators. Pays for licences, partners, the app and a pilot of up to 1,000 households.</span></li>
       <li><b>Seed · after 12 months</b><span class="small">Impact and Africa-focused early-stage funds. Pitch with real loss ratio, repayment and renewal numbers.</span></li>
-      <li><b>Growth · Phase 2</b><span class="small">Growth funds like those named in the pitch (Norrsken, Tiger Global) and regional institutional funds generally invest once revenue and repeat customers are proven. Bring Phase 1 results, not projections.</span></li>
+      <li><b>Growth · Phase 2</b><span class="small">Growth funds like those named in the pitch (Norrsken22, Tiger Global) and regional institutional funds generally invest once revenue and repeat customers are proven. Bring Phase 1 results, not projections.</span></li>
       <li><b>Strategic · any stage</b><span class="small">An insurer or development finance institution taking equity alongside underwriting or a credit facility.</span></li>
     </ul>
   </section>
@@ -1379,7 +1384,7 @@ V.how = () => {
     ${step(3, 'Shop for what you want', 'Walk into the supermarket and pick anything. The cashier scans the card and the shopping balance pays, with no cash. Bulk packs and the price-locked Food Basket stretch it further.', 'pos', 'Try the till')}
     ${step(4, 'Earn points and bonuses', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly, and double on Ugandan-made goods. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Every package payment also adds a ${trim2(P.weekly.bonus)}–${trim2(P.annual.bonus)}% bonus.`, 'plans', 'See bonuses')}
     ${step(5, 'Protected when income stops', `After ${WAIT_DAYS} days of payments, if the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and food credit repayments freeze.`, 'ops', 'See how claims are checked')}
-    ${step(6, 'Borrow to grow food', 'Kibanja Loan buys seed and fertiliser, chicks and feed, storage, or stock for a food stall. Boda and fuel loans keep food moving. The limit comes from the household\'s own record on the card.', 'loans', 'Open Kibanja Loan')}
+    ${step(6, 'Borrow to grow food', 'Kibanja Loan buys seed and fertiliser, chicks and feed, storage, stock for a food stall, a motorcycle or fuel. The limit comes from the household\'s own record on the card.', 'loans', 'Open Kibanja Loan')}
   </ol>
 </section>
 
@@ -1426,28 +1431,28 @@ V.how = () => {
 };
 
 /* Loans: one engine, two books */
-// Kibanja Loan stays inside the food system. Boda and fuel loans keep food moving. Both use the same score and rules.
+// Kibanja Loan stays inside the food system: loans that grow, store and sell food, and loans that move it.
 const LOAN_PRODUCTS = {
-  farm: { name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], period: 'month', rate: 2.0, to: 'Collected as seed and fertiliser at a Kibanja hub', via: 'Hub voucher', blurb: 'Seed, fertiliser and tools. Repay in cash, or sell the harvest to Kibanja and the instalments come off the price.' },
-  poultry: { name: 'Poultry and livestock', max: 1500000, terms: [4, 6, 9], period: 'month', rate: 2.0, to: 'Chicks, feed and vaccines from a partner supplier', via: 'Supplier', blurb: 'Layers, broilers, piglets or a dairy goat, with feed to the first sale. Kibanja can buy the eggs and milk.' },
-  storage: { name: 'Storage and drying', max: 1000000, terms: [6, 9, 12], period: 'month', rate: 2.0, to: 'Tarpaulins, hermetic bags or a small silo from a partner supplier', via: 'Supplier', blurb: 'Cuts losses after harvest, so more of the crop is eaten or sold.' },
-  business: { name: 'Food-trade stock', max: 3000000, terms: [3, 6, 9], period: 'month', rate: 2.5, to: 'Stock at trade price from a Kibanja hub', via: 'Hub stock', blurb: 'Stock for a food kiosk, market stall or produce trade.' },
+  farm: { group: 'grow', name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], period: 'month', rate: 2.0, to: 'Collected as seed and fertiliser at a Kibanja hub', via: 'Hub voucher', blurb: 'Seed, fertiliser and tools. Repay in cash, or sell the harvest to Kibanja and the instalments come off the price.' },
+  poultry: { group: 'grow', name: 'Poultry and livestock', max: 1500000, terms: [4, 6, 9], period: 'month', rate: 2.0, to: 'Chicks, feed and vaccines from a partner supplier', via: 'Supplier', blurb: 'Layers, broilers, piglets or a dairy goat, with feed to the first sale. Kibanja can buy the eggs and milk.' },
+  storage: { group: 'grow', name: 'Storage and drying', max: 1000000, terms: [6, 9, 12], period: 'month', rate: 2.0, to: 'Tarpaulins, hermetic bags or a small silo from a partner supplier', via: 'Supplier', blurb: 'Cuts losses after harvest, so more of the crop is eaten or sold.' },
+  business: { group: 'grow', name: 'Food-trade stock', max: 3000000, terms: [3, 6, 9], period: 'month', rate: 2.5, to: 'Stock at trade price from a Kibanja hub', via: 'Hub stock', blurb: 'Stock for a food kiosk, market stall or produce trade.' },
 };
 const MOVE_PRODUCTS = {
-  boda: { name: 'Motorcycle (boda boda)', max: 7000000, terms: [52, 78, 104], period: 'week', rate: 2.5, deposit: 20, to: 'Paid to the dealer once the 20% deposit is in', via: 'To dealer', blurb: 'A new motorcycle for a rider, or a farmer moving produce. It stays registered to the lender, with a tracker, until the last payment.' },
-  fuel: { name: 'Fuel', max: 150000, terms: [1, 2, 4], period: 'week', rate: 2.5, to: 'Loaded as fuel credit, spendable only at partner stations', via: 'Fuel credit', blurb: 'Fuel now, repaid within a month, for riders, farmers and food traders.' },
+  boda: { group: 'move', name: 'Motorcycle (boda boda)', max: 7000000, terms: [52, 78, 104], period: 'week', rate: 2.5, deposit: 20, to: 'Paid to the dealer once the 20% deposit is in', via: 'To dealer', blurb: 'A new motorcycle for a rider, or a farmer moving produce. It stays registered to the lender, with a tracker, until the last payment.' },
+  fuel: { group: 'move', name: 'Fuel', max: 150000, terms: [1, 2, 4], period: 'week', rate: 2.5, to: 'Loaded as fuel credit, spendable only at partner stations', via: 'Fuel credit', blurb: 'Fuel now, repaid within a month, for riders, farmers and food traders.' },
 };
 const PRODUCTS = { ...LOAN_PRODUCTS, ...MOVE_PRODUCTS };
+// One loan book. Products are grouped by what they do for the food system.
 const BOOKS = {
-  food: { view: 'loans', title: 'Kibanja Loan', short: 'Kibanja Loan', products: LOAN_PRODUCTS, def: { product: 'farm', amount: 500000, n: 4 },
-    intro: 'Loans that grow, store and sell food: farm inputs, poultry and livestock, storage and food-trade stock. Priced from the household\'s own record on the card.' },
-  move: { view: 'move', title: 'Boda and fuel loans', short: 'boda or fuel loan', products: MOVE_PRODUCTS, def: { product: 'boda', amount: 2500000, n: 104 },
-    intro: 'Motorcycles and fuel that keep food moving: riders who deliver Food Baskets from Kibanja hubs, farmers taking produce to market, traders restocking. Same score, same rules, repaid weekly.' },
+  food: { view: 'loans', title: 'Kibanja Loan', short: 'Kibanja Loan', products: PRODUCTS, def: { product: 'farm', amount: 500000, n: 4 },
+    intro: 'Loans that grow, store, sell and move food, all on the same score and rules: farm inputs, poultry and livestock, storage, food-trade stock, motorcycles and fuel.' },
 };
+const LOAN_GROUPS = [['grow', 'Grow, store and sell food'], ['move', 'Move food']];
 const LOAN_FEE = 1;          // one-off processing fee, % of the amount
 const AFFORD = 0.3;          // all monthly repayments together may not exceed 30% of declared income
 
-const bookOf = key => key in LOAN_PRODUCTS ? 'food' : 'move';
+const bookOf = () => 'food';
 const span = (period, n) => `${n} ${period}${n === 1 ? '' : 's'}`;
 const perRate = l => l.rate / 100 * (l.period === 'week' ? 12 / 52 : 1);   // the monthly rate, spread over weeks for weekly loans
 const instalment = l => { const r = perRate(l); return r ? l.amount * r / (1 - Math.pow(1 + r, -l.n)) : l.amount / l.n; };
@@ -1478,9 +1483,11 @@ function loanOffer(m, key) {
   const P = PRODUCTS[key], book = bookOf(key), sc = score(m).total, blocks = [];
   if (tierOf(m).free) blocks.push('Free card holders can\'t borrow yet. A package builds the record the score is made from.');
   if (m.cover === 'active' || m.cover === 'review') blocks.push('This household has an open emergency claim or allowance. Kibanja does not lend during an emergency; the allowance is the help.');
-  if (cover(m).s === 'lapsed') blocks.push('Cover is paused. The plan has to be paid first.');
+  if (cover(m).s === 'lapsed') blocks.push('The package is paused. It has to be paid first.');
   if (m.credit.overdue) blocks.push('A food credit repayment is overdue.');
-  if (openLoan(m, book)) blocks.push(`One ${BOOKS[book].short} at a time: this household already has one open.`);
+  // One loan at a time; fuel credit is small and short, so it may run alongside one other loan.
+  const clash = openLoans(m).find(l => (l.product === 'fuel') === (key === 'fuel'));
+  if (clash) blocks.push(key === 'fuel' ? 'This household already has fuel credit open.' : `One Kibanja Loan at a time: this household already has a ${PRODUCTS[clash.product].name.toLowerCase()} loan open. Fuel credit can still run alongside it.`);
   if (sc < 50) blocks.push(`A score of ${sc} is below the 50 needed to borrow.`);
   const step = P.max >= 1000000 ? 50000 : 10000;
   const limit = sc < 50 ? 0 : Math.floor(P.max * Math.min(1, (sc - 40) / 50) / step) * step;
@@ -1511,7 +1518,7 @@ function loanBlock(m) {
   const open = openLoans(m), off = loanOffer(m, 'farm');
   const offer = open.some(l => bookOf(l.product) === 'food') ? '' : `<div class="ph-block"><span class="eyebrow">Loans</span>
     ${off.blocks.length ? `<p class="small muted">${esc(off.blocks[0])}</p>` : `<p>You could borrow up to <b class="num">${ugx(off.limit)}</b> for farm inputs.</p><p class="small muted">Your Kibanja score is ${off.sc}. It comes from your plan payments, repayments and card use.</p>`}
-    <div class="row"><button class="btn" data-a="loan-apply" data-book="food">Kibanja Loan</button><button class="btn" data-a="loan-apply" data-book="move">Boda and fuel</button></div></div>`;
+    <button class="btn block" data-a="loan-apply">See Kibanja Loan</button></div>`;
   return open.map(loanCard).join('') + offer;
 }
 
@@ -1526,31 +1533,28 @@ function loanView(book) {
   const active = S.loans.filter(l => l.status === 'active' && inBook(l)), pending = S.loans.filter(l => l.status === 'pending' && inBook(l));
   const outstanding = active.reduce((a, l) => a + balanceAfter(l, l.paid), 0);
   const late = active.filter(l => nextDue(l) < TODAY), lateBal = late.reduce((a, l) => a + balanceAfter(l, l.paid), 0);
-  const rules = book === 'food' ? [
-    ['Food only, for now.', 'Every Kibanja Loan grows, stores or sells food. Other needs can be added once the food book has a track record.'],
-    ['The money goes where the loan says.', 'Inputs, chicks and storage come from partner suppliers and stock from Kibanja hubs, never as loose cash. That keeps loans productive and defaults lower.'],
-    ['Repay in produce.', 'A farmer can sell the harvest, eggs or milk to Kibanja and have the instalments taken off the price.'],
-  ] : [
-    ['A 20% deposit, and the bike secures the loan.', 'The motorcycle stays registered to the lender with a tracker until the last payment. A rider\'s permit, helmet and third-party insurance are checked at the dealer.'],
-    ['Weekly repayments.', 'They match how riders earn. Riders who deliver Food Baskets from Kibanja hubs can have instalments taken from their delivery pay.'],
-    ['Fuel credit buys only fuel.', 'It loads onto the card and works only at partner stations, repaid within four weeks.'],
+  const rules = [
+    ['Food system only, for now.', 'Every Kibanja Loan grows, stores, sells or moves food. Other needs can be added once the book has a track record.'],
+    ['The money goes where the loan says.', 'Inputs, chicks and storage come from partner suppliers, stock from Kibanja hubs, motorcycles from the dealer and fuel as fuel credit, never as loose cash. That keeps loans productive and defaults lower.'],
+    ['Repay in produce, or from delivery pay.', 'A farmer can sell the harvest, eggs or milk to Kibanja and have the instalments taken off the price. Riders who deliver Food Baskets can repay from their delivery pay.'],
+    ['Motorcycles need a 20% deposit and stay secured.', 'The bike stays registered to the lender with a tracker until the last weekly payment. A rider\'s permit, helmet and third-party insurance are checked at the dealer.'],
   ];
-  rules.push(['One loan per book at a time, and none during an emergency.', 'A household with an open claim or allowance is not offered credit.'],
+  rules.push(['One loan at a time, plus fuel credit, and none during an emergency.', 'A household with an open claim or Package Protection is not offered credit.'],
     ['Repayments stay under 30% of income.', 'Every loan instalment, weekly ones converted to monthly, is added to the food credit repayment before approval.'],
     ['The full cost is shown before signing.', `Rate, the ${LOAN_FEE}% fee, every instalment and the total. The highest rate here is 2.5% a month on the reducing balance. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap and whether fees count toward it.`],
     ['A licensed lender funds the loans.', 'Kibanja originates and services them; the book sits with a licensed lender until Kibanja holds its own licence.']);
   return `<div class="stack" style="gap:4px"><h2>${B.title}</h2><p class="muted small">${B.intro}</p></div>
-  <div class="plans">${Object.entries(B.products).map(([k, x]) => `<article class="panel plan-tile">
+  ${LOAN_GROUPS.map(([g, label]) => `<section class="stack"><h3>${label}</h3><div class="plans">${Object.entries(B.products).filter(([, x]) => x.group === g).map(([k, x]) => `<article class="panel plan-tile">
     <div class="row between"><h3>${x.name}</h3><span class="pill">${trim2(x.rate)}% a month</span></div>
     <div class="big">up to ${short(x.max)}<span class="per"> · ${x.terms[0]}–${span(x.period, x.terms[x.terms.length - 1])}</span></div>
-    <p class="small muted">${x.blurb} ${x.to}.</p></article>`).join('')}</div>
+    <p class="small muted">${x.blurb} ${x.to}.</p></article>`).join('')}</div></section>`).join('')}
 
   <div class="split">
     <section class="panel">
       <h3>Apply</h3>
       <div class="form-grid">
         <label class="f">Applying as<select class="in" id="ln-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))}</option>`).join('')}</select></label>
-        <label class="f">Loan<select class="in" id="ln-product">${Object.entries(B.products).map(([k, x]) => `<option value="${k}" ${k === d.product ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>
+        <label class="f">Loan<select class="in" id="ln-product">${LOAN_GROUPS.map(([g, label]) => `<optgroup label="${label}">${Object.entries(B.products).filter(([, x]) => x.group === g).map(([k, x]) => `<option value="${k}" ${k === d.product ? 'selected' : ''}>${x.name}</option>`).join('')}</optgroup>`).join('')}</select></label>
       </div>
       <div class="score">
         <div class="row between"><span class="eyebrow">Kibanja score</span><span class="big">${sc.total}<span class="per"> / 100</span></span></div>
@@ -1590,7 +1594,6 @@ function loanView(book) {
   </section>`;
 }
 V.loans = () => loanView('food');
-V.move = () => loanView('move');
 
 function loanCalc() {
   const out = $('#ln-calc'); if (!out) return;
@@ -1693,12 +1696,51 @@ V.food = () => {
 </section>`;
 };
 
+/* Investors to approach. c: confirmed in research on 22 Oct 2026; the rest are from general knowledge and need checking. */
+const INVESTORS = [{"n": "Catalyst Fund (BFA Global)","k": "grant","w": "Now","a": "Pre-seed equity","f": "Pre-seed fund and accelerator for African ventures building resilience; started in inclusive fintech.","c": true},{"n": "WFP Innovation Accelerator","k": "grant","w": "Now","a": "Grant","f": "Up to US$100k equity-free for food-security innovations that already have traction.","c": true},{"n": "Norrsken Accelerator","k": "grant","w": "Now","a": "Pre-seed equity","f": "Backed Ugandan agri-lender Emata.","c": true},{"n": "UNCDF","k": "grant","w": "Now","a": "Grant","f": "Ran AGRINVEST with Uganda Development Bank and FAO, with US$100k–300k grants for digital lending partners.","c": true},{"n": "IKEA Foundation","k": "grant","w": "Now","a": "Grant","f": "Funds agricultural livelihoods in East Africa, including Aceli Africa.","c": true},{"n": "Mastercard Foundation","k": "grant","w": "Now","a": "Grant","f": "Large funder of youth employment and agriculture work in Uganda.","c": false},{"n": "GSMA Innovation Fund","k": "grant","w": "Now","a": "Grant","f": "Equity-free grants for mobile-enabled services in low-income markets.","c": false},{"n": "Draper Richards Kaplan Foundation","k": "grant","w": "Now","a": "Grant or equity","f": "Venture philanthropy for early social enterprises; backed Emata.","c": true},{"n": "Y Combinator","k": "grant","w": "Now","a": "Pre-seed equity","f": "Standard deal for very early companies; has funded African fintechs.","c": false},{"n": "Antler East Africa","k": "grant","w": "Now","a": "Pre-seed equity","f": "Pre-seed programme and first cheque, run from Nairobi.","c": false},{"n": "Founders Factory Africa","k": "grant","w": "Now","a": "Pre-seed equity","f": "Venture builder and accelerator with fintech and agritech tracks.","c": false},{"n": "Village Capital","k": "grant","w": "Now","a": "Pre-seed equity","f": "Peer-selected accelerator programmes in fintech and agriculture.","c": false},{"n": "African Renaissance Partners","k": "seed","w": "Now","a": "Equity","f": "Led Emata's US$2.4M seed round for agri lending in Uganda.","c": true},{"n": "Zephyr Acorn","k": "seed","w": "Now","a": "Equity","f": "Early-stage investor in Ugandan fintech, including Emata.","c": true},{"n": "Mercy Corps Ventures","k": "seed","w": "Now","a": "Equity","f": "Invests in ventures that make underserved communities more resilient.","c": true},{"n": "Accion Venture Lab","k": "seed","w": "After pilot","a": "Equity","f": "Seed investor in inclusive fintech in emerging markets.","c": false},{"n": "Goodwell Investments","k": "seed","w": "After pilot","a": "Equity","f": "Inclusive-fintech investor; backed Ugandan fintech Agentbanking.","c": true},{"n": "Enabling Qapital","k": "seed","w": "After pilot","a": "Equity or debt","f": "Financial-inclusion investor; reported in Ugandan lender Premier Credit.","c": true},{"n": "Iungo Capital","k": "seed","w": "After pilot","a": "Revenue-based or debt","f": "Growth finance under US$500k for SMEs in Uganda, Kenya and Rwanda.","c": true},{"n": "Inua Capital","k": "seed","w": "After pilot","a": "Equity","f": "EU-backed impact fund for Ugandan SMEs, including agribusiness.","c": true},{"n": "Pearl Capital Partners (Yield Uganda Investment Fund)","k": "seed","w": "After pilot","a": "Equity","f": "Kampala agribusiness investor; the Yield fund targets food security with €250k–€2M deals.","c": true},{"n": "DOB Equity","k": "seed","w": "After pilot","a": "Equity","f": "Dutch family impact investor in East Africa, with a Ugandan agri-trading deal.","c": true},{"n": "Acumen (Resilient Agriculture Fund II)","k": "seed","w": "After pilot","a": "Equity","f": "Backs agribusinesses serving smallholders across ten African countries, Uganda included.","c": true},{"n": "Novastar Ventures","k": "seed","w": "After pilot","a": "Equity","f": "East Africa VC backing businesses that serve mass-market consumers.","c": false},{"n": "Savannah Fund","k": "seed","w": "After pilot","a": "Equity","f": "Nairobi seed fund for East African tech.","c": false},{"n": "Launch Africa Ventures","k": "seed","w": "After pilot","a": "Equity","f": "Pan-African seed fund with many fintech deals.","c": false},{"n": "Future Africa","k": "seed","w": "After pilot","a": "Equity","f": "Pan-African early-stage fund.","c": false},{"n": "Golden Palm Investments","k": "seed","w": "After pilot","a": "Equity","f": "Nairobi-based early-stage investor in East African startups.","c": false},{"n": "Norrsken22","k": "growth","w": "Phase 2","a": "Equity","f": "US$205M growth fund for African tech, including fintech and market enablement.","c": true},{"n": "Partech Africa","k": "growth","w": "Phase 2","a": "Equity","f": "One of the largest Africa VCs; publishes the annual Africa tech funding report.","c": true},{"n": "TLcom Capital","k": "growth","w": "Phase 2","a": "Equity","f": "Series A–B investor in African tech.","c": false},{"n": "LeapFrog Investments","k": "growth","w": "Phase 2","a": "Equity","f": "Private equity in insurance and financial services for emerging consumers; fits Package Protection.","c": true},{"n": "Lightrock","k": "growth","w": "Phase 2","a": "Equity","f": "Impact growth investor with an Africa fund.","c": false},{"n": "4DX Ventures","k": "growth","w": "Phase 2","a": "Equity","f": "Africa-focused VC from seed to Series B.","c": false},{"n": "AlphaMundi Group","k": "growth","w": "Phase 2","a": "Equity or debt","f": "Impact investor in East African agriculture and inclusive finance.","c": false},{"n": "Tiger Global","k": "growth","w": "Phase 2","a": "Equity","f": "Named in your pitch, but it has pulled back sharply from African deals since 2022. Treat as a long shot.","c": false},{"n": "Lendable","k": "debt","w": "After pilot","a": "Debt","f": "Lends to African fintechs against their loan books; arranged funding for Ugandan boda lender Tugende.","c": true},{"n": "Mobility 54 (Toyota Tsusho)","k": "debt","w": "After pilot","a": "Equity","f": "Toyota Tsusho's Africa mobility fund; led Tugende's Series A. Fits the motorcycle book.","c": true},{"n": "PG Impact Investments","k": "debt","w": "After pilot","a": "Debt","f": "Swiss impact investor; lent US$5M to Tugende.","c": true},{"n": "Global Partnerships","k": "debt","w": "After pilot","a": "Debt or equity","f": "Impact investor; joined Tugende's Series A.","c": true},{"n": "Shinnecock Partners","k": "debt","w": "After pilot","a": "Debt","f": "Lent to Kenyan boda financier Watu Credit, secured on loan repayments.","c": true},{"n": "Oikocredit","k": "debt","w": "After pilot","a": "Debt","f": "Cooperative impact lender to financial-inclusion and agriculture partners.","c": false},{"n": "Triple Jump","k": "debt","w": "Phase 2","a": "Debt","f": "Dutch impact manager lending to inclusive-finance institutions.","c": false},{"n": "responsAbility","k": "debt","w": "Phase 2","a": "Debt","f": "Swiss impact manager in financial inclusion and sustainable food.","c": false},{"n": "Aceli Africa","k": "debt","w": "After pilot","a": "Incentive for your lender","f": "First-loss cover and bonuses for loans to agri SMEs in Uganda; makes your lender partner more willing to fund farm loans.","c": true},{"n": "Uganda Development Bank","k": "dfi","w": "After pilot","a": "Debt","f": "Uganda's development bank; agriculture and SME lending, and digital farmer finance through AgriConnect.","c": true},{"n": "British International Investment (BII)","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "UK development finance institution; invests through funds including Norrsken22.","c": true},{"n": "IFC","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "World Bank Group's private-sector arm; agribusiness and financial inclusion.","c": false},{"n": "Norfund","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "Norwegian development finance institution active in East African financial inclusion.","c": false},{"n": "FMO","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "Dutch development bank for agri-food and financial institutions.","c": false}];
+const INV_KINDS = { grant: 'Grants and accelerators', seed: 'Seed to Series A', growth: 'Growth equity', debt: 'Debt and lending', dfi: 'Development finance' };
+const INV_STATUS = ['To approach', 'Contacted', 'Meeting', 'Due diligence', 'Not now'];
+const invTrack = store.get('ksc-investors', {});
+
+function investorTable() {
+  const f = ui.invFilter, list = INVESTORS.filter(x => f === 'all' || x.k === f);
+  const counts = INV_STATUS.map(st => [st, INVESTORS.filter(x => (invTrack[x.n] || 'To approach') === st).length]);
+  return `<section class="stack">
+    <div class="row between"><h2>50 investors to approach</h2><span class="small muted">${counts.filter(([, n]) => n).map(([st, n]) => `${n} ${st.toLowerCase()}`).join(' · ')}</span></div>
+    <p class="small muted" style="max-width:76ch">Ordered by when to approach them: grants and accelerators now, seed funds once the pilot has real numbers, growth funds and development banks for Phase 2, and lenders to fund the food credit, loans and motorcycles. "Confirmed" means this round of research found the investor active in this space; check every name's current fund and focus before writing. The same list is in target-investors.csv next to this page.</p>
+    <div class="row">${[['all', 'All 50'], ...Object.entries(INV_KINDS)].map(([k, l]) => `<button class="btn chip" data-a="inv-filter" data-k="${k}" aria-pressed="${f === k}">${l}${k === 'all' ? '' : ` (${INVESTORS.filter(x => x.k === k).length})`}</button>`).join('')}</div>
+    <div class="tablewrap"><table class="t wrap inv"><thead><tr><th>#</th><th>Investor</th><th>When</th><th>Ask for</th><th>Why they fit</th><th>Status</th></tr></thead><tbody>
+      ${list.map(x => `<tr><td class="n">${INVESTORS.indexOf(x) + 1}</td><td><b>${esc(x.n)}</b><span class="small muted" style="display:block">${INV_KINDS[x.k]}${x.c ? ' · <span style="color:var(--ok)">confirmed</span>' : ' · check'}</span></td>
+        <td>${x.w}</td><td>${esc(x.a)}</td><td>${esc(x.f)}</td>
+        <td><select class="in" data-inv="${esc(x.n)}" aria-label="Status for ${esc(x.n)}">${INV_STATUS.map(st => `<option ${(invTrack[x.n] || 'To approach') === st ? 'selected' : ''}>${st}</option>`).join('')}</select></td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="small muted">Your status choices stay in this browser.</p>
+  </section>`;
+}
+
+const NAMES = [
+  ['Kibanja', 'Keep it', 'Luganda for a plot of land: rooted, local and already the working name. Weakest outside Buganda.'],
+  ['Kikapu', 'Swahili: basket', 'The shopping basket and the food basket in one word, understood from Kampala to Dar es Salaam, which suits the East Africa plan.'],
+  ['Emmere', 'Luganda: food', 'Says exactly what the card is for, to a Kampala shopper.'],
+  ['Mavuno', 'Swahili: harvest', 'Speaks to producers and farmers as much as shoppers.'],
+  ['Akiba', 'Swahili: savings, a reserve', 'Fits prepaid packages and Package Protection: food put by for later.'],
+  ['Pamoja', 'Swahili: together', 'Fits family and employer packages, and the producer partnerships.'],
+  ['Kibanja Kikapu', 'Both', 'Keeps the Ugandan root and adds a word the whole region knows.'],
+  ['FoodFirst', 'English', 'Plain and international, easy for investors. Generic, and harder to protect as a trademark.'],
+];
+function nameIdeas() {
+  return `<section class="stack"><h2>Name ideas for the platform</h2>
+    <div class="plans">${NAMES.map(([n, m, why]) => `<article class="panel plan-tile"><h3>${n}</h3><span class="eyebrow">${m}</span><p class="small muted">${why}</p></article>`).join('')}</div>
+    <p class="small muted" style="max-width:76ch">Before choosing, search the Uganda Registration Services Bureau trademark register and the Kenyan and Tanzanian registers, check the .ug and .com domains and social handles, and test the shortlist with shoppers in Kampala and outside Buganda. Several of these words are common, so other businesses may already use them.</p>
+  </section>`;
+}
+
 /* ---------- render + actions ---------- */
 function render() {
   document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === ui.view)));
   $('#main').innerHTML = `<div class="view">${V[ui.view]()}</div>`;
   if (ui.view === 'model') modelOut();
-  if (ui.view === 'loans' || ui.view === 'move') loanCalc();
+  if (ui.view === 'loans') loanCalc();
 }
 
 function go(v) {
@@ -1801,6 +1843,7 @@ const A = {
   'new-sale': () => { ui.receipt = null; ui.posMember = null; ui.posInput = ''; ui.usePoints = false; render(); },
   'promo-toggle': b => { const p = S.promos.find(x => x.id === b.dataset.id); p.on = !p.on; render(); toast(`${p.name} ${p.on ? 'started' : 'paused'}`); },
   'promo-del': b => { const p = S.promos.find(x => x.id === b.dataset.id); S.promos = S.promos.filter(x => x !== p); render(); toast(`${p.name} removed`); },
+  'inv-filter': b => { ui.invFilter = b.dataset.k; render(); },
   'ops-pick': b => { ui.opsClaim = b.dataset.id; render(); },
   verify: b => { const c = S.claims.find(x => x.id === ui.opsClaim); c.checks[+b.dataset.i].r = 'ok'; render(); },
   approve: () => {
@@ -1889,6 +1932,7 @@ document.addEventListener('change', e => {
     render();
   }
   if (t.dataset.lic) { licences[t.dataset.lic] = t.checked; store.set('ksc-licences', licences); }
+  if (t.dataset.inv) { invTrack[t.dataset.inv] = t.value; store.set('ksc-investors', invTrack); render(); }
   if (t.dataset.room) { dataroom[t.dataset.room] = t.checked; store.set('ksc-dataroom', dataroom); }
   if (t.id === 'corp-staff') { const v = parseInt(t.value, 10); ui.corp.staff = isFinite(v) && v > 0 ? v : 1; render(); }
   if (t.id === 'corp-pkg') { ui.corp.pkg = t.value; render(); }
