@@ -1,0 +1,926 @@
+<title>Kibanja SmartCare</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a sticky bar of six views; each view is one column that splits into a working pane and a side pane from 900px. */
+:root {
+  --bg: #F1F4EF;  --surface: #FFFFFF; --sunk: #E7ECE5; --ink: #13231A; --muted: #55665C; --line: #D3DCD2;
+  --leaf: #1D5A3E; --leaf-soft: #DBEADF; --on-leaf: #FFFFFF;
+  --sun: #C98A12; --sun-soft: #FAEDCF;
+  --ok: #2A7748;  --ok-soft: #DCEFE2; --warn: #8F5D00; --warn-soft: #FAEAC6; --bad: #AE3520; --bad-soft: #F7DCD4;
+  --bezel: #17221C;
+  --card-a: #163F2B; --card-b: #2C7650; --card-ink: #F5F1E1; --card-sun: #F0BF4C;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1612; --surface: #16211B; --sunk: #1D2A23; --ink: #E4ECE6; --muted: #98AA9F; --line: #2B3A31;
+  --leaf: #6CC795; --leaf-soft: #1E3628; --on-leaf: #0B1A12;
+  --sun: #EDB848; --sun-soft: #3A2F14;
+  --ok: #62C68E; --ok-soft: #173325; --warn: #E8B04C; --warn-soft: #382A10; --bad: #F07A60; --bad-soft: #3D1D16;
+  --bezel: #040706; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0E1612; --surface: #16211B; --sunk: #1D2A23; --ink: #E4ECE6; --muted: #98AA9F; --line: #2B3A31;
+  --leaf: #6CC795; --leaf-soft: #1E3628; --on-leaf: #0B1A12;
+  --sun: #EDB848; --sun-soft: #3A2F14;
+  --ok: #62C68E; --ok-soft: #173325; --warn: #E8B04C; --warn-soft: #382A10; --bad: #F07A60; --bad-soft: #3D1D16;
+  --bezel: #040706; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3, h4 { font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 700; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 700; }
+h4 { font-size: 15px; font-weight: 700; font-family: var(--f-body); }
+p { margin: 0; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+button, input, select, textarea { font: inherit; color: inherit; }
+table { font: inherit; }
+:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
+
+/* Top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1200px; margin: 0 auto; padding-block: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 19px; }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(140deg, var(--card-a), var(--card-b)); position: relative; flex: none; }
+.brand-mark::after { content: ""; position: absolute; left: 7px; top: 9px; width: 14px; height: 10px; border-radius: 3px; background: var(--card-sun); }
+.brand small { font-family: var(--f-body); font-weight: 500; font-size: 12px; color: var(--muted); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-top: 8px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; background: none; padding: 10px 12px; font-size: 14px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--leaf); }
+.tab:hover { color: var(--ink); }
+
+main { max-width: 1200px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.view { display: grid; gap: 24px; }
+.split { display: grid; gap: 24px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } .split.phone-split { grid-template-columns: 400px minmax(0, 1fr); } }
+.split > * { min-width: 0; }
+.stack { display: grid; gap: 16px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.between { justify-content: space-between; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; }
+.panel.flat { background: transparent; border: 0; padding: 0; }
+.lede { font-size: 17px; max-width: 62ch; color: var(--muted); }
+
+/* Buttons and pills */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--leaf); border-color: var(--leaf); color: var(--on-leaf); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--bad); }
+.btn.block { width: 100%; justify-content: center; padding-block: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn.chip { padding: 5px 10px; font-size: 12.5px; font-family: var(--f-mono); font-weight: 500; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; background: var(--sunk); color: var(--muted); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+
+label.f { display: grid; gap: 5px; font-size: 13px; font-weight: 600; }
+label.f span.hint { font-weight: 400; color: var(--muted); }
+.in { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+textarea.in { min-height: 72px; resize: vertical; }
+
+/* Overview */
+.hero { display: grid; gap: 14px; padding-block: 8px 4px; }
+.hero h1 em { font-style: normal; color: var(--leaf); }
+.models { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.model-card { display: grid; gap: 12px; align-content: start; }
+.terms { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; margin: 0; }
+.terms dt { color: var(--muted); }
+.terms dd { margin: 0; font-weight: 600; }
+.modules { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.module { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 6px; align-content: start; background: var(--surface); cursor: pointer; text-align: left; }
+.module:hover { border-color: var(--leaf); }
+.module .go { color: var(--leaf); font-weight: 600; font-size: 13px; }
+.journey { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: j; }
+.journey li { counter-increment: j; display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding-block: 10px; border-top: 1px solid var(--line); }
+.journey li::before { content: counter(j); font-family: var(--f-mono); font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: var(--leaf-soft); color: var(--leaf); display: grid; place-items: center; }
+.callout { border-left: 3px solid var(--sun); background: var(--sun-soft); padding: 14px 16px; border-radius: 0 var(--r) var(--r) 0; display: grid; gap: 8px; }
+
+/* Phone */
+.phone { width: 100%; max-width: 400px; border: 10px solid var(--bezel); border-radius: 34px; background: var(--bg); overflow: hidden; margin-inline: auto; }
+.screen { padding: 14px 14px 20px; display: grid; gap: 14px; min-height: 640px; align-content: start; }
+.ph-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.hello { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.ph-block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.big { font-family: var(--f-mono); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; }
+.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.ticks li::before { content: "✓"; color: var(--leaf); font-weight: 700; margin-right: 8px; }
+.meter { height: 10px; border-radius: 99px; background: var(--sunk); overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--leaf); border-radius: inherit; }
+.meter.sun > i { background: var(--sun); }
+.ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; align-items: end; height: 64px; }
+.ladder i { display: block; border-radius: 4px 4px 0 0; background: var(--sunk); }
+.ladder i.done { background: var(--leaf-soft); }
+.ladder i.on { background: var(--leaf); }
+.ladder-lbl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); text-align: center; }
+.due { border-radius: 10px; padding: 10px 12px; background: var(--sunk); display: grid; gap: 8px; }
+.due.bad { background: var(--bad-soft); }
+.txns { list-style: none; margin: 0; padding: 0; display: grid; }
+.txns li { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding-block: 9px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.txns li .amt { font-family: var(--f-mono); text-align: right; }
+.txns li .sub { font-size: 12px; color: var(--muted); }
+
+/* SmartCare card */
+.kcard { position: relative; aspect-ratio: 1.586; max-width: 100%; border-radius: 14px; padding: 16px 18px; color: var(--card-ink); overflow: hidden;
+  background: radial-gradient(120% 90% at 100% 0%, rgba(240,191,76,.28), transparent 55%), repeating-linear-gradient(118deg, rgba(255,255,255,.035) 0 14px, transparent 14px 30px), linear-gradient(150deg, var(--card-a), var(--card-b));
+  display: grid; grid-template-rows: auto 1fr auto; box-shadow: 0 10px 24px -14px rgba(0,0,0,.55); }
+.kcard .k-head { display: flex; justify-content: space-between; align-items: center; }
+.kcard .k-name { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+.kcard .k-name b { color: var(--card-sun); }
+.kcard .k-chip { width: 38px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, var(--card-sun), #D49A26); align-self: center; }
+.kcard .k-num { font-family: var(--f-mono); font-size: 18px; letter-spacing: .08em; }
+.kcard .k-foot { display: flex; justify-content: space-between; align-items: end; gap: 8px; font-size: 12px; }
+.kcard .k-foot .lbl { opacity: .7; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.kcard .k-state { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; background: rgba(0,0,0,.28); }
+
+/* Rules panel */
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rules li { display: grid; gap: 2px; padding-left: 14px; border-left: 2px solid var(--line); }
+.rules li b { font-weight: 600; }
+.try { background: var(--leaf-soft); border-radius: var(--r); padding: 12px 14px; font-size: 14px; display: grid; gap: 6px; }
+
+/* POS */
+.cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.sku { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 10px; text-align: left; cursor: pointer; display: grid; gap: 4px; align-content: start; }
+.sku:hover { border-color: var(--leaf); }
+.sku .nm { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.sku .pr { font-family: var(--f-mono); font-size: 13px; }
+.tag { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--leaf); }
+.tag.no { color: var(--muted); }
+.cart { list-style: none; margin: 0; padding: 0; display: grid; }
+.cart li { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding-block: 8px; border-top: 1px solid var(--line); font-size: 14px; }
+.qty { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); }
+.qty button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.tot { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 14px; }
+.tot .v { font-family: var(--f-mono); text-align: right; }
+.tot .grand { font-weight: 700; font-size: 16px; border-top: 1px solid var(--line); padding-top: 8px; }
+.member-strip { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r); background: var(--sunk); }
+.receipt { font-family: var(--f-mono); font-size: 12.5px; background: var(--surface); border: 1px dashed var(--muted); border-radius: 6px; padding: 14px; display: grid; gap: 4px; }
+.receipt .r { display: flex; justify-content: space-between; gap: 10px; }
+.receipt hr { border: 0; border-top: 1px dashed var(--line); width: 100%; margin: 4px 0; }
+
+/* Ops */
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 4px; }
+.kpi .v { font-family: var(--f-mono); font-size: 22px; font-weight: 500; }
+.queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.queue button { width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
+.queue button[aria-current="true"] { border-color: var(--leaf); box-shadow: inset 3px 0 0 var(--leaf); }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; }
+.checks li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding-block: 9px; border-top: 1px solid var(--line); font-size: 14px; }
+.ic { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.ic.ok { background: var(--ok-soft); color: var(--ok); }
+.ic.todo { background: var(--warn-soft); color: var(--warn); }
+.ic.bad { background: var(--bad-soft); color: var(--bad); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th, table.t td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.t th { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--sunk); }
+table.t td.n, table.t th.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+table.t tr:last-child td { border-bottom: 0; }
+table.t tr.strong td { font-weight: 700; }
+table.t td.neg { color: var(--bad); }
+
+/* Model */
+.form-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+legend { padding: 0; margin-bottom: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg label { padding: 8px 12px; font-size: 13.5px; cursor: pointer; display: flex; gap: 6px; align-items: center; }
+.seg label:has(input:checked) { background: var(--leaf-soft); color: var(--leaf); font-weight: 600; }
+.seg input { accent-color: var(--leaf); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 120px 1fr 92px; gap: 10px; align-items: center; font-size: 13.5px; }
+.bar .track { height: 14px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+.bar .track i { display: block; height: 100%; border-radius: 4px; }
+.bar .v { font-family: var(--f-mono); text-align: right; font-size: 13px; }
+.grid-sens td.cell { text-align: right; font-family: var(--f-mono); }
+.grid-sens td.pos { background: var(--ok-soft); color: var(--ok); }
+.grid-sens td.neg { background: var(--bad-soft); color: var(--bad); }
+.grid-sens td.here { outline: 2px solid var(--ink); outline-offset: -2px; font-weight: 700; }
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.findings li { display: grid; grid-template-columns: 8px 1fr; gap: 12px; }
+.findings li::before { content: ""; border-radius: 4px; background: var(--sun); }
+.findings li.bad::before { background: var(--bad); }
+.findings li.ok::before { background: var(--ok); }
+.findings b { display: block; margin-bottom: 2px; }
+
+/* Rollout */
+.phases { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.phase { display: grid; gap: 10px; align-content: start; }
+.phase .when { font-family: var(--f-mono); font-size: 12.5px; color: var(--leaf); font-weight: 500; }
+.phase ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.lic { list-style: none; margin: 0; padding: 0; display: grid; }
+.lic li { border-top: 1px solid var(--line); padding-block: 10px; }
+.lic label { display: grid; grid-template-columns: 22px 1fr; gap: 10px; cursor: pointer; }
+.lic input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--leaf); }
+.lic li:has(input:checked) b { text-decoration: line-through; color: var(--muted); }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); z-index: 20; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+@media (max-width: 520px) { .bar { grid-template-columns: 92px 1fr 76px; } .screen { min-height: 0; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand-row">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Kibanja SmartCare <small>platform prototype</small></span></div>
+      <button class="btn chip" data-a="reset" title="Put every example household back to its starting state">Reset demo</button>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Platform views">
+      <button class="tab" role="tab" data-a="tab" data-v="overview">Overview</button>
+      <button class="tab" role="tab" data-a="tab" data-v="member">Family app</button>
+      <button class="tab" role="tab" data-a="tab" data-v="pos">Store till</button>
+      <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
+      <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
+      <button class="tab" role="tab" data-a="tab" data-v="rollout">Rollout</button>
+    </nav>
+  </div>
+</header>
+<main id="main"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- constants ---------- */
+const TODAY = '2026-10-22';            // demo date: every example household is dated against this
+const PREMIUM = 1500000;
+const A_LIMIT = 50000000;              // Model A: emergency allowance, paid over 12 months
+const LADDER = [4500000, 9000000, 18000000, 30000000, 50000000]; // Model B credit rungs
+const WAIT_DAYS = 90;
+const TYPES = { job: 'Job loss', medical: 'Hospital admission', drought: 'Drought in district' };
+const SKUS = [
+  { sku: '1001', name: 'Maize flour (posho) 2 kg', price: 7000, ess: true },
+  { sku: '1002', name: 'Rice, Super 5 kg', price: 24000, ess: true },
+  { sku: '1003', name: 'Dry beans 2 kg', price: 9600, ess: true },
+  { sku: '1004', name: 'Sugar 2 kg', price: 9000, ess: true },
+  { sku: '1005', name: 'Cooking oil 3 L', price: 21000, ess: true },
+  { sku: '1006', name: 'Iodised salt 1 kg', price: 1500, ess: true },
+  { sku: '1007', name: 'Fresh milk 1 L', price: 3000, ess: true },
+  { sku: '1008', name: 'Bar soap 1 kg', price: 6500, ess: true },
+  { sku: '1009', name: 'Matooke bunch, medium', price: 25000, ess: true },
+  { sku: '1010', name: 'Infant formula 400 g', price: 32000, ess: true },
+  { sku: '2001', name: 'Soda 500 ml', price: 2000, ess: false },
+  { sku: '2002', name: 'Beer 500 ml', price: 4500, ess: false },
+  { sku: '2003', name: 'Airtime voucher', price: 10000, ess: false },
+  { sku: '2004', name: 'Biscuits', price: 3500, ess: false },
+];
+const MARGIN = { ess: 0.12, other: 0.25 }; // assumed store gross margin: staples thin, extras fatter
+
+function seed() {
+  return {
+    members: [
+      { id: 'KSC-0001', card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, plan: 'A', status: 'locked', enrolled: '2026-03-02' },
+      { id: 'KSC-0002', card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, plan: 'B', status: 'good', enrolled: '2026-01-15',
+        credit: { rung: 1, used: 2350000, onTime: 2, essential: 0.96, due: '2026-11-05', dueAmt: 780000 } },
+      { id: 'KSC-0003', card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, plan: 'A', status: 'active', enrolled: '2025-12-10',
+        allowance: { activated: '2026-08-14', month: 1920000, total: 9410000 } },
+      { id: 'KSC-0004', card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, plan: 'B', status: 'overdue', enrolled: '2026-04-20',
+        credit: { rung: 0, used: 4120000, onTime: 0, essential: 0.71, due: '2026-10-05', dueAmt: 690000 } },
+      { id: 'KSC-0005', card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, plan: 'A', status: 'review', enrolled: '2026-05-30' },
+    ],
+    claims: [
+      { id: 'CLM-0141', member: 'KSC-0005', type: 'job', filed: '2026-10-19', status: 'pending',
+        note: 'Main earner laid off when the garment factory closed its second shift.',
+        checks: [
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '142 days in force' },
+          { t: 'Termination letter on file', r: 'ok' },
+          { t: 'NSSF contributions stopped', r: 'ok', d: 'Last contribution: Aug 2026' },
+          { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on the number in the letter, not the one the member gave' },
+          { t: 'No other claim this policy year', r: 'ok' },
+        ] },
+      { id: 'CLM-0138', member: 'KSC-0003', type: 'medical', filed: '2026-08-09', status: 'approved', decided: '2026-08-14',
+        note: 'Mother admitted for surgery; off work for at least four months.',
+        checks: [
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '242 days in force' },
+          { t: 'Admission note on file', r: 'ok' },
+          { t: 'Partner hospital confirms admission', r: 'ok' },
+          { t: 'No other claim this policy year', r: 'ok' },
+        ] },
+    ],
+    txns: [
+      { d: '2026-10-20', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 286000, cash: 0, items: 9 },
+      { d: '2026-10-12', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 412500, cash: 9000, items: 14 },
+      { d: '2026-10-18', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 198000, cash: 6500, items: 7 },
+      { d: '2026-10-03', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 355000, cash: 0, items: 11 },
+      { d: '2026-09-28', m: 'KSC-0004', where: 'Partner store · Ntinda', smart: 240000, cash: 31000, items: 8 },
+      { d: '2026-05-30', m: 'KSC-0005', where: 'Annual premium · Mobile Money', smart: 0, cash: PREMIUM, items: 0 },
+      { d: '2026-03-02', m: 'KSC-0001', where: 'Annual premium · Mobile Money', smart: 0, cash: PREMIUM, items: 0 },
+    ],
+  };
+}
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ugx = n => 'UGX ' + Math.round(n).toLocaleString('en-US');
+const trim2 = x => String(Math.round(x * 100) / 100);
+const short = n => { const a = Math.abs(n), s = n < 0 ? '−' : ''; if (a >= 1e9) return s + trim2(a / 1e9) + 'B'; if (a >= 1e6) return s + trim2(a / 1e6) + 'M'; if (a >= 1e3) return s + trim2(a / 1e3) + 'k'; return s + Math.round(a); };
+const pct = x => trim2(x * 100) + '%';
+const fdate = iso => new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const days = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5);
+const addMonths = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); };
+const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+let S = seed();
+const ui = { view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const M = { fam: [1000, 5000, 15000], premium: 1.5, rebateFam: 0.85, rebatePct: 6, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], rebateMode: 'all' };
+const licences = store.get('ksc-licences', {});
+
+const member = id => S.members.find(m => m.id === id);
+const hh = m => m.name + ' household';
+
+function statusPill(m) {
+  const map = {
+    locked: ['', 'Cover in force · card locked'], review: ['warn', 'Claim under review'], active: ['ok', 'Allowance active'],
+    good: ['ok', 'Credit in good standing'], overdue: ['bad', 'Repayment overdue'],
+  };
+  const [c, t] = map[m.status];
+  return `<span class="pill ${c}">${t}</span>`;
+}
+
+// What the card can pay for right now, and why.
+function power(m) {
+  if (m.plan === 'A') {
+    if (m.status !== 'active') return { amt: 0, why: m.status === 'review' ? 'Card locked while the claim is reviewed' : 'Card locked until an emergency claim is approved' };
+    const a = m.allowance, cap = A_LIMIT / 12;
+    if (TODAY >= addMonths(a.activated, 12)) return { amt: 0, why: 'The 12-month allowance has ended' };
+    return { amt: Math.max(0, Math.min(cap - a.month, A_LIMIT - a.total)), why: 'Emergency allowance left this month' };
+  }
+  if (m.status === 'overdue') return { amt: 0, why: 'Credit paused until the overdue repayment is made' };
+  return { amt: Math.max(0, LADDER[m.credit.rung] - m.credit.used), why: 'Essentials credit available' };
+}
+
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2800); }
+
+/* ---------- views ---------- */
+const V = {};
+
+V.overview = () => `
+<section class="hero">
+  <span class="eyebrow">Food security cover for Kampala households</span>
+  <h1>Pay <em>UGX 1.5M</em> a year. Keep the family fed when income stops.</h1>
+  <p class="lede">One card, two ways to run it. The platform below is the whole operation: the family's app, the store till that reads the card, the desk that verifies emergencies, and the model that says whether the premiums cover the payouts.</p>
+</section>
+
+<div class="models">
+  <article class="panel model-card">
+    <div class="row between"><h3>Model A · Emergency card</h3><span class="pill">Insurance</span></div>
+    <p class="muted">The card stays locked until a verified shock hits the household.</p>
+    <dl class="terms">
+      <dt>Premium</dt><dd class="num">UGX 1,500,000 / year</dd>
+      <dt>Triggers</dt><dd>Job loss, hospital admission, declared drought in the district</dd>
+      <dt>Payout</dt><dd class="num">UGX 50M over 12 months</dd>
+      <dt>Monthly cap</dt><dd class="num">${ugx(A_LIMIT / 12)}</dd>
+      <dt>Waiting period</dt><dd>${WAIT_DAYS} days after enrolment</dd>
+    </dl>
+  </article>
+  <article class="panel model-card">
+    <div class="row between"><h3>Model B · Essentials credit line</h3><span class="pill">Credit</span></div>
+    <p class="muted">The premium becomes a security deposit behind a credit line from a microfinance partner.</p>
+    <dl class="terms">
+      <dt>Deposit</dt><dd class="num">UGX 1,500,000 upfront</dd>
+      <dt>Starting line</dt><dd class="num">${ugx(LADDER[0])} (3× deposit)</dd>
+      <dt>Ceiling</dt><dd class="num">UGX 50M after four rung-ups</dd>
+      <dt>Move up a rung</dt><dd>3 repayments on time and at least 90% of spend on essentials</dd>
+      <dt>Spend rule</dt><dd>Essentials only; extras go to cash or Mobile Money</dd>
+    </dl>
+  </article>
+</div>
+
+<section class="stack">
+  <h2>The platform, screen by screen</h2>
+  <div class="modules">
+    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">Card, cover status, emergency claims, credit ladder, repayments, spending history.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">Cashier scans the card, the till splits essentials onto SmartCare and extras onto cash.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The three phases, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
+  </div>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <h3>A household's year on the platform</h3>
+    <ol class="journey">
+      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, choice of Model A or B.</span></div></li>
+      <li><div><b>Pay the premium by Mobile Money.</b> <span class="muted">The money goes to the underwriting partner's account, not the operating account.</span></div></li>
+      <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app. Model A cards start locked.</span></div></li>
+      <li><div><b>Shop at a Kibanja or partner store.</b> <span class="muted">The till reads the card and puts only essentials on it.</span></div></li>
+      <li><div><b>Claim, or climb the ladder.</b> <span class="muted">Model A: report an emergency, get verified, receive the monthly allowance. Model B: repay on time, unlock a bigger line.</span></div></li>
+      <li><div><b>Renew.</b> <span class="muted">Claims and repayment history price next year's cover.</span></div></li>
+    </ol>
+  </section>
+  <section class="callout">
+    <h3>Check before building: the 4% claims line</h3>
+    <p>Your table books UGX 800M of claims in Year 1. That only works if 4% of families claim <i>and</i> each one uses about UGX 20M of the 50M allowance. If every approved family uses its full allowance, claims rise to UGX 2B and Year 1 loses money.</p>
+    <p>The Underwriting screen lets you test this before committing capital.</p>
+    <div><button class="btn primary" data-a="tab" data-v="model">Open the stress test</button></div>
+  </section>
+</div>`;
+
+function cardHtml(m) {
+  const st = { locked: 'Locked', review: 'In review', active: 'Active', good: 'Active', overdue: 'Paused' }[m.status];
+  return `<div class="kcard" aria-label="Kibanja SmartCare card for the ${esc(hh(m))}">
+    <div class="k-head"><span class="k-name">Kibanja <b>SmartCare</b></span><span class="k-state">${st}</span></div>
+    <span class="k-chip" aria-hidden="true"></span>
+    <div style="display:grid;gap:10px">
+      <div class="k-num">${m.card}</div>
+      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${m.plan === 'A' ? 'Emergency' : 'Credit line'}</div></div>
+    </div>
+  </div>`;
+}
+
+function phoneA(m) {
+  if (m.status === 'locked') {
+    const inForce = days(m.enrolled, TODAY);
+    const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days in force).` : `Claims open on ${fdate(addMonths(m.enrolled, 3))}.`;
+    const form = ui.claimForm ? `
+      <form class="stack" id="claim-form" style="gap:10px">
+        <label class="f">What happened?
+          <select class="in" id="cl-type"><option value="job">Job loss</option><option value="medical">Hospital admission</option><option value="drought">Drought in our district</option></select></label>
+        <label class="f">Tell us briefly <textarea class="in" id="cl-note" placeholder="Who was affected, and when"></textarea></label>
+        <label class="f">Proof <span class="hint">Termination letter, admission note, or leave blank for drought</span><input class="in" type="file" id="cl-file" accept="image/*,.pdf"></label>
+        <div class="row"><button class="btn primary" type="submit">Send claim</button><button class="btn" type="button" data-a="cancel-claim">Cancel</button></div>
+      </form>` : `<button class="btn primary block" data-a="open-claim">Report an emergency</button>`;
+    return `<div class="ph-block">
+      <span class="eyebrow">Your emergency cover</span>
+      <div class="big">${ugx(A_LIMIT)}</div>
+      <p class="small muted">paid onto your card over 12 months, essentials only, if one of these happens:</p>
+      <ul class="ticks"><li>The main earner loses their job</li><li>Someone in the house is admitted to hospital</li><li>Drought is declared in your district</li></ul>
+      <p class="small">${waitTxt}</p>
+      ${form}
+    </div>`;
+  }
+  if (m.status === 'review') {
+    const c = S.claims.find(x => x.member === m.id && x.status === 'pending');
+    const open = c.checks.filter(k => k.r !== 'ok').length;
+    return `<div class="ph-block">
+      <span class="eyebrow">Claim ${c.id}</span>
+      <h3>${TYPES[c.type]}: we're checking it</h3>
+      <p class="small muted">Sent ${fdate(c.filed)}. Most claims are decided within 72 hours. ${open ? `${open} check${open > 1 ? 's' : ''} still open.` : 'All checks passed; waiting for a decision.'}</p>
+      <ul class="checks">${c.checks.map(k => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' ? '✕' : '…'}</span><span>${esc(k.t)}</span><span></span></li>`).join('')}</ul>
+    </div>`;
+  }
+  const a = m.allowance, cap = A_LIMIT / 12, p = power(m);
+  const ends = addMonths(a.activated, 12);
+  return `<div class="ph-block">
+    <span class="eyebrow">Left to spend this month</span>
+    <div class="big">${ugx(p.amt)}</div>
+    <div class="meter"><i style="width:${Math.min(100, a.month / cap * 100)}%"></i></div>
+    <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.</p>
+  </div>
+  <div class="ph-block">
+    <span class="eyebrow">Whole allowance</span>
+    <div class="meter sun"><i style="width:${Math.min(100, a.total / A_LIMIT * 100)}%"></i></div>
+    <p class="small">${ugx(A_LIMIT - a.total)} left, until ${fdate(ends)}.</p>
+  </div>`;
+}
+
+function phoneB(m) {
+  const c = m.credit, p = power(m), lim = LADDER[c.rung];
+  const max = LADDER[LADDER.length - 1];
+  const ladder = LADDER.map((v, i) => `<i class="${i === c.rung ? 'on' : i < c.rung ? 'done' : ''}" style="height:${18 + 82 * v / max}%"></i>`).join('');
+  const next = c.rung < LADDER.length - 1
+    ? `<p class="small">Next rung <b class="num">${short(LADDER[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments · essentials share <b>${pct(c.essential)}</b> ${c.essential >= 0.9 ? '<span class="pill ok">meets 90%</span>' : '<span class="pill warn">needs 90%</span>'}</p>`
+    : `<p class="small">You're on the top rung.</p>`;
+  const overdue = m.status === 'overdue';
+  const due = c.dueAmt > 0 ? `<div class="due ${overdue ? 'bad' : ''}">
+      <div class="row between"><span class="small"><b>${overdue ? 'Overdue since' : 'Next repayment'}</b> ${fdate(c.due)}</span><span class="num">${ugx(c.dueAmt)}</span></div>
+      <button class="btn primary block" data-a="pay">Pay ${ugx(c.dueAmt)} with Mobile Money</button>
+    </div>` : `<p class="small muted">Nothing to repay right now.</p>`;
+  return `<div class="ph-block">
+    <span class="eyebrow">${overdue ? 'Credit paused' : 'Available for essentials'}</span>
+    <div class="big">${ugx(p.amt)}</div>
+    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line</p>
+    <div class="ladder" aria-hidden="true">${ladder}</div>
+    <div class="ladder-lbl">${LADDER.map(v => `<span>${short(v)}</span>`).join('')}</div>
+    ${next}
+    ${due}
+  </div>`;
+}
+
+function txnList(id) {
+  const list = S.txns.filter(t => t.m === id).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+  if (!list.length) return `<p class="small muted">No activity yet.</p>`;
+  return `<ul class="txns">${list.map(t => `<li><span>${esc(t.where)}</span><span class="amt">${t.smart ? '−' + short(t.smart) : short(t.cash)}</span>
+    <span class="sub">${fdate(t.d)}${t.items ? ` · ${t.items} items` : ''}</span><span class="sub amt">${t.smart ? (t.cash ? `+ ${short(t.cash)} cash` : 'SmartCare') : 'paid'}</span></li>`).join('')}</ul>`;
+}
+
+function rulesFor(m) {
+  const r = {
+    locked: [
+      ['The card is locked on purpose.', 'Under Model A the premium buys cover, not shopping money. The till declines SmartCare and the family pays cash at member prices.'],
+      [`${WAIT_DAYS}-day waiting period.`, 'Stops someone buying cover the week they already know they will be laid off.'],
+      ['Claims go to a person.', 'Automated checks gather the evidence; an operations officer approves or declines.'],
+    ],
+    review: [
+      ['Card stays locked during review.', 'It unlocks the moment the claim is approved.'],
+      ['Evidence is checked at the source.', 'NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions.'],
+    ],
+    active: [
+      ['The allowance is paid monthly, not as a lump sum.', `${ugx(A_LIMIT / 12)} a month for 12 months, so the household is fed for the whole recovery and a fraudulent claim costs one month, not 50M.`],
+      ['Essentials only.', 'The till puts staples on SmartCare. Beer, airtime and soda go to cash.'],
+    ],
+    good: [
+      ['The deposit backs the line.', 'The 1.5M sits with the microfinance partner. A default first draws on the deposit.'],
+      ['The line grows with behaviour.', 'It starts at 3× the deposit and climbs a rung after three on-time repayments with at least 90% of spend on essentials.'],
+    ],
+    overdue: [
+      ['The line pauses, it does not close.', 'One payment clears the overdue status and the card works again the same minute.'],
+      ['The rung is kept.', 'Late payment resets the on-time count, so the climb starts again.'],
+    ],
+  }[m.status];
+  const tryIt = {
+    locked: 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here, then charge a basket on the <b>Store till</b>.',
+    review: 'Open <b>Operations</b>, mark the open checks verified and approve the claim.',
+    active: 'Open the <b>Store till</b>, scan this card and put a basket with beer in it. Watch the till split it.',
+    good: 'Tap <b>Pay</b>. The third on-time payment moves this household up to the 18M rung.',
+    overdue: 'Try this card at the <b>Store till</b> first: it is refused. Then pay here and try again.',
+  }[m.status];
+  return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">${r.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
+    <div class="try"><span class="eyebrow">Try it</span><span>${tryIt}</span></div></section>`;
+}
+
+V.member = () => {
+  const m = member(ui.viewAs);
+  return `<div class="row between"><div class="stack" style="gap:4px"><h2>Family app</h2><p class="muted small">Example households, dated ${fdate(TODAY)}.</p></div>
+    <label class="f" style="min-width:220px">Viewing as
+      <select class="in" id="view-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))} · Model ${x.plan}</option>`).join('')}</select></label></div>
+  <div class="split phone-split">
+    <div class="phone"><div class="screen">
+      <div class="ph-top"><span>Kibanja</span><span class="mono">${m.id}</span></div>
+      <p class="hello">Hello, ${esc(m.name)} family</p>
+      ${cardHtml(m)}
+      ${m.plan === 'A' ? phoneA(m) : phoneB(m)}
+      <div class="stack" style="gap:6px"><h4>Recent activity</h4>${txnList(m.id)}</div>
+    </div></div>
+    <div class="stack">${rulesFor(m)}
+      <section class="panel"><div class="row between"><h3>Account</h3>${statusPill(m)}</div>
+        <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd><dt>Renews</dt><dd>${fdate(addMonths(m.enrolled, 12))}</dd><dt>Premium</dt><dd class="num">${ugx(PREMIUM)} paid</dd></dl>
+      </section>
+    </div>
+  </div>`;
+};
+
+/* Till */
+function cartTotals() {
+  let ess = 0, other = 0;
+  ui.cart.forEach(l => { const s = SKUS.find(x => x.sku === l.sku); (s.ess ? (ess += s.price * l.q) : (other += s.price * l.q)); });
+  const m = ui.posMember && member(ui.posMember);
+  const p = m ? power(m) : { amt: 0, why: 'No card scanned' };
+  const smart = Math.min(ess, p.amt);
+  return { ess, other, smart, cash: ess + other - smart, p, m };
+}
+
+V.pos = () => {
+  const t = cartTotals(), m = t.m;
+  const strip = m ? `<div class="member-strip">
+      <div class="row between"><b>${esc(hh(m))}</b>${statusPill(m)}</div>
+      <div class="row between small"><span class="muted">${t.p.why}</span><span class="num">${ugx(t.p.amt)}</span></div>
+    </div>` : `<p class="small muted">Scan or type a card number. Example cards:</p>`;
+  const cart = ui.cart.length ? `<ul class="cart">${ui.cart.map(l => { const s = SKUS.find(x => x.sku === l.sku); return `<li>
+      <span><span style="display:block">${esc(s.name)}</span><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Not covered'}</span></span>
+      <span class="qty"><button data-a="dec" data-sku="${s.sku}" aria-label="One fewer ${esc(s.name)}">−</button>${l.q}<button data-a="inc" data-sku="${s.sku}" aria-label="One more ${esc(s.name)}">+</button></span>
+      <span class="num">${short(s.price * l.q)}</span></li>`; }).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
+  const r = ui.receipt;
+  const receipt = r ? `<div class="receipt" aria-label="Receipt">
+      <div class="r"><b>KIBANJA STORE · KIRA</b><span>${r.no}</span></div>
+      <div class="r"><span>${fdate(TODAY)}</span><span>Till 02</span></div><hr>
+      ${r.lines.map(l => `<div class="r"><span>${l.q}× ${esc(l.name)}${l.ess ? '' : ' *'}</span><span>${l.amt.toLocaleString('en-US')}</span></div>`).join('')}<hr>
+      <div class="r"><span>SmartCare ${r.card ? '…' + r.card.slice(-4) : ''}</span><span>${r.smart.toLocaleString('en-US')}</span></div>
+      <div class="r"><span>Cash / Mobile Money</span><span>${r.cash.toLocaleString('en-US')}</span></div>
+      <div class="r"><span>* not covered by SmartCare</span><span></span></div><hr>
+      <div class="r muted"><span>Store gross margin (est.)</span><span>${r.margin.toLocaleString('en-US')}</span></div>
+    </div><button class="btn block" data-a="new-sale">Next customer</button>` : '';
+  return `<div class="stack" style="gap:4px"><h2>Store till</h2><p class="muted small">What a cashier sees at a Kibanja or partner store. Prices are sample shelf prices in UGX.</p></div>
+  <div class="split">
+    <div class="stack">
+      <section class="panel">
+        <form id="pos-form"><label class="f">Card number or member ID<input class="in mono" id="pos-card" value="${esc(ui.posInput)}" placeholder="6201 4410 0001" autocomplete="off"></label></form>
+        <div class="row"><button class="btn primary" data-a="pos-lookup">Read card</button>${m ? '<button class="btn" data-a="pos-clear">Remove card</button>' : ''}</div>
+        ${strip}
+        ${m ? '' : `<div class="row">${S.members.map(x => `<button class="btn chip" data-a="pos-pick" data-id="${x.id}">${x.card.slice(-4)} · ${esc(x.name)}</button>`).join('')}</div>`}
+      </section>
+      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Not covered'}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`).join('')}</div></section>
+    </div>
+    <section class="panel">
+      <div class="row between"><h3>Basket</h3>${ui.cart.length ? '<button class="btn chip" data-a="clear-cart">Clear</button>' : ''}</div>
+      ${cart}
+      <div class="tot">
+        <span>Essentials</span><span class="v">${ugx(t.ess)}</span>
+        <span>Other items</span><span class="v">${ugx(t.other)}</span>
+        <span class="grand">On SmartCare</span><span class="v grand">${ugx(t.smart)}</span>
+        <span>Cash or Mobile Money</span><span class="v">${ugx(t.cash)}</span>
+      </div>
+      ${m && t.ess > t.smart && t.ess > 0 ? `<p class="small" style="color:var(--warn)">${t.p.amt === 0 ? t.p.why + '.' : 'Essentials exceed what the card can cover; the rest goes to cash.'}</p>` : ''}
+      <button class="btn primary block" data-a="charge" ${ui.cart.length ? '' : 'disabled'}>Charge ${ugx(t.ess + t.other)}</button>
+      ${receipt}
+    </section>
+  </div>`;
+};
+
+/* Operations */
+V.ops = () => {
+  const pending = S.claims.filter(c => c.status === 'pending');
+  const liability = S.members.filter(m => m.plan === 'A' && m.status === 'active').reduce((s, m) => s + A_LIMIT - m.allowance.total, 0);
+  const credit = S.members.filter(m => m.plan === 'B').reduce((s, m) => s + m.credit.used, 0);
+  const c = S.claims.find(x => x.id === ui.opsClaim) || S.claims[0];
+  const cm = member(c.member);
+  const blocking = c.checks.filter(k => k.r !== 'ok').length;
+  const failed = c.checks.some(k => k.r === 'fail');
+  const score = c.checks.filter(k => k.r === 'ok').length / c.checks.length;
+  const detail = `<section class="panel">
+    <div class="row between"><div><span class="eyebrow">${c.id} · ${TYPES[c.type]}</span><h3>${esc(hh(cm))}</h3></div>
+      <span class="pill ${c.status === 'approved' ? 'ok' : c.status === 'declined' ? 'bad' : 'warn'}">${c.status === 'pending' ? 'Awaiting decision' : c.status === 'approved' ? 'Approved ' + fdate(c.decided) : 'Declined ' + fdate(c.decided)}</span></div>
+    <p>${esc(c.note || 'No description given.')}</p>
+    <dl class="terms"><dt>Filed</dt><dd>${fdate(c.filed)}</dd><dt>Area</dt><dd>${esc(cm.area)}</dd><dt>Household</dt><dd>${cm.size} people</dd><dt>Evidence match</dt><dd class="num">${pct(score)} of checks passed</dd></dl>
+    <ul class="checks">${c.checks.map((k, i) => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' || k.r === 'missing' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' || k.r === 'missing' ? '✕' : '…'}</span>
+      <span>${esc(k.t)}${k.d ? `<span class="small muted" style="display:block">${esc(k.d)}</span>` : ''}${k.r === 'missing' ? '<span class="small" style="display:block;color:var(--bad)">No document uploaded</span>' : ''}</span>
+      ${c.status === 'pending' && (k.r === 'todo' || k.r === 'missing') ? `<button class="btn chip" data-a="verify" data-i="${i}">Mark verified</button>` : '<span></span>'}</li>`).join('')}</ul>
+    ${c.status === 'pending' ? `<p class="small muted">Automated checks collect the evidence. A person makes the decision and their name goes on it.</p>
+      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve and unlock card</button><button class="btn danger" data-a="decline">Decline</button>
+      ${blocking ? `<span class="small" style="color:${failed ? 'var(--bad)' : 'var(--warn)'}">${failed ? 'A check failed; this claim can only be declined.' : `Resolve ${blocking} open check${blocking > 1 ? 's' : ''} first.`}</span>` : ''}</div>` : ''}
+  </section>`;
+  return `<div class="stack" style="gap:4px"><h2>Operations</h2><p class="muted small">The back office: verify claims, watch exposure, see every household.</p></div>
+  <div class="kpis">
+    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${S.members.filter(m => m.plan === 'A').length} Model A · ${S.members.filter(m => m.plan === 'B').length} Model B</span></div>
+    <div class="kpi"><span class="eyebrow">Premiums held</span><span class="v">${short(S.members.length * PREMIUM)}</span><span class="small muted">with the underwriting partner</span></div>
+    <div class="kpi"><span class="eyebrow">Allowance still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
+    <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.status === 'overdue').length} household overdue</span></div>
+    <div class="kpi"><span class="eyebrow">Claims to decide</span><span class="v">${pending.length}</span><span class="small muted">target: within 72 hours</span></div>
+  </div>
+  <div class="split">
+    ${detail}
+    <section class="stack"><h3>Claims</h3>
+      <ul class="queue">${S.claims.slice().sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1) || b.filed.localeCompare(a.filed)).map(x => `<li><button data-a="ops-pick" data-id="${x.id}" aria-current="${x.id === c.id}">
+        <span class="row between"><b>${esc(hh(member(x.member)))}</b><span class="pill ${x.status === 'approved' ? 'ok' : x.status === 'declined' ? 'bad' : 'warn'}">${x.status === 'pending' ? 'Pending' : x.status === 'approved' ? 'Approved' : 'Declined'}</span></span>
+        <span class="small muted">${x.id} · ${TYPES[x.type]} · filed ${fdate(x.filed)}</span></button></li>`).join('')}</ul>
+    </section>
+  </div>
+  <section class="stack"><h3>Member register</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Status</th><th class="n">Card can pay now</th></tr></thead>
+    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${m.plan === 'A' ? 'A · Emergency' : 'B · Credit ' + short(LADDER[m.credit.rung])}</td><td>${statusPill(m)}</td><td class="n">${ugx(power(m).amt)}</td></tr>`).join('')}</tbody></table></div>
+  </section>`;
+};
+
+/* Underwriting model */
+function yr(i, o = M) {
+  const f = o.fam[i], prem = f * o.premium * 1e6, claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
+  const reb = o.rebateMode === 'all' ? f * o.rebateFam * 1e6 : claims * (o.rebatePct / 100);
+  const ops = o.ops[i] * 1e6;
+  return { f, prem, reb, gross: prem + reb, claims, ops, net: prem + reb - claims - ops };
+}
+function breakEven(i, o = M) {
+  const opsF = o.ops[i] / o.fam[i];
+  return o.rebateMode === 'all' ? (o.premium + o.rebateFam - opsF) / o.avgDraw : (o.premium - opsF) / (o.avgDraw * (1 - o.rebatePct / 100));
+}
+
+V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from its assumptions. With the defaults it reproduces your figures exactly; change any input to stress it.</p></div>
+<div class="split">
+  <section class="panel">
+    <form id="model-form" class="stack">
+      <fieldset><legend class="eyebrow">Households</legend><div class="form-grid">
+        ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="1" step="100" id="fam${i}" value="${M.fam[i]}"></label>`).join('')}</div></fieldset>
+      <fieldset><legend class="eyebrow">Per household</legend><div class="form-grid">
+        <label class="f">Premium <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.1" min="0" id="premium" value="${M.premium}"></label>
+        <label class="f">Payout limit <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="limit" value="${M.limit}"></label>
+        <label class="f">Claim rate <span class="hint">% of households / year</span><input class="in num" type="number" step="0.5" min="0" max="100" id="claimRate" value="${M.claimRate}"></label>
+        <label class="f">Average used per claim <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="avgDraw" value="${M.avgDraw}"></label>
+      </div></fieldset>
+      <fieldset><legend class="eyebrow">Rebate revenue</legend>
+        <div class="seg" role="radiogroup">
+          <label><input type="radio" name="rebateMode" value="all" ${M.rebateMode === 'all' ? 'checked' : ''}> Every household spends on the card</label>
+          <label><input type="radio" name="rebateMode" value="claimants" ${M.rebateMode === 'claimants' ? 'checked' : ''}> Only claimants spend (Model A as written)</label>
+        </div>
+        <div class="form-grid">
+          <label class="f">Rebate per household <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.05" min="0" id="rebateFam" value="${M.rebateFam}"></label>
+          <label class="f">Store rebate rate <span class="hint">% of spend</span><input class="in num" type="number" step="0.5" min="0" id="rebatePct" value="${M.rebatePct}"></label>
+        </div></fieldset>
+      <fieldset><legend class="eyebrow">Tech and operations <span class="hint">UGX M / year</span></legend><div class="form-grid">
+        ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="0" step="50" id="ops${i}" value="${M.ops[i]}"></label>`).join('')}</div></fieldset>
+      <div><button class="btn chip" type="button" data-a="model-reset">Back to your figures</button></div>
+    </form>
+  </section>
+  <div class="stack" id="model-out"></div>
+</div>
+<section class="stack" id="model-sens"></section>`;
+
+function modelOut() {
+  const Y = [0, 1, 2].map(i => yr(i));
+  const rows = [
+    ['Premium revenue', 'prem'], ['Transaction and rebate revenue', 'reb'], ['Gross revenue pool', 'gross', 1],
+    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
+  ];
+  const table = `<div class="tablewrap"><table class="t"><thead><tr><th>UGX</th>${Y.map((y, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${y.f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead>
+    <tbody>${rows.map(([l, k, s]) => `<tr class="${s ? 'strong' : ''}"><td>${l}</td>${Y.map(y => `<td class="n ${y[k] < 0 ? 'neg' : ''}">${short(y[k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const y3 = Y[2], f = y3.f;
+  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebates', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
+  const maxv = Math.max(...per.map(p => Math.abs(p[1])), 1);
+  const bars = `<section class="panel"><h3>One household, Year 3</h3><div class="bars">${per.map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${Math.abs(v) / maxv * 100}%;background:${c}"></i></span><span class="v">${short(v)}</span></div>`).join('')}</div></section>`;
+  $('#model-out').innerHTML = `<section class="stack"><h3>Three-year view</h3>${table}</section>${bars}`;
+
+  // Stress grid and findings
+  const rates = [2, 4, 6, 8, 10, 12], draws = [10, 20, 35, 50];
+  const grid = `<div class="tablewrap"><table class="t grid-sens"><thead><tr><th>Claim rate ↓ · used per claim →</th>${draws.map(d => `<th class="n">UGX ${d}M</th>`).join('')}</tr></thead><tbody>
+    ${rates.map(r => `<tr><td>${r}% of households</td>${draws.map(d => { const v = yr(2, { ...M, claimRate: r, avgDraw: d }).net; return `<td class="cell ${v >= 0 ? 'pos' : 'neg'} ${r === M.claimRate && d === M.avgDraw ? 'here' : ''}">${short(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const full = yr(2, { ...M, avgDraw: M.limit });
+  const be = breakEven(2), beFull = breakEven(2, { ...M, avgDraw: M.limit });
+  const claimantsOnly = yr(2, { ...M, rebateMode: 'claimants' });
+  const impliedSpend = M.rebateFam * 1e6 / (M.rebatePct / 100);
+  const F = [
+    [full.net < 0 ? 'bad' : '', 'If approved households use their whole allowance',
+      `With ${trim2(M.claimRate)}% claiming the full UGX ${M.limit}M, Year 3 claims become ${ugx(full.claims)} and the net margin is ${ugx(full.net)}. The original table only balances because it assumes each claimant uses UGX ${M.avgDraw}M. Monthly caps and the 12-month limit protect you, but a family that lost its income will usually spend everything it is allowed.`],
+    [be < 0.06 ? 'bad' : '', `Break-even claim rate: ${pct(be)} (${pct(beFull)} at full use)`,
+      `Above this share of households claiming in a year, every member loses money. Job loss, a hospital admission or a district drought in a given year is common among Kampala households, so price from real claims data from a pilot before scaling past Year 1.`],
+    [M.rebateMode === 'all' ? 'bad' : '', 'Rebate revenue needs card spending',
+      `UGX ${trim2(M.rebateFam)}M a year per household at a ${trim2(M.rebatePct)}% rebate means each family puts about ${ugx(impliedSpend)} a year through the card. Under Model A the card is locked for families who never claim, so they generate no rebate. Counting only claimants' spending, Year 3 net is ${ugx(claimantsOnly.net)}. Rebates fit Model B, where everyone shops on the card.`],
+    ['bad', 'Drought hits many households at once',
+      'Job losses and hospital stays are spread out. A declared drought pays every member in the district in the same month. Cap exposure per district and buy reinsurance or a parametric weather cover before offering the drought trigger.'],
+    ['', 'Costs missing from the table',
+      'The underwriting partner\'s share or reinsurance, sales agent commissions, card issuing, Model B credit losses and cost of funds, and corporate income tax (30% in Uganda). Add them before treating any line as profit.'],
+  ];
+  $('#model-sens').innerHTML = `<div class="split">
+    <section class="stack"><h3>Stress test: Year 3 net margin</h3><p class="small muted">Each cell recomputes Year 3 with that claim rate and average use, keeping every other input. The outlined cell is your current assumption.</p>${grid}</section>
+    <section class="panel"><h3>What the numbers say</h3><ul class="findings">${F.map(([c, b, t]) => `<li class="${c}"><div><b>${b}</b><span class="small">${t}</span></div></li>`).join('')}</ul></section>
+  </div>`;
+}
+
+/* Rollout */
+const LIC = [
+  ['ira', 'Underwriting partner licensed by the Insurance Regulatory Authority of Uganda', 'Model A is insurance. Either a licensed insurer carries the risk and you act as its distributor, or you apply for your own licence with the capital that requires.'],
+  ['umra', 'Credit partner, or a Tier 4 licence from the Uganda Microfinance Regulatory Authority', 'Model B lends money. A licensed bank, microfinance deposit-taker or money lender has to hold the deposits and the loan book.'],
+  ['bou', 'Payments through a Bank of Uganda-licensed provider', 'Card payments and Mobile Money collections fall under the National Payment Systems Act. Run them through a licensed payment partner at launch.'],
+  ['pdpo', 'Registration with the Personal Data Protection Office', 'Health and employment records used to verify claims are sensitive personal data under the Data Protection and Privacy Act 2019. Register, and get explicit consent at enrolment.'],
+  ['ursb', 'Company registration (URSB), a URA tax number and a KCCA trading licence for each store', 'Needed before the flagship store opens.'],
+  ['float', 'Written rule on what premium money may fund', 'Premiums back claims. Keep them with the underwriter or in a ring-fenced account and fund the stores from equity or debt.'],
+];
+
+V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The three phases, with what the platform needs to have working at each one.</p></div>
+<div class="phases">
+  <article class="panel phase"><span class="when">Months 1–6</span><h3>Fintech launch</h3><p class="small muted">Launch the app and card using partner supermarkets.</p>
+    <ul><li>Family app, card issuing, Mobile Money premium collection</li><li>Card-reading link at 3–5 partner stores</li><li>Operations desk with claims verification</li><li>Underwriter and credit partner signed</li></ul>
+    <p class="small"><b>Suggested gate:</b> six months of real claim and repayment data before the store opens.</p></article>
+  <article class="panel phase"><span class="when">Months 7–12</span><h3>Flagship store</h3><p class="small muted">Open the first Kibanja store in Kira, Kisaasi or Naalya and keep the full 15–25% retail margin.</p>
+    <ul><li>Own store till with essentials split</li><li>Stock and shelf-price management</li><li>Member pricing for locked Model A cards</li></ul>
+    <p class="small" style="color:var(--bad)"><b>Change from the original plan:</b> fund the store from equity or debt, not the premium float. That money is owed to claimants.</p></article>
+  <article class="panel phase"><span class="when">Year 2 onward</span><h3>Micro-hub expansion</h3><p class="small muted">Smaller, low-overhead container-style hubs close to members.</p>
+    <ul><li>Offline-capable till that syncs later</li><li>Hub stock replenished from the flagship</li><li>Hubs placed where members' card spend is highest</li></ul></article>
+</div>
+<div class="split">
+  <section class="stack"><h3>Flagship store set-up</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Item</th><th class="n">Low</th><th class="n">High</th></tr></thead><tbody>
+      <tr><td>Location and fit-out<br><span class="small muted">200–300 m², 6 months' rent deposit, shelving, lighting, branding</span></td><td class="n">80M</td><td class="n">150M</td></tr>
+      <tr><td>Smart till integration<br><span class="small muted">Barcode scanners, receipt printers, card-reading API</span></td><td class="n">15M</td><td class="n">30M</td></tr>
+      <tr><td>Opening stock<br><span class="small muted">Still to be costed</span></td><td class="n">—</td><td class="n">—</td></tr>
+      <tr class="strong"><td>Known so far</td><td class="n">95M</td><td class="n">180M</td></tr>
+    </tbody></table></div>
+    <p class="small muted">All figures UGX.</p>
+  </section>
+  <section class="panel"><h3>Licences and partners to line up first</h3>
+    <ul class="lic">${LIC.map(([k, b, t]) => `<li><label><input type="checkbox" data-lic="${k}" ${licences[k] ? 'checked' : ''}><span><b>${b}</b><span class="small muted" style="display:block">${t}</span></span></label></li>`).join('')}</ul>
+    <p class="small muted">A starting list, not legal advice. Confirm each item with a Ugandan lawyer before relying on it. Your ticks stay in this browser.</p>
+  </section>
+</div>`;
+
+/* ---------- render + actions ---------- */
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === ui.view)));
+  $('#main').innerHTML = `<div class="view">${V[ui.view]()}</div>`;
+  if (ui.view === 'model') modelOut();
+}
+
+function go(v) {
+  if (!V[v]) return;
+  ui.view = v;
+  try { history.replaceState(null, '', '#' + v); } catch {}
+  render();
+  window.scrollTo(0, 0);
+}
+
+function lookup(q) {
+  const d = String(q).replace(/\s/g, '').toUpperCase();
+  return S.members.find(m => m.card.replace(/\s/g, '') === d || m.id === d || (d.length >= 4 && m.card.replace(/\s/g, '').endsWith(d)));
+}
+
+const A = {
+  tab: b => go(b.dataset.v),
+  reset: () => { S = seed(); Object.assign(ui, { viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' }); render(); toast('Example households reset'); },
+  'open-claim': () => { ui.claimForm = true; render(); },
+  'cancel-claim': () => { ui.claimForm = false; render(); },
+  pay: () => {
+    const m = member(ui.viewAs), c = m.credit;
+    const wasOverdue = m.status === 'overdue';
+    c.used = Math.max(0, c.used - c.dueAmt);
+    S.txns.push({ d: TODAY, m: m.id, where: 'Repayment · Mobile Money', smart: 0, cash: c.dueAmt, items: 0 });
+    c.onTime = wasOverdue ? 0 : c.onTime + 1;
+    m.status = 'good';
+    c.due = addMonths(wasOverdue ? TODAY : c.due, 1);
+    c.dueAmt = c.used ? Math.max(100000, Math.round(c.used / 4 / 1000) * 1000) : 0;
+    let msg = wasOverdue ? 'Paid. The card works again.' : `Paid on time (${Math.min(c.onTime, 3)}/3).`;
+    if (c.onTime >= 3 && c.essential >= 0.9 && c.rung < LADDER.length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(LADDER[c.rung])} rung`; }
+    render(); toast(msg);
+  },
+  'pos-lookup': () => {
+    ui.posInput = $('#pos-card').value;
+    const m = lookup(ui.posInput);
+    if (!m) { toast('No SmartCare card matches that number'); return; }
+    ui.posMember = m.id; ui.posInput = m.card; ui.receipt = null; render();
+  },
+  'pos-pick': b => { const m = member(b.dataset.id); ui.posMember = m.id; ui.posInput = m.card; ui.receipt = null; render(); },
+  'pos-clear': () => { ui.posMember = null; ui.posInput = ''; render(); },
+  add: b => { ui.receipt = null; const l = ui.cart.find(x => x.sku === b.dataset.sku); l ? l.q++ : ui.cart.push({ sku: b.dataset.sku, q: 1 }); render(); },
+  inc: b => { ui.cart.find(x => x.sku === b.dataset.sku).q++; render(); },
+  dec: b => { const l = ui.cart.find(x => x.sku === b.dataset.sku); l.q--; if (!l.q) ui.cart = ui.cart.filter(x => x !== l); render(); },
+  'clear-cart': () => { ui.cart = []; render(); },
+  charge: () => {
+    const t = cartTotals(), m = t.m;
+    const lines = ui.cart.map(l => { const s = SKUS.find(x => x.sku === l.sku); return { q: l.q, name: s.name, ess: s.ess, amt: s.price * l.q }; });
+    const margin = Math.round(lines.reduce((s, l) => s + l.amt * (l.ess ? MARGIN.ess : MARGIN.other), 0));
+    if (m && t.smart > 0) {
+      if (m.plan === 'A') { m.allowance.month += t.smart; m.allowance.total += t.smart; } else { m.credit.used += t.smart; }
+    }
+    if (m) S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: t.smart, cash: t.cash, items: lines.reduce((s, l) => s + l.q, 0) });
+    ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines, smart: t.smart, cash: t.cash, margin, card: m && m.card.replace(/\s/g, '') };
+    ui.cart = [];
+    render(); toast(t.smart ? `${ugx(t.smart)} charged to SmartCare` : 'Paid in cash');
+  },
+  'new-sale': () => { ui.receipt = null; ui.posMember = null; ui.posInput = ''; render(); },
+  'ops-pick': b => { ui.opsClaim = b.dataset.id; render(); },
+  verify: b => { const c = S.claims.find(x => x.id === ui.opsClaim); c.checks[+b.dataset.i].r = 'ok'; render(); },
+  approve: () => {
+    const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
+    c.status = 'approved'; c.decided = TODAY;
+    m.status = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
+    render(); toast(`${hh(m)}: card unlocked, ${ugx(A_LIMIT / 12)} a month`);
+  },
+  decline: () => {
+    const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
+    c.status = 'declined'; c.decided = TODAY; m.status = 'locked';
+    render(); toast(`${c.id} declined. The household is told why in the app.`);
+  },
+  'model-reset': () => { Object.assign(M, { fam: [1000, 5000, 15000], premium: 1.5, rebateFam: 0.85, rebatePct: 6, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], rebateMode: 'all' }); render(); },
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (!b || b.disabled) return;
+  A[b.dataset.a] && A[b.dataset.a](b);
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'pos-form') return A['pos-lookup']();
+  if (e.target.id === 'claim-form') {
+    const m = member(ui.viewAs);
+    const type = $('#cl-type').value, note = $('#cl-note').value.trim(), hasFile = $('#cl-file').files.length > 0;
+    const inForce = days(m.enrolled, TODAY);
+    const checks = [{ t: `Waiting period passed (${WAIT_DAYS} days)`, r: inForce >= WAIT_DAYS ? 'ok' : 'fail', d: `${inForce} days in force` }];
+    if (type === 'job') checks.push({ t: 'Termination letter on file', r: hasFile ? 'ok' : 'missing' }, { t: 'NSSF contributions stopped', r: 'todo', d: 'Pull the contribution history' }, { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on a number the platform finds itself' });
+    if (type === 'medical') checks.push({ t: 'Admission note on file', r: hasFile ? 'ok' : 'missing' }, { t: 'Partner hospital confirms admission', r: 'todo' });
+    if (type === 'drought') checks.push({ t: 'District on the declared drought list', r: 'todo', d: 'Check against the national weather authority\'s rainfall bulletin' });
+    checks.push({ t: 'No other claim this policy year', r: S.claims.some(x => x.member === m.id && x.status === 'approved') ? 'fail' : 'ok' });
+    const id = 'CLM-0' + (142 + S.claims.length - 2);
+    S.claims.push({ id, member: m.id, type, filed: TODAY, status: 'pending', note, checks });
+    m.status = 'review'; ui.claimForm = false; ui.opsClaim = id;
+    render(); toast(`Claim ${id} sent. Operations can see it now.`);
+  }
+});
+
+document.addEventListener('change', e => {
+  if (e.target.id === 'view-as') { ui.viewAs = e.target.value; ui.claimForm = false; render(); }
+  if (e.target.dataset.lic) { licences[e.target.dataset.lic] = e.target.checked; store.set('ksc-licences', licences); }
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'pos-card') ui.posInput = e.target.value;
+  if (!e.target.closest('#model-form')) return;
+  const num = id => { const v = parseFloat($('#' + id).value); return isFinite(v) && v >= 0 ? v : 0; };
+  M.fam = [0, 1, 2].map(i => Math.max(1, num('fam' + i)));
+  M.ops = [0, 1, 2].map(i => num('ops' + i));
+  ['premium', 'limit', 'claimRate', 'avgDraw', 'rebateFam', 'rebatePct'].forEach(k => M[k] = num(k));
+  M.rebateMode = (document.querySelector('input[name="rebateMode"]:checked') || {}).value || 'all';
+  modelOut();
+});
+
+const start = (location.hash || '').slice(1);
+ui.view = V[start] ? start : 'overview';
+render();
+</script>

@@ -31,6 +31,7 @@ client relationship in-house.
 - **Free tools (no account):** a **project screening tool** that tells anyone with a project which environmental submission it needs and why, a **monitor directory** it routes them to, and **calculators and converters** open to everyone. See below.
 - **`docs/design-system.md`** — the design system written out: the four theme palettes, the type ramp, component anatomy and the rules behind them. Written to be handed to a designer or pasted into a prompt-driven builder.
 - **`design/`** — a generator for eight hi-fi artboards (dashboard, ESSR builder, analytics, inspections, audits, workflow run, phone field-capture, and the system sheet), matched value-for-value to `app/styles.css`. `node design/build-artboards.mjs`.
+- **`kibanja/`** — a separate product: a click-through prototype of the Kibanja SmartCare food-security card platform (family app, store till, operations desk, underwriting model, rollout). One self-contained HTML file; see `kibanja/README.md`.
 - **`app/`** — **Verda**, a static (no-backend) web app that runs the whole compliance care plan offer day-to-day. Open `app/index.html` in a browser. See below for what it does.
 
 ## Fastest path to first invoice
