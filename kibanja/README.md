@@ -4,11 +4,18 @@ A working, click-through prototype of the Kibanja SmartCare platform: a
 food-security card for Kampala households that pay UGX 1.5M a year. It is
 separate from Verda and shares no code with it.
 
-Open `kibanja-smartcare.html` in a browser. `target-investors.csv` holds the 50 target investors from the Investors screen, for a spreadsheet or CRM. It is one self-contained file
+Open `kibanja-smartcare.html` in a browser.
+
+The investor material lives in a separate page, `kibanja-investor-pack.html`,
+so the platform can be shown to families, stores and partners without it.
+Both pages come from one source: after editing `kibanja-smartcare.html`, run
+`node kibanja/build-investor-pack.js` to rebuild the pack, so the figures
+always match. `target-investors.csv` holds the 50 target investors for a
+spreadsheet or CRM. It is one self-contained file
 with no build step and no server. Everything runs on example households
 dated 22 Oct 2026, and **Reset demo** puts them back.
 
-## The eleven screens
+## The platform's ten screens
 
 | Screen | What it shows |
 |---|---|
@@ -22,11 +29,19 @@ dated 22 Oct 2026, and **Reset demo** puts them back.
 | Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
 | Underwriting | The three-year table rebuilt from the plan's assumptions: 96% of households on a monthly credit line, 10M card spend a year, 6% supermarket rebate, 2.5% processing fee per cycle, 4% claiming an average 20M. Lands within 1% of the original (net 1.19B / 6.6B / 20.6B vs 1.2B / 6.65B / 20.75B; the gap is the fee charged only on credit users). Inputs for credit losses and cost of funds, a stress grid, and findings |
 | Rollout | Phase 1 in detail, flagship store set-up costs, and the licences and partners to line up first |
-| Investors | The pitch with live figures, the three advantages and what diligence will ask, 50 target investors with a status tracker (grants and accelerators, seed funds, growth funds, lenders for the credit and motorcycle books, development finance), name ideas for the platform, the comparison with Uganda's supermarket cards, the 10-year expansion, fundraising by stage and a data-room checklist |
 
 The screens share state: a claim filed in the family app appears in
 Operations; approving it unlocks the card; charging a basket at the till
 reduces the household's allowance or credit.
+
+## The investor pack
+
+| Section | What it shows |
+|---|---|
+| Pitch | Year 3 figures from the model, the three advantages and what diligence will ask, the comparison with Uganda's supermarket cards, the 10-year expansion, fundraising by stage and a data-room checklist |
+| Investors to approach | 50 target investors in five groups (grants and accelerators, seed funds, growth funds, lenders, development finance) with when to approach, what to ask for, why they fit and a status tracker |
+| Name ideas | Eight candidate names for the platform and what to check before choosing |
+| Underwriting | The same live model as the platform |
 
 ## Design decisions that differ from the original plan
 

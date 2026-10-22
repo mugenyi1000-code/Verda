@@ -298,21 +298,23 @@ table.t.inv select.in { min-width: 140px; padding: 6px 8px; }
 <header class="top">
   <div class="top-in">
     <div class="brand-row">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Kibanja SmartCare <small>platform prototype</small></span></div>
-      <button class="btn chip" data-a="reset" title="Put every example household back to its starting state">Reset demo</button>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Kibanja SmartCare <small id="brand-sub">platform prototype</small></span></div>
+      <button class="btn chip" data-a="reset" data-mode="platform" title="Put every example household back to its starting state">Reset demo</button>
     </div>
     <nav class="tabs" role="tablist" aria-label="Platform views">
-      <button class="tab" role="tab" data-a="tab" data-v="overview">Overview</button>
-      <button class="tab" role="tab" data-a="tab" data-v="how">How it works</button>
-      <button class="tab" role="tab" data-a="tab" data-v="member">Family app</button>
-      <button class="tab" role="tab" data-a="tab" data-v="pos">Store till</button>
-      <button class="tab" role="tab" data-a="tab" data-v="food">Food and producers</button>
-      <button class="tab" role="tab" data-a="tab" data-v="plans">Packages</button>
-      <button class="tab" role="tab" data-a="tab" data-v="loans">Kibanja Loan</button>
-      <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
+      <button class="tab" role="tab" data-a="tab" data-v="overview" data-mode="platform">Overview</button>
+      <button class="tab" role="tab" data-a="tab" data-v="how" data-mode="platform">How it works</button>
+      <button class="tab" role="tab" data-a="tab" data-v="member" data-mode="platform">Family app</button>
+      <button class="tab" role="tab" data-a="tab" data-v="pos" data-mode="platform">Store till</button>
+      <button class="tab" role="tab" data-a="tab" data-v="food" data-mode="platform">Food and producers</button>
+      <button class="tab" role="tab" data-a="tab" data-v="plans" data-mode="platform">Packages</button>
+      <button class="tab" role="tab" data-a="tab" data-v="loans" data-mode="platform">Kibanja Loan</button>
+      <button class="tab" role="tab" data-a="tab" data-v="ops" data-mode="platform">Operations</button>
+      <button class="tab" role="tab" data-a="tab" data-v="investors" data-mode="investors">Pitch</button>
+      <button class="tab" role="tab" data-a="tab" data-v="targets" data-mode="investors">Investors to approach</button>
+      <button class="tab" role="tab" data-a="tab" data-v="names" data-mode="investors">Name ideas</button>
       <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
-      <button class="tab" role="tab" data-a="tab" data-v="rollout">Rollout</button>
-      <button class="tab" role="tab" data-a="tab" data-v="investors">Investors</button>
+      <button class="tab" role="tab" data-a="tab" data-v="rollout" data-mode="platform">Rollout</button>
     </nav>
   </div>
 </header>
@@ -320,6 +322,10 @@ table.t.inv select.in { min-width: 140px; padding: 6px 8px; }
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
+/* ---------- build ---------- */
+// One source, two pages: the platform, and the investor pack that build-investor-pack.js makes by switching MODE.
+const MODE = 'platform';
+
 /* ---------- constants ---------- */
 const TODAY = '2026-10-22';            // demo date: every example household is dated against this
 const rungs = start => [1, 1.5, 2, 2.5, 3].map(x => Math.round(start * x)); // food credit grows to three times its start
@@ -630,7 +636,6 @@ V.overview = () => `
     <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The first year in detail, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="investors"><h4>Investors</h4><span class="muted small">The pitch, the three advantages with the questions diligence will ask, and the 10-year scale plan.</span><span class="go">Open →</span></button>
   </div>
 </section>
 
@@ -1212,7 +1217,7 @@ const LIC = [
   ['float', 'Written rule on what premium money may fund', 'Premiums back claims. Keep them with the underwriter or in a ring-fenced account and fund the stores from equity or debt.'],
 ];
 
-V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The first year and a half in detail: Phase 1 of the 10-year plan on the Investors screen.</p></div>
+V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The first year and a half in detail: Phase 1 of the 10-year plan in the investor pack.</p></div>
 <div class="phases">
   <article class="panel phase"><span class="when">Months 1–6</span><h3>Fintech launch</h3><p class="small muted">Launch the app and card using partner supermarkets.</p>
     <ul><li>Family app, card issuing, Mobile Money premium collection</li><li>Card-reading link at 3–5 partner stores. Approach Kampala chains such as Fraine and Quality: their shoppers get cover and credit, the store gets locked-in customers</li><li>Operations desk with claims verification</li><li>Underwriter and credit partner signed</li></ul>
@@ -1317,10 +1322,6 @@ V.investors = () => {
   </div>
 </section>
 
-${investorTable()}
-
-${nameIdeas()}
-
 <section class="stack">
   <h2>Against Uganda's supermarket cards</h2>
   <div class="tablewrap"><table class="t"><thead><tr><th>Programme</th><th>What members get</th><th>What it doesn't do</th></tr></thead><tbody>
@@ -1336,7 +1337,7 @@ ${nameIdeas()}
   <h2>10-year geographic expansion</h2>
   <div class="phases">
     <article class="panel phase"><span class="when">Years 1–2</span><h3>Kampala urban</h3>
-      <p class="small muted">Launch the core card platform with partner supermarkets, then the flagship store. The Rollout screen has this phase in detail.</p>
+      <p class="small muted">Launch the core card platform with partner supermarkets, then the flagship store. The platform's Rollout screen has this phase in detail.</p>
       <ul><li>Family app, store till, operations desk</li><li>Underwriter and credit partner signed</li><li>Flagship store, then the first micro-hubs</li></ul>
       <p class="small"><b>Gate to Phase 2:</b> 12 months of claims and repayment data with loss ratio and credit losses inside plan, renewal rate measured, flagship profitable at store level.</p></article>
     <article class="panel phase"><span class="when">Years 3–5</span><h3>Ugandan regional</h3>
@@ -1702,12 +1703,15 @@ const INV_KINDS = { grant: 'Grants and accelerators', seed: 'Seed to Series A', 
 const INV_STATUS = ['To approach', 'Contacted', 'Meeting', 'Due diligence', 'Not now'];
 const invTrack = store.get('ksc-investors', {});
 
+V.targets = () => investorTable();
+V.names = () => nameIdeas();
+
 function investorTable() {
   const f = ui.invFilter, list = INVESTORS.filter(x => f === 'all' || x.k === f);
   const counts = INV_STATUS.map(st => [st, INVESTORS.filter(x => (invTrack[x.n] || 'To approach') === st).length]);
   return `<section class="stack">
     <div class="row between"><h2>50 investors to approach</h2><span class="small muted">${counts.filter(([, n]) => n).map(([st, n]) => `${n} ${st.toLowerCase()}`).join(' · ')}</span></div>
-    <p class="small muted" style="max-width:76ch">Ordered by when to approach them: grants and accelerators now, seed funds once the pilot has real numbers, growth funds and development banks for Phase 2, and lenders to fund the food credit, loans and motorcycles. "Confirmed" means this round of research found the investor active in this space; check every name's current fund and focus before writing. The same list is in target-investors.csv next to this page.</p>
+    <p class="small muted" style="max-width:76ch">Ordered by when to approach them: grants and accelerators now, seed funds once the pilot has real numbers, growth funds and development banks for Phase 2, and lenders to fund the food credit, loans and motorcycles. "Confirmed" means this round of research found the investor active in this space; check every name's current fund and focus before writing. The same list is in target-investors.csv in the repository.</p>
     <div class="row">${[['all', 'All 50'], ...Object.entries(INV_KINDS)].map(([k, l]) => `<button class="btn chip" data-a="inv-filter" data-k="${k}" aria-pressed="${f === k}">${l}${k === 'all' ? '' : ` (${INVESTORS.filter(x => x.k === k).length})`}</button>`).join('')}</div>
     <div class="tablewrap"><table class="t wrap inv"><thead><tr><th>#</th><th>Investor</th><th>When</th><th>Ask for</th><th>Why they fit</th><th>Status</th></tr></thead><tbody>
       ${list.map(x => `<tr><td class="n">${INVESTORS.indexOf(x) + 1}</td><td><b>${esc(x.n)}</b><span class="small muted" style="display:block">${INV_KINDS[x.k]}${x.c ? ' · <span style="color:var(--ok)">confirmed</span>' : ' · check'}</span></td>
@@ -1744,7 +1748,7 @@ function render() {
 }
 
 function go(v) {
-  if (!V[v]) return;
+  if (!V[v] || !VIEWS.includes(v)) return;
   ui.view = v;
   try { history.replaceState(null, '', '#' + v); } catch {}
   render();
@@ -1952,8 +1956,11 @@ document.addEventListener('input', e => {
   modelOut();
 });
 
+document.querySelectorAll('[data-mode]').forEach(el => { if (el.dataset.mode !== MODE) el.remove(); });
+const VIEWS = [...document.querySelectorAll('.tab')].map(t => t.dataset.v);
+if (MODE === 'investors') { $('#brand-sub').textContent = 'investor pack'; document.querySelector('.tabs').setAttribute('aria-label', 'Investor pack sections'); }
 const start = (location.hash || '').slice(1);
-ui.view = V[start] ? start : 'overview';
+ui.view = VIEWS.includes(start) ? start : VIEWS[0];
 render();
 </script>
 
