@@ -8,13 +8,14 @@ Open `kibanja-smartcare.html` in a browser. It is one self-contained file
 with no build step and no server. Everything runs on example households
 dated 22 Oct 2026, and **Reset demo** puts them back.
 
-## The ten screens
+## The eleven screens
 
 | Screen | What it shows |
 |---|---|
-| Overview | Model A (emergency card) and Model B (essentials credit line) side by side, the household's year on the platform, and the one number to check first |
+| Overview | The one card and what is on it (food credit line, emergency cover, wallet and points, Food Basket, Kibanja Loan), the household's year on the platform, and the one number to check first |
 | How it works | The plain-language explainer: six steps for a family, where every shilling is held and what Kibanja earns from it, who does what, and common questions |
 | Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, Kibanja points, a one-time pay code for when the card is at home, Kibanja Loan repayments, reporting an emergency, the monthly allowance, the credit ladder and repayments |
+| Food and producers | The price-locked Kibanja Food Basket (UGX 169,000 a month for a family of five, 15% under shelf price), the Ugandan-made share of sales against the Buy Uganda Build Uganda shelf targets, the partner directory (Made in Uganda as a proposed partner; producers and manufacturers as clearly marked examples), what partners get, and the monthly volumes producers can plan on |
 | Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash, by card or pay code: points (if the member chooses), emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
 | Plans and discounts | Weekly (UGX 32,000), monthly (135,000) and annual (1.5M) plans with editable prices, member discount and grace days; what each discount leaves of the store margin; product offers you can add, pause and remove, funded by Kibanja or a supplier; points settings (earn rate per plan, value, spend threshold) |
 | Kibanja Loan | School fees (paid to the school), farm inputs (taken as goods at a hub), business stock and quick cash. Limits come from a Kibanja score built only from the household's record on the platform, with every component shown. Repayment calculator with full cost, a 30%-of-income affordability check, one loan at a time, no lending during an emergency, and a loan book with approvals and late loans |
@@ -29,11 +30,21 @@ reduces the household's allowance or credit.
 
 ## Design decisions that differ from the original plan
 
-- **90-day waiting period** on Model A, so cover can't be bought the week a
+- **One card, not two models.** Every household gets the food credit line
+  and the emergency cover together, on one plan payment.
+- **Food first.** The credit line and the emergency allowance pay for
+  essentials only; points and the wallet pay for anything, with a Mobile
+  Money prompt for the rest, so shopping is still cashless.
+- **Credit freezes during an emergency.** While the allowance runs, nothing
+  new goes on credit and no repayments fall due, so a shock never turns
+  into debt. No Kibanja Loans during an emergency either.
+- **Ugandan-made goods earn double points**, and producers pay no shelf fees.
+
+- **90-day waiting period** on emergency claims, so cover can't be bought the week a
   layoff is already known.
-- **Model B starts at 3× the deposit (UGX 4.5M)**, not 50M, and climbs a
-  rung (4.5M → 9M → 18M → 30M → 50M) after three on-time repayments with at
-  least 90% of spend on essentials.
+- **The food credit line starts at UGX 4.5M**, not 50M, and climbs a rung
+  (4.5M → 9M → 18M → 30M → 50M) after three on-time repayments with the
+  plan paid up.
 - **Premiums don't fund the store.** Phase 2 originally used the premium
   float to open the flagship; that money is owed to claimants, so the store
   is funded from equity or debt.

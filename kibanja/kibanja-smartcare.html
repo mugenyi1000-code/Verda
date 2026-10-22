@@ -260,6 +260,16 @@ table.t.wrap td { white-space: normal; min-width: 140px; }
 .bad-callout { border-left-color: var(--bad); background: var(--bad-soft); }
 input[type="range"] { width: 100%; accent-color: var(--leaf); }
 
+/* One card and food */
+.onecard { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.feat { gap: 6px; align-content: start; }
+.tag.ug { color: var(--ink); background: var(--sun-soft); padding: 1px 5px; border-radius: 4px; }
+.target { position: relative; height: 14px; border-radius: 99px; background: var(--sunk); }
+.target > i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--leaf); }
+.target > b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.target-lbl { position: relative; height: 16px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.target-lbl span { position: absolute; transform: translateX(-50%); }
+
 /* Investors */
 .adv { display: grid; gap: 12px; align-content: start; }
 .adv h4 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -290,6 +300,7 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
       <button class="tab" role="tab" data-a="tab" data-v="how">How it works</button>
       <button class="tab" role="tab" data-a="tab" data-v="member">Family app</button>
       <button class="tab" role="tab" data-a="tab" data-v="pos">Store till</button>
+      <button class="tab" role="tab" data-a="tab" data-v="food">Food and producers</button>
       <button class="tab" role="tab" data-a="tab" data-v="plans">Plans and discounts</button>
       <button class="tab" role="tab" data-a="tab" data-v="loans">Kibanja Loan</button>
       <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
@@ -305,27 +316,32 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
 <script>
 /* ---------- constants ---------- */
 const TODAY = '2026-10-22';            // demo date: every example household is dated against this
-const A_LIMIT = 50000000;              // Model A: emergency allowance, paid over 12 months
-const LADDER = [4500000, 9000000, 18000000, 30000000, 50000000]; // Model B credit rungs
+const A_LIMIT = 50000000;              // emergency allowance, paid over 12 months
+const LADDER = [4500000, 9000000, 18000000, 30000000, 50000000]; // food credit line rungs
 const WAIT_DAYS = 90;
 const TYPES = { job: 'Job loss', medical: 'Hospital admission', drought: 'Drought in district' };
 const PLAN_KEYS = ['weekly', 'monthly', 'annual'];
+// local: made or grown in Uganda. Those lines earn double points.
 const SKUS = [
-  { sku: '1001', name: 'Maize flour (posho) 2 kg', price: 7000, ess: true },
-  { sku: '1002', name: 'Rice, Super 5 kg', price: 24000, ess: true },
-  { sku: '1003', name: 'Dry beans 2 kg', price: 9600, ess: true },
-  { sku: '1004', name: 'Sugar 2 kg', price: 9000, ess: true },
-  { sku: '1005', name: 'Cooking oil 3 L', price: 21000, ess: true },
+  { sku: '3001', name: 'Kibanja Food Basket, family of 5, one month', price: 169000, ess: true, local: true },
+  { sku: '1001', name: 'Maize flour (posho) 2 kg', price: 7000, ess: true, local: true },
+  { sku: '1002', name: 'Rice, Super 5 kg', price: 24000, ess: true, local: true },
+  { sku: '1003', name: 'Dry beans 2 kg', price: 9600, ess: true, local: true },
+  { sku: '1004', name: 'Sugar 2 kg', price: 9000, ess: true, local: true },
+  { sku: '1005', name: 'Cooking oil 3 L', price: 21000, ess: true, local: true },
   { sku: '1006', name: 'Iodised salt 1 kg', price: 1500, ess: true },
-  { sku: '1007', name: 'Fresh milk 1 L', price: 3000, ess: true },
-  { sku: '1008', name: 'Bar soap 1 kg', price: 6500, ess: true },
-  { sku: '1009', name: 'Matooke bunch, medium', price: 25000, ess: true },
+  { sku: '1007', name: 'Fresh milk 1 L', price: 3000, ess: true, local: true },
+  { sku: '1008', name: 'Bar soap 1 kg', price: 6500, ess: true, local: true },
+  { sku: '1009', name: 'Matooke bunch, medium', price: 25000, ess: true, local: true },
   { sku: '1010', name: 'Infant formula 400 g', price: 32000, ess: true },
   { sku: '2001', name: 'Soda 500 ml', price: 2000, ess: false },
   { sku: '2002', name: 'Beer 500 ml', price: 4500, ess: false },
   { sku: '2003', name: 'Airtime voucher', price: 10000, ess: false },
   { sku: '2004', name: 'Biscuits', price: 3500, ess: false },
 ];
+// What goes into the Food Basket: [sku, quantity]. Its shelf value is what the same items cost one by one.
+const BASKET = [['1001', 5, 10, 'kg'], ['1003', 3, 6, 'kg'], ['1002', 1, 5, 'kg'], ['1005', 1, 3, 'L'], ['1004', 1, 2, 'kg'], ['1006', 1, 1, 'kg'], ['1009', 2, 2, 'bunches'], ['1007', 8, 8, 'L'], ['1008', 1, 1, 'kg']];
+const BASKET_LOCKED_TO = '2027-01-31';
 const MARGIN = { ess: 0.12, other: 0.25 }; // assumed store gross margin: staples thin, extras fatter
 
 function seed() {
@@ -343,19 +359,33 @@ function seed() {
       { id: 'P2', sku: '1005', pct: 8, name: 'Cooking oil offer', funder: 'Supplier', on: true },
     ],
     members: [
-      { id: 'KSC-0001', income: 1800000, points: 3420, card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, plan: 'A', status: 'locked', enrolled: '2026-03-02', wallet: 85000,
-        sub: { plan: 'annual', paidUntil: '2027-03-02', start: '2026-03-02' } },
-      { id: 'KSC-0002', income: 2400000, points: 7880, card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, plan: 'B', status: 'good', enrolled: '2026-01-15', wallet: 40000,
-        sub: { plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' },
-        credit: { rung: 1, used: 2350000, onTime: 2, ess: 9600000, all: 10000000, due: '2026-11-05', dueAmt: 780000 } },
-      { id: 'KSC-0003', income: 1100000, points: 5210, card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, plan: 'A', status: 'active', enrolled: '2025-12-10', wallet: 12000,
-        sub: { plan: 'annual', paidUntil: '2026-12-10', start: '2025-12-10' },
-        allowance: { activated: '2026-08-14', month: 1920000, total: 9410000 } },
-      { id: 'KSC-0004', income: 900000, points: 960, card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, plan: 'B', status: 'overdue', enrolled: '2026-04-20', wallet: 0,
-        sub: { plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' },
-        credit: { rung: 0, used: 4120000, onTime: 0, ess: 2840000, all: 4000000, due: '2026-10-05', dueAmt: 690000 } },
-      { id: 'KSC-0005', income: 400000, points: 2150, card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, plan: 'A', status: 'review', enrolled: '2026-05-30', wallet: 150000,
-        sub: { plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' } },
+      { id: 'KSC-0001', income: 1800000, points: 3420, card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, enrolled: '2026-03-02', wallet: 85000,
+        sub: { plan: 'annual', paidUntil: '2027-03-02', start: '2026-03-02' }, cover: 'none', spend: { ess: 2900000, all: 3000000 },
+        credit: { rung: 0, used: 1240000, onTime: 1, due: '2026-11-05', dueAmt: 310000, overdue: false } },
+      { id: 'KSC-0002', income: 2400000, points: 7880, card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, enrolled: '2026-01-15', wallet: 40000,
+        sub: { plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' }, cover: 'none', spend: { ess: 9600000, all: 10000000 },
+        credit: { rung: 1, used: 2350000, onTime: 2, due: '2026-11-05', dueAmt: 780000, overdue: false } },
+      { id: 'KSC-0003', income: 1100000, points: 5210, card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, enrolled: '2025-12-10', wallet: 12000,
+        sub: { plan: 'annual', paidUntil: '2026-12-10', start: '2025-12-10' }, cover: 'active', spend: { ess: 4100000, all: 4300000 },
+        allowance: { activated: '2026-08-14', month: 1920000, total: 9410000 },
+        credit: { rung: 0, used: 600000, onTime: 2, due: '2026-09-05', dueAmt: 150000, overdue: false } },
+      { id: 'KSC-0004', income: 900000, points: 960, card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, enrolled: '2026-04-20', wallet: 0,
+        sub: { plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' }, cover: 'none', spend: { ess: 2840000, all: 4000000 },
+        credit: { rung: 0, used: 4120000, onTime: 0, due: '2026-10-05', dueAmt: 690000, overdue: true } },
+      { id: 'KSC-0005', income: 400000, points: 2150, card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, enrolled: '2026-05-30', wallet: 150000,
+        sub: { plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' }, cover: 'review', spend: { ess: 900000, all: 950000 },
+        credit: { rung: 0, used: 380000, onTime: 1, due: '2026-11-10', dueAmt: 95000, overdue: false } },
+    ],
+    // Store sales this month, for the Ugandan-made share. Every till sale adds to it.
+    sales: { local: 2350000, all: 5120000 },
+    // Partner names marked as examples are placeholders for the kind of partner, not real agreements.
+    partners: [
+      { id: 'MIU', name: 'Made in Uganda (MIU)', kind: 'Retail and marketplace platform', supplies: 'Ugandan-made food, household and personal care goods from many manufacturers and SMEs', terms: 'Proposed: SmartCare accepted at MIU outlets, MIU goods in Kibanja stores and baskets, MIU fulfilment for micro-hubs', status: 'Proposed' },
+      { id: 'PR1', name: 'Maize growers\' cooperative (example)', kind: 'Producer', supplies: 'Maize grain for flour', terms: 'Three-month forward order, paid within 48 hours of delivery, farm-input loans repaid in grain', status: 'Example' },
+      { id: 'PR2', name: 'Matooke farmers\' group (example)', kind: 'Producer', supplies: 'Matooke, beans', terms: 'Weekly orders sized from member demand, paid by Mobile Money', status: 'Example' },
+      { id: 'PR3', name: 'Dairy cooperative (example)', kind: 'Producer', supplies: 'Fresh milk', terms: 'Daily collection for Kampala stores and hubs', status: 'Example' },
+      { id: 'MF1', name: 'Flour mill (example)', kind: 'Manufacturer', supplies: 'Maize flour, packed for the Food Basket', terms: 'Price locked for the basket period, no shelf fees', status: 'Example' },
+      { id: 'MF2', name: 'Edible oil and soap maker (example)', kind: 'Manufacturer', supplies: 'Cooking oil, bar soap', terms: 'Funds member offers in exchange for guaranteed volume', status: 'Example' },
     ],
     claims: [
       { id: 'CLM-0141', member: 'KSC-0005', type: 'job', filed: '2026-10-19', status: 'pending',
@@ -416,7 +446,7 @@ const yearCost = p => p.price * p.perYear;
 const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 let S = seed();
-const ui = { floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanDraft: { product: 'school', amount: 1000000, months: 6 }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const ui = { uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanDraft: { product: 'school', amount: 1000000, months: 6 }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
 const M0 = { fam: [1000, 5000, 15000], mixW: 0, mixM: 0, discPct: 0, ptsPct: 0, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
 const M = JSON.parse(JSON.stringify(M0));
 const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
@@ -425,7 +455,7 @@ const dataroom = store.get('ksc-dataroom', {});
 
 const member = id => S.members.find(m => m.id === id);
 const hh = m => m.name + ' household';
-const essShare = c => c.all ? c.ess / c.all : 1;
+const essShare = sp => sp.all ? sp.ess / sp.all : 1;
 
 // Is the household's plan paid? A missed payment keeps cover through the plan's grace days, then pauses it.
 function cover(m) {
@@ -438,29 +468,32 @@ function coverPill(m) {
   return { paid: `<span class="pill ok">${c.p.name} plan · paid</span>`, due: `<span class="pill warn">${c.p.name} payment due</span>`, lapsed: '<span class="pill bad">Cover paused</span>' }[c.s];
 }
 
-function statusPill(m) {
-  const map = {
-    locked: ['', 'Allowance locked until a claim'], review: ['warn', 'Claim under review'], active: ['ok', 'Allowance active'],
-    good: ['ok', 'Credit in good standing'], overdue: ['bad', 'Repayment overdue'],
-  };
-  const [c, t] = map[m.status];
-  return `<span class="pill ${c}">${t}</span>`;
+function emergencyPill(m) {
+  if (m.cover === 'review') return '<span class="pill warn">Claim under review</span>';
+  if (m.cover === 'active') return '<span class="pill ok">Emergency allowance active</span>';
+  return days(m.sub.start, TODAY) < WAIT_DAYS ? '<span class="pill">Cover in waiting period</span>' : '<span class="pill ok">Emergency cover ready</span>';
+}
+function creditPill(m) {
+  if (m.cover === 'active') return '<span class="pill">Credit frozen during emergency</span>';
+  return m.credit.overdue ? '<span class="pill bad">Repayment overdue</span>' : '<span class="pill ok">Credit in good standing</span>';
 }
 
-// Everything the card can pay with right now. The till spends them in this order: allowance, wallet, credit.
+// Everything the card can pay with right now. The till spends them in this order: points (if chosen), allowance, wallet, credit.
 function sources(m) {
-  const c = cover(m), live = c.s !== 'lapsed', notes = [];
+  const c = cover(m), live = c.s !== 'lapsed', notes = [], cr = m.credit;
   let allowance = 0, credit = 0;
-  if (m.plan === 'A') {
-    if (m.status === 'active') {
-      const a = m.allowance, cap = A_LIMIT / 12;
-      if (TODAY >= addMonths(a.activated, 12)) notes.push('The 12-month emergency allowance has ended.');
-      else if (live) allowance = Math.max(0, Math.min(cap - a.month, A_LIMIT - a.total));
-    } else notes.push(m.status === 'review' ? 'Emergency allowance: the claim is still being reviewed.' : 'Emergency allowance opens only after an approved claim.');
-  } else if (m.status === 'overdue') notes.push('Credit line paused until the overdue repayment is made.');
-  else if (live) credit = Math.max(0, LADDER[m.credit.rung] - m.credit.used);
+  if (m.cover === 'active') {
+    const a = m.allowance, cap = A_LIMIT / 12;
+    if (TODAY >= addMonths(a.activated, 12)) notes.push('The 12-month emergency allowance has ended.');
+    else if (live) allowance = Math.max(0, Math.min(cap - a.month, A_LIMIT - a.total));
+    notes.push('Food credit is frozen while the emergency allowance runs: no new credit, no repayments due.');
+  } else {
+    if (m.cover === 'review') notes.push('Emergency claim under review.');
+    if (cr.overdue) notes.push('Food credit paused until the overdue repayment is made.');
+    else if (live) credit = Math.max(0, LADDER[cr.rung] - cr.used);
+  }
   if (!live) notes.push(`Cover paused: the ${c.p.name.toLowerCase()} payment was due ${fdate(m.sub.paidUntil)}. Allowance, credit and the member discount stop until it is paid. The wallet still works.`);
-  const pointsValue = m.points * S.loyalty.value, pointsUsable = m.points >= S.loyalty.threshold;
+  const pointsValue = m.points * S.loyalty.value, pointsUsable = m.points >= S.loyalty.threshold && S.loyalty.value > 0;
   return { allowance, credit, wallet: m.wallet, disc: live ? c.p.disc : 0, live, notes, pointsValue, pointsUsable,
     total: allowance + credit + m.wallet + (pointsUsable ? pointsValue : 0) };
 }
@@ -481,9 +514,9 @@ function planTile(k) {
 
 V.overview = () => `
 <section class="hero">
-  <span class="eyebrow">Food security cover for Kampala households</span>
-  <h1>Pay weekly, monthly or yearly. <em>Shop without cash.</em></h1>
-  <p class="lede">One card that keeps the family fed when income stops, and pays for the whole basket in the meantime. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
+  <span class="eyebrow">Food security for Kampala households</span>
+  <h1>One card. <em>Food on the table</em>, every month.</h1>
+  <p class="lede">Pay weekly, monthly or yearly. Shop without cash, buy staples at a locked price straight from Ugandan producers, and stay fed if the main income stops. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
 </section>
 
 <section class="stack">
@@ -492,38 +525,26 @@ V.overview = () => `
   <p class="small muted" style="max-width:72ch">Paying for the year upfront is the cheapest way in. Every plan also gives a member discount at Kibanja stores while it is paid. Prices are suggestions built around the UGX 1.5M annual premium.</p>
 </section>
 
-<div class="models">
-  <article class="panel model-card">
-    <div class="row between"><h3>Model A · Emergency cover</h3><span class="pill">Insurance</span></div>
-    <p class="muted">An emergency allowance stays locked until a verified shock hits the household. The card works every day for wallet purchases.</p>
-    <dl class="terms">
-      <dt>Triggers</dt><dd>Job loss, hospital admission, declared drought in the district</dd>
-      <dt>Payout</dt><dd class="num">UGX 50M over 12 months</dd>
-      <dt>Monthly cap</dt><dd class="num">${ugx(A_LIMIT / 12)}</dd>
-      <dt>Allowance buys</dt><dd>Essentials. Other items come from the wallet</dd>
-      <dt>Waiting period</dt><dd>${WAIT_DAYS} days of continuous cover</dd>
-    </dl>
-  </article>
-  <article class="panel model-card">
-    <div class="row between"><h3>Model B · Credit line</h3><span class="pill">Credit</span></div>
-    <p class="muted">The plan payments build a security deposit behind a credit line from a microfinance partner.</p>
-    <dl class="terms">
-      <dt>Starting line</dt><dd class="num">${ugx(LADDER[0])}</dd>
-      <dt>Ceiling</dt><dd class="num">UGX 50M after four rung-ups</dd>
-      <dt>Move up a rung</dt><dd>3 repayments on time and at least 90% of credit spend on essentials</dd>
-      <dt>Line buys</dt><dd>Any item in the store</dd>
-    </dl>
-  </article>
-</div>
-<p class="muted" style="max-width:72ch">The financial plan runs both on one card: about 96% of households use it as a monthly credit line for groceries, and the roughly 4% hit by a shock in a given year activate the emergency benefit, budgeted at an average of UGX 20M paid as capped monthly allowances.</p>
+<section class="stack">
+  <h2>One card, everything a household needs</h2>
+  <div class="onecard">
+    <article class="panel feat"><h3>Food credit line</h3><p class="small">Groceries now, repaid monthly. Pays for food and household essentials only. Starts at ${ugx(LADDER[0])} and grows to UGX 50M with on-time repayments.</p></article>
+    <article class="panel feat"><h3>Emergency cover</h3><p class="small">If the main income stops, up to ${ugx(A_LIMIT / 12)} a month for essentials for 12 months. Credit repayments freeze while it runs.</p></article>
+    <article class="panel feat"><h3>Wallet and points</h3><p class="small">Top up from Mobile Money and pay for anything. Every payment earns points; Ugandan-made goods earn double.</p></article>
+    <article class="panel feat"><h3>Food Basket</h3><p class="small">A month of staples for a family of five at a locked price, bought straight from Ugandan producers.</p></article>
+    <article class="panel feat"><h3>Kibanja Loan</h3><p class="small">Farm inputs, school fees, food-trade stock and quick cash, sized to what the household can repay.</p></article>
+  </div>
+  <p class="muted" style="max-width:72ch">In the financial plan about 96% of households use the card mainly as a food credit line, and roughly 4% a year are hit by a shock and draw the emergency allowance, budgeted at an average of UGX 20M paid as capped monthly amounts. Both are on every card; the household doesn't choose between them.</p>
+</section>
 
 <section class="stack">
   <h2>The platform, screen by screen</h2>
   <div class="modules">
     <button class="module" data-a="tab" data-v="how"><h4>How it works</h4><span class="muted small">The six steps for a family, where every shilling is held, who does what, and common questions.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">Card, plan payments, wallet top-ups, emergency claims, credit ladder, spending history.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">The one card: plan payments, food credit, emergency claims, wallet, points, loans, spending history.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">The cashier scans the card and the whole basket is paid without cash, with discounts applied.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="plans"><h4>Plans and discounts</h4><span class="muted small">Weekly, monthly and annual prices, member discounts, points, and product offers.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="food"><h4>Food and producers</h4><span class="muted small">The price-locked Food Basket, producer and manufacturer partners, Made in Uganda, and the Ugandan-made share of sales.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="loans"><h4>Kibanja Loan</h4><span class="muted small">School fees, farm inputs, business stock and quick cash, priced from the household's own record.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
@@ -536,11 +557,11 @@ V.overview = () => `
   <section class="panel">
     <h3>A household's year on the platform</h3>
     <ol class="journey">
-      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, Model A or B, and a weekly, monthly or annual plan.</span></div></li>
+      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, and a weekly, monthly or annual plan. One card covers everything.</span></div></li>
       <li><div><b>Pay by Mobile Money.</b> <span class="muted">Plan payments go to the underwriting partner's account, not the operating account.</span></div></li>
       <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app, with a wallet the family can top up.</span></div></li>
-      <li><div><b>Shop without cash.</b> <span class="muted">Show the card or read a pay code from the app. The till applies the member discount and pays the basket from points, the allowance, the wallet and the credit line. Any gap becomes a Mobile Money prompt on the phone. Every payment earns points.</span></div></li>
-      <li><div><b>Claim, or climb the ladder.</b> <span class="muted">Model A: report an emergency, get verified, receive the monthly allowance. Model B: repay on time, unlock a bigger line.</span></div></li>
+      <li><div><b>Shop without cash.</b> <span class="muted">Show the card or read a pay code from the app. The till applies the member discount and pays the basket from points, the allowance, the wallet and the food credit line. Any gap becomes a Mobile Money prompt on the phone. Every payment earns points.</span></div></li>
+      <li><div><b>Climb the ladder, or claim.</b> <span class="muted">Repay the food credit on time to unlock a bigger line. If the main income stops, report it, get verified and receive the monthly allowance while credit repayments freeze.</span></div></li>
       <li><div><b>Renew.</b> <span class="muted">Claims and repayment history price next year's cover.</span></div></li>
     </ol>
   </section>
@@ -559,7 +580,7 @@ function cardHtml(m) {
     <span class="k-chip" aria-hidden="true"></span>
     <div style="display:grid;gap:10px">
       <div class="k-num">${m.card}</div>
-      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${S.plans[m.sub.plan].name} · ${m.plan === 'A' ? 'Emergency' : 'Credit'}</div></div>
+      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${S.plans[m.sub.plan].name}</div></div>
     </div>
   </div>`;
 }
@@ -611,9 +632,9 @@ function walletBlock(m) {
   </div>`;
 }
 
-function phoneA(m) {
+function emergencyBlock(m) {
   const live = cover(m).s !== 'lapsed';
-  if (m.status === 'locked') {
+  if (m.cover === 'none') {
     const inForce = days(m.sub.start, TODAY);
     const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days of continuous cover).` : `Claims open on ${fdate(addDays(m.sub.start, WAIT_DAYS))}.`;
     const form = !live ? `<p class="small" style="color:var(--bad)">Pay your plan to restart cover before reporting an emergency.</p>` : ui.claimForm ? `
@@ -623,17 +644,16 @@ function phoneA(m) {
         <label class="f">Tell us briefly <textarea class="in" id="cl-note" placeholder="Who was affected, and when"></textarea></label>
         <label class="f">Proof <span class="hint">Termination letter, admission note, or leave blank for drought</span><input class="in" type="file" id="cl-file" accept="image/*,.pdf"></label>
         <div class="row"><button class="btn primary" type="submit">Send claim</button><button class="btn" type="button" data-a="cancel-claim">Cancel</button></div>
-      </form>` : `<button class="btn primary block" data-a="open-claim">Report an emergency</button>`;
+      </form>` : `<button class="btn block" data-a="open-claim">Report an emergency</button>`;
     return `<div class="ph-block">
-      <span class="eyebrow">Your emergency cover</span>
-      <div class="big">${ugx(A_LIMIT)}</div>
-      <p class="small muted">paid onto your card over 12 months for essentials, if one of these happens:</p>
+      <div class="row between"><span class="eyebrow">Emergency cover</span>${emergencyPill(m)}</div>
+      <p class="small">If one of these happens, up to <b class="num">${ugx(A_LIMIT / 12)}</b> a month goes onto your card for essentials, for 12 months, and your credit repayments freeze:</p>
       <ul class="ticks"><li>The main earner loses their job</li><li>Someone in the house is admitted to hospital</li><li>Drought is declared in your district</li></ul>
-      ${live ? `<p class="small">${waitTxt}</p>` : ''}
+      ${live ? `<p class="small muted">${waitTxt}</p>` : ''}
       ${form}
     </div>`;
   }
-  if (m.status === 'review') {
+  if (m.cover === 'review') {
     const c = S.claims.find(x => x.member === m.id && x.status === 'pending');
     const open = c.checks.filter(k => k.r !== 'ok').length;
     return `<div class="ph-block">
@@ -649,30 +669,28 @@ function phoneA(m) {
     <div class="big">${ugx(sources(m).allowance)}</div>
     <div class="meter"><i style="width:${Math.min(100, a.month / cap * 100)}%"></i></div>
     <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.${live ? '' : ' Paused until your plan is paid.'}</p>
-  </div>
-  <div class="ph-block">
-    <span class="eyebrow">Whole allowance</span>
     <div class="meter sun"><i style="width:${Math.min(100, a.total / A_LIMIT * 100)}%"></i></div>
-    <p class="small">${ugx(A_LIMIT - a.total)} left, until ${fdate(addMonths(a.activated, 12))}.</p>
+    <p class="small">${ugx(A_LIMIT - a.total)} of the whole allowance left, until ${fdate(addMonths(a.activated, 12))}.</p>
   </div>`;
 }
 
-function phoneB(m) {
-  const c = m.credit, avail = sources(m).credit, lim = LADDER[c.rung];
-  const max = LADDER[LADDER.length - 1], share = essShare(c);
+function creditBlock(m) {
+  const c = m.credit, avail = sources(m).credit, lim = LADDER[c.rung], frozen = m.cover === 'active';
+  const max = LADDER[LADDER.length - 1];
   const ladder = LADDER.map((v, i) => `<i class="${i === c.rung ? 'on' : i < c.rung ? 'done' : ''}" style="height:${18 + 82 * v / max}%"></i>`).join('');
   const next = c.rung < LADDER.length - 1
-    ? `<p class="small">Next rung <b class="num">${short(LADDER[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments · essentials share <b>${pct(share)}</b> ${share >= 0.9 ? '<span class="pill ok">meets 90%</span>' : '<span class="pill warn">needs 90%</span>'}</p>`
+    ? `<p class="small">Next rung <b class="num">${short(LADDER[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments with your plan paid up.</p>`
     : `<p class="small">You're on the top rung.</p>`;
-  const overdue = m.status === 'overdue';
-  const due = c.dueAmt > 0 ? `<div class="due ${overdue ? 'bad' : ''}">
-      <div class="row between"><span class="small"><b>${overdue ? 'Overdue since' : 'Next repayment'}</b> ${fdate(c.due)}</span><span class="num">${ugx(c.dueAmt)}</span></div>
+  const due = frozen
+    ? `<div class="due"><span class="small"><b>Frozen while your emergency allowance runs.</b> Nothing new goes on credit and nothing is due, with no extra interest, until a month after the allowance ends.</span></div>`
+    : c.dueAmt > 0 ? `<div class="due ${c.overdue ? 'bad' : ''}">
+      <div class="row between"><span class="small"><b>${c.overdue ? 'Overdue since' : 'Next repayment'}</b> ${fdate(c.due)}</span><span class="num">${ugx(c.dueAmt)}</span></div>
       <button class="btn primary block" data-a="pay">Repay ${ugx(c.dueAmt)} with Mobile Money</button>
     </div>` : `<p class="small muted">Nothing to repay right now.</p>`;
   return `<div class="ph-block">
-    <span class="eyebrow">${overdue ? 'Credit paused' : 'Available on your credit line'}</span>
+    <div class="row between"><span class="eyebrow">Food credit line</span>${creditPill(m)}</div>
     <div class="big">${ugx(avail)}</div>
-    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line. Anything in the store can go on it; the share spent on essentials decides when it grows.</p>
+    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line. It pays for food and household essentials; anything else comes from your wallet or points.</p>
     <div class="ladder" aria-hidden="true">${ladder}</div>
     <div class="ladder-lbl">${LADDER.map(v => `<span>${short(v)}</span>`).join('')}</div>
     ${next}
@@ -688,40 +706,24 @@ function txnList(id) {
 }
 
 function rulesFor(m) {
-  const lapsed = cover(m).s === 'lapsed';
-  const r = {
-    locked: [
-      ['The emergency allowance is locked on purpose.', 'The plan buys cover, not shopping money. Until a claim is approved the family still shops with the card, paying from its wallet or by a Mobile Money prompt, with the member discount.'],
-      [`${WAIT_DAYS}-day waiting period of continuous cover.`, 'Stops someone buying a week of cover the week they already know they will be laid off. A lapse starts the wait again.'],
-      ['Claims go to a person.', 'Automated checks gather the evidence; an operations officer approves or declines.'],
-    ],
-    review: [
-      ['The allowance stays locked during review.', 'It opens the moment the claim is approved. The wallet keeps working meanwhile.'],
-      ['Evidence is checked at the source.', 'NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions.'],
-    ],
-    active: [
-      ['The allowance is paid monthly, not as a lump sum.', `${ugx(A_LIMIT / 12)} a month for 12 months, so the household is fed for the whole recovery and a fraudulent claim costs one month, not 50M.`],
-      ['The allowance buys essentials; the card buys everything.', 'Insurance money goes on food and basics. Anything else in the basket comes from the wallet or a Mobile Money prompt, so the family never needs cash.'],
-    ],
-    good: [
-      ['Plan payments back the line.', 'They sit with the microfinance partner as a deposit. A default first draws on it.'],
-      ['Anything can go on the line.', 'It starts at 4.5M and climbs a rung after three on-time repayments, as long as at least 90% of credit spend is on essentials.'],
-    ],
-    overdue: [
-      ['The line pauses, it does not close.', 'One payment clears the overdue status and the line works again the same minute.'],
-      ['The rung is kept.', 'Late payment resets the on-time count, so the climb starts again.'],
-    ],
-  }[m.status];
-  if (lapsed) r.unshift(['Cover is paused.', 'The plan payment is past its grace period. Allowance, credit and the member discount stop; the wallet keeps working. Paying restarts cover.']);
+  const lapsed = cover(m).s === 'lapsed', r = [];
+  if (lapsed) r.push(['Cover is paused.', 'The plan payment is past its grace period. Allowance, credit and the member discount stop; the wallet keeps working. Paying restarts cover.']);
+  r.push({
+    none: ['One card, two kinds of help.', 'Every month the food credit line keeps the cupboard full. If the main income stops, the emergency allowance takes over. Both run on the same plan payment.'],
+    review: ['The allowance opens on approval.', 'Evidence is checked at the source: NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions. The wallet keeps working meanwhile.'],
+    active: ['The allowance is paid monthly, not as a lump sum.', `${ugx(A_LIMIT / 12)} a month for 12 months for essentials, so the household is fed for the whole recovery and a fraudulent claim costs one month, not 50M.`],
+  }[m.cover]);
+  if (m.cover === 'none') r.push([`${WAIT_DAYS}-day waiting period of continuous cover.`, 'Stops someone buying a week of cover the week they already know they will be laid off. A lapse starts the wait again.']);
+  if (m.cover === 'active') r.push(['Credit freezes instead of piling up.', 'While the allowance runs, nothing new goes on credit and no repayments fall due, so an emergency never turns into debt.']);
+  else if (m.credit.overdue) r.push(['The line pauses, it does not close.', 'One repayment clears the overdue status and the line works again the same minute. The on-time count starts again.']);
+  else r.push(['The credit line is for food.', `It pays for essentials only and starts at ${short(LADDER[0])}. Three on-time repayments with the plan paid up move it a rung higher. Extras come from the wallet or points, so the card still buys everything without cash.`]);
   const tryIt = lapsed
     ? 'Try this card at the <b>Store till</b> first: with cover paused and an empty wallet, the till sends a Mobile Money prompt instead. Then pay the plan here and try again.'
-    : {
-      locked: 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here, then charge a basket on the <b>Store till</b>.',
-      review: 'Open <b>Operations</b>, mark the open checks verified and approve the claim.',
-      active: 'Open the <b>Store till</b>, scan this card and put a basket with beer in it. Watch the allowance pay for the food and the wallet for the beer.',
-      good: 'Tap <b>Repay</b>. The third on-time repayment moves this household up to the 18M rung.',
-      overdue: 'Pay the overdue repayment here, then try the card at the <b>Store till</b>.',
-    }[m.status];
+    : m.cover === 'review' ? 'Open <b>Operations</b>, mark the open checks verified and approve the claim.'
+    : m.cover === 'active' ? 'Open the <b>Store till</b>, scan this card and add a Food Basket and a beer. The allowance pays for the food and the wallet for the beer.'
+    : m.credit.overdue ? 'Repay the overdue amount here, then try the card at the <b>Store till</b>.'
+    : m.credit.onTime === 2 ? 'Tap <b>Repay</b>. The third on-time repayment moves this household up a rung.'
+    : 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here to see credit freeze and the allowance open.';
   return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">${r.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
     <div class="try"><span class="eyebrow">Try it</span><span>${tryIt}</span></div></section>`;
 }
@@ -730,14 +732,15 @@ V.member = () => {
   const m = member(ui.viewAs);
   return `<div class="row between"><div class="stack" style="gap:4px"><h2>Family app</h2><p class="muted small">Example households, dated ${fdate(TODAY)}.</p></div>
     <label class="f" style="min-width:220px">Viewing as
-      <select class="in" id="view-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))} · Model ${x.plan}</option>`).join('')}</select></label></div>
+      <select class="in" id="view-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))}</option>`).join('')}</select></label></div>
   <div class="split phone-split">
     <div class="phone"><div class="screen">
       <div class="ph-top"><span>Kibanja</span><span class="mono">${m.id}</span></div>
       <p class="hello">Hello, ${esc(m.name)} family</p>
       ${cardHtml(m)}
       ${payBlock(m)}
-      ${m.plan === 'A' ? phoneA(m) : phoneB(m)}
+      ${creditBlock(m)}
+      ${emergencyBlock(m)}
       ${walletBlock(m)}
       ${pointsBlock(m)}
       ${loanBlock(m)}
@@ -745,7 +748,7 @@ V.member = () => {
       <div class="stack" style="gap:6px"><h4>Recent activity</h4>${txnList(m.id)}</div>
     </div></div>
     <div class="stack">${rulesFor(m)}
-      <section class="panel"><div class="row between"><h3>Account</h3>${statusPill(m)}</div>
+      <section class="panel"><div class="row between"><h3>Account</h3><span class="row" style="gap:6px">${emergencyPill(m)}${creditPill(m)}</span></div>
         <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd>
           <dt>Plan</dt><dd>${S.plans[m.sub.plan].name}, ${ugx(S.plans[m.sub.plan].price)} / ${S.plans[m.sub.plan].per}${m.sub.next && m.sub.next !== m.sub.plan ? `, switching to ${S.plans[m.sub.next].name}` : ''}</dd>
           <dt>Card can pay now</dt><dd class="num">${ugx(sources(m).total)}</dd></dl>
@@ -766,7 +769,8 @@ function cartTotals() {
   });
   const sum = k => lines.reduce((a, l) => a + l[k], 0);
   const ess = lines.filter(l => l.ess).reduce((a, l) => a + l.net, 0), total = sum('net'), other = total - ess;
-  const pay = { points: 0, allowance: 0, wallet: 0, credit: 0, creditEss: 0, mm: 0 };
+  const local = lines.filter(l => l.local).reduce((a, l) => a + l.net, 0);
+  const pay = { points: 0, allowance: 0, wallet: 0, credit: 0, mm: 0 };
   let e = ess, o = other;
   if (src) {
     if (ui.usePoints && src.pointsUsable) {
@@ -774,18 +778,18 @@ function cartTotals() {
       const p1 = Math.min(o, pay.points); o -= p1; e -= pay.points - p1; // points take extras first, leaving essentials for the allowance
     }
     pay.allowance = Math.min(e, src.allowance); e -= pay.allowance;
-    // The wallet takes non-essentials first, so credit is left for food and the household's essentials share stays high.
+    // The wallet takes extras first: the food credit line can only pay for essentials.
     const w1 = Math.min(o, src.wallet); o -= w1;
     const w2 = Math.min(e, src.wallet - w1); e -= w2;
     pay.wallet = w1 + w2;
-    pay.creditEss = Math.min(e, src.credit); e -= pay.creditEss;
-    const c2 = Math.min(o, src.credit - pay.creditEss); o -= c2;
-    pay.credit = pay.creditEss + c2;
+    pay.credit = Math.min(e, src.credit); e -= pay.credit;
   }
   pay.mm = e + o;
   // Points are earned on money the household pays in (wallet, credit, Mobile Money), not on insurance money or points.
-  const earn = src && src.live ? Math.floor((pay.wallet + pay.credit + pay.mm) / 100 * S.plans[m.sub.plan].pts) : 0;
-  return { m, src, lines, gross: sum('gross'), promoOff: sum('promoOff'), memberOff: sum('memberOff'), total, ess, other, pay, earn };
+  // Ugandan-made goods earn the plan's rate twice.
+  const paidIn = pay.wallet + pay.credit + pay.mm, rate = src && src.live ? S.plans[m.sub.plan].pts : 0;
+  const earn = Math.floor(paidIn / 100 * rate) + Math.floor(Math.min(local, paidIn) / 100 * rate);
+  return { m, src, lines, gross: sum('gross'), promoOff: sum('promoOff'), memberOff: sum('memberOff'), total, ess, other, local, pay, earn };
 }
 
 V.pos = () => {
@@ -793,9 +797,9 @@ V.pos = () => {
   const strip = m ? `<div class="member-strip">
       <div class="row between"><b>${esc(hh(m))}</b>${coverPill(m)}</div>
       <div class="tot small">
-        ${m.plan === 'A' ? `<span>Emergency allowance <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
+        ${m.cover === 'active' ? `<span>Emergency allowance <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
         <span>Wallet</span><span class="v">${ugx(src.wallet)}</span>
-        ${m.plan === 'B' ? `<span>Credit line</span><span class="v">${ugx(src.credit)}</span>` : ''}
+        <span>Food credit <span class="muted">(essentials)</span></span><span class="v">${ugx(src.credit)}</span>
         <span>Points</span><span class="v">${m.points.toLocaleString('en-US')} pts</span>
         <span>Member discount</span><span class="v">${trim2(src.disc)}%</span>
       </div>
@@ -804,12 +808,12 @@ V.pos = () => {
       ${src.notes.map(n => `<p class="small" style="color:var(--warn)">${esc(n)}</p>`).join('')}
     </div>` : `<p class="small muted">Scan or type a card number. Example cards:</p>`;
   const cart = ui.cart.length ? `<ul class="cart">${t.lines.map(l => `<li>
-      <span><span style="display:block">${esc(l.name)}</span><span class="tag ${l.ess ? '' : 'no'}">${l.ess ? 'Essential' : 'Other'}</span>${l.promo ? ` <span class="tag offer">${esc(l.promo.name)} −${trim2(l.promo.pct)}%</span>` : ''}</span>
+      <span><span style="display:block">${esc(l.name)}</span><span class="tag ${l.ess ? '' : 'no'}">${l.ess ? 'Essential' : 'Other'}</span>${l.local ? ' <span class="tag ug">UG-made</span>' : ''}${l.promo ? ` <span class="tag offer">${esc(l.promo.name)} −${trim2(l.promo.pct)}%</span>` : ''}</span>
       <span class="qty"><button data-a="dec" data-sku="${l.sku}" aria-label="One fewer ${esc(l.name)}">−</button>${l.q}<button data-a="inc" data-sku="${l.sku}" aria-label="One more ${esc(l.name)}">+</button></span>
       <span class="num">${short(l.gross - l.promoOff)}</span></li>`).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
   const paidBy = m ? [
     ['Kibanja points', P.points, P.points > 0],
-    ['Emergency allowance', P.allowance, m.plan === 'A'], ['Wallet', P.wallet, true], ['Credit line', P.credit, m.plan === 'B'],
+    ['Emergency allowance', P.allowance, m.cover === 'active'], ['Wallet', P.wallet, true], ['Food credit', P.credit, true],
     ['Mobile Money prompt to member', P.mm, true],
   ].filter(x => x[2]).map(([l, v]) => `<span>${l}</span><span class="v">${ugx(v)}</span>`).join('')
     : `<span>Mobile Money or cash</span><span class="v">${ugx(P.mm)}</span>`;
@@ -834,7 +838,7 @@ V.pos = () => {
         ${strip}
         ${m ? '' : `<div class="row">${S.members.map(x => `<button class="btn chip" data-a="pos-pick" data-id="${x.id}">${x.card.slice(-4)} · ${esc(x.name)}</button>`).join('')}</div>`}
       </section>
-      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
+      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${s.local ? '<span class="tag ug">UG-made</span>' : ''}${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
     </div>
     <section class="panel">
       <div class="row between"><h3>Basket</h3>${ui.cart.length ? '<button class="btn chip" data-a="clear-cart">Clear</button>' : ''}</div>
@@ -887,9 +891,9 @@ V.plans = () => {
     <section class="panel"><h3>How a member pays without cash</h3>
       <ol class="journey">
         <li><div><b>Discounts first.</b> <span class="muted">Product offers, then the member discount for a paid-up plan.</span></div></li>
-        <li><div><b>Emergency allowance.</b> <span class="muted">Essentials only, for Model A households with an approved claim.</span></div></li>
+        <li><div><b>Emergency allowance.</b> <span class="muted">Essentials only, for households with an approved emergency claim.</span></div></li>
         <li><div><b>Wallet.</b> <span class="muted">Anything in the basket, extras first.</span></div></li>
-        <li><div><b>Credit line.</b> <span class="muted">Anything, for Model B households in good standing.</span></div></li>
+        <li><div><b>Food credit line.</b> <span class="muted">Essentials only, for households in good standing. Frozen during an emergency.</span></div></li>
         <li><div><b>Mobile Money prompt.</b> <span class="muted">Whatever is left is sent to the member's phone to approve. No cash changes hands.</span></div></li>
       </ol>
     </section>
@@ -918,8 +922,8 @@ V.plans = () => {
 /* Operations */
 V.ops = () => {
   const pending = S.claims.filter(c => c.status === 'pending');
-  const liability = S.members.filter(m => m.plan === 'A' && m.status === 'active').reduce((s, m) => s + A_LIMIT - m.allowance.total, 0);
-  const credit = S.members.filter(m => m.plan === 'B').reduce((s, m) => s + m.credit.used, 0);
+  const liability = S.members.filter(m => m.cover === 'active').reduce((s, m) => s + A_LIMIT - m.allowance.total, 0);
+  const credit = S.members.reduce((s, m) => s + m.credit.used, 0);
   const wallets = S.members.reduce((s, m) => s + m.wallet, 0);
   const planIncome = S.members.reduce((s, m) => s + yearCost(S.plans[m.sub.plan]), 0);
   const lapsed = S.members.filter(m => cover(m).s !== 'paid').length;
@@ -945,7 +949,7 @@ V.ops = () => {
     <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${PLAN_KEYS.map(k => `${S.members.filter(m => m.sub.plan === k).length} ${S.plans[k].name.toLowerCase()}`).join(' · ')}</span></div>
     <div class="kpi"><span class="eyebrow">Plan income a year</span><span class="v">${short(planIncome)}</span><span class="small muted">${lapsed} household${lapsed === 1 ? '' : 's'} behind on payments</span></div>
     <div class="kpi"><span class="eyebrow">Allowance still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
-    <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.status === 'overdue').length} household overdue</span></div>
+    <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.credit.overdue).length} household overdue · ${S.members.filter(m => m.cover === 'active').length} frozen</span></div>
     <div class="kpi"><span class="eyebrow">Kibanja Loans outstanding</span><span class="v">${short(S.loans.filter(l => l.status === 'active').reduce((s, l) => s + balanceAfter(l, l.paid), 0))}</span><span class="small muted">${S.loans.filter(l => l.status === 'pending').length} application${S.loans.filter(l => l.status === 'pending').length === 1 ? '' : 's'} waiting</span></div>
     <div class="kpi"><span class="eyebrow">Wallet money held</span><span class="v">${short(wallets)}</span><span class="small muted">customers' money, kept in trust</span></div>
     <div class="kpi"><span class="eyebrow">Claims to decide</span><span class="v">${pending.length}</span><span class="small muted">target: within 72 hours</span></div>
@@ -959,8 +963,8 @@ V.ops = () => {
     </section>
   </div>
   <section class="stack"><h3>Member register</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Benefit</th><th class="n">Wallet</th><th class="n">Card can pay now</th></tr></thead>
-    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${coverPill(m)}</td><td>${m.plan === 'A' ? 'A · ' : 'B · ' + short(LADDER[m.credit.rung]) + ' · '}${statusPill(m)}</td><td class="n">${ugx(m.wallet)}</td><td class="n">${ugx(sources(m).total)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Emergency</th><th>Food credit</th><th class="n">Wallet</th><th class="n">Card can pay now</th></tr></thead>
+    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${coverPill(m)}</td><td>${emergencyPill(m)}</td><td>${short(LADDER[m.credit.rung])} line · ${creditPill(m)}</td><td class="n">${ugx(m.wallet)}</td><td class="n">${ugx(sources(m).total)}</td></tr>`).join('')}</tbody></table></div>
   </section>`;
 };
 
@@ -1070,7 +1074,7 @@ function modelOut() {
 
 /* Rollout */
 const LIC = [
-  ['ira', 'Underwriting partner licensed by the Insurance Regulatory Authority of Uganda', 'Model A is insurance. Either a licensed insurer carries the risk and you act as its distributor, or you apply for your own licence with the capital that requires.'],
+  ['ira', 'Underwriting partner licensed by the Insurance Regulatory Authority of Uganda', 'The emergency cover is insurance. Either a licensed insurer carries the risk and you act as its distributor, or you apply for your own licence with the capital that requires.'],
   ['umra', 'Credit partner, or a Tier 4 licence from the Uganda Microfinance Regulatory Authority', 'The credit line and Kibanja Loans lend money. A licensed bank, microfinance deposit-taker or money lender has to hold the deposits and the loan book.'],
   ['bou', 'Payments and the wallet through a Bank of Uganda-licensed provider', 'Card payments, Mobile Money collections and stored wallet balances fall under the National Payment Systems Act. Wallet money belongs to customers: hold it through a licensed e-money issuer or payment partner, in trust.'],
   ['pdpo', 'Registration with the Personal Data Protection Office', 'Health and employment records used to verify claims are sensitive personal data under the Data Protection and Privacy Act 2019. Register, and get explicit consent at enrolment.'],
@@ -1084,7 +1088,7 @@ V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="
     <ul><li>Family app, card issuing, Mobile Money premium collection</li><li>Card-reading link at 3–5 partner stores. Approach Kampala chains such as Fraine and Quality: their shoppers get cover and credit, the store gets locked-in customers</li><li>Operations desk with claims verification</li><li>Underwriter and credit partner signed</li></ul>
     <p class="small"><b>Suggested gate:</b> six months of real claim and repayment data before the store opens.</p></article>
   <article class="panel phase"><span class="when">Months 7–12</span><h3>Flagship store</h3><p class="small muted">Open the first Kibanja store in Kira, Kisaasi or Naalya and keep the full 15–25% retail margin.</p>
-    <ul><li>Own store till with essentials split</li><li>Stock and shelf-price management</li><li>Member pricing for locked Model A cards</li></ul>
+    <ul><li>Own store till with essentials split</li><li>Stock and shelf-price management</li><li>Food Basket packing and member pricing</li></ul>
     <p class="small" style="color:var(--bad)"><b>Change from the original plan:</b> fund the store from equity or debt, not the premium float. That money is owed to claimants.</p></article>
   <article class="panel phase"><span class="when">Year 2 onward</span><h3>Micro-hub expansion</h3><p class="small muted">Smaller, low-overhead container-style hubs close to members.</p>
     <ul><li>Offline-capable till that syncs later</li><li>Hub stock replenished from the flagship</li><li>Hubs placed where members' card spend is highest</li></ul></article>
@@ -1243,9 +1247,9 @@ V.how = () => {
   <ol class="how-steps">
     ${step(1, 'Join and pick a plan', `Enrol in the app with a national ID and a phone number. Pay ${ugx(P.weekly.price)} a week, ${ugx(P.monthly.price)} a month or ${ugx(P.annual.price)} a year by Mobile Money. The yearly plan is cheapest.`, 'plans', 'See the plans')}
     ${step(2, 'Get the card and the app', 'The SmartCare card works at every Kibanja and partner store. On days the card stays at home, the app gives a one-time pay code instead.', 'member', 'Open the family app')}
-    ${step(3, 'Shop without cash', 'The cashier scans the card. The till takes off discounts, then pays from points, the emergency allowance, the wallet and the credit line. Anything left is a Mobile Money prompt on your phone.', 'pos', 'Try the till')}
-    ${step(4, 'Earn points and discounts', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Paid-up members also get ${trim2(P.weekly.disc)}–${trim2(P.annual.disc)}% off in store.`, 'plans', 'See discounts')}
-    ${step(5, 'Covered when income stops', `After ${WAIT_DAYS} days of cover, a job loss, a hospital admission or a declared drought opens an allowance of up to ${ugx(A_LIMIT / 12)} a month for essentials, for 12 months.`, 'ops', 'See how claims are checked')}
+    ${step(3, 'Shop without cash', 'The cashier scans the card. The till takes off discounts, then pays from points, the emergency allowance, the wallet and the food credit line. Anything left is a Mobile Money prompt on your phone. The price-locked Food Basket covers a month of staples.', 'pos', 'Try the till')}
+    ${step(4, 'Earn points and discounts', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly, and double on Ugandan-made goods. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Paid-up members also get ${trim2(P.weekly.disc)}–${trim2(P.annual.disc)}% off in store.`, 'plans', 'See discounts')}
+    ${step(5, 'Covered when income stops', `After ${WAIT_DAYS} days of cover, a job loss, a hospital admission or a declared drought opens an allowance of up to ${ugx(A_LIMIT / 12)} a month for essentials, for 12 months. Food credit repayments freeze meanwhile.`, 'ops', 'See how claims are checked')}
     ${step(6, 'Borrow when you need to', 'Kibanja Loan pays school fees straight to the school, gives seed and fertiliser at a hub, funds business stock or sends quick cash. The limit comes from the household\'s own record on the card.', 'loans', 'Open Kibanja Loan')}
   </ol>
 </section>
@@ -1255,7 +1259,8 @@ V.how = () => {
   <div class="tablewrap"><table class="t wrap"><thead><tr><th>Money</th><th>Who holds it</th><th>What it pays for</th><th>What Kibanja earns</th></tr></thead><tbody>
     <tr><td><b>Plan payments</b></td><td>A licensed insurer partner</td><td>Emergency allowances for households hit by a shock</td><td>A share of the premium for running the scheme</td></tr>
     <tr><td><b>Wallet top-ups</b></td><td>A licensed payment partner, in trust</td><td>Shopping at any Kibanja or partner store</td><td>Nothing directly: it is the family's money</td></tr>
-    <tr><td><b>Credit line and Kibanja Loans</b></td><td>A licensed lender partner</td><td>Groceries now, school fees, farm inputs, business stock</td><td>Processing fees and a share of loan interest</td></tr>
+    <tr><td><b>Food credit and Kibanja Loans</b></td><td>A licensed lender partner</td><td>Groceries now, farm inputs, school fees, food-trade stock</td><td>Processing fees and a share of loan interest</td></tr>
+    <tr><td><b>Food Basket and store stock</b></td><td>Producers and manufacturers</td><td>Staples bought on forward orders, paid within 48 hours</td><td>A thin margin on the basket; most of its value is loyalty</td></tr>
     <tr><td><b>Shopping at partner stores</b></td><td>The store</td><td>The family's basket</td><td>A 6% rebate from the store</td></tr>
     <tr><td><b>Shopping at Kibanja stores</b></td><td>Kibanja</td><td>The family's basket</td><td>The full 15–25% retail margin</td></tr>
   </tbody></table></div>
@@ -1271,12 +1276,14 @@ V.how = () => {
       <li><b>The insurer partner</b><span class="muted small">Carries the emergency risk and holds the premiums.</span></li>
       <li><b>The lender partner</b><span class="muted small">Funds the credit line and Kibanja Loans and holds the loan book.</span></li>
       <li><b>The payment partner</b><span class="muted small">Moves Mobile Money and holds wallet balances in trust.</span></li>
+      <li><b>Producers, manufacturers and Made in Uganda</b><span class="muted small">Supply the Food Basket and the shelves on forward orders, and fund member offers.</span></li>
     </ul>
   </section>
   <section class="panel"><h3>Questions families ask</h3>
     <div class="faq">
       <details><summary>What if I miss a payment?</summary><p class="small">Cover continues for ${P.weekly.grace} days on weekly, ${P.monthly.grace} on monthly and ${P.annual.grace} on yearly. After that the allowance, credit, discount and points pause until you pay. The wallet keeps working. Paying after a pause restarts the ${WAIT_DAYS}-day wait before you can claim.</p></details>
-      <details><summary>Can I buy anything with the card?</summary><p class="small">Yes. Points, the wallet and the credit line pay for any item. The emergency allowance pays only for essentials, because it is insurance money meant to keep the family fed.</p></details>
+      <details><summary>Can I buy anything with the card?</summary><p class="small">Yes. Points and the wallet pay for any item, and anything left goes to Mobile Money, so you never need cash. The food credit line and the emergency allowance pay only for food and household essentials, so borrowed and insurance money always goes on feeding the family.</p></details>
+      <details><summary>Do I have to choose between credit and cover?</summary><p class="small">No. Every card has both. You use the food credit line month to month; if the main income stops, the emergency allowance opens and credit repayments freeze until a month after it ends.</p></details>
       <details><summary>Which shops take it?</summary><p class="small">Kibanja stores and partner supermarkets. The first partners are Kampala stores during the launch phase.</p></details>
       <details><summary>What if the card can't cover the whole basket?</summary><p class="small">The till sends the rest to your phone as a Mobile Money prompt. If you don't approve it, the cashier takes items off instead.</p></details>
       <details><summary>Can I borrow during an emergency?</summary><p class="small">No. While a claim is open or an allowance is being paid, the allowance is the help. Lending to a family whose income has just stopped would put it deeper in debt.</p></details>
@@ -1288,9 +1295,9 @@ V.how = () => {
 
 /* Kibanja Loan */
 const LOAN_PRODUCTS = {
+  farm: { name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], rate: 2.0, to: 'Collected as seed and fertiliser at a Kibanja hub', via: 'Hub voucher', blurb: 'Seed, fertiliser and tools. Repay in cash, or sell the harvest to Kibanja and the instalments come off the price.' },
   school: { name: 'School fees', max: 3000000, terms: [3, 6, 9], rate: 2.5, to: 'Paid straight to the school', via: 'To school', blurb: 'Fees paid to the school, so the money goes where it was meant to.' },
-  farm: { name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], rate: 2.0, to: 'Collected as seed and fertiliser at a Kibanja hub', via: 'Hub voucher', blurb: 'Seed, fertiliser and tools, repaid after harvest.' },
-  business: { name: 'Business stock', max: 5000000, terms: [3, 6, 12], rate: 2.5, to: 'Sent to Mobile Money', via: 'Mobile Money', blurb: 'Stock for a kiosk, salon or market stall.' },
+  business: { name: 'Food-trade stock', max: 5000000, terms: [3, 6, 12], rate: 2.5, to: 'Sent to Mobile Money', via: 'Mobile Money', blurb: 'Stock for a food kiosk, market stall or produce trade.' },
   quick: { name: 'Quick cash', max: 500000, terms: [1, 2, 3], rate: 2.5, to: 'Sent to Mobile Money within minutes', via: 'Mobile Money', blurb: 'A small top-up for a gap before payday.' },
 };
 const LOAN_FEE = 1;          // one-off processing fee, % of the amount
@@ -1308,21 +1315,21 @@ function score(m) {
   parts.push(['Time as a member', months / 12 * 20, 20, `${months} month${months === 1 ? '' : 's'}`]);
   parts.push(['Plan payments', { paid: 20, due: 10, lapsed: 0 }[c.s], 20, { paid: 'Up to date', due: 'Payment due', lapsed: 'Cover paused' }[c.s]]);
   const late = S.loans.some(l => l.m === m.id && l.status === 'active' && nextDue(l) < TODAY);
-  let rep = 15, repTxt = 'No credit history yet';
-  if (m.plan === 'B') { rep = m.status === 'overdue' ? 0 : 15 + Math.min(m.credit.onTime, 3) / 3 * 10; repTxt = m.status === 'overdue' ? 'Credit repayment overdue' : `${Math.min(m.credit.onTime, 3)} on-time repayments in a row`; }
+  let rep = m.credit.overdue ? 0 : 15 + Math.min(m.credit.onTime, 3) / 3 * 10;
+  let repTxt = m.credit.overdue ? 'Food credit repayment overdue' : `${Math.min(m.credit.onTime, 3)} on-time repayments in a row`;
   if (late) { rep = 0; repTxt = 'Loan instalment late'; }
   parts.push(['Repayment record', rep, 25, repTxt]);
-  const share = m.plan === 'B' ? essShare(m.credit) : 0.9;
-  parts.push(['Spending on essentials', share * 20, 20, m.plan === 'B' ? pct(share) : 'Not tracked yet, counted as 90%']);
+  const share = essShare(m.spend);
+  parts.push(['Spending on essentials', share * 20, 20, `${pct(share)} of card spending`]);
   parts.push(['Card activity', Math.min(15, m.points / S.loyalty.threshold * 15), 15, `${m.points.toLocaleString('en-US')} points`]);
   return { total: Math.round(parts.reduce((s, p) => s + p[1], 0)), parts };
 }
 
 function loanOffer(m, key) {
   const P = LOAN_PRODUCTS[key], sc = score(m).total, blocks = [];
-  if (m.status === 'active' || m.status === 'review') blocks.push('This household has an open emergency claim or allowance. Kibanja does not lend during an emergency; the allowance is the help.');
+  if (m.cover === 'active' || m.cover === 'review') blocks.push('This household has an open emergency claim or allowance. Kibanja does not lend during an emergency; the allowance is the help.');
   if (cover(m).s === 'lapsed') blocks.push('Cover is paused. The plan has to be paid first.');
-  if (m.status === 'overdue') blocks.push('A credit-line repayment is overdue.');
+  if (m.credit.overdue) blocks.push('A food credit repayment is overdue.');
   if (openLoan(m)) blocks.push('One loan at a time: this household already has a loan open.');
   if (sc < 50) blocks.push(`A score of ${sc} is below the 50 needed to borrow.`);
   const limit = sc < 50 ? 0 : Math.floor(P.max * Math.min(1, (sc - 40) / 50) / 50000) * 50000;
@@ -1330,7 +1337,7 @@ function loanOffer(m, key) {
 }
 
 function affordability(m, l) {
-  const other = (m.plan === 'B' ? m.credit.dueAmt : 0) + S.loans.filter(x => x.m === m.id && x.status === 'active' && x !== l).reduce((s, x) => s + instalment(x), 0);
+  const other = (m.cover === 'active' ? 0 : m.credit.dueAmt) + S.loans.filter(x => x.m === m.id && x.status === 'active' && x !== l).reduce((s, x) => s + instalment(x), 0);
   const cap = m.income * AFFORD, total = other + instalment(l);
   return { ok: total <= cap, total, cap, other };
 }
@@ -1439,6 +1446,89 @@ function loanCalc() {
   const btn = $('#ln-submit'); if (btn) btn.disabled = !a.ok;
 }
 
+/* Food and producers */
+function volume(n, unit) {
+  if (unit === 'kg') return n >= 1000 ? `${trim2(n / 1000)} t` : `${Math.round(n).toLocaleString('en-US')} kg`;
+  if (unit === 'L') return n >= 1000 ? `${trim2(n / 1000)}k L` : `${Math.round(n).toLocaleString('en-US')} L`;
+  return `${Math.round(n).toLocaleString('en-US')} ${unit}`;
+}
+
+V.food = () => {
+  const items = BASKET.map(([sku, q, amt, unit]) => { const x = SKUS.find(k => k.sku === sku); return { ...x, q, amt, unit, line: x.price * q }; });
+  const shelf = items.reduce((a, i) => a + i.line, 0), basket = SKUS.find(x => x.sku === '3001');
+  const share = S.sales.all ? S.sales.local / S.sales.all : 0;
+  const up = ui.uptake / 100;
+  return `<section class="hero">
+  <span class="eyebrow">Food and producers</span>
+  <h1>Food security starts <em>with the supply</em>.</h1>
+  <p class="lede">Kibanja's members are predictable demand: thousands of households buying the same staples every month. That lets Kibanja buy straight from Ugandan farmers and manufacturers on forward orders, lock prices for families, and pay producers fast.</p>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <div class="row between"><h3>Kibanja Food Basket</h3><span class="pill ok">Price locked to ${fdate(BASKET_LOCKED_TO)}</span></div>
+    <div class="big">${ugx(basket.price)}<span class="per"> a month · family of five</span></div>
+    <p class="small">Saves <b>${ugx(shelf - basket.price)}</b> (${pct((shelf - basket.price) / shelf)}) against buying the same items one by one. About <b class="num">${ugx(basket.price / 5 / 30)}</b> per person per day.</p>
+    <div class="tablewrap"><table class="t"><thead><tr><th>In the basket</th><th class="n">Qty</th><th class="n">Shelf price</th></tr></thead><tbody>
+      ${items.map(i => `<tr><td>${esc(i.name)}${i.local ? ' <span class="tag ug">UG-made</span>' : ''}</td><td class="n">${i.q}</td><td class="n">${i.line.toLocaleString('en-US')}</td></tr>`).join('')}
+      <tr class="strong"><td>Bought one by one</td><td></td><td class="n">${shelf.toLocaleString('en-US')}</td></tr>
+    </tbody></table></div>
+    <p class="small muted">The price holds because the basket is bought on three-month forward orders. Members pay for it with food credit, the emergency allowance, the wallet or points. Add it at the Store till.</p>
+  </section>
+  <section class="panel">
+    <h3>Ugandan-made share of store sales</h3>
+    <div class="big">${pct(share)}</div>
+    <div class="target" role="img" aria-label="${pct(share)} of sales, against targets of 40% and 50%"><i style="width:${Math.min(100, share * 100)}%"></i><b style="left:40%"></b><b style="left:50%"></b></div>
+    <div class="target-lbl"><span style="left:40%">40%</span><span style="left:50%">50%</span></div>
+    <p class="small">The Buy Uganda Build Uganda policy aimed for half of supermarket shelf space to carry local goods, and a 2017 directive asked for 40%. Manufacturers say most supermarkets haven't got there. Kibanja can report this number every month, which is a strong story for partners and government.</p>
+    <p class="small muted">${ugx(S.sales.local)} of ${ugx(S.sales.all)} this month. Every sale at the Store till updates it, and Ugandan-made goods earn shoppers double points.</p>
+  </section>
+</div>
+
+<section class="stack">
+  <h2>Partners</h2>
+  <div class="tablewrap"><table class="t wrap"><thead><tr><th>Partner</th><th>Type</th><th>Supplies</th><th>Terms</th><th>Status</th></tr></thead><tbody>
+    ${S.partners.map(x => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.kind)}</td><td>${esc(x.supplies)}</td><td>${esc(x.terms)}</td><td><span class="pill ${x.status === 'Proposed' ? 'warn' : ''}">${x.status}</span></td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="small muted">Rows marked "Example" show the kind of partner Kibanja needs, not real agreements. Replace them with real names as deals are signed.</p>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <div class="row between"><h3>Made in Uganda (MIU)</h3><span class="pill warn">Proposed</span></div>
+    <p class="small">Press coverage describes MIU as a government-backed commerce platform for Ugandan manufacturers, SMEs and artisans that combines an online marketplace, physical retail outlets and fulfilment. A 2025 government newsletter mentions a Made in Uganda supermarket at the UMA showground in Lugogo.</p>
+    <h4>What a partnership could look like</h4>
+    <ul class="rules">
+      <li><b>SmartCare accepted at MIU outlets.</b><span class="muted small">Members pay with the card, points and food credit at MIU's shops, so Kibanja grows its store network without building it.</span></li>
+      <li><b>MIU goods on Kibanja shelves and in the Food Basket.</b><span class="muted small">Tagged UG-made, earning double points, with no listing fees.</span></li>
+      <li><b>MIU fulfilment for Kibanja micro-hubs.</b><span class="muted small">One supply line into the container hubs planned for Year 2.</span></li>
+      <li><b>Shared demand data.</b><span class="muted small">Aggregated, never with names: which Ugandan-made goods members buy, where and how often.</span></li>
+    </ul>
+    <p class="small muted">No agreement exists yet. These details come from press coverage; confirm them with MIU directly before quoting them.</p>
+  </section>
+  <section class="panel">
+    <h3>What producers and manufacturers get</h3>
+    <ul class="rules">
+      <li><b>No shelf fees for Ugandan-made goods.</b><span class="muted small">Uganda's manufacturers have complained of paying supermarkets for shelf space. Kibanja doesn't charge listing fees.</span></li>
+      <li><b>Orders they can plan on.</b><span class="muted small">Three-month forward orders sized from member numbers, shown below.</span></li>
+      <li><b>Paid within 48 hours by Mobile Money.</b><span class="muted small">Small producers can't wait 60 days for a supermarket to pay.</span></li>
+      <li><b>Farm-input loans repaid in produce.</b><span class="muted small">A Kibanja Loan buys seed and fertiliser; Kibanja buys the harvest and takes the instalments off the price.</span></li>
+      <li><b>Offers that move volume.</b><span class="muted small">A supplier-funded offer reaches every member's app and till at once.</span></li>
+    </ul>
+  </section>
+</div>
+
+<section class="stack">
+  <div class="row between"><h2>Volume producers can plan on</h2>
+    <label class="f" style="min-width:220px">Households taking a basket each month <span class="hint">%</span><input class="in num" type="number" id="food-uptake" min="0" max="100" step="5" value="${ui.uptake}"></label></div>
+  <div class="tablewrap"><table class="t"><thead><tr><th>Product, a month</th><th class="n">Per basket</th>${M.fam.map((f, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead><tbody>
+    ${items.map(i => `<tr><td>${esc(i.name)}</td><td class="n">${volume(i.amt, i.unit)}</td>${M.fam.map(f => `<td class="n">${volume(i.amt * f * up, i.unit)}</td>`).join('')}</tr>`).join('')}
+    <tr class="strong"><td>Basket spend</td><td class="n">${short(basket.price)}</td>${M.fam.map(f => `<td class="n">${short(basket.price * f * up)}</td>`).join('')}</tr>
+  </tbody></table></div>
+  <p class="small muted">Household numbers come from the Underwriting screen. This is the volume to put in front of a mill, a cooperative or MIU when negotiating a locked price.</p>
+</section>`;
+};
+
 /* ---------- render + actions ---------- */
 function render() {
   document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === ui.view)));
@@ -1468,15 +1558,15 @@ const A = {
   'cancel-claim': () => { ui.claimForm = false; render(); },
   pay: () => {
     const m = member(ui.viewAs), c = m.credit;
-    const wasOverdue = m.status === 'overdue';
+    const wasOverdue = c.overdue;
     c.used = Math.max(0, c.used - c.dueAmt);
     S.txns.push({ d: TODAY, m: m.id, where: 'Repayment · Mobile Money', smart: 0, mm: c.dueAmt, items: 0 });
     c.onTime = wasOverdue ? 0 : c.onTime + 1;
-    m.status = 'good';
+    c.overdue = false;
     c.due = addMonths(wasOverdue ? TODAY : c.due, 1);
     c.dueAmt = c.used ? Math.max(100000, Math.round(c.used / 4 / 1000) * 1000) : 0;
-    let msg = wasOverdue ? 'Repaid. The credit line works again.' : `Repaid on time (${Math.min(c.onTime, 3)}/3).`;
-    if (c.onTime >= 3 && essShare(c) >= 0.9 && c.rung < LADDER.length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(LADDER[c.rung])} rung`; }
+    let msg = wasOverdue ? 'Repaid. The food credit line works again.' : `Repaid on time (${Math.min(c.onTime, 3)}/3).`;
+    if (c.onTime >= 3 && cover(m).s === 'paid' && c.rung < LADDER.length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(LADDER[c.rung])} rung`; }
     render(); toast(msg);
   },
   'pay-plan': () => {
@@ -1532,10 +1622,12 @@ const A = {
       m.points += t.earn;
       if (P.allowance) { m.allowance.month += P.allowance; m.allowance.total += P.allowance; }
       m.wallet -= P.wallet;
-      if (P.credit) { m.credit.used += P.credit; m.credit.ess += P.creditEss; m.credit.all += P.credit; }
+      if (P.credit) m.credit.used += P.credit;
+      m.spend.ess += t.ess; m.spend.all += t.total;
       S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: P.points + P.allowance + P.wallet + P.credit, mm: P.mm, items: t.lines.reduce((s, l) => s + l.q, 0) });
-      tenders = [['Kibanja points', P.points], ['Emergency allowance', P.allowance], ['SmartCare wallet', P.wallet], ['Credit line', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
+      tenders = [['Kibanja points', P.points], ['Emergency allowance', P.allowance], ['SmartCare wallet', P.wallet], ['Food credit', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
     } else tenders = [['Mobile Money or cash', P.mm]];
+    S.sales.local += t.local; S.sales.all += t.total;
     ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines: t.lines, promoOff: t.promoOff, memberOff: t.memberOff, disc: m ? t.src.disc : 0, total: t.total, tenders, margin, earn: m ? t.earn : 0, balance: m ? m.points : 0 };
     ui.cart = []; ui.usePoints = false;
     render();
@@ -1549,12 +1641,12 @@ const A = {
   approve: () => {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
     c.status = 'approved'; c.decided = TODAY;
-    m.status = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
-    render(); toast(`${hh(m)}: allowance open, ${ugx(A_LIMIT / 12)} a month`);
+    m.cover = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
+    render(); toast(`${hh(m)}: allowance open at ${ugx(A_LIMIT / 12)} a month, food credit frozen`);
   },
   decline: () => {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
-    c.status = 'declined'; c.decided = TODAY; m.status = 'locked';
+    c.status = 'declined'; c.decided = TODAY; m.cover = 'none';
     render(); toast(`${c.id} declined. The household is told why in the app.`);
   },
   'model-reset': () => { Object.assign(M, JSON.parse(JSON.stringify(M0))); render(); },
@@ -1597,7 +1689,7 @@ document.addEventListener('submit', e => {
     checks.push({ t: 'No other claim this policy year', r: S.claims.some(x => x.member === m.id && x.status === 'approved') ? 'fail' : 'ok' });
     const id = 'CLM-0' + (142 + S.claims.length - 2);
     S.claims.push({ id, member: m.id, type, filed: TODAY, status: 'pending', note, checks });
-    m.status = 'review'; ui.claimForm = false; ui.opsClaim = id;
+    m.cover = 'review'; ui.claimForm = false; ui.opsClaim = id;
     render(); toast(`Claim ${id} sent. Operations can see it now.`);
   }
 });
@@ -1622,6 +1714,7 @@ document.addEventListener('change', e => {
   }
   if (t.dataset.lic) { licences[t.dataset.lic] = t.checked; store.set('ksc-licences', licences); }
   if (t.dataset.room) { dataroom[t.dataset.room] = t.checked; store.set('ksc-dataroom', dataroom); }
+  if (t.id === 'food-uptake') { const v = parseFloat(t.value); ui.uptake = isFinite(v) ? Math.max(0, Math.min(100, v)) : 0; render(); }
   if (t.id === 'float-yield') { const v = parseFloat(t.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
 });
 
