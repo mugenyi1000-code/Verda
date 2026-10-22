@@ -8,13 +8,14 @@ Open `kibanja-smartcare.html` in a browser. It is one self-contained file
 with no build step and no server. Everything runs on example households
 dated 22 Oct 2026, and **Reset demo** puts them back.
 
-## The seven screens
+## The eight screens
 
 | Screen | What it shows |
 |---|---|
 | Overview | Model A (emergency card) and Model B (essentials credit line) side by side, the household's year on the platform, and the one number to check first |
-| Family app | The phone app for each example household: card, cover status, reporting an emergency, the monthly allowance, the credit ladder and repayments |
-| Store till | Cashier view. Reads the card, puts essentials on SmartCare and pushes extras (beer, airtime, soda) to cash. Refuses locked or overdue cards |
+| Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, reporting an emergency, the monthly allowance, the credit ladder and repayments |
+| Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash: emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
+| Plans and discounts | Weekly (UGX 32,000), monthly (135,000) and annual (1.5M) plans with editable prices, member discount and grace days; what each discount leaves of the store margin; product offers you can add, pause and remove, funded by Kibanja or a supplier |
 | Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
 | Underwriting | The three-year table rebuilt from the plan's assumptions: 96% of households on a monthly credit line, 10M card spend a year, 6% supermarket rebate, 2.5% processing fee per cycle, 4% claiming an average 20M. Lands within 1% of the original (net 1.19B / 6.6B / 20.6B vs 1.2B / 6.65B / 20.75B; the gap is the fee charged only on credit users). Inputs for credit losses and cost of funds, a stress grid, and findings |
 | Rollout | Phase 1 in detail, flagship store set-up costs, and the licences and partners to line up first |
@@ -35,6 +36,12 @@ reduces the household's allowance or credit.
   float to open the flagship; that money is owed to claimants, so the store
   is funded from equity or debt.
 - **Claims are decided by a person.** Automated checks gather the evidence.
+- **Cover needs continuous payment.** A missed plan payment keeps cover for
+  the plan's grace days (3 weekly, 7 monthly, 14 annual), then pauses the
+  allowance, credit and member discount. The wallet keeps working. Paying
+  after a lapse restarts the 90-day claim waiting period.
+- **Suggested plan prices** make annual the cheapest over a year (weekly
+  costs UGX 1,664,000, monthly 1,620,000), so paying upfront is the reward.
 
 ## What the model flags
 
@@ -47,6 +54,10 @@ reduces the household's allowance or credit.
   table counts neither credit losses nor cost of funds.
 - A 2.5% fee every monthly cycle is about 30% a year; check it against
   UMRA's rules on money-lender interest and fees.
+- Member discounts aren't in the original table: 5% on UGX 10M of card spend
+  is UGX 500k per household a year if Kibanja pays it all.
+- Wallet balances are customers' money and need a licensed e-money or
+  payment partner holding them in trust.
 - A drought trigger pays a whole district at once and needs a per-district
   cap and reinsurance.
 - Missing costs: underwriter share or reinsurance, commissions, card

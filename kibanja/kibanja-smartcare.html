@@ -233,6 +233,14 @@ legend { padding: 0; margin-bottom: 8px; }
 .lic input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--leaf); }
 .lic li:has(input:checked) b { text-decoration: line-through; color: var(--muted); }
 
+/* Plans */
+.plans { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.plan-tile { gap: 8px; align-content: start; }
+.plan-tile .per { font-size: 14px; color: var(--muted); }
+.tag.offer { color: var(--sun); }
+.cell-in { width: 120px; text-align: right; padding: 6px 8px; }
+.paid-by { display: grid; gap: 6px; padding: 12px; border-radius: 8px; background: var(--sunk); }
+
 /* Investors */
 .adv { display: grid; gap: 12px; align-content: start; }
 .adv h4 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -262,6 +270,7 @@ legend { padding: 0; margin-bottom: 8px; }
       <button class="tab" role="tab" data-a="tab" data-v="overview">Overview</button>
       <button class="tab" role="tab" data-a="tab" data-v="member">Family app</button>
       <button class="tab" role="tab" data-a="tab" data-v="pos">Store till</button>
+      <button class="tab" role="tab" data-a="tab" data-v="plans">Plans and discounts</button>
       <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
       <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
       <button class="tab" role="tab" data-a="tab" data-v="rollout">Rollout</button>
@@ -275,11 +284,11 @@ legend { padding: 0; margin-bottom: 8px; }
 <script>
 /* ---------- constants ---------- */
 const TODAY = '2026-10-22';            // demo date: every example household is dated against this
-const PREMIUM = 1500000;
 const A_LIMIT = 50000000;              // Model A: emergency allowance, paid over 12 months
 const LADDER = [4500000, 9000000, 18000000, 30000000, 50000000]; // Model B credit rungs
 const WAIT_DAYS = 90;
 const TYPES = { job: 'Job loss', medical: 'Hospital admission', drought: 'Drought in district' };
+const PLAN_KEYS = ['weekly', 'monthly', 'annual'];
 const SKUS = [
   { sku: '1001', name: 'Maize flour (posho) 2 kg', price: 7000, ess: true },
   { sku: '1002', name: 'Rice, Super 5 kg', price: 24000, ess: true },
@@ -300,21 +309,36 @@ const MARGIN = { ess: 0.12, other: 0.25 }; // assumed store gross margin: staple
 
 function seed() {
   return {
+    // Annual is the plan's UGX 1.5M. Weekly and monthly cost more over a year, so paying upfront is itself the discount.
+    plans: {
+      weekly: { name: 'Weekly', price: 32000, per: 'week', perYear: 52, grace: 3, disc: 2 },
+      monthly: { name: 'Monthly', price: 135000, per: 'month', perYear: 12, grace: 7, disc: 3 },
+      annual: { name: 'Annual', price: 1500000, per: 'year', perYear: 1, grace: 14, disc: 5 },
+    },
+    promos: [
+      { id: 'P1', sku: '1009', pct: 10, name: 'Matooke week', funder: 'Kibanja', on: true },
+      { id: 'P2', sku: '1005', pct: 8, name: 'Cooking oil offer', funder: 'Supplier', on: true },
+    ],
     members: [
-      { id: 'KSC-0001', card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, plan: 'A', status: 'locked', enrolled: '2026-03-02' },
-      { id: 'KSC-0002', card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, plan: 'B', status: 'good', enrolled: '2026-01-15',
-        credit: { rung: 1, used: 2350000, onTime: 2, essential: 0.96, due: '2026-11-05', dueAmt: 780000 } },
-      { id: 'KSC-0003', card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, plan: 'A', status: 'active', enrolled: '2025-12-10',
+      { id: 'KSC-0001', card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, plan: 'A', status: 'locked', enrolled: '2026-03-02', wallet: 85000,
+        sub: { plan: 'annual', paidUntil: '2027-03-02', start: '2026-03-02' } },
+      { id: 'KSC-0002', card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, plan: 'B', status: 'good', enrolled: '2026-01-15', wallet: 40000,
+        sub: { plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' },
+        credit: { rung: 1, used: 2350000, onTime: 2, ess: 9600000, all: 10000000, due: '2026-11-05', dueAmt: 780000 } },
+      { id: 'KSC-0003', card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, plan: 'A', status: 'active', enrolled: '2025-12-10', wallet: 12000,
+        sub: { plan: 'annual', paidUntil: '2026-12-10', start: '2025-12-10' },
         allowance: { activated: '2026-08-14', month: 1920000, total: 9410000 } },
-      { id: 'KSC-0004', card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, plan: 'B', status: 'overdue', enrolled: '2026-04-20',
-        credit: { rung: 0, used: 4120000, onTime: 0, essential: 0.71, due: '2026-10-05', dueAmt: 690000 } },
-      { id: 'KSC-0005', card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, plan: 'A', status: 'review', enrolled: '2026-05-30' },
+      { id: 'KSC-0004', card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, plan: 'B', status: 'overdue', enrolled: '2026-04-20', wallet: 0,
+        sub: { plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' },
+        credit: { rung: 0, used: 4120000, onTime: 0, ess: 2840000, all: 4000000, due: '2026-10-05', dueAmt: 690000 } },
+      { id: 'KSC-0005', card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, plan: 'A', status: 'review', enrolled: '2026-05-30', wallet: 150000,
+        sub: { plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' } },
     ],
     claims: [
       { id: 'CLM-0141', member: 'KSC-0005', type: 'job', filed: '2026-10-19', status: 'pending',
         note: 'Main earner laid off when the garment factory closed its second shift.',
         checks: [
-          { t: 'Waiting period passed (90 days)', r: 'ok', d: '142 days in force' },
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '142 days of continuous cover' },
           { t: 'Termination letter on file', r: 'ok' },
           { t: 'NSSF contributions stopped', r: 'ok', d: 'Last contribution: Aug 2026' },
           { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on the number in the letter, not the one the member gave' },
@@ -323,20 +347,25 @@ function seed() {
       { id: 'CLM-0138', member: 'KSC-0003', type: 'medical', filed: '2026-08-09', status: 'approved', decided: '2026-08-14',
         note: 'Mother admitted for surgery; off work for at least four months.',
         checks: [
-          { t: 'Waiting period passed (90 days)', r: 'ok', d: '242 days in force' },
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '242 days of continuous cover' },
           { t: 'Admission note on file', r: 'ok' },
           { t: 'Partner hospital confirms admission', r: 'ok' },
           { t: 'No other claim this policy year', r: 'ok' },
         ] },
     ],
+    // smart: paid by the card (allowance, wallet or credit); mm: paid by Mobile Money
     txns: [
-      { d: '2026-10-20', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 286000, cash: 0, items: 9 },
-      { d: '2026-10-12', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 412500, cash: 9000, items: 14 },
-      { d: '2026-10-18', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 198000, cash: 6500, items: 7 },
-      { d: '2026-10-03', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 355000, cash: 0, items: 11 },
-      { d: '2026-09-28', m: 'KSC-0004', where: 'Partner store · Ntinda', smart: 240000, cash: 31000, items: 8 },
-      { d: '2026-05-30', m: 'KSC-0005', where: 'Annual premium · Mobile Money', smart: 0, cash: PREMIUM, items: 0 },
-      { d: '2026-03-02', m: 'KSC-0001', where: 'Annual premium · Mobile Money', smart: 0, cash: PREMIUM, items: 0 },
+      { d: '2026-10-20', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 286000, mm: 0, items: 9 },
+      { d: '2026-10-12', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 412500, mm: 9000, items: 14 },
+      { d: '2026-10-18', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 204500, mm: 0, items: 7 },
+      { d: '2026-10-15', m: 'KSC-0002', where: 'Monthly plan · Mobile Money', smart: 0, mm: 135000, items: 0 },
+      { d: '2026-10-03', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 355000, mm: 0, items: 11 },
+      { d: '2026-10-08', m: 'KSC-0004', where: 'Weekly plan · Mobile Money', smart: 0, mm: 32000, items: 0 },
+      { d: '2026-09-28', m: 'KSC-0004', where: 'Partner store · Ntinda', smart: 240000, mm: 31000, items: 8 },
+      { d: '2026-09-30', m: 'KSC-0005', where: 'Monthly plan · Mobile Money', smart: 0, mm: 135000, items: 0 },
+      { d: '2026-10-11', m: 'KSC-0005', where: 'Wallet top-up · Mobile Money', smart: 0, mm: 150000, items: 0 },
+      { d: '2026-10-17', m: 'KSC-0001', where: 'Kibanja Store · Kira', smart: 61750, mm: 0, items: 6 },
+      { d: '2026-03-02', m: 'KSC-0001', where: 'Annual plan · Mobile Money', smart: 0, mm: 1500000, items: 0 },
     ],
   };
 }
@@ -348,14 +377,20 @@ const ugx = n => 'UGX ' + Math.round(n).toLocaleString('en-US');
 const trim2 = x => String(Math.round(x * 100) / 100);
 const short = n => { const a = Math.abs(n), s = n < 0 ? '−' : ''; if (a >= 1e9) return s + trim2(a / 1e9) + 'B'; if (a >= 1e6) return s + trim2(a / 1e6) + 'M'; if (a >= 1e3) return s + trim2(a / 1e3) + 'k'; return s + Math.round(a); };
 const pct = x => trim2(x * 100) + '%';
-const fdate = iso => new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-const days = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 864e5);
-const addMonths = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setMonth(d.getMonth() + n); return d.toISOString().slice(0, 10); };
+// Dates are plain calendar days, so all arithmetic is done in UTC: local-time Date maths shifts a day east of Greenwich.
+const isoOf = d => d.toISOString().slice(0, 10);
+const utc = s => new Date(s + 'T00:00:00Z');
+const fdate = s => utc(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const days = (a, b) => Math.round((utc(b) - utc(a)) / 864e5);
+const addDays = (s, n) => { const d = utc(s); d.setUTCDate(d.getUTCDate() + n); return isoOf(d); };
+const addMonths = (s, n) => { const d = utc(s); d.setUTCMonth(d.getUTCMonth() + n); return isoOf(d); };
+const nextPeriod = (s, plan) => plan === 'weekly' ? addDays(s, 7) : addMonths(s, plan === 'monthly' ? 1 : 12);
+const yearCost = p => p.price * p.perYear;
 const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 let S = seed();
 const ui = { floatYield: 10, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
-const M0 = { fam: [1000, 5000, 15000], premium: 1.5, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
+const M0 = { fam: [1000, 5000, 15000], mixW: 0, mixM: 0, discPct: 0, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
 const M = JSON.parse(JSON.stringify(M0));
 const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
 const licences = store.get('ksc-licences', {});
@@ -363,61 +398,91 @@ const dataroom = store.get('ksc-dataroom', {});
 
 const member = id => S.members.find(m => m.id === id);
 const hh = m => m.name + ' household';
+const essShare = c => c.all ? c.ess / c.all : 1;
+
+// Is the household's plan paid? A missed payment keeps cover through the plan's grace days, then pauses it.
+function cover(m) {
+  const p = S.plans[m.sub.plan];
+  if (TODAY <= m.sub.paidUntil) return { s: 'paid', p };
+  return { s: days(m.sub.paidUntil, TODAY) <= p.grace ? 'due' : 'lapsed', p };
+}
+function coverPill(m) {
+  const c = cover(m);
+  return { paid: `<span class="pill ok">${c.p.name} plan · paid</span>`, due: `<span class="pill warn">${c.p.name} payment due</span>`, lapsed: '<span class="pill bad">Cover paused</span>' }[c.s];
+}
 
 function statusPill(m) {
   const map = {
-    locked: ['', 'Cover in force · card locked'], review: ['warn', 'Claim under review'], active: ['ok', 'Allowance active'],
+    locked: ['', 'Allowance locked until a claim'], review: ['warn', 'Claim under review'], active: ['ok', 'Allowance active'],
     good: ['ok', 'Credit in good standing'], overdue: ['bad', 'Repayment overdue'],
   };
   const [c, t] = map[m.status];
   return `<span class="pill ${c}">${t}</span>`;
 }
 
-// What the card can pay for right now, and why.
-function power(m) {
+// Everything the card can pay with right now. The till spends them in this order: allowance, wallet, credit.
+function sources(m) {
+  const c = cover(m), live = c.s !== 'lapsed', notes = [];
+  let allowance = 0, credit = 0;
   if (m.plan === 'A') {
-    if (m.status !== 'active') return { amt: 0, why: m.status === 'review' ? 'Card locked while the claim is reviewed' : 'Card locked until an emergency claim is approved' };
-    const a = m.allowance, cap = A_LIMIT / 12;
-    if (TODAY >= addMonths(a.activated, 12)) return { amt: 0, why: 'The 12-month allowance has ended' };
-    return { amt: Math.max(0, Math.min(cap - a.month, A_LIMIT - a.total)), why: 'Emergency allowance left this month' };
-  }
-  if (m.status === 'overdue') return { amt: 0, why: 'Credit paused until the overdue repayment is made' };
-  return { amt: Math.max(0, LADDER[m.credit.rung] - m.credit.used), why: 'Essentials credit available' };
+    if (m.status === 'active') {
+      const a = m.allowance, cap = A_LIMIT / 12;
+      if (TODAY >= addMonths(a.activated, 12)) notes.push('The 12-month emergency allowance has ended.');
+      else if (live) allowance = Math.max(0, Math.min(cap - a.month, A_LIMIT - a.total));
+    } else notes.push(m.status === 'review' ? 'Emergency allowance: the claim is still being reviewed.' : 'Emergency allowance opens only after an approved claim.');
+  } else if (m.status === 'overdue') notes.push('Credit line paused until the overdue repayment is made.');
+  else if (live) credit = Math.max(0, LADDER[m.credit.rung] - m.credit.used);
+  if (!live) notes.push(`Cover paused: the ${c.p.name.toLowerCase()} payment was due ${fdate(m.sub.paidUntil)}. Allowance, credit and the member discount stop until it is paid. The wallet still works.`);
+  return { allowance, credit, wallet: m.wallet, disc: live ? c.p.disc : 0, live, notes, total: allowance + credit + m.wallet };
 }
 
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2800); }
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 3200); }
 
 /* ---------- views ---------- */
 const V = {};
 
+function planTile(k) {
+  const p = S.plans[k], wk = yearCost(S.plans.weekly), y = yearCost(p);
+  return `<article class="panel plan-tile">
+    <div class="row between"><h3>${p.name}</h3><span class="pill ok">${trim2(p.disc)}% off in store</span></div>
+    <div class="big">${ugx(p.price)}<span class="per"> / ${p.per}</span></div>
+    <p class="small muted">${ugx(y)} a year${k !== 'weekly' && wk > y ? ` · saves ${ugx(wk - y)} against weekly` : ''}. ${p.grace} days' grace after a missed payment.</p>
+  </article>`;
+}
+
 V.overview = () => `
 <section class="hero">
   <span class="eyebrow">Food security cover for Kampala households</span>
-  <h1>Pay <em>UGX 1.5M</em> a year. Keep the family fed when income stops.</h1>
-  <p class="lede">One card, two ways to run it. The platform below is the whole operation: the family's app, the store till that reads the card, the desk that verifies emergencies, and the model that says whether the premiums cover the payouts.</p>
+  <h1>Pay weekly, monthly or yearly. <em>Shop without cash.</em></h1>
+  <p class="lede">One card that keeps the family fed when income stops, and pays for the whole basket in the meantime. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
+</section>
+
+<section class="stack">
+  <div class="row between"><h2>Three ways to pay</h2><button class="btn chip" data-a="tab" data-v="plans">Edit plans and discounts</button></div>
+  <div class="plans">${PLAN_KEYS.map(planTile).join('')}</div>
+  <p class="small muted" style="max-width:72ch">Paying for the year upfront is the cheapest way in. Every plan also gives a member discount at Kibanja stores while it is paid. Prices are suggestions built around the UGX 1.5M annual premium.</p>
 </section>
 
 <div class="models">
   <article class="panel model-card">
-    <div class="row between"><h3>Model A · Emergency card</h3><span class="pill">Insurance</span></div>
-    <p class="muted">The card stays locked until a verified shock hits the household.</p>
+    <div class="row between"><h3>Model A · Emergency cover</h3><span class="pill">Insurance</span></div>
+    <p class="muted">An emergency allowance stays locked until a verified shock hits the household. The card works every day for wallet purchases.</p>
     <dl class="terms">
-      <dt>Premium</dt><dd class="num">UGX 1,500,000 / year</dd>
       <dt>Triggers</dt><dd>Job loss, hospital admission, declared drought in the district</dd>
       <dt>Payout</dt><dd class="num">UGX 50M over 12 months</dd>
       <dt>Monthly cap</dt><dd class="num">${ugx(A_LIMIT / 12)}</dd>
-      <dt>Waiting period</dt><dd>${WAIT_DAYS} days after enrolment</dd>
+      <dt>Allowance buys</dt><dd>Essentials. Other items come from the wallet</dd>
+      <dt>Waiting period</dt><dd>${WAIT_DAYS} days of continuous cover</dd>
     </dl>
   </article>
   <article class="panel model-card">
-    <div class="row between"><h3>Model B · Essentials credit line</h3><span class="pill">Credit</span></div>
-    <p class="muted">The premium becomes a security deposit behind a credit line from a microfinance partner.</p>
+    <div class="row between"><h3>Model B · Credit line</h3><span class="pill">Credit</span></div>
+    <p class="muted">The plan payments build a security deposit behind a credit line from a microfinance partner.</p>
     <dl class="terms">
-      <dt>Deposit</dt><dd class="num">UGX 1,500,000 upfront</dd>
-      <dt>Starting line</dt><dd class="num">${ugx(LADDER[0])} (3× deposit)</dd>
+      <dt>Starting line</dt><dd class="num">${ugx(LADDER[0])}</dd>
       <dt>Ceiling</dt><dd class="num">UGX 50M after four rung-ups</dd>
-      <dt>Move up a rung</dt><dd>3 repayments on time and at least 90% of spend on essentials</dd>
-      <dt>Spend rule</dt><dd>Essentials only; extras go to cash or Mobile Money</dd>
+      <dt>Move up a rung</dt><dd>3 repayments on time and at least 90% of credit spend on essentials</dd>
+      <dt>Line buys</dt><dd>Any item in the store</dd>
     </dl>
   </article>
 </div>
@@ -426,8 +491,9 @@ V.overview = () => `
 <section class="stack">
   <h2>The platform, screen by screen</h2>
   <div class="modules">
-    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">Card, cover status, emergency claims, credit ladder, repayments, spending history.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">Cashier scans the card, the till splits essentials onto SmartCare and extras onto cash.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">Card, plan payments, wallet top-ups, emergency claims, credit ladder, spending history.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">The cashier scans the card and the whole basket is paid without cash, with discounts applied.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="plans"><h4>Plans and discounts</h4><span class="muted small">Weekly, monthly and annual prices, member discounts, and product offers.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The first year in detail, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
@@ -439,10 +505,10 @@ V.overview = () => `
   <section class="panel">
     <h3>A household's year on the platform</h3>
     <ol class="journey">
-      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, choice of Model A or B.</span></div></li>
-      <li><div><b>Pay the premium by Mobile Money.</b> <span class="muted">The money goes to the underwriting partner's account, not the operating account.</span></div></li>
-      <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app. Model A cards start locked.</span></div></li>
-      <li><div><b>Shop at a Kibanja or partner store.</b> <span class="muted">The till reads the card and puts only essentials on it.</span></div></li>
+      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, Model A or B, and a weekly, monthly or annual plan.</span></div></li>
+      <li><div><b>Pay by Mobile Money.</b> <span class="muted">Plan payments go to the underwriting partner's account, not the operating account.</span></div></li>
+      <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app, with a wallet the family can top up.</span></div></li>
+      <li><div><b>Shop without cash.</b> <span class="muted">The till applies the member discount and pays the basket from the allowance, the wallet and the credit line. Any gap becomes a Mobile Money prompt on the phone.</span></div></li>
       <li><div><b>Claim, or climb the ladder.</b> <span class="muted">Model A: report an emergency, get verified, receive the monthly allowance. Model B: repay on time, unlock a bigger line.</span></div></li>
       <li><div><b>Renew.</b> <span class="muted">Claims and repayment history price next year's cover.</span></div></li>
     </ol>
@@ -456,22 +522,50 @@ V.overview = () => `
 </div>`;
 
 function cardHtml(m) {
-  const st = { locked: 'Locked', review: 'In review', active: 'Active', good: 'Active', overdue: 'Paused' }[m.status];
+  const st = { paid: 'Active', due: 'Payment due', lapsed: 'Cover paused' }[cover(m).s];
   return `<div class="kcard" aria-label="Kibanja SmartCare card for the ${esc(hh(m))}">
     <div class="k-head"><span class="k-name">Kibanja <b>SmartCare</b></span><span class="k-state">${st}</span></div>
     <span class="k-chip" aria-hidden="true"></span>
     <div style="display:grid;gap:10px">
       <div class="k-num">${m.card}</div>
-      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${m.plan === 'A' ? 'Emergency' : 'Credit line'}</div></div>
+      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${S.plans[m.sub.plan].name} · ${m.plan === 'A' ? 'Emergency' : 'Credit'}</div></div>
     </div>
   </div>`;
 }
 
+function planBlock(m) {
+  const c = cover(m), p = c.p, nextKey = m.sub.next || m.sub.plan, next = S.plans[nextKey];
+  const msg = {
+    paid: `<p class="small muted">Paid until ${fdate(m.sub.paidUntil)}.</p>`,
+    due: `<p class="small" style="color:var(--warn)">Payment was due ${fdate(m.sub.paidUntil)}. Pay by ${fdate(addDays(m.sub.paidUntil, p.grace))} to keep cover.</p>`,
+    lapsed: `<p class="small" style="color:var(--bad)">Cover paused since ${fdate(addDays(m.sub.paidUntil, p.grace))}. Paying restarts it, and the ${WAIT_DAYS}-day wait for emergency claims starts again.</p>`,
+  }[c.s];
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Your plan</span>${coverPill(m)}</div>
+    <div class="row between"><b>${p.name}</b><span class="num">${ugx(p.price)} / ${p.per}</span></div>
+    ${msg}
+    <p class="small muted">${trim2(p.disc)}% off everything at Kibanja stores while your plan is paid.</p>
+    <button class="btn ${c.s === 'paid' ? '' : 'primary'} block" data-a="pay-plan">Pay ${ugx(next.price)} with Mobile Money</button>
+    <label class="f">Plan from your next payment
+      <select class="in" id="plan-switch">${PLAN_KEYS.map(k => `<option value="${k}" ${nextKey === k ? 'selected' : ''}>${S.plans[k].name} · ${ugx(S.plans[k].price)} / ${S.plans[k].per}</option>`).join('')}</select></label>
+  </div>`;
+}
+
+function walletBlock(m) {
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">SmartCare wallet</span><span class="small muted">Any item</span></div>
+    <div class="big">${ugx(m.wallet)}</div>
+    <div class="row">${[20000, 50000, 100000].map(v => `<button class="btn chip" data-a="topup" data-amt="${v}">+ ${short(v)}</button>`).join('')}</div>
+    <p class="small muted">Top up from Mobile Money. At the till, anything your card can't cover becomes a Mobile Money prompt on this phone, so you never need cash.</p>
+  </div>`;
+}
+
 function phoneA(m) {
+  const live = cover(m).s !== 'lapsed';
   if (m.status === 'locked') {
-    const inForce = days(m.enrolled, TODAY);
-    const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days in force).` : `Claims open on ${fdate(addMonths(m.enrolled, 3))}.`;
-    const form = ui.claimForm ? `
+    const inForce = days(m.sub.start, TODAY);
+    const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days of continuous cover).` : `Claims open on ${fdate(addDays(m.sub.start, WAIT_DAYS))}.`;
+    const form = !live ? `<p class="small" style="color:var(--bad)">Pay your plan to restart cover before reporting an emergency.</p>` : ui.claimForm ? `
       <form class="stack" id="claim-form" style="gap:10px">
         <label class="f">What happened?
           <select class="in" id="cl-type"><option value="job">Job loss</option><option value="medical">Hospital admission</option><option value="drought">Drought in our district</option></select></label>
@@ -482,9 +576,9 @@ function phoneA(m) {
     return `<div class="ph-block">
       <span class="eyebrow">Your emergency cover</span>
       <div class="big">${ugx(A_LIMIT)}</div>
-      <p class="small muted">paid onto your card over 12 months, essentials only, if one of these happens:</p>
+      <p class="small muted">paid onto your card over 12 months for essentials, if one of these happens:</p>
       <ul class="ticks"><li>The main earner loses their job</li><li>Someone in the house is admitted to hospital</li><li>Drought is declared in your district</li></ul>
-      <p class="small">${waitTxt}</p>
+      ${live ? `<p class="small">${waitTxt}</p>` : ''}
       ${form}
     </div>`;
   }
@@ -498,37 +592,36 @@ function phoneA(m) {
       <ul class="checks">${c.checks.map(k => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' ? '✕' : '…'}</span><span>${esc(k.t)}</span><span></span></li>`).join('')}</ul>
     </div>`;
   }
-  const a = m.allowance, cap = A_LIMIT / 12, p = power(m);
-  const ends = addMonths(a.activated, 12);
+  const a = m.allowance, cap = A_LIMIT / 12;
   return `<div class="ph-block">
-    <span class="eyebrow">Left to spend this month</span>
-    <div class="big">${ugx(p.amt)}</div>
+    <span class="eyebrow">Emergency allowance left this month</span>
+    <div class="big">${ugx(sources(m).allowance)}</div>
     <div class="meter"><i style="width:${Math.min(100, a.month / cap * 100)}%"></i></div>
-    <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.</p>
+    <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.${live ? '' : ' Paused until your plan is paid.'}</p>
   </div>
   <div class="ph-block">
     <span class="eyebrow">Whole allowance</span>
     <div class="meter sun"><i style="width:${Math.min(100, a.total / A_LIMIT * 100)}%"></i></div>
-    <p class="small">${ugx(A_LIMIT - a.total)} left, until ${fdate(ends)}.</p>
+    <p class="small">${ugx(A_LIMIT - a.total)} left, until ${fdate(addMonths(a.activated, 12))}.</p>
   </div>`;
 }
 
 function phoneB(m) {
-  const c = m.credit, p = power(m), lim = LADDER[c.rung];
-  const max = LADDER[LADDER.length - 1];
+  const c = m.credit, avail = sources(m).credit, lim = LADDER[c.rung];
+  const max = LADDER[LADDER.length - 1], share = essShare(c);
   const ladder = LADDER.map((v, i) => `<i class="${i === c.rung ? 'on' : i < c.rung ? 'done' : ''}" style="height:${18 + 82 * v / max}%"></i>`).join('');
   const next = c.rung < LADDER.length - 1
-    ? `<p class="small">Next rung <b class="num">${short(LADDER[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments · essentials share <b>${pct(c.essential)}</b> ${c.essential >= 0.9 ? '<span class="pill ok">meets 90%</span>' : '<span class="pill warn">needs 90%</span>'}</p>`
+    ? `<p class="small">Next rung <b class="num">${short(LADDER[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments · essentials share <b>${pct(share)}</b> ${share >= 0.9 ? '<span class="pill ok">meets 90%</span>' : '<span class="pill warn">needs 90%</span>'}</p>`
     : `<p class="small">You're on the top rung.</p>`;
   const overdue = m.status === 'overdue';
   const due = c.dueAmt > 0 ? `<div class="due ${overdue ? 'bad' : ''}">
       <div class="row between"><span class="small"><b>${overdue ? 'Overdue since' : 'Next repayment'}</b> ${fdate(c.due)}</span><span class="num">${ugx(c.dueAmt)}</span></div>
-      <button class="btn primary block" data-a="pay">Pay ${ugx(c.dueAmt)} with Mobile Money</button>
+      <button class="btn primary block" data-a="pay">Repay ${ugx(c.dueAmt)} with Mobile Money</button>
     </div>` : `<p class="small muted">Nothing to repay right now.</p>`;
   return `<div class="ph-block">
-    <span class="eyebrow">${overdue ? 'Credit paused' : 'Available for essentials'}</span>
-    <div class="big">${ugx(p.amt)}</div>
-    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line</p>
+    <span class="eyebrow">${overdue ? 'Credit paused' : 'Available on your credit line'}</span>
+    <div class="big">${ugx(avail)}</div>
+    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line. Anything in the store can go on it; the share spent on essentials decides when it grows.</p>
     <div class="ladder" aria-hidden="true">${ladder}</div>
     <div class="ladder-lbl">${LADDER.map(v => `<span>${short(v)}</span>`).join('')}</div>
     ${next}
@@ -539,41 +632,45 @@ function phoneB(m) {
 function txnList(id) {
   const list = S.txns.filter(t => t.m === id).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
   if (!list.length) return `<p class="small muted">No activity yet.</p>`;
-  return `<ul class="txns">${list.map(t => `<li><span>${esc(t.where)}</span><span class="amt">${t.smart ? '−' + short(t.smart) : short(t.cash)}</span>
-    <span class="sub">${fdate(t.d)}${t.items ? ` · ${t.items} items` : ''}</span><span class="sub amt">${t.smart ? (t.cash ? `+ ${short(t.cash)} cash` : 'SmartCare') : 'paid'}</span></li>`).join('')}</ul>`;
+  return `<ul class="txns">${list.map(t => `<li><span>${esc(t.where)}</span><span class="amt">${t.smart ? '−' + short(t.smart) : short(t.mm)}</span>
+    <span class="sub">${fdate(t.d)}${t.items ? ` · ${t.items} items` : ''}</span><span class="sub amt">${t.smart ? (t.mm ? `+ ${short(t.mm)} Mobile Money` : 'SmartCare') : 'Mobile Money'}</span></li>`).join('')}</ul>`;
 }
 
 function rulesFor(m) {
+  const lapsed = cover(m).s === 'lapsed';
   const r = {
     locked: [
-      ['The card is locked on purpose.', 'Under Model A the premium buys cover, not shopping money. The till declines SmartCare and the family pays cash at member prices.'],
-      [`${WAIT_DAYS}-day waiting period.`, 'Stops someone buying cover the week they already know they will be laid off.'],
+      ['The emergency allowance is locked on purpose.', 'The plan buys cover, not shopping money. Until a claim is approved the family still shops with the card, paying from its wallet or by a Mobile Money prompt, with the member discount.'],
+      [`${WAIT_DAYS}-day waiting period of continuous cover.`, 'Stops someone buying a week of cover the week they already know they will be laid off. A lapse starts the wait again.'],
       ['Claims go to a person.', 'Automated checks gather the evidence; an operations officer approves or declines.'],
     ],
     review: [
-      ['Card stays locked during review.', 'It unlocks the moment the claim is approved.'],
+      ['The allowance stays locked during review.', 'It opens the moment the claim is approved. The wallet keeps working meanwhile.'],
       ['Evidence is checked at the source.', 'NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions.'],
     ],
     active: [
       ['The allowance is paid monthly, not as a lump sum.', `${ugx(A_LIMIT / 12)} a month for 12 months, so the household is fed for the whole recovery and a fraudulent claim costs one month, not 50M.`],
-      ['Essentials only.', 'The till puts staples on SmartCare. Beer, airtime and soda go to cash.'],
+      ['The allowance buys essentials; the card buys everything.', 'Insurance money goes on food and basics. Anything else in the basket comes from the wallet or a Mobile Money prompt, so the family never needs cash.'],
     ],
     good: [
-      ['The deposit backs the line.', 'The 1.5M sits with the microfinance partner. A default first draws on the deposit.'],
-      ['The line grows with behaviour.', 'It starts at 3× the deposit and climbs a rung after three on-time repayments with at least 90% of spend on essentials.'],
+      ['Plan payments back the line.', 'They sit with the microfinance partner as a deposit. A default first draws on it.'],
+      ['Anything can go on the line.', 'It starts at 4.5M and climbs a rung after three on-time repayments, as long as at least 90% of credit spend is on essentials.'],
     ],
     overdue: [
-      ['The line pauses, it does not close.', 'One payment clears the overdue status and the card works again the same minute.'],
+      ['The line pauses, it does not close.', 'One payment clears the overdue status and the line works again the same minute.'],
       ['The rung is kept.', 'Late payment resets the on-time count, so the climb starts again.'],
     ],
   }[m.status];
-  const tryIt = {
-    locked: 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here, then charge a basket on the <b>Store till</b>.',
-    review: 'Open <b>Operations</b>, mark the open checks verified and approve the claim.',
-    active: 'Open the <b>Store till</b>, scan this card and put a basket with beer in it. Watch the till split it.',
-    good: 'Tap <b>Pay</b>. The third on-time payment moves this household up to the 18M rung.',
-    overdue: 'Try this card at the <b>Store till</b> first: it is refused. Then pay here and try again.',
-  }[m.status];
+  if (lapsed) r.unshift(['Cover is paused.', 'The plan payment is past its grace period. Allowance, credit and the member discount stop; the wallet keeps working. Paying restarts cover.']);
+  const tryIt = lapsed
+    ? 'Try this card at the <b>Store till</b> first: with cover paused and an empty wallet, the till sends a Mobile Money prompt instead. Then pay the plan here and try again.'
+    : {
+      locked: 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here, then charge a basket on the <b>Store till</b>.',
+      review: 'Open <b>Operations</b>, mark the open checks verified and approve the claim.',
+      active: 'Open the <b>Store till</b>, scan this card and put a basket with beer in it. Watch the allowance pay for the food and the wallet for the beer.',
+      good: 'Tap <b>Repay</b>. The third on-time repayment moves this household up to the 18M rung.',
+      overdue: 'Pay the overdue repayment here, then try the card at the <b>Store till</b>.',
+    }[m.status];
   return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">${r.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
     <div class="try"><span class="eyebrow">Try it</span><span>${tryIt}</span></div></section>`;
 }
@@ -589,11 +686,15 @@ V.member = () => {
       <p class="hello">Hello, ${esc(m.name)} family</p>
       ${cardHtml(m)}
       ${m.plan === 'A' ? phoneA(m) : phoneB(m)}
+      ${walletBlock(m)}
+      ${planBlock(m)}
       <div class="stack" style="gap:6px"><h4>Recent activity</h4>${txnList(m.id)}</div>
     </div></div>
     <div class="stack">${rulesFor(m)}
       <section class="panel"><div class="row between"><h3>Account</h3>${statusPill(m)}</div>
-        <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd><dt>Renews</dt><dd>${fdate(addMonths(m.enrolled, 12))}</dd><dt>Premium</dt><dd class="num">${ugx(PREMIUM)} paid</dd></dl>
+        <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd>
+          <dt>Plan</dt><dd>${S.plans[m.sub.plan].name}, ${ugx(S.plans[m.sub.plan].price)} / ${S.plans[m.sub.plan].per}${m.sub.next && m.sub.next !== m.sub.plan ? `, switching to ${S.plans[m.sub.next].name}` : ''}</dd>
+          <dt>Card can pay now</dt><dd class="num">${ugx(sources(m).total)}</dd></dl>
       </section>
     </div>
   </div>`;
@@ -601,35 +702,65 @@ V.member = () => {
 
 /* Till */
 function cartTotals() {
-  let ess = 0, other = 0;
-  ui.cart.forEach(l => { const s = SKUS.find(x => x.sku === l.sku); (s.ess ? (ess += s.price * l.q) : (other += s.price * l.q)); });
   const m = ui.posMember && member(ui.posMember);
-  const p = m ? power(m) : { amt: 0, why: 'No card scanned' };
-  const smart = Math.min(ess, p.amt);
-  return { ess, other, smart, cash: ess + other - smart, p, m };
+  const src = m ? sources(m) : null;
+  const lines = ui.cart.map(l => {
+    const s = SKUS.find(x => x.sku === l.sku), promo = S.promos.find(p => p.on && p.sku === s.sku);
+    const gross = s.price * l.q, promoOff = promo ? Math.round(gross * promo.pct / 100) : 0;
+    const memberOff = src ? Math.round((gross - promoOff) * src.disc / 100) : 0;
+    return { ...s, q: l.q, gross, promo, promoOff, memberOff, net: gross - promoOff - memberOff };
+  });
+  const sum = k => lines.reduce((a, l) => a + l[k], 0);
+  const ess = lines.filter(l => l.ess).reduce((a, l) => a + l.net, 0), total = sum('net'), other = total - ess;
+  const pay = { allowance: 0, wallet: 0, credit: 0, creditEss: 0, mm: 0 };
+  let e = ess, o = other;
+  if (src) {
+    pay.allowance = Math.min(e, src.allowance); e -= pay.allowance;
+    // The wallet takes non-essentials first, so credit is left for food and the household's essentials share stays high.
+    const w1 = Math.min(o, src.wallet); o -= w1;
+    const w2 = Math.min(e, src.wallet - w1); e -= w2;
+    pay.wallet = w1 + w2;
+    pay.creditEss = Math.min(e, src.credit); e -= pay.creditEss;
+    const c2 = Math.min(o, src.credit - pay.creditEss); o -= c2;
+    pay.credit = pay.creditEss + c2;
+  }
+  pay.mm = e + o;
+  return { m, src, lines, gross: sum('gross'), promoOff: sum('promoOff'), memberOff: sum('memberOff'), total, ess, other, pay };
 }
 
 V.pos = () => {
-  const t = cartTotals(), m = t.m;
+  const t = cartTotals(), m = t.m, src = t.src, P = t.pay;
   const strip = m ? `<div class="member-strip">
-      <div class="row between"><b>${esc(hh(m))}</b>${statusPill(m)}</div>
-      <div class="row between small"><span class="muted">${t.p.why}</span><span class="num">${ugx(t.p.amt)}</span></div>
+      <div class="row between"><b>${esc(hh(m))}</b>${coverPill(m)}</div>
+      <div class="tot small">
+        ${m.plan === 'A' ? `<span>Emergency allowance <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
+        <span>Wallet</span><span class="v">${ugx(src.wallet)}</span>
+        ${m.plan === 'B' ? `<span>Credit line</span><span class="v">${ugx(src.credit)}</span>` : ''}
+        <span>Member discount</span><span class="v">${trim2(src.disc)}%</span>
+      </div>
+      ${src.notes.map(n => `<p class="small" style="color:var(--warn)">${esc(n)}</p>`).join('')}
     </div>` : `<p class="small muted">Scan or type a card number. Example cards:</p>`;
-  const cart = ui.cart.length ? `<ul class="cart">${ui.cart.map(l => { const s = SKUS.find(x => x.sku === l.sku); return `<li>
-      <span><span style="display:block">${esc(s.name)}</span><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Not covered'}</span></span>
-      <span class="qty"><button data-a="dec" data-sku="${s.sku}" aria-label="One fewer ${esc(s.name)}">−</button>${l.q}<button data-a="inc" data-sku="${s.sku}" aria-label="One more ${esc(s.name)}">+</button></span>
-      <span class="num">${short(s.price * l.q)}</span></li>`; }).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
+  const cart = ui.cart.length ? `<ul class="cart">${t.lines.map(l => `<li>
+      <span><span style="display:block">${esc(l.name)}</span><span class="tag ${l.ess ? '' : 'no'}">${l.ess ? 'Essential' : 'Other'}</span>${l.promo ? ` <span class="tag offer">${esc(l.promo.name)} −${trim2(l.promo.pct)}%</span>` : ''}</span>
+      <span class="qty"><button data-a="dec" data-sku="${l.sku}" aria-label="One fewer ${esc(l.name)}">−</button>${l.q}<button data-a="inc" data-sku="${l.sku}" aria-label="One more ${esc(l.name)}">+</button></span>
+      <span class="num">${short(l.gross - l.promoOff)}</span></li>`).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
+  const paidBy = m ? [
+    ['Emergency allowance', P.allowance, m.plan === 'A'], ['Wallet', P.wallet, true], ['Credit line', P.credit, m.plan === 'B'],
+    ['Mobile Money prompt to member', P.mm, true],
+  ].filter(x => x[2]).map(([l, v]) => `<span>${l}</span><span class="v">${ugx(v)}</span>`).join('')
+    : `<span>Mobile Money or cash</span><span class="v">${ugx(P.mm)}</span>`;
   const r = ui.receipt;
   const receipt = r ? `<div class="receipt" aria-label="Receipt">
       <div class="r"><b>KIBANJA STORE · KIRA</b><span>${r.no}</span></div>
       <div class="r"><span>${fdate(TODAY)}</span><span>Till 02</span></div><hr>
-      ${r.lines.map(l => `<div class="r"><span>${l.q}× ${esc(l.name)}${l.ess ? '' : ' *'}</span><span>${l.amt.toLocaleString('en-US')}</span></div>`).join('')}<hr>
-      <div class="r"><span>SmartCare ${r.card ? '…' + r.card.slice(-4) : ''}</span><span>${r.smart.toLocaleString('en-US')}</span></div>
-      <div class="r"><span>Cash / Mobile Money</span><span>${r.cash.toLocaleString('en-US')}</span></div>
-      <div class="r"><span>* not covered by SmartCare</span><span></span></div><hr>
-      <div class="r muted"><span>Store gross margin (est.)</span><span>${r.margin.toLocaleString('en-US')}</span></div>
+      ${r.lines.map(l => `<div class="r"><span>${l.q}× ${esc(l.name)}</span><span>${l.gross.toLocaleString('en-US')}</span></div>`).join('')}<hr>
+      ${r.promoOff ? `<div class="r"><span>Offers</span><span>−${r.promoOff.toLocaleString('en-US')}</span></div>` : ''}
+      ${r.memberOff ? `<div class="r"><span>Member discount ${trim2(r.disc)}%</span><span>−${r.memberOff.toLocaleString('en-US')}</span></div>` : ''}
+      <div class="r"><b>TOTAL</b><b>${r.total.toLocaleString('en-US')}</b></div><hr>
+      ${r.tenders.map(([l, v]) => `<div class="r"><span>${l}</span><span>${v.toLocaleString('en-US')}</span></div>`).join('')}<hr>
+      <div class="r muted"><span>Store gross margin after discounts (est.)</span><span>${r.margin.toLocaleString('en-US')}</span></div>
     </div><button class="btn block" data-a="new-sale">Next customer</button>` : '';
-  return `<div class="stack" style="gap:4px"><h2>Store till</h2><p class="muted small">What a cashier sees at a Kibanja or partner store. Prices are sample shelf prices in UGX.</p></div>
+  return `<div class="stack" style="gap:4px"><h2>Store till</h2><p class="muted small">What a cashier sees at a Kibanja or partner store. Members pay the whole basket without cash. Prices are sample shelf prices in UGX.</p></div>
   <div class="split">
     <div class="stack">
       <section class="panel">
@@ -638,22 +769,78 @@ V.pos = () => {
         ${strip}
         ${m ? '' : `<div class="row">${S.members.map(x => `<button class="btn chip" data-a="pos-pick" data-id="${x.id}">${x.card.slice(-4)} · ${esc(x.name)}</button>`).join('')}</div>`}
       </section>
-      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Not covered'}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`).join('')}</div></section>
+      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
     </div>
     <section class="panel">
       <div class="row between"><h3>Basket</h3>${ui.cart.length ? '<button class="btn chip" data-a="clear-cart">Clear</button>' : ''}</div>
       ${cart}
       <div class="tot">
-        <span>Essentials</span><span class="v">${ugx(t.ess)}</span>
-        <span>Other items</span><span class="v">${ugx(t.other)}</span>
-        <span class="grand">On SmartCare</span><span class="v grand">${ugx(t.smart)}</span>
-        <span>Cash or Mobile Money</span><span class="v">${ugx(t.cash)}</span>
+        <span>Subtotal</span><span class="v">${ugx(t.gross)}</span>
+        ${t.promoOff ? `<span>Offers</span><span class="v">−${ugx(t.promoOff)}</span>` : ''}
+        ${m ? `<span>Member discount (${trim2(src.disc)}%)</span><span class="v">−${ugx(t.memberOff)}</span>` : ''}
+        <span class="grand">Total</span><span class="v grand">${ugx(t.total)}</span>
       </div>
-      ${m && t.ess > t.smart && t.ess > 0 ? `<p class="small" style="color:var(--warn)">${t.p.amt === 0 ? t.p.why + '.' : 'Essentials exceed what the card can cover; the rest goes to cash.'}</p>` : ''}
-      <button class="btn primary block" data-a="charge" ${ui.cart.length ? '' : 'disabled'}>Charge ${ugx(t.ess + t.other)}</button>
+      <div class="paid-by"><span class="eyebrow">Paid by</span><div class="tot">${paidBy}</div></div>
+      ${m && P.mm > 0 && ui.cart.length ? `<p class="small" style="color:var(--warn)">The card covers ${ugx(t.total - P.mm)}. The rest goes to the member's phone as a Mobile Money prompt; no cash needed.</p>` : ''}
+      <button class="btn primary block" data-a="charge" ${ui.cart.length ? '' : 'disabled'}>Charge ${ugx(t.total)}</button>
       ${receipt}
     </section>
   </div>`;
+};
+
+/* Plans and discounts */
+V.plans = () => {
+  const wk = yearCost(S.plans.weekly);
+  const cellIn = (k, f, step, label) => `<input class="in num cell-in" type="number" min="0" step="${step}" data-plan="${k}" data-field="${f}" value="${S.plans[k][f]}" aria-label="${label}">`;
+  const left = (mgn, d) => { const v = mgn * 100 - d; return `<td class="n ${v <= 0 ? 'neg' : ''}">${trim2(v)}%</td>`; };
+  return `<div class="stack" style="gap:4px"><h2>Plans and discounts</h2><p class="muted small">Set what each plan costs and what members save. Changes apply at once to the family app, the till and the Underwriting model.</p></div>
+  <div class="plans">${PLAN_KEYS.map(planTile).join('')}</div>
+  <section class="stack"><h3>Plan settings</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Plan</th><th class="n">Price, UGX</th><th class="n">A year</th><th class="n">Against weekly</th><th class="n">Member discount %</th><th class="n">Grace days</th></tr></thead><tbody>
+    ${PLAN_KEYS.map(k => { const p = S.plans[k], y = yearCost(p); return `<tr><td><b>${p.name}</b> <span class="muted small">per ${p.per}</span></td>
+      <td class="n">${cellIn(k, 'price', 500, p.name + ' price')}</td><td class="n">${ugx(y)}</td>
+      <td class="n">${k === 'weekly' ? '—' : wk >= y ? `saves ${short(wk - y)} (${pct((wk - y) / wk)})` : `costs ${short(y - wk)} more`}</td>
+      <td class="n">${cellIn(k, 'disc', 0.5, p.name + ' member discount')}</td><td class="n">${cellIn(k, 'grace', 1, p.name + ' grace days')}</td></tr>`; }).join('')}
+    </tbody></table></div>
+    <p class="small muted">The annual price is the UGX 1.5M premium from your plan. Weekly and monthly cost more over a year, so families who can pay upfront are rewarded and those who can't still get in. Weekly payers miss payments more often; grace days set how long cover lasts after a missed payment.</p>
+  </section>
+  <div class="split">
+    <section class="panel"><h3>Who pays for the discount</h3>
+      <p class="small">At a Kibanja store the member discount comes out of the store's margin. This shows what is left after it, using the till's assumed margins.</p>
+      <div class="tablewrap"><table class="t"><thead><tr><th>Plan</th><th class="n">Essentials (12% margin)</th><th class="n">Other items (25% margin)</th></tr></thead><tbody>
+        ${PLAN_KEYS.map(k => `<tr><td>${S.plans[k].name} · ${trim2(S.plans[k].disc)}% off</td>${left(MARGIN.ess, S.plans[k].disc)}${left(MARGIN.other, S.plans[k].disc)}</tr>`).join('')}
+      </tbody></table></div>
+      <p class="small muted">At partner stores the discount comes out of the 6% rebate unless the supplier funds it. Supplier-funded offers cost Kibanja nothing.</p>
+    </section>
+    <section class="panel"><h3>How a member pays without cash</h3>
+      <ol class="journey">
+        <li><div><b>Discounts first.</b> <span class="muted">Product offers, then the member discount for a paid-up plan.</span></div></li>
+        <li><div><b>Emergency allowance.</b> <span class="muted">Essentials only, for Model A households with an approved claim.</span></div></li>
+        <li><div><b>Wallet.</b> <span class="muted">Anything in the basket, extras first.</span></div></li>
+        <li><div><b>Credit line.</b> <span class="muted">Anything, for Model B households in good standing.</span></div></li>
+        <li><div><b>Mobile Money prompt.</b> <span class="muted">Whatever is left is sent to the member's phone to approve. No cash changes hands.</span></div></li>
+      </ol>
+    </section>
+  </div>
+  <section class="stack"><h3>Offers</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Offer</th><th>Product</th><th class="n">Off</th><th>Paid for by</th><th>Status</th><th></th></tr></thead><tbody>
+    ${S.promos.length ? S.promos.map(p => `<tr><td>${esc(p.name)}</td><td>${esc(SKUS.find(s => s.sku === p.sku).name)}</td><td class="n">${trim2(p.pct)}%</td><td>${p.funder}</td>
+      <td>${p.on ? '<span class="pill ok">Running</span>' : '<span class="pill">Paused</span>'}</td>
+      <td><div class="row" style="flex-wrap:nowrap"><button class="btn chip" data-a="promo-toggle" data-id="${p.id}">${p.on ? 'Pause' : 'Start'}</button><button class="btn chip danger" data-a="promo-del" data-id="${p.id}">Remove</button></div></td></tr>`).join('')
+      : '<tr><td colspan="6" class="muted">No offers yet. Add one below.</td></tr>'}
+    </tbody></table></div>
+    <form class="panel" id="promo-form">
+      <h4>New offer</h4>
+      <div class="form-grid">
+        <label class="f">Name<input class="in" id="pr-name" required placeholder="School term rice deal"></label>
+        <label class="f">Product<select class="in" id="pr-sku">${SKUS.map(s => `<option value="${s.sku}">${esc(s.name)}</option>`).join('')}</select></label>
+        <label class="f">Discount %<input class="in num" id="pr-pct" type="number" min="1" max="90" step="1" value="10" required></label>
+        <label class="f">Paid for by<select class="in" id="pr-funder"><option>Kibanja</option><option>Supplier</option></select></label>
+      </div>
+      <div><button class="btn primary" type="submit">Add offer</button></div>
+    </form>
+    <p class="small muted">Offers apply to every shopper. The member discount is then taken off the offer price.</p>
+  </section>`;
 };
 
 /* Operations */
@@ -661,6 +848,9 @@ V.ops = () => {
   const pending = S.claims.filter(c => c.status === 'pending');
   const liability = S.members.filter(m => m.plan === 'A' && m.status === 'active').reduce((s, m) => s + A_LIMIT - m.allowance.total, 0);
   const credit = S.members.filter(m => m.plan === 'B').reduce((s, m) => s + m.credit.used, 0);
+  const wallets = S.members.reduce((s, m) => s + m.wallet, 0);
+  const planIncome = S.members.reduce((s, m) => s + yearCost(S.plans[m.sub.plan]), 0);
+  const lapsed = S.members.filter(m => cover(m).s !== 'paid').length;
   const c = S.claims.find(x => x.id === ui.opsClaim) || S.claims[0];
   const cm = member(c.member);
   const blocking = c.checks.filter(k => k.r !== 'ok').length;
@@ -670,20 +860,21 @@ V.ops = () => {
     <div class="row between"><div><span class="eyebrow">${c.id} · ${TYPES[c.type]}</span><h3>${esc(hh(cm))}</h3></div>
       <span class="pill ${c.status === 'approved' ? 'ok' : c.status === 'declined' ? 'bad' : 'warn'}">${c.status === 'pending' ? 'Awaiting decision' : c.status === 'approved' ? 'Approved ' + fdate(c.decided) : 'Declined ' + fdate(c.decided)}</span></div>
     <p>${esc(c.note || 'No description given.')}</p>
-    <dl class="terms"><dt>Filed</dt><dd>${fdate(c.filed)}</dd><dt>Area</dt><dd>${esc(cm.area)}</dd><dt>Household</dt><dd>${cm.size} people</dd><dt>Evidence match</dt><dd class="num">${pct(score)} of checks passed</dd></dl>
+    <dl class="terms"><dt>Filed</dt><dd>${fdate(c.filed)}</dd><dt>Area</dt><dd>${esc(cm.area)}</dd><dt>Household</dt><dd>${cm.size} people</dd><dt>Plan</dt><dd>${S.plans[cm.sub.plan].name} · ${coverPill(cm)}</dd><dt>Evidence match</dt><dd class="num">${pct(score)} of checks passed</dd></dl>
     <ul class="checks">${c.checks.map((k, i) => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' || k.r === 'missing' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' || k.r === 'missing' ? '✕' : '…'}</span>
       <span>${esc(k.t)}${k.d ? `<span class="small muted" style="display:block">${esc(k.d)}</span>` : ''}${k.r === 'missing' ? '<span class="small" style="display:block;color:var(--bad)">No document uploaded</span>' : ''}</span>
       ${c.status === 'pending' && (k.r === 'todo' || k.r === 'missing') ? `<button class="btn chip" data-a="verify" data-i="${i}">Mark verified</button>` : '<span></span>'}</li>`).join('')}</ul>
     ${c.status === 'pending' ? `<p class="small muted">Automated checks collect the evidence. A person makes the decision and their name goes on it.</p>
-      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve and unlock card</button><button class="btn danger" data-a="decline">Decline</button>
+      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve and open allowance</button><button class="btn danger" data-a="decline">Decline</button>
       ${blocking ? `<span class="small" style="color:${failed ? 'var(--bad)' : 'var(--warn)'}">${failed ? 'A check failed; this claim can only be declined.' : `Resolve ${blocking} open check${blocking > 1 ? 's' : ''} first.`}</span>` : ''}</div>` : ''}
   </section>`;
   return `<div class="stack" style="gap:4px"><h2>Operations</h2><p class="muted small">The back office: verify claims, watch exposure, see every household.</p></div>
   <div class="kpis">
-    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${S.members.filter(m => m.plan === 'A').length} Model A · ${S.members.filter(m => m.plan === 'B').length} Model B</span></div>
-    <div class="kpi"><span class="eyebrow">Premiums held</span><span class="v">${short(S.members.length * PREMIUM)}</span><span class="small muted">with the underwriting partner</span></div>
+    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${PLAN_KEYS.map(k => `${S.members.filter(m => m.sub.plan === k).length} ${S.plans[k].name.toLowerCase()}`).join(' · ')}</span></div>
+    <div class="kpi"><span class="eyebrow">Plan income a year</span><span class="v">${short(planIncome)}</span><span class="small muted">${lapsed} household${lapsed === 1 ? '' : 's'} behind on payments</span></div>
     <div class="kpi"><span class="eyebrow">Allowance still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
     <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.status === 'overdue').length} household overdue</span></div>
+    <div class="kpi"><span class="eyebrow">Wallet money held</span><span class="v">${short(wallets)}</span><span class="small muted">customers' money, kept in trust</span></div>
     <div class="kpi"><span class="eyebrow">Claims to decide</span><span class="v">${pending.length}</span><span class="small muted">target: within 72 hours</span></div>
   </div>
   <div class="split">
@@ -695,21 +886,27 @@ V.ops = () => {
     </section>
   </div>
   <section class="stack"><h3>Member register</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Status</th><th class="n">Card can pay now</th></tr></thead>
-    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${m.plan === 'A' ? 'A · Emergency' : 'B · Credit ' + short(LADDER[m.credit.rung])}</td><td>${statusPill(m)}</td><td class="n">${ugx(power(m).amt)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Benefit</th><th class="n">Wallet</th><th class="n">Card can pay now</th></tr></thead>
+    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${coverPill(m)}</td><td>${m.plan === 'A' ? 'A · ' : 'B · ' + short(LADDER[m.credit.rung]) + ' · '}${statusPill(m)}</td><td class="n">${ugx(m.wallet)}</td><td class="n">${ugx(sources(m).total)}</td></tr>`).join('')}</tbody></table></div>
   </section>`;
 };
 
-/* Underwriting model */
+// Average premium a year per household, from the plan mix and the prices on the Plans screen.
+function premiumOf(o = M) {
+  const w = Math.min(o.mixW, 100) / 100, mo = Math.min(o.mixM, 100 - Math.min(o.mixW, 100)) / 100;
+  return w * yearCost(S.plans.weekly) + mo * yearCost(S.plans.monthly) + (1 - w - mo) * yearCost(S.plans.annual);
+}
+
 function yr(i, o = M) {
   const f = o.fam[i], spend = o.spend * 1e6;
-  const prem = f * o.premium * 1e6, claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
+  const prem = f * premiumOf(o), claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
   const creditVol = f * (o.creditShare / 100) * spend;          // groceries bought on the monthly credit line
   const reb = f * spend * (o.rebatePct / 100) + creditVol * (o.feePct / 100);
   const outstanding = creditVol / 12;                           // one month of credit spend, repaid at cycle end
   const credit = creditVol * (o.lossPct / 100) + outstanding * (o.cofPct / 100);
+  const disc = f * spend * (o.discPct / 100);                  // member discounts Kibanja pays for
   const ops = o.ops[i] * 1e6;
-  return { f, prem, reb, gross: prem + reb, claims, credit, ops, outstanding, creditVol, net: prem + reb - claims - credit - ops };
+  return { f, prem, reb, gross: prem + reb, claims, credit, disc, ops, outstanding, creditVol, net: prem + reb - claims - credit - disc - ops };
 }
 // Claim rate at which the margin from everything else is used up by claims.
 function breakEven(i, o = M) { const y = yr(i, { ...o, claimRate: 0 }); return y.net / y.f / (o.avgDraw * 1e6); }
@@ -721,11 +918,15 @@ V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p clas
       <fieldset><legend class="eyebrow">Households</legend><div class="form-grid">
         ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="1" step="100" id="fam${i}" value="${M.fam[i]}"></label>`).join('')}</div></fieldset>
       <fieldset><legend class="eyebrow">Per household</legend><div class="form-grid">
-        <label class="f">Premium <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.1" min="0" id="premium" value="${M.premium}"></label>
         <label class="f">Payout limit <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="limit" value="${M.limit}"></label>
         <label class="f">Claim rate <span class="hint">% of households / year</span><input class="in num" type="number" step="0.5" min="0" max="100" id="claimRate" value="${M.claimRate}"></label>
         <label class="f">Average used per claim <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="avgDraw" value="${M.avgDraw}"></label>
       </div></fieldset>
+      <fieldset><legend class="eyebrow">Plan mix and discounts</legend><div class="form-grid">
+        <label class="f">On weekly plans <span class="hint">% of households</span><input class="in num" type="number" step="5" min="0" max="100" id="mixW" value="${M.mixW}"></label>
+        <label class="f">On monthly plans <span class="hint">% of households</span><input class="in num" type="number" step="5" min="0" max="100" id="mixM" value="${M.mixM}"></label>
+        <label class="f">Member discount paid by Kibanja <span class="hint">% of card spend</span><input class="in num" type="number" step="0.5" min="0" id="discPct" value="${M.discPct}"></label>
+      </div><p class="small muted" id="eff-prem"></p></fieldset>
       <fieldset><legend class="eyebrow">Card spending and credit line</legend><div class="form-grid">
         <label class="f">Card spend per household <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.5" min="0" id="spend" value="${M.spend}"></label>
         <label class="f">Households using credit <span class="hint">%</span><input class="in num" type="number" step="1" min="0" max="100" id="creditShare" value="${M.creditShare}"></label>
@@ -747,17 +948,19 @@ function modelOut() {
   const Y = [0, 1, 2].map(i => yr(i));
   const rows = [
     ['Premium revenue', 'prem'], ['Transaction and rebate revenue', 'reb'], ['Gross revenue pool', 'gross', 1],
-    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Credit losses and cost of funds', 'credit'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
+    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Credit losses and cost of funds', 'credit'], ['Member discounts', 'disc'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
   ];
   const table = `<div class="tablewrap"><table class="t"><thead><tr><th>UGX</th>${Y.map((y, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${y.f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead>
     <tbody>${rows.map(([l, k, s]) => `<tr class="${s ? 'strong' : ''}"><td>${l}</td>${Y.map(y => `<td class="n ${y[k] < 0 ? 'neg' : ''}">${short(y[k])}</td>`).join('')}</tr>`).join('')}
     <tr><td class="muted">Net in your original table</td>${PLAN_NET.map(v => `<td class="n muted">${short(v)}</td>`).join('')}</tr></tbody></table></div>
-    <p class="small muted">With the plan's assumptions this lands within 1% of your table. The gap is the 2.5% fee: here it is charged only on the ${trim2(M.creditShare)}% of households who use credit, not on everyone.</p>`;
+    <p class="small muted">With the plan's assumptions (everyone on the annual plan, no discounts) this lands within 1% of your table. The gap is the 2.5% fee: here it is charged only on the ${trim2(M.creditShare)}% of households who use credit, not on everyone.</p>`;
   const y3 = Y[2], f = y3.f;
-  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebate and fees', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Credit costs', y3.credit / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
+  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebate and fees', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Credit costs', y3.credit / f, 'var(--bad)'], ['Discounts', y3.disc / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
   const maxv = Math.max(...per.map(p => Math.abs(p[1])), 1);
   const bars = `<section class="panel"><h3>One household, Year 3</h3><div class="bars">${per.map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${Math.abs(v) / maxv * 100}%;background:${c}"></i></span><span class="v">${short(v)}</span></div>`).join('')}</div></section>`;
   $('#model-out').innerHTML = `<section class="stack"><h3>Three-year view</h3>${table}</section>${bars}`;
+  const annualShare = Math.max(0, 100 - Math.min(M.mixW, 100) - Math.min(M.mixM, 100 - Math.min(M.mixW, 100)));
+  $('#eff-prem').textContent = `Average premium: ${ugx(premiumOf())} a year per household (${trim2(annualShare)}% on annual). Prices come from the Plans and discounts screen.`;
 
   // Stress grid and findings
   const rates = [2, 4, 6, 8, 10, 12], draws = [10, 20, 35, 50];
@@ -776,6 +979,10 @@ function modelOut() {
       `About ${ugx(y3.outstanding)} of groceries are on credit at any moment in Year 3: one month of spend for ${trim2(M.creditShare)}% of households. Someone lends that money and absorbs the families who don't repay. ${noCreditCost ? 'Your table counts neither.' : ''} At ${trim2(Math.max(M.lossPct, 3))}% of credit volume lost and ${trim2(Math.max(M.cofPct, 18))}% a year cost of funds, Year 3 net is ${ugx(illus.net)}.`],
     ['', `A ${trim2(M.feePct)}% fee every month is about ${trim2(M.feePct * 12)}% a year`,
       'That is consumer credit pricing, and fees usually count toward the cost of credit. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap with UMRA and whether the processing fee counts toward it before launch.'],
+    ['', 'Weekly and monthly payers',
+      `If they never miss a payment, a weekly payer brings in ${ugx(yearCost(S.plans.weekly))} a year and a monthly payer ${ugx(yearCost(S.plans.monthly))}, against ${ugx(yearCost(S.plans.annual))} upfront. The model assumes every household pays all year. Weekly payers lapse more often, so track lapses by plan in the pilot and budget for them.`],
+    [M.discPct === 0 ? 'bad' : '', 'Member discounts cost money',
+      `The annual plan's ${trim2(S.plans.annual.disc)}% discount on UGX ${trim2(M.spend)}M of card spend saves each household about ${ugx(M.spend * 1e6 * S.plans.annual.disc / 100)} a year. ${M.discPct === 0 ? 'Your table counts none of it. ' : ''}If Kibanja pays all of it, Year 3 net is ${ugx(yr(2, { ...M, discPct: S.plans.annual.disc }).net)}. Supplier-funded offers and discounts limited to Kibanja's own stores keep the cost down.`],
     ['bad', 'Drought hits many households at once',
       'Job losses and hospital stays are spread out. A declared drought pays every member in the district in the same month. Cap exposure per district and buy reinsurance or a parametric weather cover before offering the drought trigger.'],
     ['', 'Costs still missing from the table',
@@ -791,7 +998,7 @@ function modelOut() {
 const LIC = [
   ['ira', 'Underwriting partner licensed by the Insurance Regulatory Authority of Uganda', 'Model A is insurance. Either a licensed insurer carries the risk and you act as its distributor, or you apply for your own licence with the capital that requires.'],
   ['umra', 'Credit partner, or a Tier 4 licence from the Uganda Microfinance Regulatory Authority', 'Model B lends money. A licensed bank, microfinance deposit-taker or money lender has to hold the deposits and the loan book.'],
-  ['bou', 'Payments through a Bank of Uganda-licensed provider', 'Card payments and Mobile Money collections fall under the National Payment Systems Act. Run them through a licensed payment partner at launch.'],
+  ['bou', 'Payments and the wallet through a Bank of Uganda-licensed provider', 'Card payments, Mobile Money collections and stored wallet balances fall under the National Payment Systems Act. Wallet money belongs to customers: hold it through a licensed e-money issuer or payment partner, in trust.'],
   ['pdpo', 'Registration with the Personal Data Protection Office', 'Health and employment records used to verify claims are sensitive personal data under the Data Protection and Privacy Act 2019. Register, and get explicit consent at enrolment.'],
   ['ursb', 'Company registration (URSB), a URA tax number and a KCCA trading licence for each store', 'Needed before the flagship store opens.'],
   ['float', 'Written rule on what premium money may fund', 'Premiums back claims. Keep them with the underwriter or in a ring-fenced account and fund the stores from equity or debt.'],
@@ -958,21 +1165,36 @@ function lookup(q) {
 
 const A = {
   tab: b => go(b.dataset.v),
-  reset: () => { S = seed(); Object.assign(ui, { viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' }); render(); toast('Example households reset'); },
+  reset: () => { S = seed(); Object.assign(ui, { viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' }); render(); toast('Example households, plans and offers reset'); },
   'open-claim': () => { ui.claimForm = true; render(); },
   'cancel-claim': () => { ui.claimForm = false; render(); },
   pay: () => {
     const m = member(ui.viewAs), c = m.credit;
     const wasOverdue = m.status === 'overdue';
     c.used = Math.max(0, c.used - c.dueAmt);
-    S.txns.push({ d: TODAY, m: m.id, where: 'Repayment · Mobile Money', smart: 0, cash: c.dueAmt, items: 0 });
+    S.txns.push({ d: TODAY, m: m.id, where: 'Repayment · Mobile Money', smart: 0, mm: c.dueAmt, items: 0 });
     c.onTime = wasOverdue ? 0 : c.onTime + 1;
     m.status = 'good';
     c.due = addMonths(wasOverdue ? TODAY : c.due, 1);
     c.dueAmt = c.used ? Math.max(100000, Math.round(c.used / 4 / 1000) * 1000) : 0;
-    let msg = wasOverdue ? 'Paid. The card works again.' : `Paid on time (${Math.min(c.onTime, 3)}/3).`;
-    if (c.onTime >= 3 && c.essential >= 0.9 && c.rung < LADDER.length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(LADDER[c.rung])} rung`; }
+    let msg = wasOverdue ? 'Repaid. The credit line works again.' : `Repaid on time (${Math.min(c.onTime, 3)}/3).`;
+    if (c.onTime >= 3 && essShare(c) >= 0.9 && c.rung < LADDER.length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(LADDER[c.rung])} rung`; }
     render(); toast(msg);
+  },
+  'pay-plan': () => {
+    const m = member(ui.viewAs), key = m.sub.next || m.sub.plan, p = S.plans[key];
+    const lapsed = cover(m).s === 'lapsed';
+    m.sub.plan = key; delete m.sub.next;
+    // After a lapse cover restarts today, and so does the waiting period for emergency claims.
+    if (lapsed) { m.sub.start = TODAY; m.sub.paidUntil = nextPeriod(TODAY, key); } else m.sub.paidUntil = nextPeriod(m.sub.paidUntil, key);
+    S.txns.push({ d: TODAY, m: m.id, where: `${p.name} plan · Mobile Money`, smart: 0, mm: p.price, items: 0 });
+    render(); toast(`${p.name} plan paid. Cover runs to ${fdate(m.sub.paidUntil)}.`);
+  },
+  topup: b => {
+    const m = member(ui.viewAs), v = +b.dataset.amt;
+    m.wallet += v;
+    S.txns.push({ d: TODAY, m: m.id, where: 'Wallet top-up · Mobile Money', smart: 0, mm: v, items: 0 });
+    render(); toast(`${ugx(v)} added to the wallet`);
   },
   'pos-lookup': () => {
     ui.posInput = $('#pos-card').value;
@@ -987,25 +1209,32 @@ const A = {
   dec: b => { const l = ui.cart.find(x => x.sku === b.dataset.sku); l.q--; if (!l.q) ui.cart = ui.cart.filter(x => x !== l); render(); },
   'clear-cart': () => { ui.cart = []; render(); },
   charge: () => {
-    const t = cartTotals(), m = t.m;
-    const lines = ui.cart.map(l => { const s = SKUS.find(x => x.sku === l.sku); return { q: l.q, name: s.name, ess: s.ess, amt: s.price * l.q }; });
-    const margin = Math.round(lines.reduce((s, l) => s + l.amt * (l.ess ? MARGIN.ess : MARGIN.other), 0));
-    if (m && t.smart > 0) {
-      if (m.plan === 'A') { m.allowance.month += t.smart; m.allowance.total += t.smart; } else { m.credit.used += t.smart; }
-    }
-    if (m) S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: t.smart, cash: t.cash, items: lines.reduce((s, l) => s + l.q, 0) });
-    ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines, smart: t.smart, cash: t.cash, margin, card: m && m.card.replace(/\s/g, '') };
+    const t = cartTotals(), m = t.m, P = t.pay;
+    const kibanjaPromo = t.lines.reduce((s, l) => s + (l.promo && l.promo.funder === 'Kibanja' ? l.promoOff : 0), 0);
+    const margin = Math.round(t.lines.reduce((s, l) => s + l.gross * (l.ess ? MARGIN.ess : MARGIN.other), 0) - kibanjaPromo - t.memberOff);
+    let tenders;
+    if (m) {
+      if (P.allowance) { m.allowance.month += P.allowance; m.allowance.total += P.allowance; }
+      m.wallet -= P.wallet;
+      if (P.credit) { m.credit.used += P.credit; m.credit.ess += P.creditEss; m.credit.all += P.credit; }
+      S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: P.allowance + P.wallet + P.credit, mm: P.mm, items: t.lines.reduce((s, l) => s + l.q, 0) });
+      tenders = [['Emergency allowance', P.allowance], ['SmartCare wallet', P.wallet], ['Credit line', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
+    } else tenders = [['Mobile Money or cash', P.mm]];
+    ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines: t.lines, promoOff: t.promoOff, memberOff: t.memberOff, disc: m ? t.src.disc : 0, total: t.total, tenders, margin };
     ui.cart = [];
-    render(); toast(t.smart ? `${ugx(t.smart)} charged to SmartCare` : 'Paid in cash');
+    render();
+    toast(!m ? 'Paid' : P.mm ? `${ugx(t.total - P.mm)} on the card; Mobile Money prompt for ${ugx(P.mm)} sent to the member's phone` : `${ugx(t.total)} paid in full by SmartCare`);
   },
   'new-sale': () => { ui.receipt = null; ui.posMember = null; ui.posInput = ''; render(); },
+  'promo-toggle': b => { const p = S.promos.find(x => x.id === b.dataset.id); p.on = !p.on; render(); toast(`${p.name} ${p.on ? 'started' : 'paused'}`); },
+  'promo-del': b => { const p = S.promos.find(x => x.id === b.dataset.id); S.promos = S.promos.filter(x => x !== p); render(); toast(`${p.name} removed`); },
   'ops-pick': b => { ui.opsClaim = b.dataset.id; render(); },
   verify: b => { const c = S.claims.find(x => x.id === ui.opsClaim); c.checks[+b.dataset.i].r = 'ok'; render(); },
   approve: () => {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
     c.status = 'approved'; c.decided = TODAY;
     m.status = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
-    render(); toast(`${hh(m)}: card unlocked, ${ugx(A_LIMIT / 12)} a month`);
+    render(); toast(`${hh(m)}: allowance open, ${ugx(A_LIMIT / 12)} a month`);
   },
   decline: () => {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
@@ -1024,11 +1253,20 @@ document.addEventListener('click', e => {
 document.addEventListener('submit', e => {
   e.preventDefault();
   if (e.target.id === 'pos-form') return A['pos-lookup']();
+  if (e.target.id === 'promo-form') {
+    const name = $('#pr-name').value.trim(), pctOff = parseFloat($('#pr-pct').value);
+    if (!name || !(pctOff > 0 && pctOff < 100)) { toast('Give the offer a name and a discount between 1 and 99%'); return; }
+    const sku = $('#pr-sku').value;
+    S.promos = S.promos.filter(p => !(p.sku === sku && p.on)); // one running offer per product
+    S.promos.push({ id: 'P' + Date.now(), sku, pct: pctOff, name, funder: $('#pr-funder').value, on: true });
+    render(); toast(`${name} is running at every till`);
+    return;
+  }
   if (e.target.id === 'claim-form') {
     const m = member(ui.viewAs);
     const type = $('#cl-type').value, note = $('#cl-note').value.trim(), hasFile = $('#cl-file').files.length > 0;
-    const inForce = days(m.enrolled, TODAY);
-    const checks = [{ t: `Waiting period passed (${WAIT_DAYS} days)`, r: inForce >= WAIT_DAYS ? 'ok' : 'fail', d: `${inForce} days in force` }];
+    const inForce = days(m.sub.start, TODAY);
+    const checks = [{ t: `Waiting period passed (${WAIT_DAYS} days)`, r: inForce >= WAIT_DAYS ? 'ok' : 'fail', d: `${inForce} days of continuous cover` }];
     if (type === 'job') checks.push({ t: 'Termination letter on file', r: hasFile ? 'ok' : 'missing' }, { t: 'NSSF contributions stopped', r: 'todo', d: 'Pull the contribution history' }, { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on a number the platform finds itself' });
     if (type === 'medical') checks.push({ t: 'Admission note on file', r: hasFile ? 'ok' : 'missing' }, { t: 'Partner hospital confirms admission', r: 'todo' });
     if (type === 'drought') checks.push({ t: 'District on the declared drought list', r: 'todo', d: 'Check against the national weather authority\'s rainfall bulletin' });
@@ -1041,10 +1279,21 @@ document.addEventListener('submit', e => {
 });
 
 document.addEventListener('change', e => {
-  if (e.target.id === 'view-as') { ui.viewAs = e.target.value; ui.claimForm = false; render(); }
-  if (e.target.dataset.lic) { licences[e.target.dataset.lic] = e.target.checked; store.set('ksc-licences', licences); }
-  if (e.target.dataset.room) { dataroom[e.target.dataset.room] = e.target.checked; store.set('ksc-dataroom', dataroom); }
-  if (e.target.id === 'float-yield') { const v = parseFloat(e.target.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
+  const t = e.target;
+  if (t.id === 'view-as') { ui.viewAs = t.value; ui.claimForm = false; render(); }
+  if (t.id === 'plan-switch') {
+    const m = member(ui.viewAs);
+    if (t.value === m.sub.plan) delete m.sub.next; else m.sub.next = t.value;
+    render(); toast(t.value === m.sub.plan ? `Staying on ${S.plans[t.value].name}` : `Switching to ${S.plans[t.value].name} from your next payment`);
+  }
+  if (t.dataset.plan) {
+    const v = parseFloat(t.value);
+    S.plans[t.dataset.plan][t.dataset.field] = isFinite(v) && v >= 0 ? v : 0;
+    render();
+  }
+  if (t.dataset.lic) { licences[t.dataset.lic] = t.checked; store.set('ksc-licences', licences); }
+  if (t.dataset.room) { dataroom[t.dataset.room] = t.checked; store.set('ksc-dataroom', dataroom); }
+  if (t.id === 'float-yield') { const v = parseFloat(t.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
 });
 
 document.addEventListener('input', e => {
@@ -1053,7 +1302,7 @@ document.addEventListener('input', e => {
   const num = id => { const v = parseFloat($('#' + id).value); return isFinite(v) && v >= 0 ? v : 0; };
   M.fam = [0, 1, 2].map(i => Math.max(1, num('fam' + i)));
   M.ops = [0, 1, 2].map(i => num('ops' + i));
-  ['premium', 'limit', 'claimRate', 'avgDraw', 'spend', 'creditShare', 'rebatePct', 'feePct', 'lossPct', 'cofPct'].forEach(k => M[k] = num(k));
+  ['mixW', 'mixM', 'discPct', 'limit', 'claimRate', 'avgDraw', 'spend', 'creditShare', 'rebatePct', 'feePct', 'lossPct', 'cofPct'].forEach(k => M[k] = num(k));
   modelOut();
 });
 
@@ -1061,3 +1310,4 @@ const start = (location.hash || '').slice(1);
 ui.view = V[start] ? start : 'overview';
 render();
 </script>
+
