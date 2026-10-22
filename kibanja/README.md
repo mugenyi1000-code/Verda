@@ -40,7 +40,7 @@ reduces the household's allowance or credit.
 |---|---|
 | Pitch | Year 3 figures from the model, the three advantages and what diligence will ask, the comparison with Uganda's supermarket cards, the 10-year expansion, fundraising by stage and a data-room checklist |
 | Investors to approach | 50 target investors in five groups (grants and accelerators, seed funds, growth funds, lenders, development finance) with when to approach, what to ask for, why they fit and a status tracker |
-| Name ideas | Eight candidate names for the platform and what to check before choosing |
+| Name ideas | Eight local names (Luganda, Swahili and mixed) and 50 English names in five themes, with a star button to build a shortlist and what to check before choosing |
 | Underwriting | The same live model as the platform |
 
 ## Design decisions that differ from the original plan

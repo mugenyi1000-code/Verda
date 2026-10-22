@@ -266,6 +266,10 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
 /* One card and food */
 .onecard { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .feat { gap: 6px; align-content: start; }
+.names-en { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-items: start; }
+.name-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.name-list li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; padding-block: 8px; border-top: 1px solid var(--line); }
+.star { border: 0; background: none; font-size: 18px; line-height: 1; color: var(--sun); cursor: pointer; padding: 2px; }
 table.t.inv td:nth-child(5) { min-width: 260px; }
 table.t.inv select.in { min-width: 140px; padding: 6px 8px; }
 .btn.chip[aria-pressed="true"] { background: var(--leaf); color: var(--on-leaf); border-color: var(--leaf); }
@@ -1732,10 +1736,17 @@ const NAMES = [
   ['Kibanja Kikapu', 'Both', 'Keeps the Ugandan root and adds a word the whole region knows.'],
   ['FoodFirst', 'English', 'Plain and international, easy for investors. Generic, and harder to protect as a trademark.'],
 ];
+const NAMES_EN = [["The full basket", [["FullBasket", "The promise in one word: the basket is never empty."], ["BasketPlus", "Says the bonus: you get more basket than you paid for."], ["ShopSure", "Shop with certainty, without cash in your pocket."], ["TrolleyPass", "Uses the word Kampala shoppers say; a pass for the trolley."], ["CartKey", "The card is the key that opens the cart."], ["AisleCard", "A card for every aisle in the store."], ["StockUp", "Speaks to the bulk packs and big family packages."], ["BulkBuddy", "Friendly name for buying in bulk at bulk prices."], ["SmartTrolley", "Modern and plain; close to the current SmartCare name."], ["ShelfReady", "Everything on the shelf, ready when you are."]]], ["Food on the table", [["FullTable", "The outcome families want: a full table every day."], ["PlateFull", "Warm and simple; easy to say in any language."], ["FoodSure", "Food security in two syllables."], ["TableFirst", "Food comes first; fits the food-only credit and loans."], ["MealMate", "A friendly companion for everyday meals."], ["FedWell", "A family that is fed well, every month."], ["PantryPass", "A pass to a full pantry."], ["KitchenCard", "Plain: the card for the kitchen."], ["StaplePlus", "Staples, plus the bonus."], ["DailyBread", "Instantly understood and warm; its religious echo will suit many shoppers and not others."]]], ["Paid ahead, stretched further", [["PayAhead", "Describes the prepaid packages exactly."], ["FoodVault", "Money put away for food, safe until you need it."], ["StretchCard", "Makes every shilling stretch further."], ["BonusBasket", "Leads with the bonus on every payment."], ["WeekWise", "For weekly payers; smart with money week by week."], ["MonthFull", "A full month of food, paid once."], ["SureSave", "Saving that turns into food you can count on."], ["SteadyShop", "Steady food, steady prices, steady payments."], ["PocketPantry", "A pantry you carry in your pocket."], ["ValueCart", "Plain value message for price-conscious shoppers."]]], ["Family, staff and community", [["FamilyFull", "For the family packages: every member fed."], ["HomeStock", "Keeps the home stocked."], ["KinCart", "Kin and cart: the whole family on one card."], ["HouseholdPlus", "Clear for families and employers alike."], ["CareCart", "Shopping that looks after people; keeps the SmartCare idea."], ["StaffPantry", "Ready-made name for the employer packages."], ["TogetherTable", "Families, employers and producers around one table."], ["HearthCard", "The hearth is the heart of the home."], ["NeighbourStore", "The trusted shop down the road, including the micro-hubs."], ["FamilyFirst Foods", "Direct and warm; a little long for a card."]]], ["From the land", [["GreenPlot", "An English cousin of kibanja, a plot of land."], ["PlotPlus", "Kibanja's plot, plus the bonus."], ["FieldToTable", "Producers to families, the whole supply in one phrase."], ["SeedToShelf", "Tells the farm-loan and producer story."], ["FarmGate", "Buying at farm-gate prices, straight from growers."], ["HarvestCard", "Every payment brings in a harvest."], ["GoodHarvest", "Optimistic and familiar."], ["RootedFoods", "Rooted in Ugandan farms and producers."], ["FreshField", "Fresh from the field; suits the Ugandan-made goods."], ["HomeGrown", "Ugandan-made, double points; also a common phrase, so harder to protect."]]]];
+const nameStars = store.get('ksc-names', {});
 function nameIdeas() {
   return `<section class="stack"><h2>Name ideas for the platform</h2>
+    <h3>Local names</h3>
     <div class="plans">${NAMES.map(([n, m, why]) => `<article class="panel plan-tile"><h3>${n}</h3><span class="eyebrow">${m}</span><p class="small muted">${why}</p></article>`).join('')}</div>
-    <p class="small muted" style="max-width:76ch">Before choosing, search the Uganda Registration Services Bureau trademark register and the Kenyan and Tanzanian registers, check the .ug and .com domains and social handles, and test the shortlist with shoppers in Kampala and outside Buganda. Several of these words are common, so other businesses may already use them.</p>
+    <div class="row between"><h3>50 more, in English</h3><span class="small muted">${Object.values(nameStars).filter(Boolean).length} starred: ${Object.keys(nameStars).filter(k => nameStars[k]).join(', ') || 'none yet'}</span></div>
+    <div class="names-en">${NAMES_EN.map(([theme, list]) => `<section class="panel"><h4>${theme}</h4><ul class="name-list">${list.map(([n, why]) => `<li>
+      <button class="star" data-a="star-name" data-name="${n}" aria-pressed="${!!nameStars[n]}" aria-label="Star ${n}">${nameStars[n] ? '★' : '☆'}</button>
+      <span><b>${n}</b><span class="small muted" style="display:block">${why}</span></span></li>`).join('')}</ul></section>`).join('')}</div>
+    <p class="small muted" style="max-width:76ch">Star the ones you like to build a shortlist; stars stay in this browser. Before choosing, search the Uganda Registration Services Bureau trademark register and the Kenyan and Tanzanian registers, check the .ug and .com domains and social handles, and test the shortlist with shoppers in Kampala and outside Buganda. Several of these words are common, so other businesses may already use them.</p>
   </section>`;
 }
 
@@ -1847,6 +1858,7 @@ const A = {
   'new-sale': () => { ui.receipt = null; ui.posMember = null; ui.posInput = ''; ui.usePoints = false; render(); },
   'promo-toggle': b => { const p = S.promos.find(x => x.id === b.dataset.id); p.on = !p.on; render(); toast(`${p.name} ${p.on ? 'started' : 'paused'}`); },
   'promo-del': b => { const p = S.promos.find(x => x.id === b.dataset.id); S.promos = S.promos.filter(x => x !== p); render(); toast(`${p.name} removed`); },
+  'star-name': b => { nameStars[b.dataset.name] = !nameStars[b.dataset.name]; store.set('ksc-names', nameStars); render(); },
   'inv-filter': b => { ui.invFilter = b.dataset.k; render(); },
   'ops-pick': b => { ui.opsClaim = b.dataset.id; render(); },
   verify: b => { const c = S.claims.find(x => x.id === ui.opsClaim); c.checks[+b.dataset.i].r = 'ok'; render(); },
