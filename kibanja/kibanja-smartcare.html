@@ -237,6 +237,8 @@ legend { padding: 0; margin-bottom: 8px; }
 .plans { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .plan-tile { gap: 8px; align-content: start; }
 .plans.tiers { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.paygrid { display: grid; grid-template-columns: auto auto 1fr; gap: 4px 12px; font-size: 13.5px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); }
+.paygrid .gets { color: var(--leaf); text-align: right; }
 .plan-tile .per { font-size: 14px; color: var(--muted); }
 .tag.offer { color: var(--sun); }
 .cell-in { width: 120px; text-align: right; padding: 6px 8px; }
@@ -302,7 +304,7 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
       <button class="tab" role="tab" data-a="tab" data-v="member">Family app</button>
       <button class="tab" role="tab" data-a="tab" data-v="pos">Store till</button>
       <button class="tab" role="tab" data-a="tab" data-v="food">Food and producers</button>
-      <button class="tab" role="tab" data-a="tab" data-v="plans">Plans and discounts</button>
+      <button class="tab" role="tab" data-a="tab" data-v="plans">Packages</button>
       <button class="tab" role="tab" data-a="tab" data-v="loans">Kibanja Loan</button>
       <button class="tab" role="tab" data-a="tab" data-v="move">Boda and fuel loans</button>
       <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
@@ -318,9 +320,12 @@ input[type="range"] { width: 100%; accent-color: var(--leaf); }
 <script>
 /* ---------- constants ---------- */
 const TODAY = '2026-10-22';            // demo date: every example household is dated against this
-const LADDER = [4500000, 9000000, 18000000, 30000000, 50000000]; // Premier's food credit rungs, from the original plan
-const rungs = start => [1, 1.5, 2, 2.5, 3].map(x => Math.round(start * x)); // other plans grow to three times their start
-const TIER_KEYS = ['starter', 'solo', 'duo', 'family', 'familyplus', 'premier'];
+const rungs = start => [1, 1.5, 2, 2.5, 3].map(x => Math.round(start * x)); // food credit grows to three times its start
+const TIER_KEYS = ['starter', 'solo', 'soloplus', 'familystart', 'family', 'familymax', 'staff', 'staffplus'];
+const GROUPS = [['individual', 'For individuals'], ['family', 'For families'], ['corporate', 'For employers']];
+const PROTECT_MONTHS = 3;   // after a verified shock, the household's package continues free for this many months
+const ORIGINAL = { weekly: 32000, monthly: 135000, annual: 1500000 }; // the original UGX 1.5M plan, still modelled on Underwriting
+const STAFF_VOLUME = [[200, 2], [50, 1]];   // extra bonus % for employers with at least this many staff
 const WAIT_DAYS = 90;
 const TYPES = { job: 'Job loss', medical: 'Hospital admission', drought: 'Drought in district' };
 const PLAN_KEYS = ['weekly', 'monthly', 'annual'];
@@ -335,64 +340,86 @@ const SKUS = [
   { sku: '1006', name: 'Iodised salt 1 kg', price: 1500, ess: true },
   { sku: '1007', name: 'Fresh milk 1 L', price: 3000, ess: true, local: true },
   { sku: '1008', name: 'Bar soap 1 kg', price: 6500, ess: true, local: true },
-  { sku: '1009', name: 'Matooke bunch, medium', price: 25000, ess: true, local: true },
+  { sku: '1009', name: 'Wheat flour 2 kg', price: 8000, ess: true, local: true },
+  { sku: '1011', name: 'Tea leaves 500 g', price: 6000, ess: true, local: true },
+  { sku: '1012', name: 'Groundnuts 1 kg', price: 12000, ess: true, local: true },
+  { sku: '1013', name: 'Toilet paper, 10 rolls', price: 15000, ess: true, local: true },
   { sku: '1010', name: 'Infant formula 400 g', price: 32000, ess: true },
+  // Bulk packs at bulk prices. shelf: what the same quantity costs in the small packs above.
+  { sku: '4001', name: 'Maize flour 25 kg bag', price: 75000, shelf: 87500, ess: true, local: true, bulk: true },
+  { sku: '4002', name: 'Rice 25 kg bag', price: 105000, shelf: 120000, ess: true, local: true, bulk: true },
+  { sku: '4003', name: 'Dry beans 10 kg', price: 42000, shelf: 48000, ess: true, local: true, bulk: true },
+  { sku: '4004', name: 'Cooking oil 10 L', price: 62000, shelf: 70000, ess: true, local: true, bulk: true },
+  { sku: '4005', name: 'Sugar 10 kg', price: 40000, shelf: 45000, ess: true, local: true, bulk: true },
+  { sku: '4006', name: 'Bar soap, carton of 10', price: 58000, shelf: 65000, ess: true, local: true, bulk: true },
   { sku: '2001', name: 'Soda 500 ml', price: 2000, ess: false },
   { sku: '2002', name: 'Beer 500 ml', price: 4500, ess: false },
   { sku: '2003', name: 'Airtime voucher', price: 10000, ess: false },
   { sku: '2004', name: 'Biscuits', price: 3500, ess: false },
 ];
 // What goes into the Food Basket: [sku, quantity]. Its shelf value is what the same items cost one by one.
-const BASKET = [['1001', 5, 10, 'kg'], ['1003', 3, 6, 'kg'], ['1002', 1, 5, 'kg'], ['1005', 1, 3, 'L'], ['1004', 1, 2, 'kg'], ['1006', 1, 1, 'kg'], ['1009', 2, 2, 'bunches'], ['1007', 8, 8, 'L'], ['1008', 1, 1, 'kg']];
+const BASKET = [['1001', 5, 10, 'kg'], ['1003', 3, 6, 'kg'], ['1002', 1, 5, 'kg'], ['1005', 1, 3, 'L'], ['1004', 1, 2, 'kg'], ['1006', 1, 1, 'kg'], ['1009', 2, 4, 'kg'], ['1011', 1, 0.5, 'kg'], ['1012', 1, 1, 'kg'], ['1013', 1, 10, 'rolls'], ['1007', 8, 8, 'L'], ['1008', 1, 1, 'kg']];
 const BASKET_LOCKED_TO = '2027-01-31';
 const MARGIN = { ess: 0.12, other: 0.25 }; // assumed store gross margin: staples thin, extras fatter
 
 function seed() {
   return {
-    // How often a household pays. Paying for the year upfront is cheapest and earns the best discount and points.
+    // How often a household pays. bonus: extra shopping value added to every payment; paying further ahead earns more.
     plans: {
-      weekly: { name: 'Weekly', per: 'week', perYear: 52, grace: 3, disc: 2, pts: 1 },
-      monthly: { name: 'Monthly', per: 'month', perYear: 12, grace: 7, disc: 3, pts: 1 },
-      annual: { name: 'Annual', per: 'year', perYear: 1, grace: 14, disc: 5, pts: 2 },
+      weekly: { name: 'Weekly', per: 'week', perYear: 52, grace: 3, bonus: 1, disc: 0, pts: 1 },
+      monthly: { name: 'Monthly', per: 'month', perYear: 12, grace: 7, bonus: 3, disc: 0, pts: 1 },
+      annual: { name: 'Yearly', per: 'year', perYear: 1, grace: 14, bonus: 8, disc: 0, pts: 2 },
     },
-    // Plans by household size. allowance: emergency allowance a month, for up to 12 months; ladder: food credit rungs.
-    // Cover is sized to what a household of that size eats, so the price stays low. Premier keeps the original UGX 1.5M / 50M design.
+    // Shopping packages. monthly: what the package costs a month (per employee for employers); the weekly and yearly
+    // prices follow from it. bonus: extra % on top of the frequency bonus. bundle: what a month buys at bulk prices.
     tiers: {
-      starter: { name: 'Kibanja Starter', who: 'Anyone, free', people: 1, free: true, prices: { weekly: 0, monthly: 0, annual: 0 }, allowance: 0, ladder: [] },
-      solo: { name: 'Kibanja Solo', who: 'One person', people: 1, prices: { weekly: 2500, monthly: 10500, annual: 120000 }, allowance: 300000, ladder: rungs(300000) },
-      duo: { name: 'Kibanja Duo', who: 'Two people: a couple, or a parent and child', people: 2, prices: { weekly: 4500, monthly: 19500, annual: 220000 }, allowance: 550000, ladder: rungs(600000) },
-      family: { name: 'Kibanja Family', who: 'A household of up to five', people: 5, prices: { weekly: 8500, monthly: 36000, annual: 400000 }, allowance: 1000000, ladder: rungs(1200000) },
-      familyplus: { name: 'Kibanja Family Plus', who: 'A household of up to eight', people: 8, prices: { weekly: 12500, monthly: 52000, annual: 600000 }, allowance: 1500000, ladder: rungs(1800000) },
-      premier: { name: 'Kibanja Premier', who: 'Up to eight people, highest cover and credit', people: 8, prices: { weekly: 32000, monthly: 135000, annual: 1500000 }, allowance: 50000000 / 12, ladder: LADDER.slice() },
+      starter: { name: 'Kibanja Card', group: 'individual', who: 'Free. Top up any amount and shop; no bonus', people: 1, free: true, monthly: 0, bonus: 0, bundle: [] },
+      solo: { name: 'Kibanja Solo', group: 'individual', who: 'Everyday shopping for one person', people: 1, monthly: 100000, bonus: 0,
+        bundle: [['1001', 3], ['1002', 1], ['1003', 1], ['1004', 1], ['1005', 1], ['1008', 1]] },
+      soloplus: { name: 'Kibanja Solo Plus', group: 'individual', who: 'For one person who shops more, or sends food home', people: 1, monthly: 200000, bonus: 1,
+        bundle: [['1001', 4], ['1002', 1], ['1003', 2], ['1004', 1], ['1005', 1], ['1008', 1], ['1007', 8]] },
+      familystart: { name: 'Kibanja Family Starter', group: 'family', who: 'A household of up to four', people: 4, monthly: 300000, bonus: 1,
+        bundle: [['4001', 1], ['4003', 1], ['4005', 1], ['1002', 2], ['1005', 1], ['1008', 2]] },
+      family: { name: 'Kibanja Family', group: 'family', who: 'A household of up to six', people: 6, monthly: 500000, bonus: 2,
+        bundle: [['4001', 1], ['4002', 1], ['4003', 1], ['4004', 1], ['4005', 1], ['4006', 1], ['1007', 20]] },
+      familymax: { name: 'Kibanja Family Max', group: 'family', who: 'Big and extended households, bought in bulk', people: 10, monthly: 1000000, bonus: 3,
+        bundle: [['4001', 2], ['4002', 2], ['4003', 2], ['4004', 1], ['4005', 2], ['4006', 1], ['1007', 30]] },
+      staff: { name: 'Kibanja Staff', group: 'corporate', who: 'An employer buys a monthly food package for every employee', people: 4, minStaff: 10, monthly: 150000, bonus: 3,
+        bundle: [['4001', 1], ['1002', 1], ['1003', 2], ['1005', 1], ['1004', 1]] },
+      staffplus: { name: 'Kibanja Staff Plus', group: 'corporate', who: 'A bigger food benefit per employee, family-sized', people: 6, minStaff: 10, monthly: 300000, bonus: 3,
+        bundle: [['4001', 1], ['4003', 1], ['4005', 1], ['1002', 2], ['1005', 1], ['1008', 2]] },
     },
     // Points: earned per UGX 100 paid (rate set per plan), each worth `value` shillings, spendable from `threshold` points.
     loyalty: { value: 1, threshold: 5000 },
     promos: [
-      { id: 'P1', sku: '1009', pct: 10, name: 'Matooke week', funder: 'Kibanja', on: true },
+      { id: 'P1', sku: '1012', pct: 10, name: 'Groundnut harvest offer', funder: 'Kibanja', on: true },
       { id: 'P2', sku: '1005', pct: 8, name: 'Cooking oil offer', funder: 'Supplier', on: true },
     ],
     members: [
-      { id: 'KSC-0001', income: 1800000, points: 3420, card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, enrolled: '2026-03-02', wallet: 85000,
-        sub: { tier: 'family', plan: 'annual', paidUntil: '2027-03-02', start: '2026-03-02' }, cover: 'none', spend: { ess: 2900000, all: 3000000 },
-        credit: { rung: 0, used: 640000, onTime: 1, due: '2026-11-05', dueAmt: 160000, overdue: false } },
-      { id: 'KSC-0002', income: 2400000, points: 7880, card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, enrolled: '2026-01-15', wallet: 40000,
-        sub: { tier: 'familyplus', plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' }, cover: 'none', spend: { ess: 9600000, all: 10000000 },
-        credit: { rung: 1, used: 2350000, onTime: 2, due: '2026-11-05', dueAmt: 780000, overdue: false } },
+      { id: 'KSC-0001', income: 1800000, points: 3420, card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, enrolled: '2026-03-02', wallet: 412000,
+        sub: { tier: 'family', plan: 'monthly', paidUntil: '2026-11-02', start: '2026-03-02' }, cover: 'none', spend: { ess: 2900000, all: 3000000 },
+        credit: { rung: 0, used: 120000, onTime: 1, due: '2026-11-02', dueAmt: 120000, overdue: false } },
+      { id: 'KSC-0002', income: 2400000, points: 7880, card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, enrolled: '2026-01-15', wallet: 268000,
+        sub: { tier: 'family', plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' }, cover: 'none', spend: { ess: 9600000, all: 10000000 },
+        credit: { rung: 1, used: 210000, onTime: 2, due: '2026-11-15', dueAmt: 210000, overdue: false } },
       { id: 'KSC-0003', income: 1100000, points: 5210, card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, enrolled: '2025-12-10', wallet: 12000,
-        sub: { tier: 'premier', plan: 'annual', paidUntil: '2026-12-10', start: '2025-12-10' }, cover: 'active', spend: { ess: 4100000, all: 4300000 },
-        allowance: { activated: '2026-08-14', month: 1920000, total: 9410000 },
-        credit: { rung: 0, used: 600000, onTime: 2, due: '2026-09-05', dueAmt: 150000, overdue: false } },
+        sub: { tier: 'familystart', plan: 'monthly', paidUntil: '2026-11-10', start: '2025-12-10' }, cover: 'active', spend: { ess: 4100000, all: 4300000 },
+        allowance: { activated: '2026-09-14', month: 120000, total: 420000 },
+        credit: { rung: 0, used: 90000, onTime: 2, due: '2026-09-10', dueAmt: 90000, overdue: false } },
       { id: 'KSC-0004', income: 900000, points: 960, card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, enrolled: '2026-04-20', wallet: 0,
-        sub: { tier: 'family', plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' }, cover: 'none', spend: { ess: 2840000, all: 4000000 },
-        credit: { rung: 0, used: 1150000, onTime: 0, due: '2026-10-05', dueAmt: 290000, overdue: true } },
+        sub: { tier: 'familystart', plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' }, cover: 'none', spend: { ess: 2840000, all: 4000000 },
+        credit: { rung: 0, used: 140000, onTime: 0, due: '2026-10-05', dueAmt: 140000, overdue: true } },
       { id: 'KSC-0005', income: 400000, points: 2150, card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, enrolled: '2026-05-30', wallet: 150000,
-        sub: { tier: 'familyplus', plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' }, cover: 'review', spend: { ess: 900000, all: 950000 },
-        credit: { rung: 0, used: 380000, onTime: 1, due: '2026-11-10', dueAmt: 95000, overdue: false } },
+        sub: { tier: 'familystart', plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' }, cover: 'review', spend: { ess: 900000, all: 950000 },
+        credit: { rung: 0, used: 60000, onTime: 1, due: '2026-10-30', dueAmt: 60000, overdue: false } },
       { id: 'KSC-0006', income: 700000, points: 2600, card: '6201 4410 0006', name: 'Mugisha', area: 'Bweyogerere', size: 1, enrolled: '2026-02-10', wallet: 22000,
         sub: { tier: 'solo', plan: 'weekly', paidUntil: '2026-10-27', start: '2026-02-10' }, cover: 'none', spend: { ess: 1530000, all: 1800000 },
-        credit: { rung: 0, used: 120000, onTime: 2, due: '2026-10-29', dueAmt: 60000, overdue: false } },
+        credit: { rung: 0, used: 20000, onTime: 2, due: '2026-10-27', dueAmt: 20000, overdue: false } },
       { id: 'KSC-0007', income: 350000, points: 800, card: '6201 4410 0007', name: 'Auma', area: 'Kawempe', size: 3, enrolled: '2026-09-20', wallet: 30000,
         sub: { tier: 'starter', plan: 'monthly', paidUntil: '2099-12-31', start: '2026-09-20' }, cover: 'none', spend: { ess: 160000, all: 190000 },
+        credit: { rung: 0, used: 0, onTime: 0, due: null, dueAmt: 0, overdue: false } },
+      { id: 'KSC-0008', income: 1200000, points: 1900, card: '6201 4410 0008', name: 'Kato', area: 'Mukono', size: 4, enrolled: '2026-07-01', wallet: 96000,
+        sub: { tier: 'staff', plan: 'monthly', paidUntil: '2026-11-01', start: '2026-07-01', payer: 'Lakeside Packers Ltd (example employer)' }, cover: 'none', spend: { ess: 560000, all: 590000 },
         credit: { rung: 0, used: 0, onTime: 0, due: null, dueAmt: 0, overdue: false } },
     ],
     // Store sales this month, for the Ugandan-made share. Every till sale adds to it.
@@ -401,7 +428,7 @@ function seed() {
     partners: [
       { id: 'MIU', name: 'Made in Uganda (MIU)', kind: 'Retail and marketplace platform', supplies: 'Ugandan-made food, household and personal care goods from many manufacturers and SMEs', terms: 'Proposed: SmartCare accepted at MIU outlets, MIU goods in Kibanja stores and baskets, MIU fulfilment for micro-hubs', status: 'Proposed' },
       { id: 'PR1', name: 'Maize growers\' cooperative (example)', kind: 'Producer', supplies: 'Maize grain for flour', terms: 'Three-month forward order, paid within 48 hours of delivery, farm-input loans repaid in grain', status: 'Example' },
-      { id: 'PR2', name: 'Matooke farmers\' group (example)', kind: 'Producer', supplies: 'Matooke, beans', terms: 'Weekly orders sized from member demand, paid by Mobile Money', status: 'Example' },
+      { id: 'PR2', name: 'Groundnut and bean growers (example)', kind: 'Producer', supplies: 'Groundnuts, beans', terms: 'Weekly orders sized from member demand, paid by Mobile Money', status: 'Example' },
       { id: 'PR3', name: 'Dairy cooperative (example)', kind: 'Producer', supplies: 'Fresh milk', terms: 'Daily collection for Kampala stores and hubs', status: 'Example' },
       { id: 'MF1', name: 'Flour mill (example)', kind: 'Manufacturer', supplies: 'Maize flour, packed for the Food Basket', terms: 'Price locked for the basket period, no shelf fees', status: 'Example' },
       { id: 'MF2', name: 'Edible oil and soap maker (example)', kind: 'Manufacturer', supplies: 'Cooking oil, bar soap', terms: 'Funds member offers in exchange for guaranteed volume', status: 'Example' },
@@ -434,15 +461,16 @@ function seed() {
       { d: '2026-10-20', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 286000, mm: 0, items: 9 },
       { d: '2026-10-12', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 412500, mm: 9000, items: 14 },
       { d: '2026-10-18', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 204500, mm: 0, items: 7 },
-      { d: '2026-10-15', m: 'KSC-0002', where: 'Family Plus, monthly · Mobile Money', smart: 0, mm: 52000, items: 0 },
+      { d: '2026-10-15', m: 'KSC-0002', where: 'Family, monthly · Mobile Money', smart: 0, mm: 500000, items: 0, via: '+ 525,000 to spend' },
       { d: '2026-10-03', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 355000, mm: 0, items: 11 },
-      { d: '2026-10-08', m: 'KSC-0004', where: 'Family, weekly · Mobile Money', smart: 0, mm: 8500, items: 0 },
+      { d: '2026-10-08', m: 'KSC-0004', where: 'Family Starter, weekly · Mobile Money', smart: 0, mm: 69000, items: 0, via: '+ 70,380 to spend' },
       { d: '2026-09-28', m: 'KSC-0004', where: 'Partner store · Ntinda', smart: 240000, mm: 31000, items: 8 },
-      { d: '2026-09-30', m: 'KSC-0005', where: 'Family Plus, monthly · Mobile Money', smart: 0, mm: 52000, items: 0 },
+      { d: '2026-09-30', m: 'KSC-0005', where: 'Family Starter, monthly · Mobile Money', smart: 0, mm: 300000, items: 0, via: '+ 312,000 to spend' },
       { d: '2026-10-11', m: 'KSC-0005', where: 'Wallet top-up · Mobile Money', smart: 0, mm: 150000, items: 0 },
       { d: '2026-10-17', m: 'KSC-0001', where: 'Kibanja Store · Kira', smart: 61750, mm: 0, items: 6 },
-      { d: '2026-03-02', m: 'KSC-0001', where: 'Family, annual · Mobile Money', smart: 0, mm: 400000, items: 0 },
-      { d: '2026-10-20', m: 'KSC-0006', where: 'Solo, weekly · Mobile Money', smart: 0, mm: 2500, items: 0 },
+      { d: '2026-10-02', m: 'KSC-0001', where: 'Family, monthly · Mobile Money', smart: 0, mm: 500000, items: 0, via: '+ 525,000 to spend' },
+      { d: '2026-10-01', m: 'KSC-0008', where: 'Kibanja Staff · paid by employer', smart: 0, mm: 150000, items: 0, via: '+ 159,000 to spend' },
+      { d: '2026-10-20', m: 'KSC-0006', where: 'Solo, weekly · Mobile Money', smart: 0, mm: 23000, items: 0, via: '+ 23,230 to spend' },
       { d: '2026-10-19', m: 'KSC-0006', where: 'Kibanja Store · Kira', smart: 18400, mm: 0, items: 4 },
       { d: '2026-10-14', m: 'KSC-0007', where: 'Wallet top-up · Mobile Money', smart: 0, mm: 50000, items: 0 },
     ],
@@ -464,18 +492,22 @@ const days = (a, b) => Math.round((utc(b) - utc(a)) / 864e5);
 const addDays = (s, n) => { const d = utc(s); d.setUTCDate(d.getUTCDate() + n); return isoOf(d); };
 const addMonths = (s, n) => { const d = utc(s); d.setUTCMonth(d.getUTCMonth() + n); return isoOf(d); };
 const nextPeriod = (s, plan) => plan === 'weekly' ? addDays(s, 7) : addMonths(s, plan === 'monthly' ? 1 : 12);
-const yearCost = (t, f) => S.tiers[t].prices[f] * S.plans[f].perYear;
+const priceFor = (k, f) => { const t = S.tiers[k]; if (t.free) return 0; return f === 'weekly' ? Math.round(t.monthly * 12 / 52 / 500) * 500 : f === 'monthly' ? t.monthly : t.monthly * 12; };
+const bonusPct = (k, f, staff = 0) => S.tiers[k].free ? 0 : S.plans[f].bonus + S.tiers[k].bonus + ((STAFF_VOLUME.find(([n]) => staff >= n) || [0, 0])[1]);
+const valueFor = (k, f, staff) => Math.round(priceFor(k, f) * (1 + bonusPct(k, f, staff) / 100));
+const yearCost = (t, f) => priceFor(t, f) * S.plans[f].perYear;
+const bundleOf = k => (S.tiers[k].bundle || []).map(([sku, q]) => { const x = SKUS.find(y => y.sku === sku); return { ...x, q, cost: x.price * q, shelfCost: (x.shelf || x.price) * q }; });
 const tierOf = m => S.tiers[m.sub.tier];
-const priceOf = m => tierOf(m).prices[m.sub.plan];
+const priceOf = m => priceFor(m.sub.tier, m.sub.plan);
 const planLabel = m => tierOf(m).free ? tierOf(m).name : `${tierOf(m).name}, ${S.plans[m.sub.plan].name.toLowerCase()}`;
-const capOf = m => tierOf(m).allowance;          // emergency allowance a month
-const limitOf = m => capOf(m) * 12;               // the whole allowance, over 12 months
-const ladderOf = m => tierOf(m).ladder;
+const capOf = m => tierOf(m).monthly;            // Package Protection pays the package's monthly value, for essentials
+const limitOf = m => capOf(m) * PROTECT_MONTHS;
+const ladderOf = m => tierOf(m).free ? [] : rungs(tierOf(m).monthly / 2); // food credit starts at half a month of the package
 const earnRate = m => tierOf(m).free ? 1 : S.plans[m.sub.plan].pts;
 const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 let S = seed();
-const ui = { uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanBook: 'food', loanDraft: { food: { product: 'farm', amount: 500000, n: 4 }, move: { product: 'boda', amount: 2500000, n: 104 } }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const ui = { corp: { staff: 40, pkg: 'staff', freq: 'monthly' }, uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanBook: 'food', loanDraft: { food: { product: 'farm', amount: 500000, n: 4 }, move: { product: 'boda', amount: 2500000, n: 104 } }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
 const M0 = { fam: [1000, 5000, 15000], mixW: 0, mixM: 0, discPct: 0, ptsPct: 0, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
 const M = JSON.parse(JSON.stringify(M0));
 const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
@@ -494,15 +526,15 @@ function cover(m) {
 }
 function coverPill(m) {
   const c = cover(m);
-  if (tierOf(m).free) return '<span class="pill">Starter · free</span>';
-  return { paid: `<span class="pill ok">${c.p.name} plan · paid</span>`, due: `<span class="pill warn">${c.p.name} payment due</span>`, lapsed: '<span class="pill bad">Cover paused</span>' }[c.s];
+  if (tierOf(m).free) return '<span class="pill">Kibanja Card · free</span>';
+  return { paid: `<span class="pill ok">${m.sub.payer ? 'Paid by employer' : c.p.name + ' · paid'}</span>`, due: `<span class="pill warn">${c.p.name} payment due</span>`, lapsed: '<span class="pill bad">Cover paused</span>' }[c.s];
 }
 
 function emergencyPill(m) {
-  if (tierOf(m).free) return '<span class="pill">No emergency cover</span>';
+  if (tierOf(m).free) return '<span class="pill">No Package Protection</span>';
   if (m.cover === 'review') return '<span class="pill warn">Claim under review</span>';
-  if (m.cover === 'active') return '<span class="pill ok">Emergency allowance active</span>';
-  return days(m.sub.start, TODAY) < WAIT_DAYS ? '<span class="pill">Cover in waiting period</span>' : '<span class="pill ok">Emergency cover ready</span>';
+  if (m.cover === 'active') return '<span class="pill ok">Package Protection paying</span>';
+  return days(m.sub.start, TODAY) < WAIT_DAYS ? '<span class="pill">Protection in waiting period</span>' : '<span class="pill ok">Package Protection ready</span>';
 }
 function creditPill(m) {
   if (tierOf(m).free) return '<span class="pill">No food credit</span>';
@@ -516,7 +548,7 @@ function sources(m) {
   let allowance = 0, credit = 0;
   if (m.cover === 'active') {
     const a = m.allowance, cap = capOf(m);
-    if (TODAY >= addMonths(a.activated, 12)) notes.push('The 12-month emergency allowance has ended.');
+    if (TODAY >= addMonths(a.activated, PROTECT_MONTHS)) notes.push('Package Protection has ended.');
     else if (live) allowance = Math.max(0, Math.min(cap - a.month, limitOf(m) - a.total));
     notes.push('Food credit is frozen while the emergency allowance runs: no new credit, no repayments due.');
   } else {
@@ -526,7 +558,7 @@ function sources(m) {
   }
   if (!live) notes.push(`Cover paused: the ${c.p.name.toLowerCase()} payment was due ${fdate(m.sub.paidUntil)}. Allowance, credit and the member discount stop until it is paid. The wallet still works.`);
   const pointsValue = m.points * S.loyalty.value, pointsUsable = m.points >= S.loyalty.threshold && S.loyalty.value > 0;
-  if (tierOf(m).free) notes.push('Starter: wallet, points and Food Basket prices. Upgrade for emergency cover, food credit and the member discount.');
+  if (tierOf(m).free) notes.push('Kibanja Card: shopping balance and points. A package adds bonus value, Package Protection and food credit.');
   return { allowance, credit, wallet: m.wallet, disc: live && !tierOf(m).free ? c.p.disc : 0, live, notes, pointsValue, pointsUsable,
     total: allowance + credit + m.wallet + (pointsUsable ? pointsValue : 0) };
 }
@@ -541,35 +573,43 @@ function tierTile(k) {
   if (t.free) return `<article class="panel plan-tile">
     <div class="row between"><h3>${t.name}</h3><span class="pill">Free</span></div>
     <div class="big">UGX 0</div>
-    <p class="small muted">${t.who}. The card, the app, the wallet, points and Food Basket prices. Upgrade any time for cover and food credit.</p>
+    <p class="small muted">The card and the app, free. Top up any amount from Mobile Money and shop for anything. Earns points; no bonus. Move to a package any time.</p>
   </article>`;
+  const items = bundleOf(k), cost = items.reduce((a, i) => a + i.cost, 0), shelf = items.reduce((a, i) => a + i.shelfCost, 0);
+  const monthValue = valueFor(k, 'monthly'), per = t.group === 'corporate' ? ' per employee' : '';
   return `<article class="panel plan-tile">
-    <div class="row between"><h3>${t.name}</h3><span class="pill">${t.people === 1 ? '1 person' : `up to ${t.people}`}</span></div>
-    <div class="big">${ugx(t.prices.weekly)}<span class="per"> a week</span></div>
-    <p class="small muted">or ${ugx(t.prices.monthly)} a month, ${ugx(t.prices.annual)} a year. ${t.who}.</p>
-    <dl class="terms small"><dt>Emergency cover</dt><dd class="num">${ugx(t.allowance)} a month</dd><dt>Food credit from</dt><dd class="num">${ugx(t.ladder[0])}</dd></dl>
+    <div class="row between"><h3>${t.name}</h3><span class="pill">${t.group === 'corporate' ? `from ${t.minStaff} staff` : t.people === 1 ? '1 person' : `up to ${t.people} people`}</span></div>
+    <p class="small muted">${t.who}.</p>
+    <div class="paygrid">
+      ${PLAN_KEYS.map(f => `<span>${S.plans[f].name}</span><span class="num">${ugx(priceFor(k, f))}</span><span class="num gets">→ ${valueFor(k, f).toLocaleString('en-US')} to spend</span>`).join('')}
+    </div>
+    <p class="small"><b>A month buys</b> ${items.map(i => `${i.q > 1 ? i.q + '× ' : ''}${esc(i.name)}`).join(', ')}, for ${ugx(cost)}${shelf > cost ? `, ${ugx(shelf - cost)} less than in small packs` : ''}. That leaves <b class="num">${ugx(monthValue - cost)}</b>${per} for anything else in the store.</p>
   </article>`;
+}
+
+function packageGroups() {
+  return GROUPS.map(([g, label]) => `<section class="stack"><h3>${label}</h3><div class="plans tiers">${TIER_KEYS.filter(k => S.tiers[k].group === g).map(tierTile).join('')}</div></section>`).join('');
 }
 
 V.overview = () => `
 <section class="hero">
   <span class="eyebrow">Food security for Kampala households</span>
-  <h1>One card. <em>Food on the table</em>, every month.</h1>
-  <p class="lede">Pay weekly, monthly or yearly. Shop without cash, buy staples at a locked price straight from Ugandan producers, and stay fed if the main income stops. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
+  <h1>Pay weekly, monthly or yearly. <em>Shop for what you want.</em></h1>
+  <p class="lede">Buy a Kibanja package and the money, plus a bonus, lands on your card as a shopping balance. Walk into the supermarket and buy what you want, with no cash. Packages for individuals, families and employers, with bulk staples at prices a single shopper can't get. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
 </section>
 
 <section class="stack">
-  <div class="row between"><h2>A plan for every household</h2><button class="btn chip" data-a="tab" data-v="plans">Edit plans and discounts</button></div>
-  <div class="plans tiers">${TIER_KEYS.map(tierTile).join('')}</div>
-  <p class="small muted" style="max-width:72ch">From one person to a household of eight, and free to start. Every plan can be paid weekly, monthly or yearly; yearly is cheapest and earns the best discount and points. Cover is sized to what a household of that size eats, which keeps prices low enough to reach most of Kampala. Premier keeps the original UGX 1.5M design.</p>
+  <div class="row between"><h2>Shopping packages</h2><button class="btn chip" data-a="tab" data-v="plans">Edit packages</button></div>
+  <p class="muted" style="max-width:72ch">Pay weekly, monthly or yearly. Every payment adds its value plus a bonus to your shopping balance: ${PLAN_KEYS.map(f => `${S.plans[f].bonus}% ${S.plans[f].name.toLowerCase()}`).join(', ')}, more on bigger packages. Spend it on anything in the store.</p>
+  ${packageGroups()}
 </section>
 
 <section class="stack">
   <h2>One card, everything a household needs</h2>
   <div class="onecard">
-    <article class="panel feat"><h3>Food credit line</h3><p class="small">Groceries now, repaid monthly. Pays for food and household essentials only. Starts at ${ugx(S.tiers.solo.ladder[0])} on Solo and ${ugx(S.tiers.family.ladder[0])} on Family, and grows with on-time repayments.</p></article>
-    <article class="panel feat"><h3>Emergency cover</h3><p class="small">If the main income stops, an allowance for essentials for 12 months: ${ugx(S.tiers.solo.allowance)} a month on Solo, ${ugx(S.tiers.family.allowance)} on Family. Credit repayments freeze while it runs.</p></article>
-    <article class="panel feat"><h3>Wallet and points</h3><p class="small">Top up from Mobile Money and pay for anything. Every payment earns points; Ugandan-made goods earn double.</p></article>
+    <article class="panel feat"><h3>Food credit line</h3><p class="small">Run short before the next payment? Shop essentials on credit, up to half a month of your package to start, repaid with your next payment.</p></article>
+    <article class="panel feat"><h3>Package Protection</h3><p class="small">If the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and credit repayments freeze.</p></article>
+    <article class="panel feat"><h3>Shopping balance and points</h3><p class="small">Package payments and top-ups land here and pay for anything. Every payment earns points; Ugandan-made goods earn double.</p></article>
     <article class="panel feat"><h3>Food Basket</h3><p class="small">A month of staples for a family of five at a locked price, bought straight from Ugandan producers.</p></article>
     <article class="panel feat"><h3>Kibanja Loan</h3><p class="small">Farm inputs, poultry, storage and food-trade stock, sized to what the household can repay. Boda and fuel loans keep food moving.</p></article>
   </div>
@@ -582,7 +622,7 @@ V.overview = () => `
     <button class="module" data-a="tab" data-v="how"><h4>How it works</h4><span class="muted small">The six steps for a family, where every shilling is held, who does what, and common questions.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">The one card: plan payments, food credit, emergency claims, wallet, points, loans, spending history.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">The cashier scans the card and the whole basket is paid without cash, with discounts applied.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="plans"><h4>Plans and discounts</h4><span class="muted small">Weekly, monthly and annual prices, member discounts, points, and product offers.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="plans"><h4>Packages</h4><span class="muted small">Individual, family and corporate packages paid weekly, monthly or yearly, bonuses, points and product offers.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="food"><h4>Food and producers</h4><span class="muted small">The price-locked Food Basket, producer and manufacturer partners, Made in Uganda, and the Ugandan-made share of sales.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="loans"><h4>Kibanja Loan</h4><span class="muted small">Food-system loans: farm inputs, poultry and livestock, storage and food-trade stock, priced from the household's own record.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="move"><h4>Boda and fuel loans</h4><span class="muted small">Motorcycles and fuel that keep food moving, on the same score and rules, repaid weekly.</span><span class="go">Open →</span></button>
@@ -597,11 +637,11 @@ V.overview = () => `
   <section class="panel">
     <h3>A household's year on the platform</h3>
     <ol class="journey">
-      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, and a weekly, monthly or annual plan. One card covers everything.</span></div></li>
+      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, and a package paid weekly, monthly or yearly. Employers enrol their staff in one go.</span></div></li>
       <li><div><b>Pay by Mobile Money.</b> <span class="muted">Plan payments go to the underwriting partner's account, not the operating account.</span></div></li>
       <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app, with a wallet the family can top up.</span></div></li>
       <li><div><b>Shop without cash.</b> <span class="muted">Show the card or read a pay code from the app. The till applies the member discount and pays the basket from points, the allowance, the wallet and the food credit line. Any gap becomes a Mobile Money prompt on the phone. Every payment earns points.</span></div></li>
-      <li><div><b>Climb the ladder, or claim.</b> <span class="muted">Repay the food credit on time to unlock a bigger line. If the main income stops, report it, get verified and receive the monthly allowance while credit repayments freeze.</span></div></li>
+      <li><div><b>Keep going, or claim.</b> <span class="muted">Each payment refills the shopping balance with its bonus. If the main income stops, report it, get verified, and the package continues free for ${PROTECT_MONTHS} months while credit repayments freeze.</span></div></li>
       <li><div><b>Renew.</b> <span class="muted">Claims and repayment history price next year's cover.</span></div></li>
     </ol>
   </section>
@@ -620,7 +660,7 @@ function cardHtml(m) {
     <span class="k-chip" aria-hidden="true"></span>
     <div style="display:grid;gap:10px">
       <div class="k-num">${m.card}</div>
-      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Plan</div>${tierOf(m).name.replace('Kibanja ', '')}</div></div>
+      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Package</div>${tierOf(m).name.replace('Kibanja ', '')}</div></div>
     </div>
   </div>`;
 }
@@ -628,23 +668,28 @@ function cardHtml(m) {
 function planBlock(m) {
   const c = cover(m), t = tierOf(m), f = S.plans[m.sub.plan];
   const nt = m.sub.nextTier || m.sub.tier, nf = m.sub.next || m.sub.plan, NT = S.tiers[nt], changing = nt !== m.sub.tier || nf !== m.sub.plan;
-  const msg = t.free ? '<p class="small muted">Free. Upgrade to add emergency cover, a food credit line and the member discount.</p>' : {
-    paid: `<p class="small muted">Paid until ${fdate(m.sub.paidUntil)}.</p>`,
-    due: `<p class="small" style="color:var(--warn)">Payment was due ${fdate(m.sub.paidUntil)}. Pay by ${fdate(addDays(m.sub.paidUntil, f.grace))} to keep cover.</p>`,
-    lapsed: `<p class="small" style="color:var(--bad)">Cover paused since ${fdate(addDays(m.sub.paidUntil, f.grace))}. Paying restarts it, and the ${WAIT_DAYS}-day wait for emergency claims starts again.</p>`,
+  if (m.sub.payer) return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Your package</span>${coverPill(m)}</div>
+    <div class="row between"><b>${t.name}</b><span class="num">${ugx(valueFor(m.sub.tier, m.sub.plan))} a ${f.per}</span></div>
+    <p class="small muted">Paid by ${esc(m.sub.payer)}. Next top-up on ${fdate(m.sub.paidUntil)}. You can still top up your balance yourself.</p>
+  </div>`;
+  const msg = t.free ? '<p class="small muted">Free. A package adds bonus value to every payment, Package Protection and food credit.</p>' : {
+    paid: `<p class="small muted">Paid until ${fdate(m.sub.paidUntil)}. Each payment adds ${ugx(valueFor(m.sub.tier, m.sub.plan))} to your balance.</p>`,
+    due: `<p class="small" style="color:var(--warn)">Payment was due ${fdate(m.sub.paidUntil)}. Pay by ${fdate(addDays(m.sub.paidUntil, f.grace))} to keep Package Protection.</p>`,
+    lapsed: `<p class="small" style="color:var(--bad)">Package paused since ${fdate(addDays(m.sub.paidUntil, f.grace))}. Your balance still works. Paying restarts the package, and the ${WAIT_DAYS}-day wait for Package Protection starts again.</p>`,
   }[c.s];
-  const fit = !t.free && m.size > t.people ? `<p class="small" style="color:var(--warn)">Your household has ${m.size} people; ${t.name} covers up to ${t.people}. Family Plus covers up to eight.</p>` : '';
+  const fit = !t.free && m.size > t.people ? `<p class="small" style="color:var(--warn)">Your household has ${m.size} people; ${t.name} is sized for up to ${t.people}.</p>` : '';
+  const choices = TIER_KEYS.filter(k => S.tiers[k].group !== 'corporate');
   return `<div class="ph-block">
-    <div class="row between"><span class="eyebrow">Your plan</span>${coverPill(m)}</div>
-    <div class="row between"><b>${t.name}</b><span class="num">${t.free ? 'Free' : `${ugx(priceOf(m))} / ${f.per}`}</span></div>
+    <div class="row between"><span class="eyebrow">Your package</span>${coverPill(m)}</div>
+    <div class="row between"><b>${t.name}</b><span class="num">${t.free ? 'Free' : `${ugx(priceOf(m))} a ${f.per}`}</span></div>
     ${msg}${fit}
-    ${t.free ? '' : `<p class="small muted">${trim2(f.disc)}% off at Kibanja stores and ${trim2(f.pts)} point${f.pts === 1 ? '' : 's'} per UGX 100 while your plan is paid.</p>`}
-    ${NT.free ? '' : `<button class="btn ${c.s === 'paid' && !t.free && !changing ? '' : 'primary'} block" data-a="pay-plan">Pay ${ugx(NT.prices[nf])} with Mobile Money</button>`}
+    ${NT.free ? '' : `<button class="btn ${c.s === 'paid' && !t.free && !changing ? '' : 'primary'} block" data-a="pay-plan">Pay ${ugx(priceFor(nt, nf))}, get ${ugx(valueFor(nt, nf))} to spend</button>`}
     <div class="form-grid">
-      <label class="f">Plan<select class="in" id="tier-switch">${TIER_KEYS.map(k => `<option value="${k}" ${nt === k ? 'selected' : ''}>${S.tiers[k].name.replace('Kibanja ', '')}</option>`).join('')}</select></label>
-      ${NT.free ? '' : `<label class="f">Pay<select class="in" id="plan-switch">${PLAN_KEYS.map(k => `<option value="${k}" ${nf === k ? 'selected' : ''}>${S.plans[k].name} · ${ugx(NT.prices[k])}</option>`).join('')}</select></label>`}
+      <label class="f">Package<select class="in" id="tier-switch">${choices.map(k => `<option value="${k}" ${nt === k ? 'selected' : ''}>${S.tiers[k].name.replace('Kibanja ', '')}</option>`).join('')}</select></label>
+      ${NT.free ? '' : `<label class="f">Pay<select class="in" id="plan-switch">${PLAN_KEYS.map(k => `<option value="${k}" ${nf === k ? 'selected' : ''}>${S.plans[k].name} · ${ugx(priceFor(nt, k))}</option>`).join('')}</select></label>`}
     </div>
-    <p class="small muted">${!changing ? 'Change your plan or how often you pay at any time.' : NT.free ? `Moves to ${NT.name} when your paid period ends.` : `Moves to ${NT.name}, ${S.plans[nf].name.toLowerCase()}, ${t.free ? 'as soon as you pay' : 'from your next payment'}.`}</p>
+    <p class="small muted">${!changing ? 'Change your package or how often you pay at any time.' : NT.free ? `Moves to the free ${NT.name} when your paid period ends.` : `Moves to ${NT.name}, ${S.plans[nf].name.toLowerCase()}, ${t.free ? 'as soon as you pay' : 'from your next payment'}.`}</p>
   </div>`;
 }
 
@@ -670,18 +715,18 @@ function pointsBlock(m) {
 
 function walletBlock(m) {
   return `<div class="ph-block">
-    <div class="row between"><span class="eyebrow">SmartCare wallet</span><span class="small muted">Any item</span></div>
+    <div class="row between"><span class="eyebrow">Shopping balance</span><span class="small muted">Spend on anything</span></div>
     <div class="big">${ugx(m.wallet)}</div>
     <div class="row">${[20000, 50000, 100000].map(v => `<button class="btn chip" data-a="topup" data-amt="${v}">+ ${short(v)}</button>`).join('')}</div>
-    <p class="small muted">Top up from Mobile Money. At the till, anything your card can't cover becomes a Mobile Money prompt on this phone, so you never need cash.</p>
+    <p class="small muted">Your package payments land here with their bonus, and you can top up any amount from Mobile Money. At the till, anything the balance can't cover becomes a Mobile Money prompt on this phone, so you never need cash.</p>
   </div>`;
 }
 
 function emergencyBlock(m) {
   const live = cover(m).s !== 'lapsed';
-  if (tierOf(m).free) return `<div class="ph-block"><div class="row between"><span class="eyebrow">Emergency cover</span>${emergencyPill(m)}</div>
-    <p class="small">Upgrade to Kibanja Solo (${ugx(S.tiers.solo.prices.weekly)} a week) or Family (${ugx(S.tiers.family.prices.weekly)} a week) and the household is covered if the main income stops.</p>
-    <button class="btn block" data-a="tab" data-v="plans">Compare plans</button></div>`;
+  if (tierOf(m).free) return `<div class="ph-block"><div class="row between"><span class="eyebrow">Package Protection</span>${emergencyPill(m)}</div>
+    <p class="small">With a package, if the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months. Kibanja Solo is ${ugx(priceFor('solo', 'weekly'))} a week; Family Starter ${ugx(priceFor('familystart', 'weekly'))}.</p>
+    <button class="btn block" data-a="tab" data-v="plans">Compare packages</button></div>`;
   if (m.cover === 'none') {
     const inForce = days(m.sub.start, TODAY);
     const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days of continuous cover).` : `Claims open on ${fdate(addDays(m.sub.start, WAIT_DAYS))}.`;
@@ -694,8 +739,8 @@ function emergencyBlock(m) {
         <div class="row"><button class="btn primary" type="submit">Send claim</button><button class="btn" type="button" data-a="cancel-claim">Cancel</button></div>
       </form>` : `<button class="btn block" data-a="open-claim">Report an emergency</button>`;
     return `<div class="ph-block">
-      <div class="row between"><span class="eyebrow">Emergency cover</span>${emergencyPill(m)}</div>
-      <p class="small">If one of these happens, up to <b class="num">${ugx(capOf(m))}</b> a month goes onto your card for essentials, for 12 months, and your credit repayments freeze:</p>
+      <div class="row between"><span class="eyebrow">Package Protection</span>${emergencyPill(m)}</div>
+      <p class="small">If one of these happens, your package continues free for ${PROTECT_MONTHS} months: <b class="num">${ugx(capOf(m))}</b> a month for essentials, and your credit repayments freeze:</p>
       <ul class="ticks"><li>The main earner loses their job</li><li>Someone in the house is admitted to hospital</li><li>Drought is declared in your district</li></ul>
       ${live ? `<p class="small muted">${waitTxt}</p>` : ''}
       ${form}
@@ -713,19 +758,19 @@ function emergencyBlock(m) {
   }
   const a = m.allowance, cap = capOf(m);
   return `<div class="ph-block">
-    <span class="eyebrow">Emergency allowance left this month</span>
+    <span class="eyebrow">Package Protection left this month</span>
     <div class="big">${ugx(sources(m).allowance)}</div>
     <div class="meter"><i style="width:${Math.min(100, a.month / cap * 100)}%"></i></div>
     <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.${live ? '' : ' Paused until your plan is paid.'}</p>
     <div class="meter sun"><i style="width:${Math.min(100, a.total / limitOf(m) * 100)}%"></i></div>
-    <p class="small">${ugx(limitOf(m) - a.total)} of the whole allowance left, until ${fdate(addMonths(a.activated, 12))}.</p>
+    <p class="small">${ugx(limitOf(m) - a.total)} of the ${PROTECT_MONTHS} months left, until ${fdate(addMonths(a.activated, PROTECT_MONTHS))}.</p>
   </div>`;
 }
 
 function creditBlock(m) {
   const L = ladderOf(m);
   if (!L.length) return `<div class="ph-block"><div class="row between"><span class="eyebrow">Food credit line</span>${creditPill(m)}</div>
-    <p class="small">Paid plans come with a food credit line: groceries now, repaid monthly. It starts at ${ugx(S.tiers.solo.ladder[0])} on Solo and ${ugx(S.tiers.family.ladder[0])} on Family.</p></div>`;
+    <p class="small">Packages come with food credit: essentials now, repaid with your next payment. It starts at half a month of your package.</p></div>`;
   const c = m.credit, avail = sources(m).credit, lim = L[c.rung], frozen = m.cover === 'active';
   const max = L[L.length - 1];
   const ladder = L.map((v, i) => `<i class="${i === c.rung ? 'on' : i < c.rung ? 'done' : ''}" style="height:${18 + 82 * v / max}%"></i>`).join('');
@@ -741,7 +786,7 @@ function creditBlock(m) {
   return `<div class="ph-block">
     <div class="row between"><span class="eyebrow">Food credit line</span>${creditPill(m)}</div>
     <div class="big">${ugx(avail)}</div>
-    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line. It pays for food and household essentials; anything else comes from your wallet or points.</p>
+    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line, repaid with your next package payment. It pays for food and household essentials; anything else comes from your shopping balance or points.</p>
     <div class="ladder" aria-hidden="true">${ladder}</div>
     <div class="ladder-lbl">${L.map(v => `<span>${short(v)}</span>`).join('')}</div>
     ${next}
@@ -760,27 +805,27 @@ function rulesFor(m) {
   const lapsed = cover(m).s === 'lapsed', r = [];
   if (tierOf(m).free) {
     return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">
-      <li><b>Free to start.</b><span class="muted small">Starter gives anyone the card, the app, the wallet, points and Food Basket prices, so the network can grow without anyone paying to join.</span></li>
-      <li><b>Upgrading is one tap.</b><span class="muted small">Solo from ${ugx(S.tiers.solo.prices.weekly)} a week adds emergency cover, a food credit line and the member discount. The ${WAIT_DAYS}-day wait for claims starts on the first payment.</span></li>
-    </ul><div class="try"><span class="eyebrow">Try it</span><span>Pick <b>Family</b> under Your plan, choose weekly, and pay. The card gains cover and food credit at once.</span></div></section>`;
+      <li><b>Free to start.</b><span class="muted small">The Kibanja Card gives anyone the app, a shopping balance and points, so the network grows without anyone paying to join.</span></li>
+      <li><b>A package adds value.</b><span class="muted small">Every package payment adds a bonus to the balance, plus Package Protection and food credit. Solo is ${ugx(priceFor('solo', 'weekly'))} a week.</span></li>
+    </ul><div class="try"><span class="eyebrow">Try it</span><span>Pick <b>Family Starter</b> under Your package, choose weekly, and pay. Watch the balance grow by more than you paid.</span></div></section>`;
   }
-  if (lapsed) r.push(['Cover is paused.', 'The plan payment is past its grace period. Allowance, credit and the member discount stop; the wallet keeps working. Paying restarts cover.']);
+  if (lapsed) r.push(['The package is paused.', 'The payment is past its grace period. Protection and credit stop; the shopping balance keeps working. Paying restarts the package.']);
   r.push({
-    none: ['One card, two kinds of help.', 'Every month the food credit line keeps the cupboard full. If the main income stops, the emergency allowance takes over. Both run on the same plan payment.'],
+    none: ['Pay, then shop for what you want.', `Each payment adds ${ugx(valueFor(m.sub.tier, m.sub.plan))} to the shopping balance, ${bonusPct(m.sub.tier, m.sub.plan)}% more than was paid. It buys anything in the store, without cash.`],
     review: ['The allowance opens on approval.', 'Evidence is checked at the source: NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions. The wallet keeps working meanwhile.'],
-    active: ['The allowance is paid monthly, not as a lump sum.', `${ugx(capOf(m))} a month for 12 months for essentials, so the household is fed for the whole recovery and a fraudulent claim costs one month, not the whole year.`],
+    active: ['The package continues, a month at a time.', `${ugx(capOf(m))} a month for ${PROTECT_MONTHS} months for essentials, released monthly so a fraudulent claim costs one month, not all of it.`],
   }[m.cover]);
-  if (m.cover === 'none') r.push([`${WAIT_DAYS}-day waiting period of continuous cover.`, 'Stops someone buying a week of cover the week they already know they will be laid off. A lapse starts the wait again.']);
+  if (m.cover === 'none') r.push(['Package Protection.', `If the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months. It starts after ${WAIT_DAYS} days of continuous payments, so nobody joins the week they know they'll be laid off.`]);
   if (m.cover === 'active') r.push(['Credit freezes instead of piling up.', 'While the allowance runs, nothing new goes on credit and no repayments fall due, so an emergency never turns into debt.']);
   else if (m.credit.overdue) r.push(['The line pauses, it does not close.', 'One repayment clears the overdue status and the line works again the same minute. The on-time count starts again.']);
-  else r.push(['The credit line is for food.', `It pays for essentials only and starts at ${short(ladderOf(m)[0])} on ${tierOf(m).name}. Three on-time repayments with the plan paid up move it a rung higher. Extras come from the wallet or points, so the card still buys everything without cash.`]);
+  else r.push(['Food credit for short weeks.', `Essentials only, starting at ${short(ladderOf(m)[0])} on ${tierOf(m).name} and repaid with the next payment. Three on-time repayments move it a rung higher.`]);
   const tryIt = lapsed
     ? 'Try this card at the <b>Store till</b> first: with cover paused and an empty wallet, the till sends a Mobile Money prompt instead. Then pay the plan here and try again.'
     : m.cover === 'review' ? 'Open <b>Operations</b>, mark the open checks verified and approve the claim.'
-    : m.cover === 'active' ? 'Open the <b>Store till</b>, scan this card and add a Food Basket and a beer. The allowance pays for the food and the wallet for the beer.'
+    : m.cover === 'active' ? 'Open the <b>Store till</b>, scan this card and add a Food Basket and a beer. Package Protection pays for the food and the shopping balance for the beer.'
     : m.credit.overdue ? 'Repay the overdue amount here, then try the card at the <b>Store till</b>.'
     : m.credit.onTime === 2 ? 'Tap <b>Repay</b>. The third on-time repayment moves this household up a rung.'
-    : 'Tap <b>Report an emergency</b>, send it, then open <b>Operations</b> to approve it. Come back here to see credit freeze and the allowance open.';
+    : 'Open the <b>Store till</b>, scan this card and buy a 25 kg bag of maize flour and a soda. The shopping balance pays for both, no cash.';
   return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">${r.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
     <div class="try"><span class="eyebrow">Try it</span><span>${tryIt}</span></div></section>`;
 }
@@ -795,19 +840,19 @@ V.member = () => {
       <div class="ph-top"><span>Kibanja</span><span class="mono">${m.id}</span></div>
       <p class="hello">Hello, ${esc(m.name)} family</p>
       ${cardHtml(m)}
+      ${walletBlock(m)}
+      ${planBlock(m)}
       ${payBlock(m)}
       ${creditBlock(m)}
       ${emergencyBlock(m)}
-      ${walletBlock(m)}
       ${pointsBlock(m)}
       ${loanBlock(m)}
-      ${planBlock(m)}
       <div class="stack" style="gap:6px"><h4>Recent activity</h4>${txnList(m.id)}</div>
     </div></div>
     <div class="stack">${rulesFor(m)}
       <section class="panel"><div class="row between"><h3>Account</h3><span class="row" style="gap:6px">${emergencyPill(m)}${creditPill(m)}</span></div>
         <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd>
-          <dt>Plan</dt><dd>${planLabel(m)}${tierOf(m).free ? '' : `, ${ugx(priceOf(m))} / ${S.plans[m.sub.plan].per}`}</dd>
+          <dt>Package</dt><dd>${planLabel(m)}${tierOf(m).free ? '' : m.sub.payer ? `, paid by ${esc(m.sub.payer)}` : `, ${ugx(priceOf(m))} a ${S.plans[m.sub.plan].per}`}</dd>
           <dt>Household</dt><dd>${m.size} ${m.size === 1 ? 'person' : 'people'}</dd>
           <dt>Card can pay now</dt><dd class="num">${ugx(sources(m).total)}</dd></dl>
       </section>
@@ -855,11 +900,11 @@ V.pos = () => {
   const strip = m ? `<div class="member-strip">
       <div class="row between"><b>${esc(hh(m))}</b>${coverPill(m)}</div>
       <div class="tot small">
-        ${m.cover === 'active' ? `<span>Emergency allowance <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
-        <span>Wallet</span><span class="v">${ugx(src.wallet)}</span>
+        ${m.cover === 'active' ? `<span>Package Protection <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
+        <span>Shopping balance</span><span class="v">${ugx(src.wallet)}</span>
         <span>Food credit <span class="muted">(essentials)</span></span><span class="v">${ugx(src.credit)}</span>
         <span>Points</span><span class="v">${m.points.toLocaleString('en-US')} pts</span>
-        <span>Member discount</span><span class="v">${trim2(src.disc)}%</span>
+        ${src.disc ? `<span>Member discount</span><span class="v">${trim2(src.disc)}%</span>` : ''}
       </div>
       <label class="check"><input type="checkbox" id="use-points" ${ui.usePoints && src.pointsUsable ? 'checked' : ''} ${src.pointsUsable ? '' : 'disabled'}>
         <span>Pay with points (${ugx(src.pointsValue)})${src.pointsUsable ? '' : `<span class="small muted"> · spendable from ${S.loyalty.threshold.toLocaleString('en-US')} points</span>`}</span></label>
@@ -871,7 +916,7 @@ V.pos = () => {
       <span class="num">${short(l.gross - l.promoOff)}</span></li>`).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
   const paidBy = m ? [
     ['Kibanja points', P.points, P.points > 0],
-    ['Emergency allowance', P.allowance, m.cover === 'active'], ['Wallet', P.wallet, true], ['Food credit', P.credit, true],
+    ['Package Protection', P.allowance, m.cover === 'active'], ['Shopping balance', P.wallet, true], ['Food credit', P.credit, ladderOf(m).length > 0],
     ['Mobile Money prompt to member', P.mm, true],
   ].filter(x => x[2]).map(([l, v]) => `<span>${l}</span><span class="v">${ugx(v)}</span>`).join('')
     : `<span>Mobile Money or cash</span><span class="v">${ugx(P.mm)}</span>`;
@@ -896,7 +941,7 @@ V.pos = () => {
         ${strip}
         ${m ? '' : `<div class="row">${S.members.map(x => `<button class="btn chip" data-a="pos-pick" data-id="${x.id}">${x.card.slice(-4)} · ${esc(x.name)}</button>`).join('')}</div>`}
       </section>
-      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${s.local ? '<span class="tag ug">UG-made</span>' : ''}${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
+      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${s.bulk ? '<span class="tag offer">Bulk</span>' : ''}${s.local ? '<span class="tag ug">UG-made</span>' : ''}${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
     </div>
     <section class="panel">
       <div class="row between"><h3>Basket</h3>${ui.cart.length ? '<button class="btn chip" data-a="clear-cart">Clear</button>' : ''}</div>
@@ -904,7 +949,7 @@ V.pos = () => {
       <div class="tot">
         <span>Subtotal</span><span class="v">${ugx(t.gross)}</span>
         ${t.promoOff ? `<span>Offers</span><span class="v">−${ugx(t.promoOff)}</span>` : ''}
-        ${m ? `<span>Member discount (${trim2(src.disc)}%)</span><span class="v">−${ugx(t.memberOff)}</span>` : ''}
+        ${t.memberOff ? `<span>Member discount (${trim2(src.disc)}%)</span><span class="v">−${ugx(t.memberOff)}</span>` : ''}
         <span class="grand">Total</span><span class="v grand">${ugx(t.total)}</span>
       </div>
       <div class="paid-by"><span class="eyebrow">Paid by</span><div class="tot">${paidBy}</div>${m && ui.cart.length ? `<span class="small muted">Points earned on this sale: <b class="num">+${t.earn.toLocaleString('en-US')}</b></span>` : ''}</div>
@@ -918,57 +963,65 @@ V.pos = () => {
 /* Plans and discounts */
 V.plans = () => {
   const cellIn = (k, f, step, label) => `<input class="in num cell-in" type="number" min="0" step="${step}" data-plan="${k}" data-field="${f}" value="${S.plans[k][f]}" aria-label="${label}">`;
-  const priceIn = (t, f) => `<input class="in num cell-in" type="number" min="0" step="500" data-tier="${t}" data-freq="${f}" value="${S.tiers[t].prices[f]}" aria-label="${S.tiers[t].name} ${f} price">`;
-  const left = (mgn, d) => { const v = mgn * 100 - d; return `<td class="n ${v <= 0 ? 'neg' : ''}">${trim2(v)}%</td>`; };
-  const use = M.limit ? M.avgDraw / M.limit : 0.4, perPerson = SKUS.find(x => x.sku === '3001').price / 5;
-  const paid = TIER_KEYS.filter(k => !S.tiers[k].free);
-  const times = k => S.tiers[k].allowance / (perPerson * S.tiers[k].people), mid = paid.filter(k => k !== 'premier').map(times);
-  return `<div class="stack" style="gap:4px"><h2>Plans and discounts</h2><p class="muted small">Plans for one person up to a household of eight, each payable weekly, monthly or yearly. Changes apply at once to the family app, the till and the Underwriting model.</p></div>
-  <div class="plans tiers">${TIER_KEYS.map(tierTile).join('')}</div>
-  <section class="stack"><h3>Prices and cover</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Plan</th><th class="n">People</th><th class="n">Weekly, UGX</th><th class="n">Monthly, UGX</th><th class="n">Annual, UGX</th><th class="n">Emergency cover a month</th><th class="n">Food credit starts at</th></tr></thead><tbody>
-    ${paid.map(k => { const t = S.tiers[k]; return `<tr><td><b>${t.name}</b></td><td class="n">${t.people}</td>
-      <td class="n">${priceIn(k, 'weekly')}</td><td class="n">${priceIn(k, 'monthly')}</td><td class="n">${priceIn(k, 'annual')}</td>
-      <td class="n"><input class="in num cell-in" type="number" min="0" step="50000" data-tier="${k}" data-freq="allowance" value="${Math.round(t.allowance)}" aria-label="${t.name} emergency cover a month"></td>
-      <td class="n">${ugx(t.ladder[0])}</td></tr>`; }).join('')}
-    </tbody></table></div>
-    <p class="small muted">Starter is free and has no cover or credit. Weekly and monthly prices cost a little more over a year than annual, so households who can pay upfront save and those who can't still get in.</p>
+  const pkgIn = (k, f, step, label) => `<input class="in num cell-in" type="number" min="0" step="${step}" data-tier="${k}" data-freq="${f}" value="${S.tiers[k][f]}" aria-label="${label}">`;
+  const paid = TIER_KEYS.filter(k => !S.tiers[k].free), C = ui.corp, ck = C.pkg;
+  const corpPay = priceFor(ck, C.freq) * C.staff, corpValue = valueFor(ck, C.freq, C.staff) * C.staff;
+  return `<div class="stack" style="gap:4px"><h2>Shopping packages</h2><p class="muted small">Pay weekly, monthly or yearly; every payment adds its value plus a bonus to the shopping balance. Changes here apply at once to the family app and the till.</p></div>
+  ${packageGroups()}
+
+  <section class="panel">
+    <h3>Corporate package calculator</h3>
+    <div class="form-grid">
+      <label class="f">Employees<input class="in num" type="number" id="corp-staff" min="1" step="1" value="${C.staff}"></label>
+      <label class="f">Package<select class="in" id="corp-pkg">${paid.filter(k => S.tiers[k].group === 'corporate').map(k => `<option value="${k}" ${k === ck ? 'selected' : ''}>${S.tiers[k].name}</option>`).join('')}</select></label>
+      <label class="f">Paid<select class="in" id="corp-freq">${PLAN_KEYS.map(f => `<option value="${f}" ${f === C.freq ? 'selected' : ''}>${S.plans[f].name}</option>`).join('')}</select></label>
+    </div>
+    ${C.staff < S.tiers[ck].minStaff ? `<p class="small" style="color:var(--warn)">${S.tiers[ck].name} starts at ${S.tiers[ck].minStaff} employees. Smaller teams can buy family packages for each person.</p>` : ''}
+    <div class="figs">
+      <span>Employer pays a ${S.plans[C.freq].per}</span><span class="v">${ugx(corpPay)}</span>
+      <span>Staff receive to spend</span><span class="v">${ugx(corpValue)}</span>
+      <span>Bonus</span><span class="v">${bonusPct(ck, C.freq, C.staff)}% · ${ugx(corpValue - corpPay)}</span>
+      <span class="tot">Each employee gets</span><span class="v tot">${ugx(valueFor(ck, C.freq, C.staff))} a ${S.plans[C.freq].per}</span>
+    </div>
+    <p class="small muted">Employers with ${STAFF_VOLUME[1][0]}+ staff get ${STAFF_VOLUME[1][1]}% more, and ${STAFF_VOLUME[0][0]}+ get ${STAFF_VOLUME[0][1]}% more. One invoice, a card for every employee, and staff can top up their own balance. Staff on a package also get Package Protection and food credit.</p>
   </section>
-  <section class="stack"><h3>Is each plan affordable and sound?</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Plan</th><th class="n">Annual price</th><th class="n">Expected claims a year</th><th class="n">Claims ÷ price</th><th class="n">Cover ÷ food need</th><th class="n">Weekly price ÷ 1 day of basket</th></tr></thead><tbody>
-    ${paid.map(k => { const t = S.tiers[k], exp = (M.claimRate / 100) * use * t.allowance * 12, ratio = t.prices.annual ? exp / t.prices.annual : 0, need = perPerson * t.people, day = SKUS.find(x => x.sku === '3001').price / 30 * t.people / 5;
-      return `<tr><td><b>${t.name}</b></td><td class="n">${ugx(t.prices.annual)}</td><td class="n">${ugx(exp)}</td><td class="n ${ratio > 0.7 ? 'neg' : ''}">${pct(ratio)}</td><td class="n">${trim2(t.allowance / need)}×</td><td class="n">${trim2(t.prices.weekly / day)} days</td></tr>`; }).join('')}
+
+  <section class="stack"><h3>Package settings</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Package</th><th class="n">Monthly price, UGX</th><th class="n">Package bonus %</th><th class="n">Weekly</th><th class="n">Yearly</th><th class="n">Bundle saving a month</th></tr></thead><tbody>
+    ${paid.map(k => { const t = S.tiers[k], items = bundleOf(k), save = items.reduce((a, i) => a + i.shelfCost - i.cost, 0); return `<tr><td><b>${t.name}</b>${t.group === 'corporate' ? ' <span class="muted small">per employee</span>' : ''}</td>
+      <td class="n">${pkgIn(k, 'monthly', 5000, t.name + ' monthly price')}</td><td class="n">${pkgIn(k, 'bonus', 0.5, t.name + ' package bonus')}</td>
+      <td class="n">${ugx(priceFor(k, 'weekly'))}</td><td class="n">${ugx(priceFor(k, 'annual'))}</td><td class="n">${ugx(save)}</td></tr>`; }).join('')}
     </tbody></table></div>
-    <p class="small muted">Expected claims use the Underwriting screen's ${trim2(M.claimRate)}% claim rate and ${pct(use)} average use of the allowance. Claims above about 70% of the price leave too little for running costs. "Cover ÷ food need" compares the monthly allowance with the Food Basket cost for that many people (${ugx(perPerson)} per person a month): Solo to Family Plus cover food ${trim2(Math.min(...mid))} to ${trim2(Math.max(...mid))} times over, leaving room for rent, transport and cooking fuel; Premier covers it ${trim2(times('premier'))} times. The last column shows what a week of the plan costs in days of Food Basket for that household.</p>
   </section>
-  <section class="stack"><h3>How often a household pays</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Paying</th><th class="n">Member discount %</th><th class="n">Points per UGX 100</th><th class="n">Grace days</th><th class="n">Family plan over a year</th></tr></thead><tbody>
-    ${PLAN_KEYS.map(k => { const f = S.plans[k]; return `<tr><td><b>${f.name}</b> <span class="muted small">per ${f.per}</span></td>
-      <td class="n">${cellIn(k, 'disc', 0.5, f.name + ' member discount')}</td><td class="n">${cellIn(k, 'pts', 0.5, f.name + ' points per UGX 100')}</td><td class="n">${cellIn(k, 'grace', 1, f.name + ' grace days')}</td>
-      <td class="n">${ugx(yearCost('family', k))}</td></tr>`; }).join('')}
+
+  <section class="stack"><h3>Paying weekly, monthly or yearly</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Paying</th><th class="n">Bonus %</th><th class="n">Points per UGX 100</th><th class="n">Grace days</th><th class="n">Family package: pay → get</th></tr></thead><tbody>
+    ${PLAN_KEYS.map(k => { const f = S.plans[k]; return `<tr><td><b>${f.name}</b></td>
+      <td class="n">${cellIn(k, 'bonus', 0.5, f.name + ' bonus')}</td><td class="n">${cellIn(k, 'pts', 0.5, f.name + ' points per UGX 100')}</td><td class="n">${cellIn(k, 'grace', 1, f.name + ' grace days')}</td>
+      <td class="n">${ugx(priceFor('family', k))} → ${ugx(valueFor('family', k))}</td></tr>`; }).join('')}
     </tbody></table></div>
-    <p class="small muted">Weekly payers miss payments more often; grace days set how long cover lasts after a missed payment.</p>
+  </section>
+
+  <section class="panel"><h3>Who pays for the bonus</h3>
+    <p class="small">A bonus is extra shopping value Kibanja gives away, so it has to come from somewhere. At a Kibanja store it comes out of the 12% margin on essentials and 25% on extras, topped up by supplier volume rebates (about 6%) and by interest on prepaid money held in trust. At partner stores only the rebate is available, so keep the bonus there to what suppliers fund.</p>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Biggest bonus on</th><th class="n">Bonus</th><th class="n">Essentials margin + 6% rebate − bonus</th></tr></thead><tbody>
+      ${PLAN_KEYS.map(f => { const b = bonusPct('familymax', f, 0), left = 12 + 6 - b; return `<tr><td>Family Max, ${S.plans[f].name.toLowerCase()}</td><td class="n">${trim2(b)}%</td><td class="n ${left < 3 ? 'neg' : ''}">${trim2(left)}%</td></tr>`; }).join('')}
+    </tbody></table></div>
+    <p class="small muted">Prepaid balances are customers' money: hold them in trust through a licensed payment partner, and never spend them on running the business.</p>
   </section>
   <section class="panel"><h3>Kibanja points</h3>
     <div class="form-grid">
       <label class="f">One point is worth <span class="hint">UGX</span><input class="in num" type="number" min="0" step="0.5" data-loyalty="value" value="${S.loyalty.value}"></label>
       <label class="f">Spendable from <span class="hint">points</span><input class="in num" type="number" min="0" step="500" data-loyalty="threshold" value="${S.loyalty.threshold}"></label>
     </div>
-    <p class="small muted">At these settings paying annually gives back ${trim2(S.plans.annual.pts * S.loyalty.value)}% of what a member pays, and a household spending UGX 10M a year on the card can spend its points about every ${((w) => `${w} week${w === 1 ? '' : 's'}`)(Math.max(1, Math.round(S.loyalty.threshold / (1e7 / 100 * S.plans.annual.pts / 12) * 4.3)))}. For comparison, Carrefour Uganda's MyCLUB lowered its redemption point to 10,000 points in 2023; a lower threshold suits families who shop in small amounts.</p>
+    <p class="small muted">At these settings paying yearly gives back ${trim2(S.plans.annual.pts * S.loyalty.value)}% of what a member pays, and a household spending UGX 10M a year on the card can spend its points about every ${((w) => `${w} week${w === 1 ? '' : 's'}`)(Math.max(1, Math.round(S.loyalty.threshold / (1e7 / 100 * S.plans.annual.pts / 12) * 4.3)))}. For comparison, Carrefour Uganda's MyCLUB lowered its redemption point to 10,000 points in 2023; a lower threshold suits families who shop in small amounts.</p>
   </section>
   <div class="split">
-    <section class="panel"><h3>Who pays for the discount</h3>
-      <p class="small">At a Kibanja store the member discount comes out of the store's margin. This shows what is left after it, using the till's assumed margins.</p>
-      <div class="tablewrap"><table class="t"><thead><tr><th>Plan</th><th class="n">Essentials (12% margin)</th><th class="n">Other items (25% margin)</th></tr></thead><tbody>
-        ${PLAN_KEYS.map(k => `<tr><td>${S.plans[k].name} · ${trim2(S.plans[k].disc)}% off</td>${left(MARGIN.ess, S.plans[k].disc)}${left(MARGIN.other, S.plans[k].disc)}</tr>`).join('')}
-      </tbody></table></div>
-      <p class="small muted">At partner stores the discount comes out of the 6% rebate unless the supplier funds it. Supplier-funded offers cost Kibanja nothing.</p>
-    </section>
     <section class="panel"><h3>How a member pays without cash</h3>
       <ol class="journey">
-        <li><div><b>Discounts first.</b> <span class="muted">Product offers, then the member discount for a paid-up plan.</span></div></li>
-        <li><div><b>Emergency allowance.</b> <span class="muted">Essentials only, for households with an approved emergency claim.</span></div></li>
-        <li><div><b>Wallet.</b> <span class="muted">Anything in the basket, extras first.</span></div></li>
+        <li><div><b>Offers first.</b> <span class="muted">Product offers and bulk prices.</span></div></li>
+        <li><div><b>Package Protection.</b> <span class="muted">Essentials only, for households with an approved claim.</span></div></li>
+        <li><div><b>Shopping balance.</b> <span class="muted">Anything in the basket. Package payments and top-ups land here.</span></div></li>
         <li><div><b>Food credit line.</b> <span class="muted">Essentials only, for households in good standing. Frozen during an emergency.</span></div></li>
         <li><div><b>Mobile Money prompt.</b> <span class="muted">Whatever is left is sent to the member's phone to approve. No cash changes hands.</span></div></li>
       </ol>
@@ -1017,17 +1070,17 @@ V.ops = () => {
       <span>${esc(k.t)}${k.d ? `<span class="small muted" style="display:block">${esc(k.d)}</span>` : ''}${k.r === 'missing' ? '<span class="small" style="display:block;color:var(--bad)">No document uploaded</span>' : ''}</span>
       ${c.status === 'pending' && (k.r === 'todo' || k.r === 'missing') ? `<button class="btn chip" data-a="verify" data-i="${i}">Mark verified</button>` : '<span></span>'}</li>`).join('')}</ul>
     ${c.status === 'pending' ? `<p class="small muted">Automated checks collect the evidence. A person makes the decision and their name goes on it.</p>
-      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve and open allowance</button><button class="btn danger" data-a="decline">Decline</button>
+      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve Package Protection</button><button class="btn danger" data-a="decline">Decline</button>
       ${blocking ? `<span class="small" style="color:${failed ? 'var(--bad)' : 'var(--warn)'}">${failed ? 'A check failed; this claim can only be declined.' : `Resolve ${blocking} open check${blocking > 1 ? 's' : ''} first.`}</span>` : ''}</div>` : ''}
   </section>`;
   return `<div class="stack" style="gap:4px"><h2>Operations</h2><p class="muted small">The back office: verify claims, watch exposure, see every household.</p></div>
   <div class="kpis">
     <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${TIER_KEYS.filter(k => S.members.some(m => m.sub.tier === k)).map(k => `${S.members.filter(m => m.sub.tier === k).length} ${S.tiers[k].name.replace('Kibanja ', '')}`).join(' · ')}</span></div>
-    <div class="kpi"><span class="eyebrow">Plan income a year</span><span class="v">${short(planIncome)}</span><span class="small muted">${lapsed} household${lapsed === 1 ? '' : 's'} behind on payments</span></div>
-    <div class="kpi"><span class="eyebrow">Allowance still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
+    <div class="kpi"><span class="eyebrow">Package payments a year</span><span class="v">${short(planIncome)}</span><span class="small muted">${lapsed} household${lapsed === 1 ? '' : 's'} behind on payments</span></div>
+    <div class="kpi"><span class="eyebrow">Protection still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
     <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.credit.overdue).length} household overdue · ${S.members.filter(m => m.cover === 'active').length} frozen</span></div>
     <div class="kpi"><span class="eyebrow">Kibanja Loans outstanding</span><span class="v">${short(S.loans.filter(l => l.status === 'active').reduce((s, l) => s + balanceAfter(l, l.paid), 0))}</span><span class="small muted">${S.loans.filter(l => l.status === 'pending').length} application${S.loans.filter(l => l.status === 'pending').length === 1 ? '' : 's'} waiting</span></div>
-    <div class="kpi"><span class="eyebrow">Wallet money held</span><span class="v">${short(wallets)}</span><span class="small muted">customers' money, kept in trust</span></div>
+    <div class="kpi"><span class="eyebrow">Prepaid balances held</span><span class="v">${short(wallets)}</span><span class="small muted">customers' money, kept in trust</span></div>
     <div class="kpi"><span class="eyebrow">Claims to decide</span><span class="v">${pending.length}</span><span class="small muted">target: within 72 hours</span></div>
   </div>
   <div class="split">
@@ -1039,7 +1092,7 @@ V.ops = () => {
     </section>
   </div>
   <section class="stack"><h3>Member register</h3>
-    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Plan</th><th>Emergency</th><th>Food credit</th><th class="n">Wallet</th><th class="n">Card can pay now</th></tr></thead>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Package</th><th>Protection</th><th>Food credit</th><th class="n">Balance</th><th class="n">Card can pay now</th></tr></thead>
     <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${esc(planLabel(m))}<br>${coverPill(m)}</td><td>${emergencyPill(m)}</td><td>${ladderOf(m).length ? short(ladderOf(m)[m.credit.rung]) + ' line · ' : ''}${creditPill(m)}</td><td class="n">${ugx(m.wallet)}</td><td class="n">${ugx(sources(m).total)}</td></tr>`).join('')}</tbody></table></div>
   </section>`;
 };
@@ -1047,7 +1100,7 @@ V.ops = () => {
 // Average premium a year per household, from the plan mix and the prices on the Plans screen.
 function premiumOf(o = M) {
   const w = Math.min(o.mixW, 100) / 100, mo = Math.min(o.mixM, 100 - Math.min(o.mixW, 100)) / 100;
-  return w * yearCost('premier', 'weekly') + mo * yearCost('premier', 'monthly') + (1 - w - mo) * yearCost('premier', 'annual');
+  return w * ORIGINAL.weekly * 52 + mo * ORIGINAL.monthly * 12 + (1 - w - mo) * ORIGINAL.annual;
 }
 
 function yr(i, o = M) {
@@ -1064,7 +1117,7 @@ function yr(i, o = M) {
 // Claim rate at which the margin from everything else is used up by claims.
 function breakEven(i, o = M) { const y = yr(i, { ...o, claimRate: 0 }); return y.net / y.f / (o.avgDraw * 1e6); }
 
-V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from the assumptions in your plan, which match the Kibanja Premier plan. The affordability check for the smaller plans is on the Plans and discounts screen.</p></div>
+V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from the assumptions in your plan, the original UGX 1.5M-a-year insurance-and-credit plan. The shopping packages, their bonuses and who pays for them are on the Packages screen.</p></div>
 <div class="split">
   <section class="panel">
     <form id="model-form" class="stack">
@@ -1114,7 +1167,7 @@ function modelOut() {
   const bars = `<section class="panel"><h3>One household, Year 3</h3><div class="bars">${per.map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${Math.abs(v) / maxv * 100}%;background:${c}"></i></span><span class="v">${short(v)}</span></div>`).join('')}</div></section>`;
   $('#model-out').innerHTML = `<section class="stack"><h3>Three-year view</h3>${table}</section>${bars}`;
   const annualShare = Math.max(0, 100 - Math.min(M.mixW, 100) - Math.min(M.mixM, 100 - Math.min(M.mixW, 100)));
-  $('#eff-prem').textContent = `Average premium: ${ugx(premiumOf())} a year per household (${trim2(annualShare)}% on annual). Prices come from the Plans and discounts screen.`;
+  $('#eff-prem').textContent = `Average premium: ${ugx(premiumOf())} a year per household (${trim2(annualShare)}% on annual). It uses the original plan's prices; shopping packages are on the Packages screen.`;
 
   // Stress grid and findings
   const rates = [2, 4, 6, 8, 10, 12], draws = [10, 20, 35, 50];
@@ -1134,9 +1187,9 @@ function modelOut() {
     ['', `A ${trim2(M.feePct)}% fee every month is about ${trim2(M.feePct * 12)}% a year`,
       'That is consumer credit pricing, and fees usually count toward the cost of credit. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap with UMRA and whether the processing fee counts toward it before launch.'],
     ['', 'Weekly and monthly payers',
-      `If they never miss a payment, a weekly Premier payer brings in ${ugx(yearCost('premier', 'weekly'))} a year and a monthly payer ${ugx(yearCost('premier', 'monthly'))}, against ${ugx(yearCost('premier', 'annual'))} upfront. The model assumes every household pays all year. Weekly payers lapse more often, so track lapses by plan in the pilot and budget for them.`],
-    [M.discPct + M.ptsPct === 0 ? 'bad' : '', 'Discounts and points cost money',
-      `The annual plan's ${trim2(S.plans.annual.disc)}% discount and ${trim2(S.plans.annual.pts * S.loyalty.value)}% back in points, on UGX ${trim2(M.spend)}M of card spend, are worth about ${ugx(M.spend * 1e6 * (S.plans.annual.disc + S.plans.annual.pts * S.loyalty.value) / 100)} a year to each household. ${M.discPct + M.ptsPct === 0 ? 'Your table counts none of it. ' : ''}If Kibanja pays all of it, Year 3 net is ${ugx(yr(2, { ...M, discPct: S.plans.annual.disc, ptsPct: S.plans.annual.pts * S.loyalty.value }).net)}. Supplier-funded offers and unspent points keep the real cost lower.`],
+      `If they never miss a payment, a weekly payer brings in ${ugx(ORIGINAL.weekly * 52)} a year and a monthly payer ${ugx(ORIGINAL.monthly * 12)}, against ${ugx(ORIGINAL.annual)} upfront. The model assumes every household pays all year. Weekly payers lapse more often, so track lapses by plan in the pilot and budget for them.`],
+    [M.discPct + M.ptsPct === 0 ? 'bad' : '', 'Bonuses and points cost money',
+      `The yearly ${trim2(S.plans.annual.bonus)}% bonus and ${trim2(S.plans.annual.pts * S.loyalty.value)}% back in points, on UGX ${trim2(M.spend)}M of card spend, are worth about ${ugx(M.spend * 1e6 * (S.plans.annual.bonus + S.plans.annual.pts * S.loyalty.value) / 100)} a year to each household. ${M.discPct + M.ptsPct === 0 ? 'Your table counts none of it. ' : ''}If Kibanja pays all of it, Year 3 net is ${ugx(yr(2, { ...M, discPct: S.plans.annual.bonus, ptsPct: S.plans.annual.pts * S.loyalty.value }).net)}. Supplier-funded offers and unspent points keep the real cost lower.`],
     ['bad', 'Drought hits many households at once',
       'Job losses and hospital stays are spread out. A declared drought pays every member in the district in the same month. Cap exposure per district and buy reinsurance or a parametric weather cover before offering the drought trigger.'],
     ['', 'Costs still missing from the table',
@@ -1321,11 +1374,11 @@ V.how = () => {
 <section class="stack">
   <h2>For a family, in six steps</h2>
   <ol class="how-steps">
-    ${step(1, 'Join and pick a plan', `Enrol in the app with a national ID and a phone number. Start free on Starter, or pick a plan for your household: Solo from ${ugx(S.tiers.solo.prices.weekly)} a week, Duo ${ugx(S.tiers.duo.prices.weekly)}, Family ${ugx(S.tiers.family.prices.weekly)}, Family Plus ${ugx(S.tiers.familyplus.prices.weekly)}. Pay weekly, monthly or yearly by Mobile Money.`, 'plans', 'See the plans')}
+    ${step(1, 'Pick a package', `Enrol in the app with a national ID and a phone number. Solo is ${ugx(priceFor('solo', 'weekly'))} a week, Family Starter ${ugx(priceFor('familystart', 'weekly'))}, Family ${ugx(priceFor('family', 'weekly'))}. Employers buy for all their staff. Pay weekly, monthly or yearly by Mobile Money; the money plus a bonus lands on your card.`, 'plans', 'See the packages')}
     ${step(2, 'Get the card and the app', 'The SmartCare card works at every Kibanja and partner store. On days the card stays at home, the app gives a one-time pay code instead.', 'member', 'Open the family app')}
-    ${step(3, 'Shop without cash', 'The cashier scans the card. The till takes off discounts, then pays from points, the emergency allowance, the wallet and the food credit line. Anything left is a Mobile Money prompt on your phone. The price-locked Food Basket covers a month of staples.', 'pos', 'Try the till')}
-    ${step(4, 'Earn points and discounts', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly, and double on Ugandan-made goods. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Paid-up members also get ${trim2(P.weekly.disc)}–${trim2(P.annual.disc)}% off in store.`, 'plans', 'See discounts')}
-    ${step(5, 'Covered when income stops', `After ${WAIT_DAYS} days of cover, a job loss, a hospital admission or a declared drought opens an allowance for essentials for 12 months, from ${ugx(S.tiers.solo.allowance)} a month on Solo to ${ugx(S.tiers.familyplus.allowance)} on Family Plus. Food credit repayments freeze meanwhile.`, 'ops', 'See how claims are checked')}
+    ${step(3, 'Shop for what you want', 'Walk into the supermarket and pick anything. The cashier scans the card and the shopping balance pays, with no cash. Bulk packs and the price-locked Food Basket stretch it further.', 'pos', 'Try the till')}
+    ${step(4, 'Earn points and bonuses', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly, and double on Ugandan-made goods. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Every package payment also adds a ${trim2(P.weekly.bonus)}–${trim2(P.annual.bonus)}% bonus.`, 'plans', 'See bonuses')}
+    ${step(5, 'Protected when income stops', `After ${WAIT_DAYS} days of payments, if the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and food credit repayments freeze.`, 'ops', 'See how claims are checked')}
     ${step(6, 'Borrow to grow food', 'Kibanja Loan buys seed and fertiliser, chicks and feed, storage, or stock for a food stall. Boda and fuel loans keep food moving. The limit comes from the household\'s own record on the card.', 'loans', 'Open Kibanja Loan')}
   </ol>
 </section>
@@ -1357,10 +1410,11 @@ V.how = () => {
   </section>
   <section class="panel"><h3>Questions families ask</h3>
     <div class="faq">
-      <details><summary>Which plan is right for us?</summary><p class="small">Count the people you feed. One person: Solo. Two: Duo. Up to five: Family. Up to eight: Family Plus. Premier is for households that want much higher cover and credit. Not ready to pay? Starter is free and still gives the card, wallet and points.</p></details>
-      <details><summary>What if I miss a payment?</summary><p class="small">Cover continues for ${P.weekly.grace} days on weekly, ${P.monthly.grace} on monthly and ${P.annual.grace} on yearly. After that the allowance, credit, discount and points pause until you pay. The wallet keeps working. Paying after a pause restarts the ${WAIT_DAYS}-day wait before you can claim.</p></details>
-      <details><summary>Can I buy anything with the card?</summary><p class="small">Yes. Points and the wallet pay for any item, and anything left goes to Mobile Money, so you never need cash. The food credit line and the emergency allowance pay only for food and household essentials, so borrowed and insurance money always goes on feeding the family.</p></details>
-      <details><summary>Do I have to choose between credit and cover?</summary><p class="small">No. Every card has both. You use the food credit line month to month; if the main income stops, the emergency allowance opens and credit repayments freeze until a month after it ends.</p></details>
+      <details><summary>Which package is right for us?</summary><p class="small">Count the people you feed. One person: Solo or Solo Plus. Up to four: Family Starter. Up to six: Family. Bigger or extended households: Family Max. Not ready to commit? The Kibanja Card is free; top it up any time.</p></details>
+      <details><summary>Do I lose money I don't spend?</summary><p class="small">No. Your shopping balance carries over from one payment to the next. It is your money, held in trust.</p></details>
+      <details><summary>My employer pays. How does that work?</summary><p class="small">Your employer buys a Kibanja Staff package and your balance is topped up on the same day every month. You shop the same way and can add your own money too.</p></details>
+      <details><summary>What if I miss a payment?</summary><p class="small">Your balance keeps working. Package Protection continues for ${P.weekly.grace} days on weekly, ${P.monthly.grace} on monthly and ${P.annual.grace} on yearly; after that protection and credit pause until you pay, and the ${WAIT_DAYS}-day wait starts again.</p></details>
+      <details><summary>Can I buy anything with the card?</summary><p class="small">Yes. Your shopping balance and points pay for any item, and anything left goes to Mobile Money, so you never need cash. Only food credit and Package Protection are kept to essentials, so borrowed and insurance money always feeds the family.</p></details>
       <details><summary>Which shops take it?</summary><p class="small">Kibanja stores and partner supermarkets. The first partners are Kampala stores during the launch phase.</p></details>
       <details><summary>What if the card can't cover the whole basket?</summary><p class="small">The till sends the rest to your phone as a Mobile Money prompt. If you don't approve it, the cashier takes items off instead.</p></details>
       <details><summary>Can I borrow for school fees?</summary><p class="small">Not yet. Kibanja Loan is for growing, storing and selling food, plus motorcycles and fuel that move it. Other loans can follow once these have a track record.</p></details>
@@ -1408,7 +1462,7 @@ function score(m) {
   const c = cover(m), parts = [];
   const months = Math.min(12, Math.max(0, Math.floor(days(m.enrolled, TODAY) / 30)));
   parts.push(['Time as a member', months / 12 * 20, 20, `${months} month${months === 1 ? '' : 's'}`]);
-  parts.push(['Plan payments', tierOf(m).free ? 5 : { paid: 20, due: 10, lapsed: 0 }[c.s], 20, tierOf(m).free ? 'Starter: no plan payments yet' : { paid: 'Up to date', due: 'Payment due', lapsed: 'Cover paused' }[c.s]]);
+  parts.push(['Plan payments', tierOf(m).free ? 5 : { paid: 20, due: 10, lapsed: 0 }[c.s], 20, tierOf(m).free ? 'Free card: no package payments yet' : { paid: 'Up to date', due: 'Payment due', lapsed: 'Cover paused' }[c.s]]);
   const late = S.loans.some(l => l.m === m.id && l.status === 'active' && nextDue(l) < TODAY);
   let rep = m.credit.overdue ? 0 : 15 + Math.min(m.credit.onTime, 3) / 3 * 10;
   let repTxt = m.credit.overdue ? 'Food credit repayment overdue' : `${Math.min(m.credit.onTime, 3)} on-time repayments in a row`;
@@ -1422,7 +1476,7 @@ function score(m) {
 
 function loanOffer(m, key) {
   const P = PRODUCTS[key], book = bookOf(key), sc = score(m).total, blocks = [];
-  if (tierOf(m).free) blocks.push('Starter members can\'t borrow yet. A paid plan builds the record the score is made from.');
+  if (tierOf(m).free) blocks.push('Free card holders can\'t borrow yet. A package builds the record the score is made from.');
   if (m.cover === 'active' || m.cover === 'review') blocks.push('This household has an open emergency claim or allowance. Kibanja does not lend during an emergency; the allowance is the help.');
   if (cover(m).s === 'lapsed') blocks.push('Cover is paused. The plan has to be paid first.');
   if (m.credit.overdue) blocks.push('A food credit repayment is overdue.');
@@ -1681,19 +1735,19 @@ const A = {
   },
   'pay-plan': () => {
     const m = member(ui.viewAs), wasFree = tierOf(m).free, lapsed = cover(m).s === 'lapsed';
-    const tk = m.sub.nextTier || m.sub.tier, fk = m.sub.next || m.sub.plan, t = S.tiers[tk], price = t.prices[fk];
+    const tk = m.sub.nextTier || m.sub.tier, fk = m.sub.next || m.sub.plan, t = S.tiers[tk], price = priceFor(tk, fk), value = valueFor(tk, fk);
     m.sub.tier = tk; m.sub.plan = fk; delete m.sub.next; delete m.sub.nextTier;
     // Starting from free or after a lapse, cover starts today, and so does the waiting period for emergency claims.
     if (wasFree || lapsed) { m.sub.start = TODAY; m.sub.paidUntil = nextPeriod(TODAY, fk); } else m.sub.paidUntil = nextPeriod(m.sub.paidUntil, fk);
-    if (m.credit.rung > t.ladder.length - 1) m.credit.rung = Math.max(0, t.ladder.length - 1);
-    S.txns.push({ d: TODAY, m: m.id, where: `${t.name.replace('Kibanja ', '')}, ${S.plans[fk].name.toLowerCase()} · Mobile Money`, smart: 0, mm: price, items: 0 });
-    render(); toast(`${t.name} paid. Cover runs to ${fdate(m.sub.paidUntil)}.`);
+    m.wallet += value;
+    S.txns.push({ d: TODAY, m: m.id, where: `${t.name.replace('Kibanja ', '')}, ${S.plans[fk].name.toLowerCase()} · Mobile Money`, smart: 0, mm: price, items: 0, via: `+ ${value.toLocaleString('en-US')} to spend` });
+    render(); toast(`Paid ${ugx(price)}. ${ugx(value)} added to your shopping balance.`);
   },
   topup: b => {
     const m = member(ui.viewAs), v = +b.dataset.amt;
     m.wallet += v;
     S.txns.push({ d: TODAY, m: m.id, where: 'Wallet top-up · Mobile Money', smart: 0, mm: v, items: 0 });
-    render(); toast(`${ugx(v)} added to the wallet`);
+    render(); toast(`${ugx(v)} added to your shopping balance`);
   },
   'pos-lookup': () => {
     ui.posInput = $('#pos-card').value;
@@ -1736,7 +1790,7 @@ const A = {
       if (P.credit) m.credit.used += P.credit;
       m.spend.ess += t.ess; m.spend.all += t.total;
       S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: P.points + P.allowance + P.wallet + P.credit, mm: P.mm, items: t.lines.reduce((s, l) => s + l.q, 0) });
-      tenders = [['Kibanja points', P.points], ['Emergency allowance', P.allowance], ['SmartCare wallet', P.wallet], ['Food credit', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
+      tenders = [['Kibanja points', P.points], ['Package Protection', P.allowance], ['Shopping balance', P.wallet], ['Food credit', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
     } else tenders = [['Mobile Money or cash', P.mm]];
     S.sales.local += t.local; S.sales.all += t.total;
     ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines: t.lines, promoOff: t.promoOff, memberOff: t.memberOff, disc: m ? t.src.disc : 0, total: t.total, tenders, margin, earn: m ? t.earn : 0, balance: m ? m.points : 0 };
@@ -1753,7 +1807,7 @@ const A = {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
     c.status = 'approved'; c.decided = TODAY;
     m.cover = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
-    render(); toast(`${hh(m)}: allowance open at ${ugx(capOf(m))} a month, food credit frozen`);
+    render(); toast(`${hh(m)}: package continues free for ${PROTECT_MONTHS} months at ${ugx(capOf(m))} a month, food credit frozen`);
   },
   decline: () => {
     const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
@@ -1791,7 +1845,7 @@ document.addEventListener('submit', e => {
   }
   if (e.target.id === 'claim-form') {
     const m = member(ui.viewAs);
-    if (tierOf(m).free) { toast('Starter has no emergency cover. Upgrade first.'); return; }
+    if (tierOf(m).free) { toast('The free card has no Package Protection. Choose a package first.'); return; }
     const type = $('#cl-type').value, note = $('#cl-note').value.trim(), hasFile = $('#cl-file').files.length > 0;
     const inForce = days(m.sub.start, TODAY);
     const checks = [{ t: `Waiting period passed (${WAIT_DAYS} days)`, r: inForce >= WAIT_DAYS ? 'ok' : 'fail', d: `${inForce} days of continuous cover` }];
@@ -1826,7 +1880,7 @@ document.addEventListener('change', e => {
   }
   if (t.dataset.tier) {
     const v = parseFloat(t.value), x = isFinite(v) && v >= 0 ? v : 0;
-    if (t.dataset.freq === 'allowance') S.tiers[t.dataset.tier].allowance = x; else S.tiers[t.dataset.tier].prices[t.dataset.freq] = x;
+    S.tiers[t.dataset.tier][t.dataset.freq] = x;
     render();
   }
   if (t.dataset.plan) {
@@ -1836,6 +1890,9 @@ document.addEventListener('change', e => {
   }
   if (t.dataset.lic) { licences[t.dataset.lic] = t.checked; store.set('ksc-licences', licences); }
   if (t.dataset.room) { dataroom[t.dataset.room] = t.checked; store.set('ksc-dataroom', dataroom); }
+  if (t.id === 'corp-staff') { const v = parseInt(t.value, 10); ui.corp.staff = isFinite(v) && v > 0 ? v : 1; render(); }
+  if (t.id === 'corp-pkg') { ui.corp.pkg = t.value; render(); }
+  if (t.id === 'corp-freq') { ui.corp.freq = t.value; render(); }
   if (t.id === 'food-uptake') { const v = parseFloat(t.value); ui.uptake = isFinite(v) ? Math.max(0, Math.min(100, v)) : 0; render(); }
   if (t.id === 'float-yield') { const v = parseFloat(t.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
 });

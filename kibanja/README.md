@@ -17,7 +17,7 @@ dated 22 Oct 2026, and **Reset demo** puts them back.
 | Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, Kibanja points, a one-time pay code for when the card is at home, Kibanja Loan repayments, reporting an emergency, the monthly allowance, the credit ladder and repayments |
 | Food and producers | The price-locked Kibanja Food Basket (UGX 169,000 a month for a family of five, 15% under shelf price), the Ugandan-made share of sales against the Buy Uganda Build Uganda shelf targets, the partner directory (Made in Uganda as a proposed partner; producers and manufacturers as clearly marked examples), what partners get, and the monthly volumes producers can plan on |
 | Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash, by card or pay code: points (if the member chooses), emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
-| Plans and discounts | Six named plans by household size: Kibanja Starter (free: card, wallet, points, Food Basket prices), Solo (1 person, UGX 2,500 a week), Duo (2, 4,500), Family (up to 5, 8,500), Family Plus (up to 8, 12,500) and Premier (the original UGX 1.5M a year / 50M design). Each payable weekly, monthly or annually, with editable prices and cover, an affordability check per plan (expected claims against price, cover against what the household eats), discount and points by payment frequency, margin check, and product offers |
+| Packages | Prepaid shopping packages: pay weekly, monthly or yearly and the money plus a bonus (1%, 3% or 8%, more on bigger packages) lands on the card as a shopping balance that buys anything in the store. For individuals (free Kibanja Card, Solo UGX 100,000 a month, Solo Plus 200,000), families (Family Starter 300,000, Family 500,000, Family Max 1,000,000) and employers (Kibanja Staff 150,000 and Staff Plus 300,000 per employee, from 10 staff, with a volume bonus at 50+ and 200+). Each package shows what a month buys in bulk packs (25 kg flour and rice bags, 10 kg beans and sugar, 10 L oil) and what is left over. Corporate calculator, editable settings, who pays for the bonus, points and offers |
 | Kibanja Loan | Food-system loans only: farm inputs, poultry and livestock, storage and drying, and food-trade stock, paid to suppliers or as hub stock rather than cash, and repayable in produce. Limits come from an explainable Kibanja score; full-cost calculator, 30%-of-income affordability check, one loan per book, no lending during an emergency, and a loan book with approvals and late loans |
 | Boda and fuel loans | The same engine and score for motorcycles (up to UGX 7M, 20% deposit, 52–104 weeks, repaid weekly, bike registered to the lender with a tracker) and fuel (up to UGX 150,000 as fuel credit at partner stations, 1–4 weeks). Tied to the food system: riders deliver Food Baskets and can repay from delivery pay |
 | Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
@@ -40,12 +40,18 @@ reduces the household's allowance or credit.
   new goes on credit and no repayments fall due, so a shock never turns
   into debt. No Kibanja Loans during an emergency either.
 - **Ugandan-made goods earn double points**, and producers pay no shelf fees.
-- **Cover sized to the household.** Solo to Family Plus size the emergency
-  allowance to what a household of that size eats (5–9 times the Food Basket
-  cost), which keeps plans at UGX 2,500–12,500 a week. Expected claims are
-  about 48% of the price at the plan's 4% claim rate. Premier keeps the
-  original UGX 1.5M / 50M design.
-- **Free Starter plan** so anyone can join the network and upgrade later.
+- **Packages are prepaid shopping, not insurance premiums.** What a household
+  pays comes back as shopping value plus a bonus, so the value is obvious and
+  the economics don't rest on claims. The bonus is funded from store margin,
+  supplier volume rebates and interest on the prepaid float; the Packages
+  screen shows what is left after it.
+- **Package Protection replaces the large emergency allowance.** After a
+  verified job loss or hospital admission the package continues free for
+  three months, for essentials. The Underwriting screen still models the
+  original UGX 1.5M / 50M plan.
+- **Free Kibanja Card** so anyone can join the network and move to a package later.
+- **Matooke removed** from the catalogue and the Food Basket; replaced with
+  wheat flour, tea leaves, groundnuts and toilet paper.
 - **Loans stay inside the food system** for now; school fees and other
   needs wait until the food book has a track record.
 
