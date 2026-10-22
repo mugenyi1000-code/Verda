@@ -233,6 +233,19 @@ legend { padding: 0; margin-bottom: 8px; }
 .lic input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--leaf); }
 .lic li:has(input:checked) b { text-decoration: line-through; color: var(--muted); }
 
+/* Investors */
+.adv { display: grid; gap: 12px; align-content: start; }
+.adv h4 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.adv .claim { font-size: 15px; }
+.adv .ask { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px; font-size: 14px; }
+.figs { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); }
+.figs .v { font-family: var(--f-mono); text-align: right; }
+.figs .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 4px; }
+.stages { list-style: none; margin: 0; padding: 0; display: grid; }
+.stages li { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; gap: 4px 16px; padding-block: 12px; border-top: 1px solid var(--line); }
+.stages li b { font-family: var(--f-display); }
+@media (max-width: 520px) { .stages li { grid-template-columns: 1fr; } }
+
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); z-index: 20; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
@@ -252,6 +265,7 @@ legend { padding: 0; margin-bottom: 8px; }
       <button class="tab" role="tab" data-a="tab" data-v="ops">Operations</button>
       <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
       <button class="tab" role="tab" data-a="tab" data-v="rollout">Rollout</button>
+      <button class="tab" role="tab" data-a="tab" data-v="investors">Investors</button>
     </nav>
   </div>
 </header>
@@ -340,9 +354,12 @@ const addMonths = (iso, n) => { const d = new Date(iso + 'T00:00:00'); d.setMont
 const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
 let S = seed();
-const ui = { view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
-const M = { fam: [1000, 5000, 15000], premium: 1.5, rebateFam: 0.85, rebatePct: 6, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], rebateMode: 'all' };
+const ui = { floatYield: 10, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const M0 = { fam: [1000, 5000, 15000], premium: 1.5, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
+const M = JSON.parse(JSON.stringify(M0));
+const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
 const licences = store.get('ksc-licences', {});
+const dataroom = store.get('ksc-dataroom', {});
 
 const member = id => S.members.find(m => m.id === id);
 const hh = m => m.name + ' household';
@@ -404,6 +421,7 @@ V.overview = () => `
     </dl>
   </article>
 </div>
+<p class="muted" style="max-width:72ch">The financial plan runs both on one card: about 96% of households use it as a monthly credit line for groceries, and the roughly 4% hit by a shock in a given year activate the emergency benefit, budgeted at an average of UGX 20M paid as capped monthly allowances.</p>
 
 <section class="stack">
   <h2>The platform, screen by screen</h2>
@@ -412,7 +430,8 @@ V.overview = () => `
     <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">Cashier scans the card, the till splits essentials onto SmartCare and extras onto cash.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
     <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
-    <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The three phases, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The first year in detail, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="investors"><h4>Investors</h4><span class="muted small">The pitch, the three advantages with the questions diligence will ask, and the 10-year scale plan.</span><span class="go">Open →</span></button>
   </div>
 </section>
 
@@ -430,7 +449,7 @@ V.overview = () => `
   </section>
   <section class="callout">
     <h3>Check before building: the 4% claims line</h3>
-    <p>Your table books UGX 800M of claims in Year 1. That only works if 4% of families claim <i>and</i> each one uses about UGX 20M of the 50M allowance. If every approved family uses its full allowance, claims rise to UGX 2B and Year 1 loses money.</p>
+    <p>Your plan books UGX 800M of claims in Year 1: 4% of families claiming an average of UGX 20M each, against a 50M allowance. If every approved family uses its full allowance, claims rise to UGX 2B and Year 1 loses money. Either cap the benefit at 20M or price for 50M.</p>
     <p>The Underwriting screen lets you test this before committing capital.</p>
     <div><button class="btn primary" data-a="tab" data-v="model">Open the stress test</button></div>
   </section>
@@ -683,17 +702,19 @@ V.ops = () => {
 
 /* Underwriting model */
 function yr(i, o = M) {
-  const f = o.fam[i], prem = f * o.premium * 1e6, claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
-  const reb = o.rebateMode === 'all' ? f * o.rebateFam * 1e6 : claims * (o.rebatePct / 100);
+  const f = o.fam[i], spend = o.spend * 1e6;
+  const prem = f * o.premium * 1e6, claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
+  const creditVol = f * (o.creditShare / 100) * spend;          // groceries bought on the monthly credit line
+  const reb = f * spend * (o.rebatePct / 100) + creditVol * (o.feePct / 100);
+  const outstanding = creditVol / 12;                           // one month of credit spend, repaid at cycle end
+  const credit = creditVol * (o.lossPct / 100) + outstanding * (o.cofPct / 100);
   const ops = o.ops[i] * 1e6;
-  return { f, prem, reb, gross: prem + reb, claims, ops, net: prem + reb - claims - ops };
+  return { f, prem, reb, gross: prem + reb, claims, credit, ops, outstanding, creditVol, net: prem + reb - claims - credit - ops };
 }
-function breakEven(i, o = M) {
-  const opsF = o.ops[i] / o.fam[i];
-  return o.rebateMode === 'all' ? (o.premium + o.rebateFam - opsF) / o.avgDraw : (o.premium - opsF) / (o.avgDraw * (1 - o.rebatePct / 100));
-}
+// Claim rate at which the margin from everything else is used up by claims.
+function breakEven(i, o = M) { const y = yr(i, { ...o, claimRate: 0 }); return y.net / y.f / (o.avgDraw * 1e6); }
 
-V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from its assumptions. With the defaults it reproduces your figures exactly; change any input to stress it.</p></div>
+V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from the assumptions in your plan. Change any input to stress it.</p></div>
 <div class="split">
   <section class="panel">
     <form id="model-form" class="stack">
@@ -705,15 +726,14 @@ V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p clas
         <label class="f">Claim rate <span class="hint">% of households / year</span><input class="in num" type="number" step="0.5" min="0" max="100" id="claimRate" value="${M.claimRate}"></label>
         <label class="f">Average used per claim <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="avgDraw" value="${M.avgDraw}"></label>
       </div></fieldset>
-      <fieldset><legend class="eyebrow">Rebate revenue</legend>
-        <div class="seg" role="radiogroup">
-          <label><input type="radio" name="rebateMode" value="all" ${M.rebateMode === 'all' ? 'checked' : ''}> Every household spends on the card</label>
-          <label><input type="radio" name="rebateMode" value="claimants" ${M.rebateMode === 'claimants' ? 'checked' : ''}> Only claimants spend (Model A as written)</label>
-        </div>
-        <div class="form-grid">
-          <label class="f">Rebate per household <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.05" min="0" id="rebateFam" value="${M.rebateFam}"></label>
-          <label class="f">Store rebate rate <span class="hint">% of spend</span><input class="in num" type="number" step="0.5" min="0" id="rebatePct" value="${M.rebatePct}"></label>
-        </div></fieldset>
+      <fieldset><legend class="eyebrow">Card spending and credit line</legend><div class="form-grid">
+        <label class="f">Card spend per household <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.5" min="0" id="spend" value="${M.spend}"></label>
+        <label class="f">Households using credit <span class="hint">%</span><input class="in num" type="number" step="1" min="0" max="100" id="creditShare" value="${M.creditShare}"></label>
+        <label class="f">Supermarket rebate <span class="hint">% of spend</span><input class="in num" type="number" step="0.5" min="0" id="rebatePct" value="${M.rebatePct}"></label>
+        <label class="f">Processing fee <span class="hint">% per monthly cycle</span><input class="in num" type="number" step="0.1" min="0" id="feePct" value="${M.feePct}"></label>
+        <label class="f">Credit losses <span class="hint">% of credit volume</span><input class="in num" type="number" step="0.5" min="0" id="lossPct" value="${M.lossPct}"></label>
+        <label class="f">Cost of funds <span class="hint">% a year on balances</span><input class="in num" type="number" step="1" min="0" id="cofPct" value="${M.cofPct}"></label>
+      </div></fieldset>
       <fieldset><legend class="eyebrow">Tech and operations <span class="hint">UGX M / year</span></legend><div class="form-grid">
         ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="0" step="50" id="ops${i}" value="${M.ops[i]}"></label>`).join('')}</div></fieldset>
       <div><button class="btn chip" type="button" data-a="model-reset">Back to your figures</button></div>
@@ -727,12 +747,14 @@ function modelOut() {
   const Y = [0, 1, 2].map(i => yr(i));
   const rows = [
     ['Premium revenue', 'prem'], ['Transaction and rebate revenue', 'reb'], ['Gross revenue pool', 'gross', 1],
-    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
+    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Credit losses and cost of funds', 'credit'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
   ];
   const table = `<div class="tablewrap"><table class="t"><thead><tr><th>UGX</th>${Y.map((y, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${y.f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead>
-    <tbody>${rows.map(([l, k, s]) => `<tr class="${s ? 'strong' : ''}"><td>${l}</td>${Y.map(y => `<td class="n ${y[k] < 0 ? 'neg' : ''}">${short(y[k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    <tbody>${rows.map(([l, k, s]) => `<tr class="${s ? 'strong' : ''}"><td>${l}</td>${Y.map(y => `<td class="n ${y[k] < 0 ? 'neg' : ''}">${short(y[k])}</td>`).join('')}</tr>`).join('')}
+    <tr><td class="muted">Net in your original table</td>${PLAN_NET.map(v => `<td class="n muted">${short(v)}</td>`).join('')}</tr></tbody></table></div>
+    <p class="small muted">With the plan's assumptions this lands within 1% of your table. The gap is the 2.5% fee: here it is charged only on the ${trim2(M.creditShare)}% of households who use credit, not on everyone.</p>`;
   const y3 = Y[2], f = y3.f;
-  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebates', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
+  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebate and fees', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Credit costs', y3.credit / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
   const maxv = Math.max(...per.map(p => Math.abs(p[1])), 1);
   const bars = `<section class="panel"><h3>One household, Year 3</h3><div class="bars">${per.map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${Math.abs(v) / maxv * 100}%;background:${c}"></i></span><span class="v">${short(v)}</span></div>`).join('')}</div></section>`;
   $('#model-out').innerHTML = `<section class="stack"><h3>Three-year view</h3>${table}</section>${bars}`;
@@ -743,19 +765,21 @@ function modelOut() {
     ${rates.map(r => `<tr><td>${r}% of households</td>${draws.map(d => { const v = yr(2, { ...M, claimRate: r, avgDraw: d }).net; return `<td class="cell ${v >= 0 ? 'pos' : 'neg'} ${r === M.claimRate && d === M.avgDraw ? 'here' : ''}">${short(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
   const full = yr(2, { ...M, avgDraw: M.limit });
   const be = breakEven(2), beFull = breakEven(2, { ...M, avgDraw: M.limit });
-  const claimantsOnly = yr(2, { ...M, rebateMode: 'claimants' });
-  const impliedSpend = M.rebateFam * 1e6 / (M.rebatePct / 100);
+  const illus = yr(2, { ...M, lossPct: Math.max(M.lossPct, 3), cofPct: Math.max(M.cofPct, 18) });
+  const noCreditCost = M.lossPct === 0 && M.cofPct === 0;
   const F = [
     [full.net < 0 ? 'bad' : '', 'If approved households use their whole allowance',
-      `With ${trim2(M.claimRate)}% claiming the full UGX ${M.limit}M, Year 3 claims become ${ugx(full.claims)} and the net margin is ${ugx(full.net)}. The original table only balances because it assumes each claimant uses UGX ${M.avgDraw}M. Monthly caps and the 12-month limit protect you, but a family that lost its income will usually spend everything it is allowed.`],
+      `Your plan budgets an average payout of UGX ${M.avgDraw}M against a ${M.limit}M allowance. If ${trim2(M.claimRate)}% claim the full ${M.limit}M, Year 3 claims become ${ugx(full.claims)} and the net margin is ${ugx(full.net)}. A family that lost its income will usually spend everything it is allowed, so either cap the benefit at ${M.avgDraw}M or price for ${M.limit}M.`],
     [be < 0.06 ? 'bad' : '', `Break-even claim rate: ${pct(be)} (${pct(beFull)} at full use)`,
-      `Above this share of households claiming in a year, every member loses money. Job loss, a hospital admission or a district drought in a given year is common among Kampala households, so price from real claims data from a pilot before scaling past Year 1.`],
-    [M.rebateMode === 'all' ? 'bad' : '', 'Rebate revenue needs card spending',
-      `UGX ${trim2(M.rebateFam)}M a year per household at a ${trim2(M.rebatePct)}% rebate means each family puts about ${ugx(impliedSpend)} a year through the card. Under Model A the card is locked for families who never claim, so they generate no rebate. Counting only claimants' spending, Year 3 net is ${ugx(claimantsOnly.net)}. Rebates fit Model B, where everyone shops on the card.`],
+      `Above this share of households claiming in a year, the business loses money. Job loss, a hospital admission or a district drought in a given year is common among Kampala households, so price from real claims data from a pilot before scaling past Year 1.`],
+    [noCreditCost ? 'bad' : '', 'The credit line has to be funded',
+      `About ${ugx(y3.outstanding)} of groceries are on credit at any moment in Year 3: one month of spend for ${trim2(M.creditShare)}% of households. Someone lends that money and absorbs the families who don't repay. ${noCreditCost ? 'Your table counts neither.' : ''} At ${trim2(Math.max(M.lossPct, 3))}% of credit volume lost and ${trim2(Math.max(M.cofPct, 18))}% a year cost of funds, Year 3 net is ${ugx(illus.net)}.`],
+    ['', `A ${trim2(M.feePct)}% fee every month is about ${trim2(M.feePct * 12)}% a year`,
+      'That is consumer credit pricing, and fees usually count toward the cost of credit. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap with UMRA and whether the processing fee counts toward it before launch.'],
     ['bad', 'Drought hits many households at once',
       'Job losses and hospital stays are spread out. A declared drought pays every member in the district in the same month. Cap exposure per district and buy reinsurance or a parametric weather cover before offering the drought trigger.'],
-    ['', 'Costs missing from the table',
-      'The underwriting partner\'s share or reinsurance, sales agent commissions, card issuing, Model B credit losses and cost of funds, and corporate income tax (30% in Uganda). Add them before treating any line as profit.'],
+    ['', 'Costs still missing from the table',
+      'The underwriting partner\'s share or reinsurance, sales agent commissions, card issuing, and corporate income tax (30% in Uganda). Add them before treating any line as profit.'],
   ];
   $('#model-sens').innerHTML = `<div class="split">
     <section class="stack"><h3>Stress test: Year 3 net margin</h3><p class="small muted">Each cell recomputes Year 3 with that claim rate and average use, keeping every other input. The outlined cell is your current assumption.</p>${grid}</section>
@@ -773,7 +797,7 @@ const LIC = [
   ['float', 'Written rule on what premium money may fund', 'Premiums back claims. Keep them with the underwriter or in a ring-fenced account and fund the stores from equity or debt.'],
 ];
 
-V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The three phases, with what the platform needs to have working at each one.</p></div>
+V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The first year and a half in detail: Phase 1 of the 10-year plan on the Investors screen.</p></div>
 <div class="phases">
   <article class="panel phase"><span class="when">Months 1–6</span><h3>Fintech launch</h3><p class="small muted">Launch the app and card using partner supermarkets.</p>
     <ul><li>Family app, card issuing, Mobile Money premium collection</li><li>Card-reading link at 3–5 partner stores</li><li>Operations desk with claims verification</li><li>Underwriter and credit partner signed</li></ul>
@@ -799,6 +823,118 @@ V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="
     <p class="small muted">A starting list, not legal advice. Confirm each item with a Ugandan lawyer before relying on it. Your ticks stay in this browser.</p>
   </section>
 </div>`;
+
+/* Investors */
+const ROOM = [
+  ['claims', 'Pilot claims log', 'Every claim, its trigger, evidence, decision and amount paid.'],
+  ['cohorts', 'Renewal and repayment by monthly cohort', 'The retention and credit-loss numbers the pitch depends on.'],
+  ['cac', 'Customer acquisition cost', 'Total sales and marketing spend divided by households enrolled, by channel.'],
+  ['store', 'Flagship store P&L and measured shrinkage', 'Against the month before the kitchen and the card went live.'],
+  ['legal', 'Licences and partner agreements', 'Underwriter, credit partner, payments, data protection registration.'],
+  ['cap', 'Cap table and use of funds', 'Who owns what, and what this round pays for.'],
+];
+
+V.investors = () => {
+  const Y = [0, 1, 2].map(i => yr(i)), y3 = Y[2], f = y3.f;
+  const float = y3.prem / 2;                 // premiums are earned through the year, so on average half a year's worth is held
+  const nwc = float - y3.outstanding;
+  const floatIncome = float * ui.floatYield / 100;
+  const lossRatio = y3.claims / y3.prem;
+  return `<section class="hero">
+  <span class="eyebrow">Investor pitch and 10-year scale plan</span>
+  <h1>A fintech ecosystem <em>with its own shelves</em>.</h1>
+  <p class="lede">Kibanja SmartCare is pitched as more than a supermarket: an AI-driven card that families pay for upfront, a captive store network where they spend it, and the data that links the two. Investors like captive ecosystems because acquisition costs are low, retention is high and upfront subscriptions make cash flow predictable. Each of those has to be shown with pilot numbers.</p>
+</section>
+
+<section class="stack">
+  <div class="row between"><h2>Year 3 in the model</h2><button class="btn chip" data-a="tab" data-v="model">Change assumptions</button></div>
+  <div class="kpis">
+    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${f.toLocaleString('en-US')}</span><span class="small muted">Kampala, Year 3</span></div>
+    <div class="kpi"><span class="eyebrow">Revenue per household</span><span class="v">${short(y3.gross / f)}</span><span class="small muted">premium, rebate and fees</span></div>
+    <div class="kpi"><span class="eyebrow">Net per household</span><span class="v">${short(y3.net / f)}</span><span class="small muted">before tax and commissions</span></div>
+    <div class="kpi"><span class="eyebrow">Loss ratio</span><span class="v">${pct(lossRatio)}</span><span class="small muted">claims ÷ premiums</span></div>
+    <div class="kpi"><span class="eyebrow">Acquisition cost</span><span class="v">Not measured</span><span class="small muted">the pilot has to produce it</span></div>
+  </div>
+</section>
+
+<section class="stack">
+  <h2>The three unfair advantages</h2>
+  <div class="models">
+    <article class="panel adv">
+      <h3>Negative working capital: the float</h3>
+      <p class="claim">Families pay their subscriptions upfront, so Kibanja holds their money before they consume the goods, and that cash earns interest.</p>
+      <div class="figs">
+        <span>Premiums held on average</span><span class="v">${short(float)}</span>
+        <span>Groceries on credit at any time</span><span class="v">−${short(y3.outstanding)}</span>
+        <span class="tot">Cash held minus credit funded</span><span class="v tot" style="color:${nwc < 0 ? 'var(--bad)' : 'var(--ok)'}">${short(nwc)}</span>
+      </div>
+      <label class="f">Yield on the float <span class="hint">% a year, your assumption</span><input class="in num" type="number" id="float-yield" min="0" step="0.5" value="${ui.floatYield}"></label>
+      <p class="small">At ${trim2(ui.floatYield)}% the premiums held would earn about <b class="num">${ugx(floatIncome)}</b> a year.</p>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Whose balance sheet is the float on? Premiums belong to whoever carries the risk. If a licensed insurer underwrites the cover, the float and its interest sit with them unless the agreement shares investment income.</p>
+        <p>${nwc < 0 ? `With ${trim2(M.creditShare)}% of households shopping on credit, Kibanja fronts more in groceries than it holds in premiums. The credit line needs a funder; it does not create float.` : 'Premiums cover the credit line in this scenario, but they are reserved for claims and cannot also fund it.'}</p>
+      </div>
+    </article>
+    <article class="panel adv">
+      <h3>The AI data goldmine</h3>
+      <p class="claim">The platform records item-level checkout data for every household, down to each family's consumption cycle.</p>
+      <div class="figs">
+        <span>Households tracked, Year 3</span><span class="v">${f.toLocaleString('en-US')}</span>
+        <span>Card spend recorded a year</span><span class="v">${short(f * M.spend * 1e6)}</span>
+      </div>
+      <div class="ask"><h4>What makes it a moat</h4>
+        <p>Nobody else links what a family buys to whether it repays and when it hits a shock. Show the data predicting something that earns money: a missed repayment from a change in the basket, restock timing, supplier-funded offers.</p></div>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Consent and use. Purchase, health and employment data is personal data under the Data Protection and Privacy Act 2019: get consent at enrolment, use it for stated purposes, and sell suppliers only aggregated insight.</p>
+        <p>Scale. ${f.toLocaleString('en-US')} households is a deep panel but a small one next to mobile money operators and large retailers. Pitch the link between spending, repayment and shocks, not the size.</p>
+      </div>
+    </article>
+    <article class="panel adv">
+      <h3>Zero-waste vertical integration</h3>
+      <p class="claim">Supermarket, AI wallet and an in-house kitchen together: stock near its sell-by date becomes cooked meals, so food waste, the biggest profit killer in retail, falls sharply.</p>
+      <div class="ask"><h4>What makes it true</h4>
+        <p>A measured number. Run the flagship for six months, record shrinkage against the month before the kitchen opened, and publish it. Card data helps too: knowing when members restock lets the store order closer to demand.</p></div>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Shrinkage also covers theft, damage and record errors, not only spoilage, so "near zero" will not survive a store visit. Lead with the measured reduction.</p>
+        <p>The kitchen adds food-safety licensing, cooks and equipment to the store's costs. Show it pays for itself.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="stack">
+  <h2>10-year geographic expansion</h2>
+  <div class="phases">
+    <article class="panel phase"><span class="when">Years 1–2</span><h3>Kampala urban</h3>
+      <p class="small muted">Launch the core card platform with partner supermarkets, then the flagship store. The Rollout screen has this phase in detail.</p>
+      <ul><li>Family app, store till, operations desk</li><li>Underwriter and credit partner signed</li><li>Flagship store, then the first micro-hubs</li></ul>
+      <p class="small"><b>Gate to Phase 2:</b> 12 months of claims and repayment data with loss ratio and credit losses inside plan, renewal rate measured, flagship profitable at store level.</p></article>
+    <article class="panel phase"><span class="when">Years 3–5</span><h3>Ugandan regional</h3>
+      <p class="small muted">Regional cities such as Jinja, Mbarara, Gulu, Mbale and Masaka, plus the farming households around them.</p>
+      <ul><li>Micro-hubs supplied from a regional hub store</li><li>Crop and drought cover with agricultural partners</li><li>Offline-capable tills for weaker connectivity</li></ul>
+      <p class="small"><b>Gate to Phase 3:</b> unit economics positive in at least two cities outside Kampala, and drought exposure reinsured.</p></article>
+    <article class="panel phase"><span class="when">Years 6–10</span><h3>Pan-East Africa</h3>
+      <p class="small muted">Kenya, Tanzania and Rwanda, entered one country at a time.</p>
+      <ul><li>A local insurer and lender in each country</li><li>Multi-currency, multi-regulator platform</li><li>Data stored according to each country's law</li></ul>
+      <p class="small"><b>Watch:</b> insurance, lending, payments and data licences are national. Each country is a new licensing project, not a switch-on.</p></article>
+  </div>
+</section>
+
+<div class="split">
+  <section class="panel"><h3>Raise in the order the evidence arrives</h3>
+    <ul class="stages">
+      <li><b>Pre-seed · now</b><span class="small">Founders, angels, grants and impact accelerators. Pays for licences, partners, the app and a pilot of up to 1,000 households.</span></li>
+      <li><b>Seed · after 12 months</b><span class="small">Impact and Africa-focused early-stage funds. Pitch with real loss ratio, repayment and renewal numbers.</span></li>
+      <li><b>Growth · Phase 2</b><span class="small">Growth funds like those named in the pitch (Norrsken, Tiger Global) and regional institutional funds generally invest once revenue and repeat customers are proven. Bring Phase 1 results, not projections.</span></li>
+      <li><b>Strategic · any stage</b><span class="small">An insurer or development finance institution taking equity alongside underwriting or a credit facility.</span></li>
+    </ul>
+  </section>
+  <section class="panel"><h3>Data room checklist</h3>
+    <ul class="lic">${ROOM.map(([k, b, t]) => `<li><label><input type="checkbox" data-room="${k}" ${dataroom[k] ? 'checked' : ''}><span><b>${b}</b><span class="small muted" style="display:block">${t}</span></span></label></li>`).join('')}</ul>
+    <p class="small muted">Your ticks stay in this browser.</p>
+  </section>
+</div>`;
+};
 
 /* ---------- render + actions ---------- */
 function render() {
@@ -876,7 +1012,7 @@ const A = {
     c.status = 'declined'; c.decided = TODAY; m.status = 'locked';
     render(); toast(`${c.id} declined. The household is told why in the app.`);
   },
-  'model-reset': () => { Object.assign(M, { fam: [1000, 5000, 15000], premium: 1.5, rebateFam: 0.85, rebatePct: 6, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], rebateMode: 'all' }); render(); },
+  'model-reset': () => { Object.assign(M, JSON.parse(JSON.stringify(M0))); render(); },
 };
 
 document.addEventListener('click', e => {
@@ -907,6 +1043,8 @@ document.addEventListener('submit', e => {
 document.addEventListener('change', e => {
   if (e.target.id === 'view-as') { ui.viewAs = e.target.value; ui.claimForm = false; render(); }
   if (e.target.dataset.lic) { licences[e.target.dataset.lic] = e.target.checked; store.set('ksc-licences', licences); }
+  if (e.target.dataset.room) { dataroom[e.target.dataset.room] = e.target.checked; store.set('ksc-dataroom', dataroom); }
+  if (e.target.id === 'float-yield') { const v = parseFloat(e.target.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
 });
 
 document.addEventListener('input', e => {
@@ -915,8 +1053,7 @@ document.addEventListener('input', e => {
   const num = id => { const v = parseFloat($('#' + id).value); return isFinite(v) && v >= 0 ? v : 0; };
   M.fam = [0, 1, 2].map(i => Math.max(1, num('fam' + i)));
   M.ops = [0, 1, 2].map(i => num('ops' + i));
-  ['premium', 'limit', 'claimRate', 'avgDraw', 'rebateFam', 'rebatePct'].forEach(k => M[k] = num(k));
-  M.rebateMode = (document.querySelector('input[name="rebateMode"]:checked') || {}).value || 'all';
+  ['premium', 'limit', 'claimRate', 'avgDraw', 'spend', 'creditShare', 'rebatePct', 'feePct', 'lossPct', 'cofPct'].forEach(k => M[k] = num(k));
   modelOut();
 });
 
