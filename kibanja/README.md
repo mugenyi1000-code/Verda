@@ -1,8 +1,9 @@
 # Kibanja SmartCare — platform prototype
 
-A working, click-through prototype of the Kibanja SmartCare platform: a
-food-security card for Kampala households that pay UGX 1.5M a year. It is
-separate from Verda and shares no code with it.
+A working, click-through prototype of the Kibanja platform: prepaid food
+packages for Kampala households and employers, paid weekly, monthly or yearly
+and spent with a card or phone code instead of cash. It is separate from Verda
+and shares no code with it.
 
 Open `kibanja-smartcare.html` in a browser. It is the platform as an app,
 with one switch at the top for who is using it:
