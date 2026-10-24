@@ -1,0 +1,1978 @@
+<title>Kibanja SmartCare</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a sticky bar of six views; each view is one column that splits into a working pane and a side pane from 900px. */
+:root {
+  --bg: #F1F4EF;  --surface: #FFFFFF; --sunk: #E7ECE5; --ink: #13231A; --muted: #55665C; --line: #D3DCD2;
+  --leaf: #1D5A3E; --leaf-soft: #DBEADF; --on-leaf: #FFFFFF;
+  --sun: #C98A12; --sun-soft: #FAEDCF;
+  --ok: #2A7748;  --ok-soft: #DCEFE2; --warn: #8F5D00; --warn-soft: #FAEAC6; --bad: #AE3520; --bad-soft: #F7DCD4;
+  --bezel: #17221C;
+  --card-a: #163F2B; --card-b: #2C7650; --card-ink: #F5F1E1; --card-sun: #F0BF4C;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1612; --surface: #16211B; --sunk: #1D2A23; --ink: #E4ECE6; --muted: #98AA9F; --line: #2B3A31;
+  --leaf: #6CC795; --leaf-soft: #1E3628; --on-leaf: #0B1A12;
+  --sun: #EDB848; --sun-soft: #3A2F14;
+  --ok: #62C68E; --ok-soft: #173325; --warn: #E8B04C; --warn-soft: #382A10; --bad: #F07A60; --bad-soft: #3D1D16;
+  --bezel: #040706; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0E1612; --surface: #16211B; --sunk: #1D2A23; --ink: #E4ECE6; --muted: #98AA9F; --line: #2B3A31;
+  --leaf: #6CC795; --leaf-soft: #1E3628; --on-leaf: #0B1A12;
+  --sun: #EDB848; --sun-soft: #3A2F14;
+  --ok: #62C68E; --ok-soft: #173325; --warn: #E8B04C; --warn-soft: #382A10; --bad: #F07A60; --bad-soft: #3D1D16;
+  --bezel: #040706; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+h1, h2, h3, h4 { font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 700; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 700; }
+h4 { font-size: 15px; font-weight: 700; font-family: var(--f-body); }
+p { margin: 0; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+button, input, select, textarea { font: inherit; color: inherit; }
+table { font: inherit; }
+:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
+
+/* Top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1200px; margin: 0 auto; padding-block: 10px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.brand-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 19px; }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(140deg, var(--card-a), var(--card-b)); position: relative; flex: none; }
+.brand-mark::after { content: ""; position: absolute; left: 7px; top: 9px; width: 14px; height: 10px; border-radius: 3px; background: var(--card-sun); }
+.brand small { font-family: var(--f-body); font-weight: 500; font-size: 12px; color: var(--muted); }
+.tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-top: 8px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { border: 0; background: none; padding: 10px 12px; font-size: 14px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; cursor: pointer; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--leaf); }
+.tab:hover { color: var(--ink); }
+
+main { max-width: 1200px; margin: 0 auto; padding-block: 24px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.view { display: grid; gap: 24px; }
+.split { display: grid; gap: 24px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .split { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } .split.phone-split { grid-template-columns: 400px minmax(0, 1fr); } }
+.split > * { min-width: 0; }
+.stack { display: grid; gap: 16px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.between { justify-content: space-between; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; }
+.panel.flat { background: transparent; border: 0; padding: 0; }
+.lede { font-size: 17px; max-width: 62ch; color: var(--muted); }
+
+/* Buttons and pills */
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--leaf); border-color: var(--leaf); color: var(--on-leaf); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.danger { color: var(--bad); }
+.btn.block { width: 100%; justify-content: center; padding-block: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; filter: none; }
+.btn.chip { padding: 5px 10px; font-size: 12.5px; font-family: var(--f-mono); font-weight: 500; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 99px; white-space: nowrap; background: var(--sunk); color: var(--muted); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+
+label.f { display: grid; gap: 5px; font-size: 13px; font-weight: 600; }
+label.f span.hint { font-weight: 400; color: var(--muted); }
+.in { width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+textarea.in { min-height: 72px; resize: vertical; }
+
+/* Overview */
+.hero { display: grid; gap: 14px; padding-block: 8px 4px; }
+.hero h1 em { font-style: normal; color: var(--leaf); }
+.models { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.model-card { display: grid; gap: 12px; align-content: start; }
+.terms { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 14px; margin: 0; }
+.terms dt { color: var(--muted); }
+.terms dd { margin: 0; font-weight: 600; }
+.modules { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.module { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 6px; align-content: start; background: var(--surface); cursor: pointer; text-align: left; }
+.module:hover { border-color: var(--leaf); }
+.module .go { color: var(--leaf); font-weight: 600; font-size: 13px; }
+.journey { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: j; }
+.journey li { counter-increment: j; display: grid; grid-template-columns: 34px 1fr; gap: 12px; padding-block: 10px; border-top: 1px solid var(--line); }
+.journey li::before { content: counter(j); font-family: var(--f-mono); font-size: 13px; width: 26px; height: 26px; border-radius: 50%; background: var(--leaf-soft); color: var(--leaf); display: grid; place-items: center; }
+.callout { border-left: 3px solid var(--sun); background: var(--sun-soft); padding: 14px 16px; border-radius: 0 var(--r) var(--r) 0; display: grid; gap: 8px; }
+
+/* Phone */
+.phone { width: 100%; max-width: 400px; border: 10px solid var(--bezel); border-radius: 34px; background: var(--bg); overflow: hidden; margin-inline: auto; }
+.screen { padding: 14px 14px 20px; display: grid; gap: 14px; min-height: 640px; align-content: start; }
+.ph-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.hello { font-family: var(--f-display); font-size: 20px; font-weight: 700; }
+.ph-block { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.big { font-family: var(--f-mono); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; }
+.ticks { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.ticks li::before { content: "✓"; color: var(--leaf); font-weight: 700; margin-right: 8px; }
+.meter { height: 10px; border-radius: 99px; background: var(--sunk); overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--leaf); border-radius: inherit; }
+.meter.sun > i { background: var(--sun); }
+.ladder { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; align-items: end; height: 64px; }
+.ladder i { display: block; border-radius: 4px 4px 0 0; background: var(--sunk); }
+.ladder i.done { background: var(--leaf-soft); }
+.ladder i.on { background: var(--leaf); }
+.ladder-lbl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); text-align: center; }
+.due { border-radius: 10px; padding: 10px 12px; background: var(--sunk); display: grid; gap: 8px; }
+.due.bad { background: var(--bad-soft); }
+.txns { list-style: none; margin: 0; padding: 0; display: grid; }
+.txns li { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding-block: 9px; border-top: 1px solid var(--line); font-size: 13.5px; }
+.txns li .amt { font-family: var(--f-mono); text-align: right; }
+.txns li .sub { font-size: 12px; color: var(--muted); }
+
+/* SmartCare card */
+.kcard { position: relative; aspect-ratio: 1.586; max-width: 100%; border-radius: 14px; padding: 16px 18px; color: var(--card-ink); overflow: hidden;
+  background: radial-gradient(120% 90% at 100% 0%, rgba(240,191,76,.28), transparent 55%), repeating-linear-gradient(118deg, rgba(255,255,255,.035) 0 14px, transparent 14px 30px), linear-gradient(150deg, var(--card-a), var(--card-b));
+  display: grid; grid-template-rows: auto 1fr auto; box-shadow: 0 10px 24px -14px rgba(0,0,0,.55); }
+.kcard .k-head { display: flex; justify-content: space-between; align-items: center; }
+.kcard .k-name { font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+.kcard .k-name b { color: var(--card-sun); }
+.kcard .k-chip { width: 38px; height: 28px; border-radius: 6px; background: linear-gradient(135deg, var(--card-sun), #D49A26); align-self: center; }
+.kcard .k-num { font-family: var(--f-mono); font-size: 18px; letter-spacing: .08em; }
+.kcard .k-foot { display: flex; justify-content: space-between; align-items: end; gap: 8px; font-size: 12px; }
+.kcard .k-foot .lbl { opacity: .7; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.kcard .k-state { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; background: rgba(0,0,0,.28); }
+
+/* Rules panel */
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rules li { display: grid; gap: 2px; padding-left: 14px; border-left: 2px solid var(--line); }
+.rules li b { font-weight: 600; }
+.try { background: var(--leaf-soft); border-radius: var(--r); padding: 12px 14px; font-size: 14px; display: grid; gap: 6px; }
+
+/* POS */
+.cat { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.sku { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 10px; text-align: left; cursor: pointer; display: grid; gap: 4px; align-content: start; }
+.sku:hover { border-color: var(--leaf); }
+.sku .nm { font-size: 13.5px; font-weight: 600; line-height: 1.3; }
+.sku .pr { font-family: var(--f-mono); font-size: 13px; }
+.tag { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--leaf); }
+.tag.no { color: var(--muted); }
+.cart { list-style: none; margin: 0; padding: 0; display: grid; }
+.cart li { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding-block: 8px; border-top: 1px solid var(--line); font-size: 14px; }
+.qty { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); }
+.qty button { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.tot { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; font-size: 14px; }
+.tot .v { font-family: var(--f-mono); text-align: right; }
+.tot .grand { font-weight: 700; font-size: 16px; border-top: 1px solid var(--line); padding-top: 8px; }
+.member-strip { display: grid; gap: 8px; padding: 12px 14px; border-radius: var(--r); background: var(--sunk); }
+.receipt { font-family: var(--f-mono); font-size: 12.5px; background: var(--surface); border: 1px dashed var(--muted); border-radius: 6px; padding: 14px; display: grid; gap: 4px; }
+.receipt .r { display: flex; justify-content: space-between; gap: 10px; }
+.receipt hr { border: 0; border-top: 1px dashed var(--line); width: 100%; margin: 4px 0; }
+
+/* Ops */
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: grid; gap: 4px; }
+.kpi .v { font-family: var(--f-mono); font-size: 22px; font-weight: 500; }
+.queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.queue button { width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: grid; gap: 4px; }
+.queue button[aria-current="true"] { border-color: var(--leaf); box-shadow: inset 3px 0 0 var(--leaf); }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; }
+.checks li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding-block: 9px; border-top: 1px solid var(--line); font-size: 14px; }
+.ic { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.ic.ok { background: var(--ok-soft); color: var(--ok); }
+.ic.todo { background: var(--warn-soft); color: var(--warn); }
+.ic.bad { background: var(--bad-soft); color: var(--bad); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th, table.t td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table.t th { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--sunk); }
+table.t td.n, table.t th.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+table.t tr:last-child td { border-bottom: 0; }
+table.t tr.strong td { font-weight: 700; }
+table.t td.neg { color: var(--bad); }
+
+/* Model */
+.form-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+legend { padding: 0; margin-bottom: 8px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg label { padding: 8px 12px; font-size: 13.5px; cursor: pointer; display: flex; gap: 6px; align-items: center; }
+.seg label:has(input:checked) { background: var(--leaf-soft); color: var(--leaf); font-weight: 600; }
+.seg input { accent-color: var(--leaf); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 120px 1fr 92px; gap: 10px; align-items: center; font-size: 13.5px; }
+.bar .track { height: 14px; background: var(--sunk); border-radius: 4px; overflow: hidden; }
+.bar .track i { display: block; height: 100%; border-radius: 4px; }
+.bar .v { font-family: var(--f-mono); text-align: right; font-size: 13px; }
+.grid-sens td.cell { text-align: right; font-family: var(--f-mono); }
+.grid-sens td.pos { background: var(--ok-soft); color: var(--ok); }
+.grid-sens td.neg { background: var(--bad-soft); color: var(--bad); }
+.grid-sens td.here { outline: 2px solid var(--ink); outline-offset: -2px; font-weight: 700; }
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.findings li { display: grid; grid-template-columns: 8px 1fr; gap: 12px; }
+.findings li::before { content: ""; border-radius: 4px; background: var(--sun); }
+.findings li.bad::before { background: var(--bad); }
+.findings li.ok::before { background: var(--ok); }
+.findings b { display: block; margin-bottom: 2px; }
+
+/* Rollout */
+.phases { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.phase { display: grid; gap: 10px; align-content: start; }
+.phase .when { font-family: var(--f-mono); font-size: 12.5px; color: var(--leaf); font-weight: 500; }
+.phase ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.lic { list-style: none; margin: 0; padding: 0; display: grid; }
+.lic li { border-top: 1px solid var(--line); padding-block: 10px; }
+.lic label { display: grid; grid-template-columns: 22px 1fr; gap: 10px; cursor: pointer; }
+.lic input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--leaf); }
+.lic li:has(input:checked) b { text-decoration: line-through; color: var(--muted); }
+
+/* Plans */
+.plans { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.plan-tile { gap: 8px; align-content: start; }
+.plans.tiers { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.paygrid { display: grid; grid-template-columns: auto auto 1fr; gap: 4px 12px; font-size: 13.5px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); }
+.paygrid .gets { color: var(--leaf); text-align: right; }
+.plan-tile .per { font-size: 14px; color: var(--muted); }
+.tag.offer { color: var(--sun); }
+.cell-in { width: 120px; text-align: right; padding: 6px 8px; }
+.per { font-size: 14px; color: var(--muted); font-family: var(--f-body); letter-spacing: 0; }
+.paycode { font-family: var(--f-mono); font-size: 30px; letter-spacing: .14em; text-align: center; padding: 10px; border: 1px dashed var(--muted); border-radius: 10px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--leaf); }
+.paid-by { display: grid; gap: 6px; padding: 12px; border-radius: 8px; background: var(--sunk); }
+
+/* How it works and loans */
+.how-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.how-step { gap: 8px; align-content: start; }
+.step-n { width: 30px; height: 30px; border-radius: 50%; background: var(--leaf); color: var(--on-leaf); display: grid; place-items: center; font-family: var(--f-mono); font-size: 14px; }
+.faq { display: grid; }
+.faq details { border-top: 1px solid var(--line); padding-block: 10px; }
+.faq summary { cursor: pointer; font-weight: 600; font-size: 14.5px; }
+.faq details p { margin-top: 6px; }
+table.t.wrap td { white-space: normal; min-width: 140px; }
+.score { display: grid; gap: 8px; padding: 12px; border-radius: 8px; background: var(--sunk); }
+.score .bars { gap: 2px; }
+.score-why { margin: 0 0 6px; }
+.bad-callout { border-left-color: var(--bad); background: var(--bad-soft); }
+input[type="range"] { width: 100%; accent-color: var(--leaf); }
+
+/* One card and food */
+.onecard { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.feat { gap: 6px; align-content: start; }
+.names-en { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); align-items: start; }
+.name-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.name-list li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: start; padding-block: 8px; border-top: 1px solid var(--line); }
+.star { border: 0; background: none; font-size: 18px; line-height: 1; color: var(--sun); cursor: pointer; padding: 2px; }
+table.t.inv td:nth-child(5) { min-width: 260px; }
+table.t.inv select.in { min-width: 140px; padding: 6px 8px; }
+.btn.chip[aria-pressed="true"] { background: var(--leaf); color: var(--on-leaf); border-color: var(--leaf); }
+.tag.ug { color: var(--ink); background: var(--sun-soft); padding: 1px 5px; border-radius: 4px; }
+.target { position: relative; height: 14px; border-radius: 99px; background: var(--sunk); }
+.target > i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; background: var(--leaf); }
+.target > b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.target-lbl { position: relative; height: 16px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); }
+.target-lbl span { position: absolute; transform: translateX(-50%); }
+
+/* Investors */
+.adv { display: grid; gap: 12px; align-content: start; }
+.adv h4 { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.adv .claim { font-size: 15px; }
+.adv .ask { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 6px; font-size: 14px; }
+.figs { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; padding: 10px 12px; border-radius: 8px; background: var(--sunk); }
+.figs .v { font-family: var(--f-mono); text-align: right; }
+.figs .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 4px; }
+.stages { list-style: none; margin: 0; padding: 0; display: grid; }
+.stages li { display: grid; grid-template-columns: minmax(110px, 160px) 1fr; gap: 4px 16px; padding-block: 12px; border-top: 1px solid var(--line); }
+.stages li b { font-family: var(--f-display); }
+@media (max-width: 520px) { .stages li { grid-template-columns: 1fr; } }
+
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); z-index: 20; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+@media (max-width: 520px) { .bar { grid-template-columns: 92px 1fr 76px; } .screen { min-height: 0; } }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand-row">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>Kibanja SmartCare <small id="brand-sub">platform prototype</small></span></div>
+      <button class="btn chip" data-a="reset" data-mode="platform" title="Put every example household back to its starting state">Reset demo</button>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Platform views">
+      <button class="tab" role="tab" data-a="tab" data-v="overview" data-mode="platform">Overview</button>
+      <button class="tab" role="tab" data-a="tab" data-v="how" data-mode="platform">How it works</button>
+      <button class="tab" role="tab" data-a="tab" data-v="member" data-mode="platform">Family app</button>
+      <button class="tab" role="tab" data-a="tab" data-v="pos" data-mode="platform">Store till</button>
+      <button class="tab" role="tab" data-a="tab" data-v="food" data-mode="platform">Food and producers</button>
+      <button class="tab" role="tab" data-a="tab" data-v="plans" data-mode="platform">Packages</button>
+      <button class="tab" role="tab" data-a="tab" data-v="loans" data-mode="platform">Kibanja Loan</button>
+      <button class="tab" role="tab" data-a="tab" data-v="ops" data-mode="platform">Operations</button>
+      <button class="tab" role="tab" data-a="tab" data-v="investors" data-mode="investors">Pitch</button>
+      <button class="tab" role="tab" data-a="tab" data-v="targets" data-mode="investors">Investors to approach</button>
+      <button class="tab" role="tab" data-a="tab" data-v="names" data-mode="investors">Name ideas</button>
+      <button class="tab" role="tab" data-a="tab" data-v="model">Underwriting</button>
+      <button class="tab" role="tab" data-a="tab" data-v="rollout" data-mode="platform">Rollout</button>
+    </nav>
+  </div>
+</header>
+<main id="main"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- build ---------- */
+// One source, two pages: the platform, and the investor pack that build-investor-pack.js makes by switching MODE.
+const MODE = 'platform';
+
+/* ---------- constants ---------- */
+const TODAY = '2026-10-22';            // demo date: every example household is dated against this
+const rungs = start => [1, 1.5, 2, 2.5, 3].map(x => Math.round(start * x)); // food credit grows to three times its start
+const TIER_KEYS = ['starter', 'solo', 'soloplus', 'familystart', 'family', 'familymax', 'staff', 'staffplus'];
+const GROUPS = [['individual', 'For individuals'], ['family', 'For families'], ['corporate', 'For employers']];
+const PROTECT_MONTHS = 3;   // after a verified shock, the household's package continues free for this many months
+const ORIGINAL = { weekly: 32000, monthly: 135000, annual: 1500000 }; // the original UGX 1.5M plan, still modelled on Underwriting
+const STAFF_VOLUME = [[200, 2], [50, 1]];   // extra bonus % for employers with at least this many staff
+const WAIT_DAYS = 90;
+const TYPES = { job: 'Job loss', medical: 'Hospital admission', drought: 'Drought in district' };
+const PLAN_KEYS = ['weekly', 'monthly', 'annual'];
+// local: made or grown in Uganda. Those lines earn double points.
+const SKUS = [
+  { sku: '3001', name: 'Kibanja Food Basket, family of 5, one month', price: 169000, ess: true, local: true },
+  { sku: '1001', name: 'Maize flour (posho) 2 kg', price: 7000, ess: true, local: true },
+  { sku: '1002', name: 'Rice, Super 5 kg', price: 24000, ess: true, local: true },
+  { sku: '1003', name: 'Dry beans 2 kg', price: 9600, ess: true, local: true },
+  { sku: '1004', name: 'Sugar 2 kg', price: 9000, ess: true, local: true },
+  { sku: '1005', name: 'Cooking oil 3 L', price: 21000, ess: true, local: true },
+  { sku: '1006', name: 'Iodised salt 1 kg', price: 1500, ess: true },
+  { sku: '1007', name: 'Fresh milk 1 L', price: 3000, ess: true, local: true },
+  { sku: '1008', name: 'Bar soap 1 kg', price: 6500, ess: true, local: true },
+  { sku: '1009', name: 'Wheat flour 2 kg', price: 8000, ess: true, local: true },
+  { sku: '1011', name: 'Tea leaves 500 g', price: 6000, ess: true, local: true },
+  { sku: '1012', name: 'Groundnuts 1 kg', price: 12000, ess: true, local: true },
+  { sku: '1013', name: 'Toilet paper, 10 rolls', price: 15000, ess: true, local: true },
+  { sku: '1010', name: 'Infant formula 400 g', price: 32000, ess: true },
+  // Bulk packs at bulk prices. shelf: what the same quantity costs in the small packs above.
+  { sku: '4001', name: 'Maize flour 25 kg bag', price: 75000, shelf: 87500, ess: true, local: true, bulk: true },
+  { sku: '4002', name: 'Rice 25 kg bag', price: 105000, shelf: 120000, ess: true, local: true, bulk: true },
+  { sku: '4003', name: 'Dry beans 10 kg', price: 42000, shelf: 48000, ess: true, local: true, bulk: true },
+  { sku: '4004', name: 'Cooking oil 10 L', price: 62000, shelf: 70000, ess: true, local: true, bulk: true },
+  { sku: '4005', name: 'Sugar 10 kg', price: 40000, shelf: 45000, ess: true, local: true, bulk: true },
+  { sku: '4006', name: 'Bar soap, carton of 10', price: 58000, shelf: 65000, ess: true, local: true, bulk: true },
+  { sku: '2001', name: 'Soda 500 ml', price: 2000, ess: false },
+  { sku: '2002', name: 'Beer 500 ml', price: 4500, ess: false },
+  { sku: '2003', name: 'Airtime voucher', price: 10000, ess: false },
+  { sku: '2004', name: 'Biscuits', price: 3500, ess: false },
+];
+// What goes into the Food Basket: [sku, quantity]. Its shelf value is what the same items cost one by one.
+const BASKET = [['1001', 5, 10, 'kg'], ['1003', 3, 6, 'kg'], ['1002', 1, 5, 'kg'], ['1005', 1, 3, 'L'], ['1004', 1, 2, 'kg'], ['1006', 1, 1, 'kg'], ['1009', 2, 4, 'kg'], ['1011', 1, 0.5, 'kg'], ['1012', 1, 1, 'kg'], ['1013', 1, 10, 'rolls'], ['1007', 8, 8, 'L'], ['1008', 1, 1, 'kg']];
+const BASKET_LOCKED_TO = '2027-01-31';
+const MARGIN = { ess: 0.12, other: 0.25 }; // assumed store gross margin: staples thin, extras fatter
+
+function seed() {
+  return {
+    // How often a household pays. bonus: extra shopping value added to every payment; paying further ahead earns more.
+    plans: {
+      weekly: { name: 'Weekly', per: 'week', perYear: 52, grace: 3, bonus: 1, disc: 0, pts: 1 },
+      monthly: { name: 'Monthly', per: 'month', perYear: 12, grace: 7, bonus: 3, disc: 0, pts: 1 },
+      annual: { name: 'Yearly', per: 'year', perYear: 1, grace: 14, bonus: 8, disc: 0, pts: 2 },
+    },
+    // Shopping packages. monthly: what the package costs a month (per employee for employers); the weekly and yearly
+    // prices follow from it. bonus: extra % on top of the frequency bonus. bundle: what a month buys at bulk prices.
+    tiers: {
+      starter: { name: 'Kibanja Card', group: 'individual', who: 'Free. Top up any amount and shop; no bonus', people: 1, free: true, monthly: 0, bonus: 0, bundle: [] },
+      solo: { name: 'Kibanja Solo', group: 'individual', who: 'Everyday shopping for one person', people: 1, monthly: 100000, bonus: 0,
+        bundle: [['1001', 3], ['1002', 1], ['1003', 1], ['1004', 1], ['1005', 1], ['1008', 1]] },
+      soloplus: { name: 'Kibanja Solo Plus', group: 'individual', who: 'For one person who shops more, or sends food home', people: 1, monthly: 200000, bonus: 1,
+        bundle: [['1001', 4], ['1002', 1], ['1003', 2], ['1004', 1], ['1005', 1], ['1008', 1], ['1007', 8]] },
+      familystart: { name: 'Kibanja Family Starter', group: 'family', who: 'A household of up to four', people: 4, monthly: 300000, bonus: 1,
+        bundle: [['4001', 1], ['4003', 1], ['4005', 1], ['1002', 2], ['1005', 1], ['1008', 2]] },
+      family: { name: 'Kibanja Family', group: 'family', who: 'A household of up to six', people: 6, monthly: 500000, bonus: 2,
+        bundle: [['4001', 1], ['4002', 1], ['4003', 1], ['4004', 1], ['4005', 1], ['4006', 1], ['1007', 20]] },
+      familymax: { name: 'Kibanja Family Max', group: 'family', who: 'Big and extended households, bought in bulk', people: 10, monthly: 1000000, bonus: 3,
+        bundle: [['4001', 2], ['4002', 2], ['4003', 2], ['4004', 1], ['4005', 2], ['4006', 1], ['1007', 30]] },
+      staff: { name: 'Kibanja Staff', group: 'corporate', who: 'An employer buys a monthly food package for every employee', people: 4, minStaff: 10, monthly: 150000, bonus: 3,
+        bundle: [['4001', 1], ['1002', 1], ['1003', 2], ['1005', 1], ['1004', 1]] },
+      staffplus: { name: 'Kibanja Staff Plus', group: 'corporate', who: 'A bigger food benefit per employee, family-sized', people: 6, minStaff: 10, monthly: 300000, bonus: 3,
+        bundle: [['4001', 1], ['4003', 1], ['4005', 1], ['1002', 2], ['1005', 1], ['1008', 2]] },
+    },
+    // Points: earned per UGX 100 paid (rate set per plan), each worth `value` shillings, spendable from `threshold` points.
+    loyalty: { value: 1, threshold: 5000 },
+    promos: [
+      { id: 'P1', sku: '1012', pct: 10, name: 'Groundnut harvest offer', funder: 'Kibanja', on: true },
+      { id: 'P2', sku: '1005', pct: 8, name: 'Cooking oil offer', funder: 'Supplier', on: true },
+    ],
+    members: [
+      { id: 'KSC-0001', income: 1800000, points: 3420, card: '6201 4410 0001', name: 'Nakato', area: 'Kira', size: 5, enrolled: '2026-03-02', wallet: 412000,
+        sub: { tier: 'family', plan: 'monthly', paidUntil: '2026-11-02', start: '2026-03-02' }, cover: 'none', spend: { ess: 2900000, all: 3000000 },
+        credit: { rung: 0, used: 120000, onTime: 1, due: '2026-11-02', dueAmt: 120000, overdue: false } },
+      { id: 'KSC-0002', income: 2400000, points: 7880, card: '6201 4410 0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, enrolled: '2026-01-15', wallet: 268000,
+        sub: { tier: 'family', plan: 'monthly', paidUntil: '2026-11-15', start: '2026-01-15' }, cover: 'none', spend: { ess: 9600000, all: 10000000 },
+        credit: { rung: 1, used: 210000, onTime: 2, due: '2026-11-15', dueAmt: 210000, overdue: false } },
+      { id: 'KSC-0003', income: 1100000, points: 5210, card: '6201 4410 0003', name: 'Achieng', area: 'Naalya', size: 4, enrolled: '2025-12-10', wallet: 12000,
+        sub: { tier: 'familystart', plan: 'monthly', paidUntil: '2026-11-10', start: '2025-12-10' }, cover: 'active', spend: { ess: 4100000, all: 4300000 },
+        allowance: { activated: '2026-09-14', month: 120000, total: 420000 },
+        credit: { rung: 0, used: 90000, onTime: 2, due: '2026-09-10', dueAmt: 90000, overdue: false } },
+      { id: 'KSC-0004', income: 900000, points: 960, card: '6201 4410 0004', name: 'Okello', area: 'Ntinda', size: 3, enrolled: '2026-04-20', wallet: 0,
+        sub: { tier: 'familystart', plan: 'weekly', paidUntil: '2026-10-15', start: '2026-04-20' }, cover: 'none', spend: { ess: 2840000, all: 4000000 },
+        credit: { rung: 0, used: 140000, onTime: 0, due: '2026-10-05', dueAmt: 140000, overdue: true } },
+      { id: 'KSC-0005', income: 400000, points: 2150, card: '6201 4410 0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 7, enrolled: '2026-05-30', wallet: 150000,
+        sub: { tier: 'familystart', plan: 'monthly', paidUntil: '2026-10-30', start: '2026-05-30' }, cover: 'review', spend: { ess: 900000, all: 950000 },
+        credit: { rung: 0, used: 60000, onTime: 1, due: '2026-10-30', dueAmt: 60000, overdue: false } },
+      { id: 'KSC-0006', income: 700000, points: 2600, card: '6201 4410 0006', name: 'Mugisha', area: 'Bweyogerere', size: 1, enrolled: '2026-02-10', wallet: 22000,
+        sub: { tier: 'solo', plan: 'weekly', paidUntil: '2026-10-27', start: '2026-02-10' }, cover: 'none', spend: { ess: 1530000, all: 1800000 },
+        credit: { rung: 0, used: 20000, onTime: 2, due: '2026-10-27', dueAmt: 20000, overdue: false } },
+      { id: 'KSC-0007', income: 350000, points: 800, card: '6201 4410 0007', name: 'Auma', area: 'Kawempe', size: 3, enrolled: '2026-09-20', wallet: 30000,
+        sub: { tier: 'starter', plan: 'monthly', paidUntil: '2099-12-31', start: '2026-09-20' }, cover: 'none', spend: { ess: 160000, all: 190000 },
+        credit: { rung: 0, used: 0, onTime: 0, due: null, dueAmt: 0, overdue: false } },
+      { id: 'KSC-0008', income: 1200000, points: 1900, card: '6201 4410 0008', name: 'Kato', area: 'Mukono', size: 4, enrolled: '2026-07-01', wallet: 96000,
+        sub: { tier: 'staff', plan: 'monthly', paidUntil: '2026-11-01', start: '2026-07-01', payer: 'Lakeside Packers Ltd (example employer)' }, cover: 'none', spend: { ess: 560000, all: 590000 },
+        credit: { rung: 0, used: 0, onTime: 0, due: null, dueAmt: 0, overdue: false } },
+    ],
+    // Store sales this month, for the Ugandan-made share. Every till sale adds to it.
+    sales: { local: 2350000, all: 5120000 },
+    // Partner names marked as examples are placeholders for the kind of partner, not real agreements.
+    partners: [
+      { id: 'MIU', name: 'Made in Uganda (MIU)', kind: 'Retail and marketplace platform', supplies: 'Ugandan-made food, household and personal care goods from many manufacturers and SMEs', terms: 'Proposed: SmartCare accepted at MIU outlets, MIU goods in Kibanja stores and baskets, MIU fulfilment for micro-hubs', status: 'Proposed' },
+      { id: 'PR1', name: 'Maize growers\' cooperative (example)', kind: 'Producer', supplies: 'Maize grain for flour', terms: 'Three-month forward order, paid within 48 hours of delivery, farm-input loans repaid in grain', status: 'Example' },
+      { id: 'PR2', name: 'Groundnut and bean growers (example)', kind: 'Producer', supplies: 'Groundnuts, beans', terms: 'Weekly orders sized from member demand, paid by Mobile Money', status: 'Example' },
+      { id: 'PR3', name: 'Dairy cooperative (example)', kind: 'Producer', supplies: 'Fresh milk', terms: 'Daily collection for Kampala stores and hubs', status: 'Example' },
+      { id: 'MF1', name: 'Flour mill (example)', kind: 'Manufacturer', supplies: 'Maize flour, packed for the Food Basket', terms: 'Price locked for the basket period, no shelf fees', status: 'Example' },
+      { id: 'MF2', name: 'Edible oil and soap maker (example)', kind: 'Manufacturer', supplies: 'Cooking oil, bar soap', terms: 'Funds member offers in exchange for guaranteed volume', status: 'Example' },
+    ],
+    claims: [
+      { id: 'CLM-0141', member: 'KSC-0005', type: 'job', filed: '2026-10-19', status: 'pending',
+        note: 'Main earner laid off when the garment factory closed its second shift.',
+        checks: [
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '142 days of continuous cover' },
+          { t: 'Termination letter on file', r: 'ok' },
+          { t: 'NSSF contributions stopped', r: 'ok', d: 'Last contribution: Aug 2026' },
+          { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on the number in the letter, not the one the member gave' },
+          { t: 'No other claim this policy year', r: 'ok' },
+        ] },
+      { id: 'CLM-0138', member: 'KSC-0003', type: 'medical', filed: '2026-08-09', status: 'approved', decided: '2026-08-14',
+        note: 'Mother admitted for surgery; off work for at least four months.',
+        checks: [
+          { t: 'Waiting period passed (90 days)', r: 'ok', d: '242 days of continuous cover' },
+          { t: 'Admission note on file', r: 'ok' },
+          { t: 'Partner hospital confirms admission', r: 'ok' },
+          { t: 'No other claim this policy year', r: 'ok' },
+        ] },
+    ],
+    loans: [
+      { id: 'LN-0007', m: 'KSC-0002', product: 'business', amount: 1500000, n: 6, period: 'month', rate: 2.5, applied: '2026-07-28', start: '2026-08-01', paid: 2, status: 'active' },
+      { id: 'LN-0005', m: 'KSC-0004', product: 'boda', amount: 4800000, n: 104, period: 'week', rate: 2.5, applied: '2026-04-28', start: '2026-05-04', paid: 20, status: 'active' },
+    ],
+    // smart: paid by the card (points, allowance, wallet or credit); mm: paid by Mobile Money
+    txns: [
+      { d: '2026-10-20', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 286000, mm: 0, items: 9 },
+      { d: '2026-10-12', m: 'KSC-0003', where: 'Partner store · Naalya', smart: 412500, mm: 9000, items: 14 },
+      { d: '2026-10-18', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 204500, mm: 0, items: 7 },
+      { d: '2026-10-15', m: 'KSC-0002', where: 'Family, monthly · Mobile Money', smart: 0, mm: 500000, items: 0, via: '+ 525,000 to spend' },
+      { d: '2026-10-03', m: 'KSC-0002', where: 'Partner store · Kisaasi', smart: 355000, mm: 0, items: 11 },
+      { d: '2026-10-08', m: 'KSC-0004', where: 'Family Starter, weekly · Mobile Money', smart: 0, mm: 69000, items: 0, via: '+ 70,380 to spend' },
+      { d: '2026-09-28', m: 'KSC-0004', where: 'Partner store · Ntinda', smart: 240000, mm: 31000, items: 8 },
+      { d: '2026-09-30', m: 'KSC-0005', where: 'Family Starter, monthly · Mobile Money', smart: 0, mm: 300000, items: 0, via: '+ 312,000 to spend' },
+      { d: '2026-10-11', m: 'KSC-0005', where: 'Wallet top-up · Mobile Money', smart: 0, mm: 150000, items: 0 },
+      { d: '2026-10-17', m: 'KSC-0001', where: 'Kibanja Store · Kira', smart: 61750, mm: 0, items: 6 },
+      { d: '2026-10-02', m: 'KSC-0001', where: 'Family, monthly · Mobile Money', smart: 0, mm: 500000, items: 0, via: '+ 525,000 to spend' },
+      { d: '2026-10-01', m: 'KSC-0008', where: 'Kibanja Staff · paid by employer', smart: 0, mm: 150000, items: 0, via: '+ 159,000 to spend' },
+      { d: '2026-10-20', m: 'KSC-0006', where: 'Solo, weekly · Mobile Money', smart: 0, mm: 23000, items: 0, via: '+ 23,230 to spend' },
+      { d: '2026-10-19', m: 'KSC-0006', where: 'Kibanja Store · Kira', smart: 18400, mm: 0, items: 4 },
+      { d: '2026-10-14', m: 'KSC-0007', where: 'Wallet top-up · Mobile Money', smart: 0, mm: 50000, items: 0 },
+    ],
+  };
+}
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ugx = n => 'UGX ' + Math.round(n).toLocaleString('en-US');
+const trim2 = x => String(Math.round(x * 100) / 100);
+const short = n => { const a = Math.abs(n), s = n < 0 ? '−' : ''; if (a >= 1e9) return s + trim2(a / 1e9) + 'B'; if (a >= 1e6) return s + trim2(a / 1e6) + 'M'; if (a >= 1e3) return s + trim2(a / 1e3) + 'k'; return s + Math.round(a); };
+const pct = x => trim2(x * 100) + '%';
+// Dates are plain calendar days, so all arithmetic is done in UTC: local-time Date maths shifts a day east of Greenwich.
+const isoOf = d => d.toISOString().slice(0, 10);
+const utc = s => new Date(s + 'T00:00:00Z');
+const fdate = s => utc(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const days = (a, b) => Math.round((utc(b) - utc(a)) / 864e5);
+const addDays = (s, n) => { const d = utc(s); d.setUTCDate(d.getUTCDate() + n); return isoOf(d); };
+const addMonths = (s, n) => { const d = utc(s); d.setUTCMonth(d.getUTCMonth() + n); return isoOf(d); };
+const nextPeriod = (s, plan) => plan === 'weekly' ? addDays(s, 7) : addMonths(s, plan === 'monthly' ? 1 : 12);
+const priceFor = (k, f) => { const t = S.tiers[k]; if (t.free) return 0; return f === 'weekly' ? Math.round(t.monthly * 12 / 52 / 500) * 500 : f === 'monthly' ? t.monthly : t.monthly * 12; };
+const bonusPct = (k, f, staff = 0) => S.tiers[k].free ? 0 : S.plans[f].bonus + S.tiers[k].bonus + ((STAFF_VOLUME.find(([n]) => staff >= n) || [0, 0])[1]);
+const valueFor = (k, f, staff) => Math.round(priceFor(k, f) * (1 + bonusPct(k, f, staff) / 100));
+const yearCost = (t, f) => priceFor(t, f) * S.plans[f].perYear;
+const bundleOf = k => (S.tiers[k].bundle || []).map(([sku, q]) => { const x = SKUS.find(y => y.sku === sku); return { ...x, q, cost: x.price * q, shelfCost: (x.shelf || x.price) * q }; });
+const tierOf = m => S.tiers[m.sub.tier];
+const priceOf = m => priceFor(m.sub.tier, m.sub.plan);
+const planLabel = m => tierOf(m).free ? tierOf(m).name : `${tierOf(m).name}, ${S.plans[m.sub.plan].name.toLowerCase()}`;
+const capOf = m => tierOf(m).monthly;            // Package Protection pays the package's monthly value, for essentials
+const limitOf = m => capOf(m) * PROTECT_MONTHS;
+const ladderOf = m => tierOf(m).free ? [] : rungs(tierOf(m).monthly / 2); // food credit starts at half a month of the package
+const earnRate = m => tierOf(m).free ? 1 : S.plans[m.sub.plan].pts;
+const store = { get(k, f) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+let S = seed();
+const ui = { invFilter: 'all', corp: { staff: 40, pkg: 'staff', freq: 'monthly' }, uptake: 60, floatYield: 10, usePoints: false, payCode: null, loanAs: 'KSC-0001', loanBook: 'food', loanDraft: { food: { product: 'farm', amount: 500000, n: 4 }, move: { product: 'boda', amount: 2500000, n: 104 } }, view: 'overview', viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' };
+const M0 = { fam: [1000, 5000, 15000], mixW: 0, mixM: 0, discPct: 0, ptsPct: 0, spend: 10, rebatePct: 6, feePct: 2.5, creditShare: 96, claimRate: 4, avgDraw: 20, limit: 50, ops: [350, 1100, 2500], lossPct: 0, cofPct: 0 };
+const M = JSON.parse(JSON.stringify(M0));
+const PLAN_NET = [1.2e9, 6.65e9, 20.75e9]; // net margin in the original three-year table
+const licences = store.get('ksc-licences', {});
+const dataroom = store.get('ksc-dataroom', {});
+
+const member = id => S.members.find(m => m.id === id);
+const hh = m => m.name + ' household';
+const essShare = sp => sp.all ? sp.ess / sp.all : 1;
+
+// Is the household's plan paid? A missed payment keeps cover through the plan's grace days, then pauses it.
+function cover(m) {
+  const p = S.plans[m.sub.plan];
+  if (tierOf(m).free || TODAY <= m.sub.paidUntil) return { s: 'paid', p };
+  return { s: days(m.sub.paidUntil, TODAY) <= p.grace ? 'due' : 'lapsed', p };
+}
+function coverPill(m) {
+  const c = cover(m);
+  if (tierOf(m).free) return '<span class="pill">Kibanja Card · free</span>';
+  return { paid: `<span class="pill ok">${m.sub.payer ? 'Paid by employer' : c.p.name + ' · paid'}</span>`, due: `<span class="pill warn">${c.p.name} payment due</span>`, lapsed: '<span class="pill bad">Cover paused</span>' }[c.s];
+}
+
+function emergencyPill(m) {
+  if (tierOf(m).free) return '<span class="pill">No Package Protection</span>';
+  if (m.cover === 'review') return '<span class="pill warn">Claim under review</span>';
+  if (m.cover === 'active') return '<span class="pill ok">Package Protection paying</span>';
+  return days(m.sub.start, TODAY) < WAIT_DAYS ? '<span class="pill">Protection in waiting period</span>' : '<span class="pill ok">Package Protection ready</span>';
+}
+function creditPill(m) {
+  if (tierOf(m).free) return '<span class="pill">No food credit</span>';
+  if (m.cover === 'active') return '<span class="pill">Credit frozen during emergency</span>';
+  return m.credit.overdue ? '<span class="pill bad">Repayment overdue</span>' : '<span class="pill ok">Credit in good standing</span>';
+}
+
+// Everything the card can pay with right now. The till spends them in this order: points (if chosen), allowance, wallet, credit.
+function sources(m) {
+  const c = cover(m), live = c.s !== 'lapsed', notes = [], cr = m.credit;
+  let allowance = 0, credit = 0;
+  if (m.cover === 'active') {
+    const a = m.allowance, cap = capOf(m);
+    if (TODAY >= addMonths(a.activated, PROTECT_MONTHS)) notes.push('Package Protection has ended.');
+    else if (live) allowance = Math.max(0, Math.min(cap - a.month, limitOf(m) - a.total));
+    notes.push('Food credit is frozen while the emergency allowance runs: no new credit, no repayments due.');
+  } else {
+    if (m.cover === 'review') notes.push('Emergency claim under review.');
+    if (cr.overdue) notes.push('Food credit paused until the overdue repayment is made.');
+    else if (live && ladderOf(m).length) credit = Math.max(0, ladderOf(m)[cr.rung] - cr.used);
+  }
+  if (!live) notes.push(`Cover paused: the ${c.p.name.toLowerCase()} payment was due ${fdate(m.sub.paidUntil)}. Allowance, credit and the member discount stop until it is paid. The wallet still works.`);
+  const pointsValue = m.points * S.loyalty.value, pointsUsable = m.points >= S.loyalty.threshold && S.loyalty.value > 0;
+  if (tierOf(m).free) notes.push('Kibanja Card: shopping balance and points. A package adds bonus value, Package Protection and food credit.');
+  return { allowance, credit, wallet: m.wallet, disc: live && !tierOf(m).free ? c.p.disc : 0, live, notes, pointsValue, pointsUsable,
+    total: allowance + credit + m.wallet + (pointsUsable ? pointsValue : 0) };
+}
+
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 3200); }
+
+/* ---------- views ---------- */
+const V = {};
+
+function tierTile(k) {
+  const t = S.tiers[k];
+  if (t.free) return `<article class="panel plan-tile">
+    <div class="row between"><h3>${t.name}</h3><span class="pill">Free</span></div>
+    <div class="big">UGX 0</div>
+    <p class="small muted">The card and the app, free. Top up any amount from Mobile Money and shop for anything. Earns points; no bonus. Move to a package any time.</p>
+  </article>`;
+  const items = bundleOf(k), cost = items.reduce((a, i) => a + i.cost, 0), shelf = items.reduce((a, i) => a + i.shelfCost, 0);
+  const monthValue = valueFor(k, 'monthly'), per = t.group === 'corporate' ? ' per employee' : '';
+  return `<article class="panel plan-tile">
+    <div class="row between"><h3>${t.name}</h3><span class="pill">${t.group === 'corporate' ? `from ${t.minStaff} staff` : t.people === 1 ? '1 person' : `up to ${t.people} people`}</span></div>
+    <p class="small muted">${t.who}.</p>
+    <div class="paygrid">
+      ${PLAN_KEYS.map(f => `<span>${S.plans[f].name}</span><span class="num">${ugx(priceFor(k, f))}</span><span class="num gets">→ ${valueFor(k, f).toLocaleString('en-US')} to spend</span>`).join('')}
+    </div>
+    <p class="small"><b>A month buys</b> ${items.map(i => `${i.q > 1 ? i.q + '× ' : ''}${esc(i.name)}`).join(', ')}, for ${ugx(cost)}${shelf > cost ? `, ${ugx(shelf - cost)} less than in small packs` : ''}. That leaves <b class="num">${ugx(monthValue - cost)}</b>${per} for anything else in the store.</p>
+  </article>`;
+}
+
+function packageGroups() {
+  return GROUPS.map(([g, label]) => `<section class="stack"><h3>${label}</h3><div class="plans tiers">${TIER_KEYS.filter(k => S.tiers[k].group === g).map(tierTile).join('')}</div></section>`).join('');
+}
+
+V.overview = () => `
+<section class="hero">
+  <span class="eyebrow">Food security for Kampala households</span>
+  <h1>Pay weekly, monthly or yearly. <em>Shop for what you want.</em></h1>
+  <p class="lede">Buy a Kibanja package and the money, plus a bonus, lands on your card as a shopping balance. Walk into the supermarket and buy what you want, with no cash. Packages for individuals, families and employers, with bulk staples at prices a single shopper can't get. The platform below is the whole operation: the family's app, the store till that reads the card, plans and discounts, the desk that verifies emergencies, and the model that says whether the money adds up.</p>
+</section>
+
+<section class="stack">
+  <div class="row between"><h2>Shopping packages</h2><button class="btn chip" data-a="tab" data-v="plans">Edit packages</button></div>
+  <p class="muted" style="max-width:72ch">Pay weekly, monthly or yearly. Every payment adds its value plus a bonus to your shopping balance: ${PLAN_KEYS.map(f => `${S.plans[f].bonus}% ${S.plans[f].name.toLowerCase()}`).join(', ')}, more on bigger packages. Spend it on anything in the store.</p>
+  ${packageGroups()}
+</section>
+
+<section class="stack">
+  <h2>One card, everything a household needs</h2>
+  <div class="onecard">
+    <article class="panel feat"><h3>Food credit line</h3><p class="small">Run short before the next payment? Shop essentials on credit, up to half a month of your package to start, repaid with your next payment.</p></article>
+    <article class="panel feat"><h3>Package Protection</h3><p class="small">If the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and credit repayments freeze.</p></article>
+    <article class="panel feat"><h3>Shopping balance and points</h3><p class="small">Package payments and top-ups land here and pay for anything. Every payment earns points; Ugandan-made goods earn double.</p></article>
+    <article class="panel feat"><h3>Food Basket</h3><p class="small">A month of staples for a family of five at a locked price, bought straight from Ugandan producers.</p></article>
+    <article class="panel feat"><h3>Kibanja Loan</h3><p class="small">Farm inputs, poultry, storage, food-trade stock, motorcycles and fuel, sized to what the household can repay.</p></article>
+  </div>
+  <p class="muted" style="max-width:72ch">In the financial plan about 96% of households use the card mainly as a food credit line, and roughly 4% a year are hit by a shock and draw the emergency allowance, budgeted at an average of UGX 20M paid as capped monthly amounts. Both are on every card; the household doesn't choose between them.</p>
+</section>
+
+<section class="stack">
+  <h2>The platform, screen by screen</h2>
+  <div class="modules">
+    <button class="module" data-a="tab" data-v="how"><h4>How it works</h4><span class="muted small">The six steps for a family, where every shilling is held, who does what, and common questions.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="member"><h4>Family app</h4><span class="muted small">The one card: plan payments, food credit, emergency claims, wallet, points, loans, spending history.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="pos"><h4>Store till</h4><span class="muted small">The cashier scans the card and the whole basket is paid without cash, with discounts applied.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="plans"><h4>Packages</h4><span class="muted small">Individual, family and corporate packages paid weekly, monthly or yearly, bonuses, points and product offers.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="food"><h4>Food and producers</h4><span class="muted small">The price-locked Food Basket, producer and manufacturer partners, Made in Uganda, and the Ugandan-made share of sales.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="loans"><h4>Kibanja Loan</h4><span class="muted small">Loans that grow, store, sell and move food: farm inputs, poultry, storage, food-trade stock, motorcycles and fuel.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="ops"><h4>Operations</h4><span class="muted small">Claims queue with automated checks and a human decision, member register, exposure.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="model"><h4>Underwriting</h4><span class="muted small">Your three-year table, rebuilt as a live model with a stress test.</span><span class="go">Open →</span></button>
+    <button class="module" data-a="tab" data-v="rollout"><h4>Rollout</h4><span class="muted small">The first year in detail, store set-up costs and the licences to line up first.</span><span class="go">Open →</span></button>
+  </div>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <h3>A household's year on the platform</h3>
+    <ol class="journey">
+      <li><div><b>Enrol in the app.</b> <span class="muted">National ID, household size, phone number, and a package paid weekly, monthly or yearly. Employers enrol their staff in one go.</span></div></li>
+      <li><div><b>Pay by Mobile Money.</b> <span class="muted">Plan payments go to the underwriting partner's account, not the operating account.</span></div></li>
+      <li><div><b>Receive the SmartCare card.</b> <span class="muted">Physical card plus a QR in the app, with a wallet the family can top up.</span></div></li>
+      <li><div><b>Shop without cash.</b> <span class="muted">Show the card or read a pay code from the app. The till applies the member discount and pays the basket from points, the allowance, the wallet and the food credit line. Any gap becomes a Mobile Money prompt on the phone. Every payment earns points.</span></div></li>
+      <li><div><b>Keep going, or claim.</b> <span class="muted">Each payment refills the shopping balance with its bonus. If the main income stops, report it, get verified, and the package continues free for ${PROTECT_MONTHS} months while credit repayments freeze.</span></div></li>
+      <li><div><b>Renew.</b> <span class="muted">Claims and repayment history price next year's cover.</span></div></li>
+    </ol>
+  </section>
+  <section class="callout">
+    <h3>Check before building: the 4% claims line</h3>
+    <p>Your plan books UGX 800M of claims in Year 1: 4% of families claiming an average of UGX 20M each, against a 50M allowance. If every approved family uses its full allowance, claims rise to UGX 2B and Year 1 loses money. Either cap the benefit at 20M or price for 50M.</p>
+    <p>The Underwriting screen lets you test this before committing capital.</p>
+    <div><button class="btn primary" data-a="tab" data-v="model">Open the stress test</button></div>
+  </section>
+</div>`;
+
+function cardHtml(m) {
+  const st = { paid: 'Active', due: 'Payment due', lapsed: 'Cover paused' }[cover(m).s];
+  return `<div class="kcard" aria-label="Kibanja SmartCare card for the ${esc(hh(m))}">
+    <div class="k-head"><span class="k-name">Kibanja <b>SmartCare</b></span><span class="k-state">${st}</span></div>
+    <span class="k-chip" aria-hidden="true"></span>
+    <div style="display:grid;gap:10px">
+      <div class="k-num">${m.card}</div>
+      <div class="k-foot"><div><div class="lbl">Household</div>${esc(m.name)} · ${m.size} people</div><div style="text-align:right"><div class="lbl">Package</div>${tierOf(m).name.replace('Kibanja ', '')}</div></div>
+    </div>
+  </div>`;
+}
+
+function planBlock(m) {
+  const c = cover(m), t = tierOf(m), f = S.plans[m.sub.plan];
+  const nt = m.sub.nextTier || m.sub.tier, nf = m.sub.next || m.sub.plan, NT = S.tiers[nt], changing = nt !== m.sub.tier || nf !== m.sub.plan;
+  if (m.sub.payer) return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Your package</span>${coverPill(m)}</div>
+    <div class="row between"><b>${t.name}</b><span class="num">${ugx(valueFor(m.sub.tier, m.sub.plan))} a ${f.per}</span></div>
+    <p class="small muted">Paid by ${esc(m.sub.payer)}. Next top-up on ${fdate(m.sub.paidUntil)}. You can still top up your balance yourself.</p>
+  </div>`;
+  const msg = t.free ? '<p class="small muted">Free. A package adds bonus value to every payment, Package Protection and food credit.</p>' : {
+    paid: `<p class="small muted">Paid until ${fdate(m.sub.paidUntil)}. Each payment adds ${ugx(valueFor(m.sub.tier, m.sub.plan))} to your balance.</p>`,
+    due: `<p class="small" style="color:var(--warn)">Payment was due ${fdate(m.sub.paidUntil)}. Pay by ${fdate(addDays(m.sub.paidUntil, f.grace))} to keep Package Protection.</p>`,
+    lapsed: `<p class="small" style="color:var(--bad)">Package paused since ${fdate(addDays(m.sub.paidUntil, f.grace))}. Your balance still works. Paying restarts the package, and the ${WAIT_DAYS}-day wait for Package Protection starts again.</p>`,
+  }[c.s];
+  const fit = !t.free && m.size > t.people ? `<p class="small" style="color:var(--warn)">Your household has ${m.size} people; ${t.name} is sized for up to ${t.people}.</p>` : '';
+  const choices = TIER_KEYS.filter(k => S.tiers[k].group !== 'corporate');
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Your package</span>${coverPill(m)}</div>
+    <div class="row between"><b>${t.name}</b><span class="num">${t.free ? 'Free' : `${ugx(priceOf(m))} a ${f.per}`}</span></div>
+    ${msg}${fit}
+    ${NT.free ? '' : `<button class="btn ${c.s === 'paid' && !t.free && !changing ? '' : 'primary'} block" data-a="pay-plan">Pay ${ugx(priceFor(nt, nf))}, get ${ugx(valueFor(nt, nf))} to spend</button>`}
+    <div class="form-grid">
+      <label class="f">Package<select class="in" id="tier-switch">${choices.map(k => `<option value="${k}" ${nt === k ? 'selected' : ''}>${S.tiers[k].name.replace('Kibanja ', '')}</option>`).join('')}</select></label>
+      ${NT.free ? '' : `<label class="f">Pay<select class="in" id="plan-switch">${PLAN_KEYS.map(k => `<option value="${k}" ${nf === k ? 'selected' : ''}>${S.plans[k].name} · ${ugx(priceFor(nt, k))}</option>`).join('')}</select></label>`}
+    </div>
+    <p class="small muted">${!changing ? 'Change your package or how often you pay at any time.' : NT.free ? `Moves to the free ${NT.name} when your paid period ends.` : `Moves to ${NT.name}, ${S.plans[nf].name.toLowerCase()}, ${t.free ? 'as soon as you pay' : 'from your next payment'}.`}</p>
+  </div>`;
+}
+
+function payBlock(m) {
+  const code = ui.payCode && ui.payCode.m === m.id ? ui.payCode.code : null;
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Pay with your phone</span><span class="small muted">No card needed</span></div>
+    ${code ? `<div class="paycode">${code.slice(0, 3)} ${code.slice(3)}</div><p class="small muted">Read this to the cashier. It works once, for the next 5 minutes.</p>`
+      : '<p class="small muted">Card at home? Get a one-time code and the cashier types it into the till.</p>'}
+    <button class="btn block" data-a="pay-code">${code ? 'Get a new code' : 'Get a pay code'}</button>
+  </div>`;
+}
+
+function pointsBlock(m) {
+  const L = S.loyalty, ready = m.points >= L.threshold;
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Kibanja points</span><span class="small muted">${trim2(earnRate(m))} per UGX 100, double on UG-made</span></div>
+    <div class="big">${m.points.toLocaleString('en-US')}<span class="per"> pts · worth ${ugx(m.points * L.value)}</span></div>
+    <div class="meter sun"><i style="width:${Math.min(100, m.points / L.threshold * 100)}%"></i></div>
+    <p class="small muted">${ready ? 'Ready to spend: ask the cashier to pay with points.' : `${(L.threshold - m.points).toLocaleString('en-US')} more points until you can spend them.`} You earn points on wallet, credit and Mobile Money payments while your plan is paid.</p>
+  </div>`;
+}
+
+function walletBlock(m) {
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Shopping balance</span><span class="small muted">Spend on anything</span></div>
+    <div class="big">${ugx(m.wallet)}</div>
+    <div class="row">${[20000, 50000, 100000].map(v => `<button class="btn chip" data-a="topup" data-amt="${v}">+ ${short(v)}</button>`).join('')}</div>
+    <p class="small muted">Your package payments land here with their bonus, and you can top up any amount from Mobile Money. At the till, anything the balance can't cover becomes a Mobile Money prompt on this phone, so you never need cash.</p>
+  </div>`;
+}
+
+function emergencyBlock(m) {
+  const live = cover(m).s !== 'lapsed';
+  if (tierOf(m).free) return `<div class="ph-block"><div class="row between"><span class="eyebrow">Package Protection</span>${emergencyPill(m)}</div>
+    <p class="small">With a package, if the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months. Kibanja Solo is ${ugx(priceFor('solo', 'weekly'))} a week; Family Starter ${ugx(priceFor('familystart', 'weekly'))}.</p>
+    <button class="btn block" data-a="tab" data-v="plans">Compare packages</button></div>`;
+  if (m.cover === 'none') {
+    const inForce = days(m.sub.start, TODAY);
+    const waitTxt = inForce >= WAIT_DAYS ? `Waiting period done (${inForce} days of continuous cover).` : `Claims open on ${fdate(addDays(m.sub.start, WAIT_DAYS))}.`;
+    const form = !live ? `<p class="small" style="color:var(--bad)">Pay your plan to restart cover before reporting an emergency.</p>` : ui.claimForm ? `
+      <form class="stack" id="claim-form" style="gap:10px">
+        <label class="f">What happened?
+          <select class="in" id="cl-type"><option value="job">Job loss</option><option value="medical">Hospital admission</option><option value="drought">Drought in our district</option></select></label>
+        <label class="f">Tell us briefly <textarea class="in" id="cl-note" placeholder="Who was affected, and when"></textarea></label>
+        <label class="f">Proof <span class="hint">Termination letter, admission note, or leave blank for drought</span><input class="in" type="file" id="cl-file" accept="image/*,.pdf"></label>
+        <div class="row"><button class="btn primary" type="submit">Send claim</button><button class="btn" type="button" data-a="cancel-claim">Cancel</button></div>
+      </form>` : `<button class="btn block" data-a="open-claim">Report an emergency</button>`;
+    return `<div class="ph-block">
+      <div class="row between"><span class="eyebrow">Package Protection</span>${emergencyPill(m)}</div>
+      <p class="small">If one of these happens, your package continues free for ${PROTECT_MONTHS} months: <b class="num">${ugx(capOf(m))}</b> a month for essentials, and your credit repayments freeze:</p>
+      <ul class="ticks"><li>The main earner loses their job</li><li>Someone in the house is admitted to hospital</li><li>Drought is declared in your district</li></ul>
+      ${live ? `<p class="small muted">${waitTxt}</p>` : ''}
+      ${form}
+    </div>`;
+  }
+  if (m.cover === 'review') {
+    const c = S.claims.find(x => x.member === m.id && x.status === 'pending');
+    const open = c.checks.filter(k => k.r !== 'ok').length;
+    return `<div class="ph-block">
+      <span class="eyebrow">Claim ${c.id}</span>
+      <h3>${TYPES[c.type]}: we're checking it</h3>
+      <p class="small muted">Sent ${fdate(c.filed)}. Most claims are decided within 72 hours. ${open ? `${open} check${open > 1 ? 's' : ''} still open.` : 'All checks passed; waiting for a decision.'}</p>
+      <ul class="checks">${c.checks.map(k => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' ? '✕' : '…'}</span><span>${esc(k.t)}</span><span></span></li>`).join('')}</ul>
+    </div>`;
+  }
+  const a = m.allowance, cap = capOf(m);
+  return `<div class="ph-block">
+    <span class="eyebrow">Package Protection left this month</span>
+    <div class="big">${ugx(sources(m).allowance)}</div>
+    <div class="meter"><i style="width:${Math.min(100, a.month / cap * 100)}%"></i></div>
+    <p class="small muted">${ugx(a.month)} of ${ugx(cap)} used this month. Resets on the 1st.${live ? '' : ' Paused until your plan is paid.'}</p>
+    <div class="meter sun"><i style="width:${Math.min(100, a.total / limitOf(m) * 100)}%"></i></div>
+    <p class="small">${ugx(limitOf(m) - a.total)} of the ${PROTECT_MONTHS} months left, until ${fdate(addMonths(a.activated, PROTECT_MONTHS))}.</p>
+  </div>`;
+}
+
+function creditBlock(m) {
+  const L = ladderOf(m);
+  if (!L.length) return `<div class="ph-block"><div class="row between"><span class="eyebrow">Food credit line</span>${creditPill(m)}</div>
+    <p class="small">Packages come with food credit: essentials now, repaid with your next payment. It starts at half a month of your package.</p></div>`;
+  const c = m.credit, avail = sources(m).credit, lim = L[c.rung], frozen = m.cover === 'active';
+  const max = L[L.length - 1];
+  const ladder = L.map((v, i) => `<i class="${i === c.rung ? 'on' : i < c.rung ? 'done' : ''}" style="height:${18 + 82 * v / max}%"></i>`).join('');
+  const next = c.rung < L.length - 1
+    ? `<p class="small">Next rung <b class="num">${short(L[c.rung + 1])}</b>: ${Math.min(c.onTime, 3)}/3 on-time repayments with your plan paid up.</p>`
+    : `<p class="small">You're on the top rung.</p>`;
+  const due = frozen
+    ? `<div class="due"><span class="small"><b>Frozen while your emergency allowance runs.</b> Nothing new goes on credit and nothing is due, with no extra interest, until a month after the allowance ends.</span></div>`
+    : c.dueAmt > 0 ? `<div class="due ${c.overdue ? 'bad' : ''}">
+      <div class="row between"><span class="small"><b>${c.overdue ? 'Overdue since' : 'Next repayment'}</b> ${fdate(c.due)}</span><span class="num">${ugx(c.dueAmt)}</span></div>
+      <button class="btn primary block" data-a="pay">Repay ${ugx(c.dueAmt)} with Mobile Money</button>
+    </div>` : `<p class="small muted">Nothing to repay right now.</p>`;
+  return `<div class="ph-block">
+    <div class="row between"><span class="eyebrow">Food credit line</span>${creditPill(m)}</div>
+    <div class="big">${ugx(avail)}</div>
+    <p class="small muted">${ugx(c.used)} used of your ${ugx(lim)} line, repaid with your next package payment. It pays for food and household essentials; anything else comes from your shopping balance or points.</p>
+    <div class="ladder" aria-hidden="true">${ladder}</div>
+    <div class="ladder-lbl">${L.map(v => `<span>${short(v)}</span>`).join('')}</div>
+    ${next}
+    ${due}
+  </div>`;
+}
+
+function txnList(id) {
+  const list = S.txns.filter(t => t.m === id).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 6);
+  if (!list.length) return `<p class="small muted">No activity yet.</p>`;
+  return `<ul class="txns">${list.map(t => `<li><span>${esc(t.where)}</span><span class="amt">${t.smart ? '−' + short(t.smart) : short(t.mm)}</span>
+    <span class="sub">${fdate(t.d)}${t.items ? ` · ${t.items} items` : ''}</span><span class="sub amt">${t.via || (t.smart ? (t.mm ? `+ ${short(t.mm)} Mobile Money` : 'SmartCare') : 'Mobile Money')}</span></li>`).join('')}</ul>`;
+}
+
+function rulesFor(m) {
+  const lapsed = cover(m).s === 'lapsed', r = [];
+  if (tierOf(m).free) {
+    return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">
+      <li><b>Free to start.</b><span class="muted small">The Kibanja Card gives anyone the app, a shopping balance and points, so the network grows without anyone paying to join.</span></li>
+      <li><b>A package adds value.</b><span class="muted small">Every package payment adds a bonus to the balance, plus Package Protection and food credit. Solo is ${ugx(priceFor('solo', 'weekly'))} a week.</span></li>
+    </ul><div class="try"><span class="eyebrow">Try it</span><span>Pick <b>Family Starter</b> under Your package, choose weekly, and pay. Watch the balance grow by more than you paid.</span></div></section>`;
+  }
+  if (lapsed) r.push(['The package is paused.', 'The payment is past its grace period. Protection and credit stop; the shopping balance keeps working. Paying restarts the package.']);
+  r.push({
+    none: ['Pay, then shop for what you want.', `Each payment adds ${ugx(valueFor(m.sub.tier, m.sub.plan))} to the shopping balance, ${bonusPct(m.sub.tier, m.sub.plan)}% more than was paid. It buys anything in the store, without cash.`],
+    review: ['The allowance opens on approval.', 'Evidence is checked at the source: NSSF contribution history, the employer called on a number the platform found itself, the partner hospital confirms admissions. The wallet keeps working meanwhile.'],
+    active: ['The package continues, a month at a time.', `${ugx(capOf(m))} a month for ${PROTECT_MONTHS} months for essentials, released monthly so a fraudulent claim costs one month, not all of it.`],
+  }[m.cover]);
+  if (m.cover === 'none') r.push(['Package Protection.', `If the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months. It starts after ${WAIT_DAYS} days of continuous payments, so nobody joins the week they know they'll be laid off.`]);
+  if (m.cover === 'active') r.push(['Credit freezes instead of piling up.', 'While the allowance runs, nothing new goes on credit and no repayments fall due, so an emergency never turns into debt.']);
+  else if (m.credit.overdue) r.push(['The line pauses, it does not close.', 'One repayment clears the overdue status and the line works again the same minute. The on-time count starts again.']);
+  else r.push(['Food credit for short weeks.', `Essentials only, starting at ${short(ladderOf(m)[0])} on ${tierOf(m).name} and repaid with the next payment. Three on-time repayments move it a rung higher.`]);
+  const tryIt = lapsed
+    ? 'Try this card at the <b>Store till</b> first: with cover paused and an empty wallet, the till sends a Mobile Money prompt instead. Then pay the plan here and try again.'
+    : m.cover === 'review' ? 'Open <b>Operations</b>, mark the open checks verified and approve the claim.'
+    : m.cover === 'active' ? 'Open the <b>Store till</b>, scan this card and add a Food Basket and a beer. Package Protection pays for the food and the shopping balance for the beer.'
+    : m.credit.overdue ? 'Repay the overdue amount here, then try the card at the <b>Store till</b>.'
+    : m.credit.onTime === 2 ? 'Tap <b>Repay</b>. The third on-time repayment moves this household up a rung.'
+    : 'Open the <b>Store till</b>, scan this card and buy a 25 kg bag of maize flour and a soda. The shopping balance pays for both, no cash.';
+  return `<section class="panel"><h3>What the platform is doing</h3><ul class="rules">${r.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
+    <div class="try"><span class="eyebrow">Try it</span><span>${tryIt}</span></div></section>`;
+}
+
+V.member = () => {
+  const m = member(ui.viewAs);
+  return `<div class="row between"><div class="stack" style="gap:4px"><h2>Family app</h2><p class="muted small">Example households, dated ${fdate(TODAY)}.</p></div>
+    <label class="f" style="min-width:220px">Viewing as
+      <select class="in" id="view-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))}</option>`).join('')}</select></label></div>
+  <div class="split phone-split">
+    <div class="phone"><div class="screen">
+      <div class="ph-top"><span>Kibanja</span><span class="mono">${m.id}</span></div>
+      <p class="hello">Hello, ${esc(m.name)} family</p>
+      ${cardHtml(m)}
+      ${walletBlock(m)}
+      ${planBlock(m)}
+      ${payBlock(m)}
+      ${creditBlock(m)}
+      ${emergencyBlock(m)}
+      ${pointsBlock(m)}
+      ${loanBlock(m)}
+      <div class="stack" style="gap:6px"><h4>Recent activity</h4>${txnList(m.id)}</div>
+    </div></div>
+    <div class="stack">${rulesFor(m)}
+      <section class="panel"><div class="row between"><h3>Account</h3><span class="row" style="gap:6px">${emergencyPill(m)}${creditPill(m)}</span></div>
+        <dl class="terms"><dt>Member</dt><dd class="num">${m.id}</dd><dt>Area</dt><dd>${esc(m.area)}</dd><dt>Enrolled</dt><dd>${fdate(m.enrolled)}</dd>
+          <dt>Package</dt><dd>${planLabel(m)}${tierOf(m).free ? '' : m.sub.payer ? `, paid by ${esc(m.sub.payer)}` : `, ${ugx(priceOf(m))} a ${S.plans[m.sub.plan].per}`}</dd>
+          <dt>Household</dt><dd>${m.size} ${m.size === 1 ? 'person' : 'people'}</dd>
+          <dt>Card can pay now</dt><dd class="num">${ugx(sources(m).total)}</dd></dl>
+      </section>
+    </div>
+  </div>`;
+};
+
+/* Till */
+function cartTotals() {
+  const m = ui.posMember && member(ui.posMember);
+  const src = m ? sources(m) : null;
+  const lines = ui.cart.map(l => {
+    const s = SKUS.find(x => x.sku === l.sku), promo = S.promos.find(p => p.on && p.sku === s.sku);
+    const gross = s.price * l.q, promoOff = promo ? Math.round(gross * promo.pct / 100) : 0;
+    const memberOff = src ? Math.round((gross - promoOff) * src.disc / 100) : 0;
+    return { ...s, q: l.q, gross, promo, promoOff, memberOff, net: gross - promoOff - memberOff };
+  });
+  const sum = k => lines.reduce((a, l) => a + l[k], 0);
+  const ess = lines.filter(l => l.ess).reduce((a, l) => a + l.net, 0), total = sum('net'), other = total - ess;
+  const local = lines.filter(l => l.local).reduce((a, l) => a + l.net, 0);
+  const pay = { points: 0, allowance: 0, wallet: 0, credit: 0, mm: 0 };
+  let e = ess, o = other;
+  if (src) {
+    if (ui.usePoints && src.pointsUsable) {
+      pay.points = Math.min(src.pointsValue, total);
+      const p1 = Math.min(o, pay.points); o -= p1; e -= pay.points - p1; // points take extras first, leaving essentials for the allowance
+    }
+    pay.allowance = Math.min(e, src.allowance); e -= pay.allowance;
+    // The wallet takes extras first: the food credit line can only pay for essentials.
+    const w1 = Math.min(o, src.wallet); o -= w1;
+    const w2 = Math.min(e, src.wallet - w1); e -= w2;
+    pay.wallet = w1 + w2;
+    pay.credit = Math.min(e, src.credit); e -= pay.credit;
+  }
+  pay.mm = e + o;
+  // Points are earned on money the household pays in (wallet, credit, Mobile Money), not on insurance money or points.
+  // Ugandan-made goods earn the plan's rate twice.
+  const paidIn = pay.wallet + pay.credit + pay.mm, rate = src && src.live ? earnRate(m) : 0;
+  const earn = Math.floor(paidIn / 100 * rate) + Math.floor(Math.min(local, paidIn) / 100 * rate);
+  return { m, src, lines, gross: sum('gross'), promoOff: sum('promoOff'), memberOff: sum('memberOff'), total, ess, other, local, pay, earn };
+}
+
+V.pos = () => {
+  const t = cartTotals(), m = t.m, src = t.src, P = t.pay;
+  const strip = m ? `<div class="member-strip">
+      <div class="row between"><b>${esc(hh(m))}</b>${coverPill(m)}</div>
+      <div class="tot small">
+        ${m.cover === 'active' ? `<span>Package Protection <span class="muted">(essentials)</span></span><span class="v">${ugx(src.allowance)}</span>` : ''}
+        <span>Shopping balance</span><span class="v">${ugx(src.wallet)}</span>
+        <span>Food credit <span class="muted">(essentials)</span></span><span class="v">${ugx(src.credit)}</span>
+        <span>Points</span><span class="v">${m.points.toLocaleString('en-US')} pts</span>
+        ${src.disc ? `<span>Member discount</span><span class="v">${trim2(src.disc)}%</span>` : ''}
+      </div>
+      <label class="check"><input type="checkbox" id="use-points" ${ui.usePoints && src.pointsUsable ? 'checked' : ''} ${src.pointsUsable ? '' : 'disabled'}>
+        <span>Pay with points (${ugx(src.pointsValue)})${src.pointsUsable ? '' : `<span class="small muted"> · spendable from ${S.loyalty.threshold.toLocaleString('en-US')} points</span>`}</span></label>
+      ${src.notes.map(n => `<p class="small" style="color:var(--warn)">${esc(n)}</p>`).join('')}
+    </div>` : `<p class="small muted">Scan or type a card number. Example cards:</p>`;
+  const cart = ui.cart.length ? `<ul class="cart">${t.lines.map(l => `<li>
+      <span><span style="display:block">${esc(l.name)}</span><span class="tag ${l.ess ? '' : 'no'}">${l.ess ? 'Essential' : 'Other'}</span>${l.local ? ' <span class="tag ug">UG-made</span>' : ''}${l.promo ? ` <span class="tag offer">${esc(l.promo.name)} −${trim2(l.promo.pct)}%</span>` : ''}</span>
+      <span class="qty"><button data-a="dec" data-sku="${l.sku}" aria-label="One fewer ${esc(l.name)}">−</button>${l.q}<button data-a="inc" data-sku="${l.sku}" aria-label="One more ${esc(l.name)}">+</button></span>
+      <span class="num">${short(l.gross - l.promoOff)}</span></li>`).join('')}</ul>` : `<p class="small muted">Tap products to add them to the basket.</p>`;
+  const paidBy = m ? [
+    ['Kibanja points', P.points, P.points > 0],
+    ['Package Protection', P.allowance, m.cover === 'active'], ['Shopping balance', P.wallet, true], ['Food credit', P.credit, ladderOf(m).length > 0],
+    ['Mobile Money prompt to member', P.mm, true],
+  ].filter(x => x[2]).map(([l, v]) => `<span>${l}</span><span class="v">${ugx(v)}</span>`).join('')
+    : `<span>Mobile Money or cash</span><span class="v">${ugx(P.mm)}</span>`;
+  const r = ui.receipt;
+  const receipt = r ? `<div class="receipt" aria-label="Receipt">
+      <div class="r"><b>KIBANJA STORE · KIRA</b><span>${r.no}</span></div>
+      <div class="r"><span>${fdate(TODAY)}</span><span>Till 02</span></div><hr>
+      ${r.lines.map(l => `<div class="r"><span>${l.q}× ${esc(l.name)}</span><span>${l.gross.toLocaleString('en-US')}</span></div>`).join('')}<hr>
+      ${r.promoOff ? `<div class="r"><span>Offers</span><span>−${r.promoOff.toLocaleString('en-US')}</span></div>` : ''}
+      ${r.memberOff ? `<div class="r"><span>Member discount ${trim2(r.disc)}%</span><span>−${r.memberOff.toLocaleString('en-US')}</span></div>` : ''}
+      <div class="r"><b>TOTAL</b><b>${r.total.toLocaleString('en-US')}</b></div><hr>
+      ${r.tenders.map(([l, v]) => `<div class="r"><span>${l}</span><span>${v.toLocaleString('en-US')}</span></div>`).join('')}<hr>
+      ${r.earn ? `<div class="r"><span>Points earned</span><span>+${r.earn.toLocaleString('en-US')}</span></div><div class="r"><span>Points balance</span><span>${r.balance.toLocaleString('en-US')}</span></div><hr>` : ''}
+      <div class="r muted"><span>Store gross margin after discounts (est.)</span><span>${r.margin.toLocaleString('en-US')}</span></div>
+    </div><button class="btn block" data-a="new-sale">Next customer</button>` : '';
+  return `<div class="stack" style="gap:4px"><h2>Store till</h2><p class="muted small">What a cashier sees at a Kibanja or partner store. Members pay the whole basket without cash, by card or by a pay code from the app. Prices are sample shelf prices in UGX.</p></div>
+  <div class="split">
+    <div class="stack">
+      <section class="panel">
+        <form id="pos-form"><label class="f">Card number, member ID or pay code<input class="in mono" id="pos-card" value="${esc(ui.posInput)}" placeholder="6201 4410 0001" autocomplete="off"></label></form>
+        <div class="row"><button class="btn primary" data-a="pos-lookup">Read card</button>${m ? '<button class="btn" data-a="pos-clear">Remove card</button>' : ''}</div>
+        ${strip}
+        ${m ? '' : `<div class="row">${S.members.map(x => `<button class="btn chip" data-a="pos-pick" data-id="${x.id}">${x.card.slice(-4)} · ${esc(x.name)}</button>`).join('')}</div>`}
+      </section>
+      <section class="stack"><h3>Products</h3><div class="cat">${SKUS.map(s => { const p = S.promos.find(x => x.on && x.sku === s.sku); return `<button class="sku" data-a="add" data-sku="${s.sku}"><span class="row" style="gap:6px"><span class="tag ${s.ess ? '' : 'no'}">${s.ess ? 'Essential' : 'Other'}</span>${s.bulk ? '<span class="tag offer">Bulk</span>' : ''}${s.local ? '<span class="tag ug">UG-made</span>' : ''}${p ? `<span class="tag offer">−${trim2(p.pct)}%</span>` : ''}</span><span class="nm">${esc(s.name)}</span><span class="pr">${s.price.toLocaleString('en-US')}</span></button>`; }).join('')}</div></section>
+    </div>
+    <section class="panel">
+      <div class="row between"><h3>Basket</h3>${ui.cart.length ? '<button class="btn chip" data-a="clear-cart">Clear</button>' : ''}</div>
+      ${cart}
+      <div class="tot">
+        <span>Subtotal</span><span class="v">${ugx(t.gross)}</span>
+        ${t.promoOff ? `<span>Offers</span><span class="v">−${ugx(t.promoOff)}</span>` : ''}
+        ${t.memberOff ? `<span>Member discount (${trim2(src.disc)}%)</span><span class="v">−${ugx(t.memberOff)}</span>` : ''}
+        <span class="grand">Total</span><span class="v grand">${ugx(t.total)}</span>
+      </div>
+      <div class="paid-by"><span class="eyebrow">Paid by</span><div class="tot">${paidBy}</div>${m && ui.cart.length ? `<span class="small muted">Points earned on this sale: <b class="num">+${t.earn.toLocaleString('en-US')}</b></span>` : ''}</div>
+      ${m && P.mm > 0 && ui.cart.length ? `<p class="small" style="color:var(--warn)">The card covers ${ugx(t.total - P.mm)}. The rest goes to the member's phone as a Mobile Money prompt; no cash needed.</p>` : ''}
+      <button class="btn primary block" data-a="charge" ${ui.cart.length ? '' : 'disabled'}>Charge ${ugx(t.total)}</button>
+      ${receipt}
+    </section>
+  </div>`;
+};
+
+/* Plans and discounts */
+V.plans = () => {
+  const cellIn = (k, f, step, label) => `<input class="in num cell-in" type="number" min="0" step="${step}" data-plan="${k}" data-field="${f}" value="${S.plans[k][f]}" aria-label="${label}">`;
+  const pkgIn = (k, f, step, label) => `<input class="in num cell-in" type="number" min="0" step="${step}" data-tier="${k}" data-freq="${f}" value="${S.tiers[k][f]}" aria-label="${label}">`;
+  const paid = TIER_KEYS.filter(k => !S.tiers[k].free), C = ui.corp, ck = C.pkg;
+  const corpPay = priceFor(ck, C.freq) * C.staff, corpValue = valueFor(ck, C.freq, C.staff) * C.staff;
+  return `<div class="stack" style="gap:4px"><h2>Shopping packages</h2><p class="muted small">Pay weekly, monthly or yearly; every payment adds its value plus a bonus to the shopping balance. Changes here apply at once to the family app and the till.</p></div>
+  ${packageGroups()}
+
+  <section class="panel">
+    <h3>Corporate package calculator</h3>
+    <div class="form-grid">
+      <label class="f">Employees<input class="in num" type="number" id="corp-staff" min="1" step="1" value="${C.staff}"></label>
+      <label class="f">Package<select class="in" id="corp-pkg">${paid.filter(k => S.tiers[k].group === 'corporate').map(k => `<option value="${k}" ${k === ck ? 'selected' : ''}>${S.tiers[k].name}</option>`).join('')}</select></label>
+      <label class="f">Paid<select class="in" id="corp-freq">${PLAN_KEYS.map(f => `<option value="${f}" ${f === C.freq ? 'selected' : ''}>${S.plans[f].name}</option>`).join('')}</select></label>
+    </div>
+    ${C.staff < S.tiers[ck].minStaff ? `<p class="small" style="color:var(--warn)">${S.tiers[ck].name} starts at ${S.tiers[ck].minStaff} employees. Smaller teams can buy family packages for each person.</p>` : ''}
+    <div class="figs">
+      <span>Employer pays a ${S.plans[C.freq].per}</span><span class="v">${ugx(corpPay)}</span>
+      <span>Staff receive to spend</span><span class="v">${ugx(corpValue)}</span>
+      <span>Bonus</span><span class="v">${bonusPct(ck, C.freq, C.staff)}% · ${ugx(corpValue - corpPay)}</span>
+      <span class="tot">Each employee gets</span><span class="v tot">${ugx(valueFor(ck, C.freq, C.staff))} a ${S.plans[C.freq].per}</span>
+    </div>
+    <p class="small muted">Employers with ${STAFF_VOLUME[1][0]}+ staff get ${STAFF_VOLUME[1][1]}% more, and ${STAFF_VOLUME[0][0]}+ get ${STAFF_VOLUME[0][1]}% more. One invoice, a card for every employee, and staff can top up their own balance. Staff on a package also get Package Protection and food credit.</p>
+  </section>
+
+  <section class="stack"><h3>Package settings</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Package</th><th class="n">Monthly price, UGX</th><th class="n">Package bonus %</th><th class="n">Weekly</th><th class="n">Yearly</th><th class="n">Bundle saving a month</th></tr></thead><tbody>
+    ${paid.map(k => { const t = S.tiers[k], items = bundleOf(k), save = items.reduce((a, i) => a + i.shelfCost - i.cost, 0); return `<tr><td><b>${t.name}</b>${t.group === 'corporate' ? ' <span class="muted small">per employee</span>' : ''}</td>
+      <td class="n">${pkgIn(k, 'monthly', 5000, t.name + ' monthly price')}</td><td class="n">${pkgIn(k, 'bonus', 0.5, t.name + ' package bonus')}</td>
+      <td class="n">${ugx(priceFor(k, 'weekly'))}</td><td class="n">${ugx(priceFor(k, 'annual'))}</td><td class="n">${ugx(save)}</td></tr>`; }).join('')}
+    </tbody></table></div>
+  </section>
+
+  <section class="stack"><h3>Paying weekly, monthly or yearly</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Paying</th><th class="n">Bonus %</th><th class="n">Points per UGX 100</th><th class="n">Grace days</th><th class="n">Family package: pay → get</th></tr></thead><tbody>
+    ${PLAN_KEYS.map(k => { const f = S.plans[k]; return `<tr><td><b>${f.name}</b></td>
+      <td class="n">${cellIn(k, 'bonus', 0.5, f.name + ' bonus')}</td><td class="n">${cellIn(k, 'pts', 0.5, f.name + ' points per UGX 100')}</td><td class="n">${cellIn(k, 'grace', 1, f.name + ' grace days')}</td>
+      <td class="n">${ugx(priceFor('family', k))} → ${ugx(valueFor('family', k))}</td></tr>`; }).join('')}
+    </tbody></table></div>
+  </section>
+
+  <section class="panel"><h3>Who pays for the bonus</h3>
+    <p class="small">A bonus is extra shopping value Kibanja gives away, so it has to come from somewhere. At a Kibanja store it comes out of the 12% margin on essentials and 25% on extras, topped up by supplier volume rebates (about 6%) and by interest on prepaid money held in trust. At partner stores only the rebate is available, so keep the bonus there to what suppliers fund.</p>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Biggest bonus on</th><th class="n">Bonus</th><th class="n">Essentials margin + 6% rebate − bonus</th></tr></thead><tbody>
+      ${PLAN_KEYS.map(f => { const b = bonusPct('familymax', f, 0), left = 12 + 6 - b; return `<tr><td>Family Max, ${S.plans[f].name.toLowerCase()}</td><td class="n">${trim2(b)}%</td><td class="n ${left < 3 ? 'neg' : ''}">${trim2(left)}%</td></tr>`; }).join('')}
+    </tbody></table></div>
+    <p class="small muted">Prepaid balances are customers' money: hold them in trust through a licensed payment partner, and never spend them on running the business.</p>
+  </section>
+  <section class="panel"><h3>Kibanja points</h3>
+    <div class="form-grid">
+      <label class="f">One point is worth <span class="hint">UGX</span><input class="in num" type="number" min="0" step="0.5" data-loyalty="value" value="${S.loyalty.value}"></label>
+      <label class="f">Spendable from <span class="hint">points</span><input class="in num" type="number" min="0" step="500" data-loyalty="threshold" value="${S.loyalty.threshold}"></label>
+    </div>
+    <p class="small muted">At these settings paying yearly gives back ${trim2(S.plans.annual.pts * S.loyalty.value)}% of what a member pays, and a household spending UGX 10M a year on the card can spend its points about every ${((w) => `${w} week${w === 1 ? '' : 's'}`)(Math.max(1, Math.round(S.loyalty.threshold / (1e7 / 100 * S.plans.annual.pts / 12) * 4.3)))}. For comparison, Carrefour Uganda's MyCLUB lowered its redemption point to 10,000 points in 2023; a lower threshold suits families who shop in small amounts.</p>
+  </section>
+  <div class="split">
+    <section class="panel"><h3>How a member pays without cash</h3>
+      <ol class="journey">
+        <li><div><b>Offers first.</b> <span class="muted">Product offers and bulk prices.</span></div></li>
+        <li><div><b>Package Protection.</b> <span class="muted">Essentials only, for households with an approved claim.</span></div></li>
+        <li><div><b>Shopping balance.</b> <span class="muted">Anything in the basket. Package payments and top-ups land here.</span></div></li>
+        <li><div><b>Food credit line.</b> <span class="muted">Essentials only, for households in good standing. Frozen during an emergency.</span></div></li>
+        <li><div><b>Mobile Money prompt.</b> <span class="muted">Whatever is left is sent to the member's phone to approve. No cash changes hands.</span></div></li>
+      </ol>
+    </section>
+  </div>
+  <section class="stack"><h3>Offers</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Offer</th><th>Product</th><th class="n">Off</th><th>Paid for by</th><th>Status</th><th></th></tr></thead><tbody>
+    ${S.promos.length ? S.promos.map(p => `<tr><td>${esc(p.name)}</td><td>${esc(SKUS.find(s => s.sku === p.sku).name)}</td><td class="n">${trim2(p.pct)}%</td><td>${p.funder}</td>
+      <td>${p.on ? '<span class="pill ok">Running</span>' : '<span class="pill">Paused</span>'}</td>
+      <td><div class="row" style="flex-wrap:nowrap"><button class="btn chip" data-a="promo-toggle" data-id="${p.id}">${p.on ? 'Pause' : 'Start'}</button><button class="btn chip danger" data-a="promo-del" data-id="${p.id}">Remove</button></div></td></tr>`).join('')
+      : '<tr><td colspan="6" class="muted">No offers yet. Add one below.</td></tr>'}
+    </tbody></table></div>
+    <form class="panel" id="promo-form">
+      <h4>New offer</h4>
+      <div class="form-grid">
+        <label class="f">Name<input class="in" id="pr-name" required placeholder="School term rice deal"></label>
+        <label class="f">Product<select class="in" id="pr-sku">${SKUS.map(s => `<option value="${s.sku}">${esc(s.name)}</option>`).join('')}</select></label>
+        <label class="f">Discount %<input class="in num" id="pr-pct" type="number" min="1" max="90" step="1" value="10" required></label>
+        <label class="f">Paid for by<select class="in" id="pr-funder"><option>Kibanja</option><option>Supplier</option></select></label>
+      </div>
+      <div><button class="btn primary" type="submit">Add offer</button></div>
+    </form>
+    <p class="small muted">Offers apply to every shopper. The member discount is then taken off the offer price.</p>
+  </section>`;
+};
+
+/* Operations */
+V.ops = () => {
+  const pending = S.claims.filter(c => c.status === 'pending');
+  const liability = S.members.filter(m => m.cover === 'active').reduce((s, m) => s + limitOf(m) - m.allowance.total, 0);
+  const credit = S.members.reduce((s, m) => s + m.credit.used, 0);
+  const wallets = S.members.reduce((s, m) => s + m.wallet, 0);
+  const planIncome = S.members.reduce((s, m) => s + yearCost(m.sub.tier, m.sub.plan), 0);
+  const lapsed = S.members.filter(m => cover(m).s !== 'paid').length;
+  const c = S.claims.find(x => x.id === ui.opsClaim) || S.claims[0];
+  const cm = member(c.member);
+  const blocking = c.checks.filter(k => k.r !== 'ok').length;
+  const failed = c.checks.some(k => k.r === 'fail');
+  const score = c.checks.filter(k => k.r === 'ok').length / c.checks.length;
+  const detail = `<section class="panel">
+    <div class="row between"><div><span class="eyebrow">${c.id} · ${TYPES[c.type]}</span><h3>${esc(hh(cm))}</h3></div>
+      <span class="pill ${c.status === 'approved' ? 'ok' : c.status === 'declined' ? 'bad' : 'warn'}">${c.status === 'pending' ? 'Awaiting decision' : c.status === 'approved' ? 'Approved ' + fdate(c.decided) : 'Declined ' + fdate(c.decided)}</span></div>
+    <p>${esc(c.note || 'No description given.')}</p>
+    <dl class="terms"><dt>Filed</dt><dd>${fdate(c.filed)}</dd><dt>Area</dt><dd>${esc(cm.area)}</dd><dt>Household</dt><dd>${cm.size} people</dd><dt>Plan</dt><dd>${planLabel(cm)} · ${coverPill(cm)}</dd><dt>Evidence match</dt><dd class="num">${pct(score)} of checks passed</dd></dl>
+    <ul class="checks">${c.checks.map((k, i) => `<li><span class="ic ${k.r === 'ok' ? 'ok' : k.r === 'fail' || k.r === 'missing' ? 'bad' : 'todo'}">${k.r === 'ok' ? '✓' : k.r === 'fail' || k.r === 'missing' ? '✕' : '…'}</span>
+      <span>${esc(k.t)}${k.d ? `<span class="small muted" style="display:block">${esc(k.d)}</span>` : ''}${k.r === 'missing' ? '<span class="small" style="display:block;color:var(--bad)">No document uploaded</span>' : ''}</span>
+      ${c.status === 'pending' && (k.r === 'todo' || k.r === 'missing') ? `<button class="btn chip" data-a="verify" data-i="${i}">Mark verified</button>` : '<span></span>'}</li>`).join('')}</ul>
+    ${c.status === 'pending' ? `<p class="small muted">Automated checks collect the evidence. A person makes the decision and their name goes on it.</p>
+      <div class="row"><button class="btn primary" data-a="approve" ${blocking ? 'disabled' : ''}>Approve Package Protection</button><button class="btn danger" data-a="decline">Decline</button>
+      ${blocking ? `<span class="small" style="color:${failed ? 'var(--bad)' : 'var(--warn)'}">${failed ? 'A check failed; this claim can only be declined.' : `Resolve ${blocking} open check${blocking > 1 ? 's' : ''} first.`}</span>` : ''}</div>` : ''}
+  </section>`;
+  return `<div class="stack" style="gap:4px"><h2>Operations</h2><p class="muted small">The back office: verify claims, watch exposure, see every household.</p></div>
+  <div class="kpis">
+    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${S.members.length}</span><span class="small muted">${TIER_KEYS.filter(k => S.members.some(m => m.sub.tier === k)).map(k => `${S.members.filter(m => m.sub.tier === k).length} ${S.tiers[k].name.replace('Kibanja ', '')}`).join(' · ')}</span></div>
+    <div class="kpi"><span class="eyebrow">Package payments a year</span><span class="v">${short(planIncome)}</span><span class="small muted">${lapsed} household${lapsed === 1 ? '' : 's'} behind on payments</span></div>
+    <div class="kpi"><span class="eyebrow">Protection still owed</span><span class="v">${short(liability)}</span><span class="small muted">to households with an approved claim</span></div>
+    <div class="kpi"><span class="eyebrow">Credit outstanding</span><span class="v">${short(credit)}</span><span class="small muted">${S.members.filter(m => m.credit.overdue).length} household overdue · ${S.members.filter(m => m.cover === 'active').length} frozen</span></div>
+    <div class="kpi"><span class="eyebrow">Kibanja Loans outstanding</span><span class="v">${short(S.loans.filter(l => l.status === 'active').reduce((s, l) => s + balanceAfter(l, l.paid), 0))}</span><span class="small muted">${S.loans.filter(l => l.status === 'pending').length} application${S.loans.filter(l => l.status === 'pending').length === 1 ? '' : 's'} waiting</span></div>
+    <div class="kpi"><span class="eyebrow">Prepaid balances held</span><span class="v">${short(wallets)}</span><span class="small muted">customers' money, kept in trust</span></div>
+    <div class="kpi"><span class="eyebrow">Claims to decide</span><span class="v">${pending.length}</span><span class="small muted">target: within 72 hours</span></div>
+  </div>
+  <div class="split">
+    ${detail}
+    <section class="stack"><h3>Claims</h3>
+      <ul class="queue">${S.claims.slice().sort((a, b) => (a.status === 'pending' ? 0 : 1) - (b.status === 'pending' ? 0 : 1) || b.filed.localeCompare(a.filed)).map(x => `<li><button data-a="ops-pick" data-id="${x.id}" aria-current="${x.id === c.id}">
+        <span class="row between"><b>${esc(hh(member(x.member)))}</b><span class="pill ${x.status === 'approved' ? 'ok' : x.status === 'declined' ? 'bad' : 'warn'}">${x.status === 'pending' ? 'Pending' : x.status === 'approved' ? 'Approved' : 'Declined'}</span></span>
+        <span class="small muted">${x.id} · ${TYPES[x.type]} · filed ${fdate(x.filed)}</span></button></li>`).join('')}</ul>
+    </section>
+  </div>
+  <section class="stack"><h3>Member register</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Member</th><th>Household</th><th>Area</th><th>Package</th><th>Protection</th><th>Food credit</th><th class="n">Balance</th><th class="n">Card can pay now</th></tr></thead>
+    <tbody>${S.members.map(m => `<tr><td class="mono">${m.id}</td><td>${esc(m.name)} (${m.size})</td><td>${esc(m.area)}</td><td>${esc(planLabel(m))}<br>${coverPill(m)}</td><td>${emergencyPill(m)}</td><td>${ladderOf(m).length ? short(ladderOf(m)[m.credit.rung]) + ' line · ' : ''}${creditPill(m)}</td><td class="n">${ugx(m.wallet)}</td><td class="n">${ugx(sources(m).total)}</td></tr>`).join('')}</tbody></table></div>
+  </section>`;
+};
+
+// Average premium a year per household, from the plan mix and the prices on the Plans screen.
+function premiumOf(o = M) {
+  const w = Math.min(o.mixW, 100) / 100, mo = Math.min(o.mixM, 100 - Math.min(o.mixW, 100)) / 100;
+  return w * ORIGINAL.weekly * 52 + mo * ORIGINAL.monthly * 12 + (1 - w - mo) * ORIGINAL.annual;
+}
+
+function yr(i, o = M) {
+  const f = o.fam[i], spend = o.spend * 1e6;
+  const prem = f * premiumOf(o), claims = f * (o.claimRate / 100) * o.avgDraw * 1e6;
+  const creditVol = f * (o.creditShare / 100) * spend;          // groceries bought on the monthly credit line
+  const reb = f * spend * (o.rebatePct / 100) + creditVol * (o.feePct / 100);
+  const outstanding = creditVol / 12;                           // one month of credit spend, repaid at cycle end
+  const credit = creditVol * (o.lossPct / 100) + outstanding * (o.cofPct / 100);
+  const disc = f * spend * ((o.discPct + o.ptsPct) / 100);     // member discounts and points Kibanja pays for
+  const ops = o.ops[i] * 1e6;
+  return { f, prem, reb, gross: prem + reb, claims, credit, disc, ops, outstanding, creditVol, net: prem + reb - claims - credit - disc - ops };
+}
+// Claim rate at which the margin from everything else is used up by claims.
+function breakEven(i, o = M) { const y = yr(i, { ...o, claimRate: 0 }); return y.net / y.f / (o.avgDraw * 1e6); }
+
+V.model = () => `<div class="stack" style="gap:4px"><h2>Underwriting</h2><p class="muted small">Your three-year table, rebuilt from the assumptions in your plan, the original UGX 1.5M-a-year insurance-and-credit plan. The shopping packages, their bonuses and who pays for them are on the Packages screen.</p></div>
+<div class="split">
+  <section class="panel">
+    <form id="model-form" class="stack">
+      <fieldset><legend class="eyebrow">Households</legend><div class="form-grid">
+        ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="1" step="100" id="fam${i}" value="${M.fam[i]}"></label>`).join('')}</div></fieldset>
+      <fieldset><legend class="eyebrow">Per household</legend><div class="form-grid">
+        <label class="f">Payout limit <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="limit" value="${M.limit}"></label>
+        <label class="f">Claim rate <span class="hint">% of households / year</span><input class="in num" type="number" step="0.5" min="0" max="100" id="claimRate" value="${M.claimRate}"></label>
+        <label class="f">Average used per claim <span class="hint">UGX M</span><input class="in num" type="number" step="1" min="0" id="avgDraw" value="${M.avgDraw}"></label>
+      </div></fieldset>
+      <fieldset><legend class="eyebrow">Plan mix and discounts</legend><div class="form-grid">
+        <label class="f">On weekly plans <span class="hint">% of households</span><input class="in num" type="number" step="5" min="0" max="100" id="mixW" value="${M.mixW}"></label>
+        <label class="f">On monthly plans <span class="hint">% of households</span><input class="in num" type="number" step="5" min="0" max="100" id="mixM" value="${M.mixM}"></label>
+        <label class="f">Member discount paid by Kibanja <span class="hint">% of card spend</span><input class="in num" type="number" step="0.5" min="0" id="discPct" value="${M.discPct}"></label>
+        <label class="f">Points given back <span class="hint">% of card spend</span><input class="in num" type="number" step="0.5" min="0" id="ptsPct" value="${M.ptsPct}"></label>
+      </div><p class="small muted" id="eff-prem"></p></fieldset>
+      <fieldset><legend class="eyebrow">Card spending and credit line</legend><div class="form-grid">
+        <label class="f">Card spend per household <span class="hint">UGX M / year</span><input class="in num" type="number" step="0.5" min="0" id="spend" value="${M.spend}"></label>
+        <label class="f">Households using credit <span class="hint">%</span><input class="in num" type="number" step="1" min="0" max="100" id="creditShare" value="${M.creditShare}"></label>
+        <label class="f">Supermarket rebate <span class="hint">% of spend</span><input class="in num" type="number" step="0.5" min="0" id="rebatePct" value="${M.rebatePct}"></label>
+        <label class="f">Processing fee <span class="hint">% per monthly cycle</span><input class="in num" type="number" step="0.1" min="0" id="feePct" value="${M.feePct}"></label>
+        <label class="f">Credit losses <span class="hint">% of credit volume</span><input class="in num" type="number" step="0.5" min="0" id="lossPct" value="${M.lossPct}"></label>
+        <label class="f">Cost of funds <span class="hint">% a year on balances</span><input class="in num" type="number" step="1" min="0" id="cofPct" value="${M.cofPct}"></label>
+      </div></fieldset>
+      <fieldset><legend class="eyebrow">Tech and operations <span class="hint">UGX M / year</span></legend><div class="form-grid">
+        ${[0, 1, 2].map(i => `<label class="f">Year ${i + 1}<input class="in num" type="number" min="0" step="50" id="ops${i}" value="${M.ops[i]}"></label>`).join('')}</div></fieldset>
+      <div><button class="btn chip" type="button" data-a="model-reset">Back to your figures</button></div>
+    </form>
+  </section>
+  <div class="stack" id="model-out"></div>
+</div>
+<section class="stack" id="model-sens"></section>`;
+
+function modelOut() {
+  const Y = [0, 1, 2].map(i => yr(i));
+  const rows = [
+    ['Premium revenue', 'prem'], ['Transaction and rebate revenue', 'reb'], ['Gross revenue pool', 'gross', 1],
+    [`Emergency claims paid (${trim2(M.claimRate)}% claim)`, 'claims'], ['Credit losses and cost of funds', 'credit'], ['Member discounts and points', 'disc'], ['Tech and operations', 'ops'], ['Net margin', 'net', 1],
+  ];
+  const table = `<div class="tablewrap"><table class="t"><thead><tr><th>UGX</th>${Y.map((y, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${y.f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead>
+    <tbody>${rows.map(([l, k, s]) => `<tr class="${s ? 'strong' : ''}"><td>${l}</td>${Y.map(y => `<td class="n ${y[k] < 0 ? 'neg' : ''}">${short(y[k])}</td>`).join('')}</tr>`).join('')}
+    <tr><td class="muted">Net in your original table</td>${PLAN_NET.map(v => `<td class="n muted">${short(v)}</td>`).join('')}</tr></tbody></table></div>
+    <p class="small muted">With the plan's assumptions (everyone on the annual plan, no discounts) this lands within 1% of your table. The gap is the 2.5% fee: here it is charged only on the ${trim2(M.creditShare)}% of households who use credit, not on everyone.</p>`;
+  const y3 = Y[2], f = y3.f;
+  const per = [['Premium', y3.prem / f, 'var(--leaf)'], ['Rebate and fees', y3.reb / f, 'var(--leaf)'], ['Claims', y3.claims / f, 'var(--bad)'], ['Credit costs', y3.credit / f, 'var(--bad)'], ['Discounts', y3.disc / f, 'var(--bad)'], ['Tech and ops', y3.ops / f, 'var(--bad)'], ['Net', y3.net / f, y3.net >= 0 ? 'var(--ok)' : 'var(--bad)']];
+  const maxv = Math.max(...per.map(p => Math.abs(p[1])), 1);
+  const bars = `<section class="panel"><h3>One household, Year 3</h3><div class="bars">${per.map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${Math.abs(v) / maxv * 100}%;background:${c}"></i></span><span class="v">${short(v)}</span></div>`).join('')}</div></section>`;
+  $('#model-out').innerHTML = `<section class="stack"><h3>Three-year view</h3>${table}</section>${bars}`;
+  const annualShare = Math.max(0, 100 - Math.min(M.mixW, 100) - Math.min(M.mixM, 100 - Math.min(M.mixW, 100)));
+  $('#eff-prem').textContent = `Average premium: ${ugx(premiumOf())} a year per household (${trim2(annualShare)}% on annual). It uses the original plan's prices; shopping packages are on the Packages screen.`;
+
+  // Stress grid and findings
+  const rates = [2, 4, 6, 8, 10, 12], draws = [10, 20, 35, 50];
+  const grid = `<div class="tablewrap"><table class="t grid-sens"><thead><tr><th>Claim rate ↓ · used per claim →</th>${draws.map(d => `<th class="n">UGX ${d}M</th>`).join('')}</tr></thead><tbody>
+    ${rates.map(r => `<tr><td>${r}% of households</td>${draws.map(d => { const v = yr(2, { ...M, claimRate: r, avgDraw: d }).net; return `<td class="cell ${v >= 0 ? 'pos' : 'neg'} ${r === M.claimRate && d === M.avgDraw ? 'here' : ''}">${short(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+  const full = yr(2, { ...M, avgDraw: M.limit });
+  const be = breakEven(2), beFull = breakEven(2, { ...M, avgDraw: M.limit });
+  const illus = yr(2, { ...M, lossPct: Math.max(M.lossPct, 3), cofPct: Math.max(M.cofPct, 18) });
+  const noCreditCost = M.lossPct === 0 && M.cofPct === 0;
+  const F = [
+    [full.net < 0 ? 'bad' : '', 'If approved households use their whole allowance',
+      `Your plan budgets an average payout of UGX ${M.avgDraw}M against a ${M.limit}M allowance. If ${trim2(M.claimRate)}% claim the full ${M.limit}M, Year 3 claims become ${ugx(full.claims)} and the net margin is ${ugx(full.net)}. A family that lost its income will usually spend everything it is allowed, so either cap the benefit at ${M.avgDraw}M or price for ${M.limit}M.`],
+    [be < 0.06 ? 'bad' : '', `Break-even claim rate: ${pct(be)} (${pct(beFull)} at full use)`,
+      `Above this share of households claiming in a year, the business loses money. Job loss, a hospital admission or a district drought in a given year is common among Kampala households, so price from real claims data from a pilot before scaling past Year 1.`],
+    [noCreditCost ? 'bad' : '', 'The credit line has to be funded',
+      `About ${ugx(y3.outstanding)} of groceries are on credit at any moment in Year 3: one month of spend for ${trim2(M.creditShare)}% of households. Someone lends that money and absorbs the families who don't repay. ${noCreditCost ? 'Your table counts neither.' : ''} At ${trim2(Math.max(M.lossPct, 3))}% of credit volume lost and ${trim2(Math.max(M.cofPct, 18))}% a year cost of funds, Year 3 net is ${ugx(illus.net)}.`],
+    ['', `A ${trim2(M.feePct)}% fee every month is about ${trim2(M.feePct * 12)}% a year`,
+      'That is consumer credit pricing, and fees usually count toward the cost of credit. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap with UMRA and whether the processing fee counts toward it before launch.'],
+    ['', 'Weekly and monthly payers',
+      `If they never miss a payment, a weekly payer brings in ${ugx(ORIGINAL.weekly * 52)} a year and a monthly payer ${ugx(ORIGINAL.monthly * 12)}, against ${ugx(ORIGINAL.annual)} upfront. The model assumes every household pays all year. Weekly payers lapse more often, so track lapses by plan in the pilot and budget for them.`],
+    [M.discPct + M.ptsPct === 0 ? 'bad' : '', 'Bonuses and points cost money',
+      `The yearly ${trim2(S.plans.annual.bonus)}% bonus and ${trim2(S.plans.annual.pts * S.loyalty.value)}% back in points, on UGX ${trim2(M.spend)}M of card spend, are worth about ${ugx(M.spend * 1e6 * (S.plans.annual.bonus + S.plans.annual.pts * S.loyalty.value) / 100)} a year to each household. ${M.discPct + M.ptsPct === 0 ? 'Your table counts none of it. ' : ''}If Kibanja pays all of it, Year 3 net is ${ugx(yr(2, { ...M, discPct: S.plans.annual.bonus, ptsPct: S.plans.annual.pts * S.loyalty.value }).net)}. Supplier-funded offers and unspent points keep the real cost lower.`],
+    ['bad', 'Drought hits many households at once',
+      'Job losses and hospital stays are spread out. A declared drought pays every member in the district in the same month. Cap exposure per district and buy reinsurance or a parametric weather cover before offering the drought trigger.'],
+    ['', 'Costs still missing from the table',
+      'The underwriting partner\'s share or reinsurance, sales agent commissions, card issuing, and corporate income tax (30% in Uganda). Add them before treating any line as profit.'],
+  ];
+  $('#model-sens').innerHTML = `<div class="split">
+    <section class="stack"><h3>Stress test: Year 3 net margin</h3><p class="small muted">Each cell recomputes Year 3 with that claim rate and average use, keeping every other input. The outlined cell is your current assumption.</p>${grid}</section>
+    <section class="panel"><h3>What the numbers say</h3><ul class="findings">${F.map(([c, b, t]) => `<li class="${c}"><div><b>${b}</b><span class="small">${t}</span></div></li>`).join('')}</ul></section>
+  </div>`;
+}
+
+/* Rollout */
+const LIC = [
+  ['ira', 'Underwriting partner licensed by the Insurance Regulatory Authority of Uganda', 'The emergency cover is insurance. Either a licensed insurer carries the risk and you act as its distributor, or you apply for your own licence with the capital that requires.'],
+  ['umra', 'Credit partner, or a Tier 4 licence from the Uganda Microfinance Regulatory Authority', 'The credit line and Kibanja Loans lend money. A licensed bank, microfinance deposit-taker or money lender has to hold the deposits and the loan book.'],
+  ['bou', 'Payments and the wallet through a Bank of Uganda-licensed provider', 'Card payments, Mobile Money collections and stored wallet balances fall under the National Payment Systems Act. Wallet money belongs to customers: hold it through a licensed e-money issuer or payment partner, in trust.'],
+  ['pdpo', 'Registration with the Personal Data Protection Office', 'Health and employment records used to verify claims are sensitive personal data under the Data Protection and Privacy Act 2019. Register, and get explicit consent at enrolment.'],
+  ['ursb', 'Company registration (URSB), a URA tax number and a KCCA trading licence for each store', 'Needed before the flagship store opens.'],
+  ['float', 'Written rule on what premium money may fund', 'Premiums back claims. Keep them with the underwriter or in a ring-fenced account and fund the stores from equity or debt.'],
+];
+
+V.rollout = () => `<div class="stack" style="gap:4px"><h2>Rollout</h2><p class="muted small">The first year and a half in detail: Phase 1 of the 10-year plan in the investor pack.</p></div>
+<div class="phases">
+  <article class="panel phase"><span class="when">Months 1–6</span><h3>Fintech launch</h3><p class="small muted">Launch the app and card using partner supermarkets.</p>
+    <ul><li>Family app, card issuing, Mobile Money premium collection</li><li>Card-reading link at 3–5 partner stores. Approach Kampala chains such as Fraine and Quality: their shoppers get cover and credit, the store gets locked-in customers</li><li>Operations desk with claims verification</li><li>Underwriter and credit partner signed</li></ul>
+    <p class="small"><b>Suggested gate:</b> six months of real claim and repayment data before the store opens.</p></article>
+  <article class="panel phase"><span class="when">Months 7–12</span><h3>Flagship store</h3><p class="small muted">Open the first Kibanja store in Kira, Kisaasi or Naalya and keep the full 15–25% retail margin.</p>
+    <ul><li>Own store till with essentials split</li><li>Stock and shelf-price management</li><li>Food Basket packing and member pricing</li></ul>
+    <p class="small" style="color:var(--bad)"><b>Change from the original plan:</b> fund the store from equity or debt, not the premium float. That money is owed to claimants.</p></article>
+  <article class="panel phase"><span class="when">Year 2 onward</span><h3>Micro-hub expansion</h3><p class="small muted">Smaller, low-overhead container-style hubs close to members.</p>
+    <ul><li>Offline-capable till that syncs later</li><li>Hub stock replenished from the flagship</li><li>Hubs placed where members' card spend is highest</li></ul></article>
+</div>
+<div class="split">
+  <section class="stack"><h3>Flagship store set-up</h3>
+    <div class="tablewrap"><table class="t"><thead><tr><th>Item</th><th class="n">Low</th><th class="n">High</th></tr></thead><tbody>
+      <tr><td>Location and fit-out<br><span class="small muted">200–300 m², 6 months' rent deposit, shelving, lighting, branding</span></td><td class="n">80M</td><td class="n">150M</td></tr>
+      <tr><td>Smart till integration<br><span class="small muted">Barcode scanners, receipt printers, card-reading API</span></td><td class="n">15M</td><td class="n">30M</td></tr>
+      <tr><td>Opening stock<br><span class="small muted">Still to be costed</span></td><td class="n">—</td><td class="n">—</td></tr>
+      <tr class="strong"><td>Known so far</td><td class="n">95M</td><td class="n">180M</td></tr>
+    </tbody></table></div>
+    <p class="small muted">All figures UGX.</p>
+  </section>
+  <section class="panel"><h3>Licences and partners to line up first</h3>
+    <ul class="lic">${LIC.map(([k, b, t]) => `<li><label><input type="checkbox" data-lic="${k}" ${licences[k] ? 'checked' : ''}><span><b>${b}</b><span class="small muted" style="display:block">${t}</span></span></label></li>`).join('')}</ul>
+    <p class="small muted">A starting list, not legal advice. Confirm each item with a Ugandan lawyer before relying on it. Your ticks stay in this browser.</p>
+  </section>
+</div>`;
+
+/* Investors */
+const ROOM = [
+  ['claims', 'Pilot claims log', 'Every claim, its trigger, evidence, decision and amount paid.'],
+  ['cohorts', 'Renewal and repayment by monthly cohort', 'The retention and credit-loss numbers the pitch depends on.'],
+  ['cac', 'Customer acquisition cost', 'Total sales and marketing spend divided by households enrolled, by channel.'],
+  ['store', 'Flagship store P&L and measured shrinkage', 'Against the month before the kitchen and the card went live.'],
+  ['legal', 'Licences and partner agreements', 'Underwriter, credit partner, payments, data protection registration.'],
+  ['cap', 'Cap table and use of funds', 'Who owns what, and what this round pays for.'],
+];
+
+V.investors = () => {
+  const Y = [0, 1, 2].map(i => yr(i)), y3 = Y[2], f = y3.f;
+  const float = y3.prem / 2;                 // premiums are earned through the year, so on average half a year's worth is held
+  const nwc = float - y3.outstanding;
+  const floatIncome = float * ui.floatYield / 100;
+  const lossRatio = y3.claims / y3.prem;
+  return `<section class="hero">
+  <span class="eyebrow">Investor pitch and 10-year scale plan</span>
+  <h1>A fintech ecosystem <em>with its own shelves</em>.</h1>
+  <p class="lede">Kibanja SmartCare is pitched as more than a supermarket: an AI-driven card that families pay for upfront, a captive store network where they spend it, and the data that links the two. Investors like captive ecosystems because acquisition costs are low, retention is high and upfront subscriptions make cash flow predictable. Each of those has to be shown with pilot numbers.</p>
+</section>
+
+<section class="stack">
+  <div class="row between"><h2>Year 3 in the model</h2><button class="btn chip" data-a="tab" data-v="model">Change assumptions</button></div>
+  <div class="kpis">
+    <div class="kpi"><span class="eyebrow">Households</span><span class="v">${f.toLocaleString('en-US')}</span><span class="small muted">Kampala, Year 3</span></div>
+    <div class="kpi"><span class="eyebrow">Revenue per household</span><span class="v">${short(y3.gross / f)}</span><span class="small muted">premium, rebate and fees</span></div>
+    <div class="kpi"><span class="eyebrow">Net per household</span><span class="v">${short(y3.net / f)}</span><span class="small muted">before tax and commissions</span></div>
+    <div class="kpi"><span class="eyebrow">Loss ratio</span><span class="v">${pct(lossRatio)}</span><span class="small muted">claims ÷ premiums</span></div>
+    <div class="kpi"><span class="eyebrow">Acquisition cost</span><span class="v">Not measured</span><span class="small muted">the pilot has to produce it</span></div>
+  </div>
+</section>
+
+<section class="stack">
+  <h2>The three unfair advantages</h2>
+  <div class="models">
+    <article class="panel adv">
+      <h3>Negative working capital: the float</h3>
+      <p class="claim">Families pay their subscriptions upfront, so Kibanja holds their money before they consume the goods, and that cash earns interest.</p>
+      <div class="figs">
+        <span>Premiums held on average</span><span class="v">${short(float)}</span>
+        <span>Groceries on credit at any time</span><span class="v">−${short(y3.outstanding)}</span>
+        <span class="tot">Cash held minus credit funded</span><span class="v tot" style="color:${nwc < 0 ? 'var(--bad)' : 'var(--ok)'}">${short(nwc)}</span>
+      </div>
+      <label class="f">Yield on the float <span class="hint">% a year, your assumption</span><input class="in num" type="number" id="float-yield" min="0" step="0.5" value="${ui.floatYield}"></label>
+      <p class="small">At ${trim2(ui.floatYield)}% the premiums held would earn about <b class="num">${ugx(floatIncome)}</b> a year.</p>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Whose balance sheet is the float on? Premiums belong to whoever carries the risk. If a licensed insurer underwrites the cover, the float and its interest sit with them unless the agreement shares investment income.</p>
+        <p>${nwc < 0 ? `With ${trim2(M.creditShare)}% of households shopping on credit, Kibanja fronts more in groceries than it holds in premiums. The credit line needs a funder; it does not create float.` : 'Premiums cover the credit line in this scenario, but they are reserved for claims and cannot also fund it.'}</p>
+      </div>
+    </article>
+    <article class="panel adv">
+      <h3>The AI data goldmine</h3>
+      <p class="claim">The platform records item-level checkout data for every household, down to each family's consumption cycle.</p>
+      <div class="figs">
+        <span>Households tracked, Year 3</span><span class="v">${f.toLocaleString('en-US')}</span>
+        <span>Card spend recorded a year</span><span class="v">${short(f * M.spend * 1e6)}</span>
+      </div>
+      <div class="ask"><h4>What makes it a moat</h4>
+        <p>Nobody else links what a family buys to whether it repays and when it hits a shock. Show the data predicting something that earns money: a missed repayment from a change in the basket, restock timing, supplier-funded offers.</p></div>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Consent and use. Purchase, health and employment data is personal data under the Data Protection and Privacy Act 2019: get consent at enrolment, use it for stated purposes, and sell suppliers only aggregated insight.</p>
+        <p>Scale. ${f.toLocaleString('en-US')} households is a deep panel but a small one next to mobile money operators and large retailers. Pitch the link between spending, repayment and shocks, not the size.</p>
+      </div>
+    </article>
+    <article class="panel adv">
+      <h3>Zero-waste vertical integration</h3>
+      <p class="claim">Supermarket, AI wallet and an in-house kitchen together: stock near its sell-by date becomes cooked meals, so food waste, the biggest profit killer in retail, falls sharply.</p>
+      <div class="ask"><h4>What makes it true</h4>
+        <p>A measured number. Run the flagship for six months, record shrinkage against the month before the kitchen opened, and publish it. Card data helps too: knowing when members restock lets the store order closer to demand.</p></div>
+      <div class="ask"><h4>What diligence will ask</h4>
+        <p>Shrinkage also covers theft, damage and record errors, not only spoilage, so "near zero" will not survive a store visit. Lead with the measured reduction.</p>
+        <p>The kitchen adds food-safety licensing, cooks and equipment to the store's costs. Show it pays for itself.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="stack">
+  <h2>Against Uganda's supermarket cards</h2>
+  <div class="tablewrap"><table class="t"><thead><tr><th>Programme</th><th>What members get</th><th>What it doesn't do</th></tr></thead><tbody>
+    <tr><td><b>Carrefour MyCLUB</b></td><td style="white-space:normal">Points for scanning the MAF Carrefour app at the till, spendable in store from 10,000 points (lowered from 100,000 in 2023), and extra points on MyCLUB offers</td><td style="white-space:normal">No cover when income stops, no credit, one chain only</td></tr>
+    <tr><td><b>Fraine</b></td><td style="white-space:normal">Known for fresh, local produce. No public shopping-card programme found</td><td style="white-space:normal">A strong partner-store candidate rather than a card competitor</td></tr>
+    <tr><td><b>Older card schemes</b></td><td style="white-space:normal">Uchumi's U-Club card, around 2008: 1 point per UGX 100, each worth UGX 1</td><td style="white-space:normal">Points only</td></tr>
+    <tr><td><b>Kibanja SmartCare</b></td><td style="white-space:normal">Points on the same base (2 per UGX 100 on annual), member discount, wallet, credit line and emergency cover. Pays by card or phone code across partner stores</td><td style="white-space:normal">Has to earn store partners and licences first</td></tr>
+  </tbody></table></div>
+  <p class="small muted" style="max-width:72ch">Shoppers in Kampala already know points. The pitch is what points can't do: keep a family fed when its income stops. Programme details are from press coverage and may have changed; check before quoting them to investors.</p>
+</section>
+
+<section class="stack">
+  <h2>10-year geographic expansion</h2>
+  <div class="phases">
+    <article class="panel phase"><span class="when">Years 1–2</span><h3>Kampala urban</h3>
+      <p class="small muted">Launch the core card platform with partner supermarkets, then the flagship store. The platform's Rollout screen has this phase in detail.</p>
+      <ul><li>Family app, store till, operations desk</li><li>Underwriter and credit partner signed</li><li>Flagship store, then the first micro-hubs</li></ul>
+      <p class="small"><b>Gate to Phase 2:</b> 12 months of claims and repayment data with loss ratio and credit losses inside plan, renewal rate measured, flagship profitable at store level.</p></article>
+    <article class="panel phase"><span class="when">Years 3–5</span><h3>Ugandan regional</h3>
+      <p class="small muted">Regional cities such as Jinja, Mbarara, Gulu, Mbale and Masaka, plus the farming households around them.</p>
+      <ul><li>Micro-hubs supplied from a regional hub store</li><li>Crop and drought cover with agricultural partners</li><li>Offline-capable tills for weaker connectivity</li></ul>
+      <p class="small"><b>Gate to Phase 3:</b> unit economics positive in at least two cities outside Kampala, and drought exposure reinsured.</p></article>
+    <article class="panel phase"><span class="when">Years 6–10</span><h3>Pan-East Africa</h3>
+      <p class="small muted">Kenya, Tanzania and Rwanda, entered one country at a time.</p>
+      <ul><li>A local insurer and lender in each country</li><li>Multi-currency, multi-regulator platform</li><li>Data stored according to each country's law</li></ul>
+      <p class="small"><b>Watch:</b> insurance, lending, payments and data licences are national. Each country is a new licensing project, not a switch-on.</p></article>
+  </div>
+</section>
+
+<div class="split">
+  <section class="panel"><h3>Raise in the order the evidence arrives</h3>
+    <ul class="stages">
+      <li><b>Pre-seed · now</b><span class="small">Founders, angels, grants and impact accelerators. Pays for licences, partners, the app and a pilot of up to 1,000 households.</span></li>
+      <li><b>Seed · after 12 months</b><span class="small">Impact and Africa-focused early-stage funds. Pitch with real loss ratio, repayment and renewal numbers.</span></li>
+      <li><b>Growth · Phase 2</b><span class="small">Growth funds like those named in the pitch (Norrsken22, Tiger Global) and regional institutional funds generally invest once revenue and repeat customers are proven. Bring Phase 1 results, not projections.</span></li>
+      <li><b>Strategic · any stage</b><span class="small">An insurer or development finance institution taking equity alongside underwriting or a credit facility.</span></li>
+    </ul>
+  </section>
+  <section class="panel"><h3>Data room checklist</h3>
+    <ul class="lic">${ROOM.map(([k, b, t]) => `<li><label><input type="checkbox" data-room="${k}" ${dataroom[k] ? 'checked' : ''}><span><b>${b}</b><span class="small muted" style="display:block">${t}</span></span></label></li>`).join('')}</ul>
+    <p class="small muted">Your ticks stay in this browser.</p>
+  </section>
+</div>`;
+};
+
+/* How it works */
+V.how = () => {
+  const P = S.plans;
+  const step = (n, title, text, v, label) => `<li class="panel how-step"><span class="step-n">${n}</span><h3>${title}</h3><p class="small">${text}</p><div><button class="btn chip" data-a="tab" data-v="${v}">${label}</button></div></li>`;
+  return `<section class="hero">
+  <span class="eyebrow">How Kibanja works</span>
+  <h1>One card for the family's <em>food, savings, credit and cover</em>.</h1>
+  <p class="lede">A household pays a small plan, shops with a card or a phone code instead of cash, earns points on everything, can borrow against its own good record, and is kept fed if the main income stops.</p>
+</section>
+
+<section class="stack">
+  <h2>For a family, in six steps</h2>
+  <ol class="how-steps">
+    ${step(1, 'Pick a package', `Enrol in the app with a national ID and a phone number. Solo is ${ugx(priceFor('solo', 'weekly'))} a week, Family Starter ${ugx(priceFor('familystart', 'weekly'))}, Family ${ugx(priceFor('family', 'weekly'))}. Employers buy for all their staff. Pay weekly, monthly or yearly by Mobile Money; the money plus a bonus lands on your card.`, 'plans', 'See the packages')}
+    ${step(2, 'Get the card and the app', 'The SmartCare card works at every Kibanja and partner store. On days the card stays at home, the app gives a one-time pay code instead.', 'member', 'Open the family app')}
+    ${step(3, 'Shop for what you want', 'Walk into the supermarket and pick anything. The cashier scans the card and the shopping balance pays, with no cash. Bulk packs and the price-locked Food Basket stretch it further.', 'pos', 'Try the till')}
+    ${step(4, 'Earn points and bonuses', `Every payment earns points: ${trim2(P.annual.pts)} per UGX 100 on the yearly plan, ${trim2(P.weekly.pts)} on weekly, and double on Ugandan-made goods. Points spend like money from ${S.loyalty.threshold.toLocaleString('en-US')}. Every package payment also adds a ${trim2(P.weekly.bonus)}–${trim2(P.annual.bonus)}% bonus.`, 'plans', 'See bonuses')}
+    ${step(5, 'Protected when income stops', `After ${WAIT_DAYS} days of payments, if the main earner loses their job or is admitted to hospital, the package continues free for ${PROTECT_MONTHS} months for essentials, and food credit repayments freeze.`, 'ops', 'See how claims are checked')}
+    ${step(6, 'Borrow to grow food', 'Kibanja Loan buys seed and fertiliser, chicks and feed, storage, stock for a food stall, a motorcycle or fuel. The limit comes from the household\'s own record on the card.', 'loans', 'Open Kibanja Loan')}
+  </ol>
+</section>
+
+<section class="stack">
+  <h2>Where the money goes</h2>
+  <div class="tablewrap"><table class="t wrap"><thead><tr><th>Money</th><th>Who holds it</th><th>What it pays for</th><th>What Kibanja earns</th></tr></thead><tbody>
+    <tr><td><b>Plan payments</b></td><td>A licensed insurer partner</td><td>Emergency allowances for households hit by a shock</td><td>A share of the premium for running the scheme</td></tr>
+    <tr><td><b>Wallet top-ups</b></td><td>A licensed payment partner, in trust</td><td>Shopping at any Kibanja or partner store</td><td>Nothing directly: it is the family's money</td></tr>
+    <tr><td><b>Food credit and Kibanja Loans</b></td><td>A licensed lender partner</td><td>Groceries now, farm inputs, poultry, storage, food-trade stock, motorcycles and fuel</td><td>Processing fees and a share of loan interest</td></tr>
+    <tr><td><b>Food Basket and store stock</b></td><td>Producers and manufacturers</td><td>Staples bought on forward orders, paid within 48 hours</td><td>A thin margin on the basket; most of its value is loyalty</td></tr>
+    <tr><td><b>Shopping at partner stores</b></td><td>The store</td><td>The family's basket</td><td>A 6% rebate from the store</td></tr>
+    <tr><td><b>Shopping at Kibanja stores</b></td><td>Kibanja</td><td>The family's basket</td><td>The full 15–25% retail margin</td></tr>
+  </tbody></table></div>
+  <p class="small muted" style="max-width:72ch">Keeping each kind of money with a licensed partner is what lets Kibanja run insurance, payments and lending before it holds those licences itself. It also means premiums and wallet balances are never used to fund stores.</p>
+</section>
+
+<div class="split">
+  <section class="panel"><h3>Who does what</h3>
+    <ul class="rules">
+      <li><b>The family</b><span class="muted small">Pays the plan, tops up the wallet, shops, repays on time, reports an emergency.</span></li>
+      <li><b>The store and its cashier</b><span class="muted small">Scans the card or pay code. The till applies discounts and splits the payment.</span></li>
+      <li><b>Kibanja operations</b><span class="muted small">Checks claims and loan applications, approves or declines them, and answers families.</span></li>
+      <li><b>The insurer partner</b><span class="muted small">Carries the emergency risk and holds the premiums.</span></li>
+      <li><b>The lender partner</b><span class="muted small">Funds the credit line and Kibanja Loans and holds the loan book.</span></li>
+      <li><b>The payment partner</b><span class="muted small">Moves Mobile Money and holds wallet balances in trust.</span></li>
+      <li><b>Producers, manufacturers and Made in Uganda</b><span class="muted small">Supply the Food Basket and the shelves on forward orders, and fund member offers.</span></li>
+    </ul>
+  </section>
+  <section class="panel"><h3>Questions families ask</h3>
+    <div class="faq">
+      <details><summary>Which package is right for us?</summary><p class="small">Count the people you feed. One person: Solo or Solo Plus. Up to four: Family Starter. Up to six: Family. Bigger or extended households: Family Max. Not ready to commit? The Kibanja Card is free; top it up any time.</p></details>
+      <details><summary>Do I lose money I don't spend?</summary><p class="small">No. Your shopping balance carries over from one payment to the next. It is your money, held in trust.</p></details>
+      <details><summary>My employer pays. How does that work?</summary><p class="small">Your employer buys a Kibanja Staff package and your balance is topped up on the same day every month. You shop the same way and can add your own money too.</p></details>
+      <details><summary>What if I miss a payment?</summary><p class="small">Your balance keeps working. Package Protection continues for ${P.weekly.grace} days on weekly, ${P.monthly.grace} on monthly and ${P.annual.grace} on yearly; after that protection and credit pause until you pay, and the ${WAIT_DAYS}-day wait starts again.</p></details>
+      <details><summary>Can I buy anything with the card?</summary><p class="small">Yes. Your shopping balance and points pay for any item, and anything left goes to Mobile Money, so you never need cash. Only food credit and Package Protection are kept to essentials, so borrowed and insurance money always feeds the family.</p></details>
+      <details><summary>Which shops take it?</summary><p class="small">Kibanja stores and partner supermarkets. The first partners are Kampala stores during the launch phase.</p></details>
+      <details><summary>What if the card can't cover the whole basket?</summary><p class="small">The till sends the rest to your phone as a Mobile Money prompt. If you don't approve it, the cashier takes items off instead.</p></details>
+      <details><summary>Can I borrow for school fees?</summary><p class="small">Not yet. Kibanja Loan is for growing, storing and selling food, plus motorcycles and fuel that move it. Other loans can follow once these have a track record.</p></details>
+      <details><summary>Can I borrow during an emergency?</summary><p class="small">No. While a claim is open or an allowance is being paid, the allowance is the help. Lending to a family whose income has just stopped would put it deeper in debt.</p></details>
+      <details><summary>Who sees my information?</summary><p class="small">Kibanja and its licensed partners, to run your account and decide claims and loans. It is never sold with your name on it, and you can ask what is held about you.</p></details>
+    </div>
+  </section>
+</div>`;
+};
+
+/* Loans: one engine, two books */
+// Kibanja Loan stays inside the food system: loans that grow, store and sell food, and loans that move it.
+const LOAN_PRODUCTS = {
+  farm: { group: 'grow', name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], period: 'month', rate: 2.0, to: 'Collected as seed and fertiliser at a Kibanja hub', via: 'Hub voucher', blurb: 'Seed, fertiliser and tools. Repay in cash, or sell the harvest to Kibanja and the instalments come off the price.' },
+  poultry: { group: 'grow', name: 'Poultry and livestock', max: 1500000, terms: [4, 6, 9], period: 'month', rate: 2.0, to: 'Chicks, feed and vaccines from a partner supplier', via: 'Supplier', blurb: 'Layers, broilers, piglets or a dairy goat, with feed to the first sale. Kibanja can buy the eggs and milk.' },
+  storage: { group: 'grow', name: 'Storage and drying', max: 1000000, terms: [6, 9, 12], period: 'month', rate: 2.0, to: 'Tarpaulins, hermetic bags or a small silo from a partner supplier', via: 'Supplier', blurb: 'Cuts losses after harvest, so more of the crop is eaten or sold.' },
+  business: { group: 'grow', name: 'Food-trade stock', max: 3000000, terms: [3, 6, 9], period: 'month', rate: 2.5, to: 'Stock at trade price from a Kibanja hub', via: 'Hub stock', blurb: 'Stock for a food kiosk, market stall or produce trade.' },
+};
+const MOVE_PRODUCTS = {
+  boda: { group: 'move', name: 'Motorcycle (boda boda)', max: 7000000, terms: [52, 78, 104], period: 'week', rate: 2.5, deposit: 20, to: 'Paid to the dealer once the 20% deposit is in', via: 'To dealer', blurb: 'A new motorcycle for a rider, or a farmer moving produce. It stays registered to the lender, with a tracker, until the last payment.' },
+  fuel: { group: 'move', name: 'Fuel', max: 150000, terms: [1, 2, 4], period: 'week', rate: 2.5, to: 'Loaded as fuel credit, spendable only at partner stations', via: 'Fuel credit', blurb: 'Fuel now, repaid within a month, for riders, farmers and food traders.' },
+};
+const PRODUCTS = { ...LOAN_PRODUCTS, ...MOVE_PRODUCTS };
+// One loan book. Products are grouped by what they do for the food system.
+const BOOKS = {
+  food: { view: 'loans', title: 'Kibanja Loan', short: 'Kibanja Loan', products: PRODUCTS, def: { product: 'farm', amount: 500000, n: 4 },
+    intro: 'Loans that grow, store, sell and move food, all on the same score and rules: farm inputs, poultry and livestock, storage, food-trade stock, motorcycles and fuel.' },
+};
+const LOAN_GROUPS = [['grow', 'Grow, store and sell food'], ['move', 'Move food']];
+const LOAN_FEE = 1;          // one-off processing fee, % of the amount
+const AFFORD = 0.3;          // all monthly repayments together may not exceed 30% of declared income
+
+const bookOf = () => 'food';
+const span = (period, n) => `${n} ${period}${n === 1 ? '' : 's'}`;
+const perRate = l => l.rate / 100 * (l.period === 'week' ? 12 / 52 : 1);   // the monthly rate, spread over weeks for weekly loans
+const instalment = l => { const r = perRate(l); return r ? l.amount * r / (1 - Math.pow(1 + r, -l.n)) : l.amount / l.n; };
+const monthlyCost = l => instalment(l) * (l.period === 'week' ? 52 / 12 : 1);
+const balanceAfter = (l, k) => { const r = perRate(l), i = instalment(l); return r ? Math.max(0, l.amount * Math.pow(1 + r, k) - i * (Math.pow(1 + r, k) - 1) / r) : l.amount - i * k; };
+const nextDue = l => l.period === 'week' ? addDays(l.start, 7 * (l.paid + 1)) : addMonths(l.start, l.paid + 1);
+const openLoans = m => S.loans.filter(l => l.m === m.id && (l.status === 'active' || l.status === 'pending'));
+const openLoan = (m, book) => openLoans(m).find(l => !book || bookOf(l.product) === book);
+
+// The Kibanja score: built only from what the household has done on the platform, so every point can be explained to them.
+function score(m) {
+  const c = cover(m), parts = [];
+  const months = Math.min(12, Math.max(0, Math.floor(days(m.enrolled, TODAY) / 30)));
+  parts.push(['Time as a member', months / 12 * 20, 20, `${months} month${months === 1 ? '' : 's'}`]);
+  parts.push(['Plan payments', tierOf(m).free ? 5 : { paid: 20, due: 10, lapsed: 0 }[c.s], 20, tierOf(m).free ? 'Free card: no package payments yet' : { paid: 'Up to date', due: 'Payment due', lapsed: 'Cover paused' }[c.s]]);
+  const late = S.loans.some(l => l.m === m.id && l.status === 'active' && nextDue(l) < TODAY);
+  let rep = m.credit.overdue ? 0 : 15 + Math.min(m.credit.onTime, 3) / 3 * 10;
+  let repTxt = m.credit.overdue ? 'Food credit repayment overdue' : `${Math.min(m.credit.onTime, 3)} on-time repayments in a row`;
+  if (late) { rep = 0; repTxt = 'Loan instalment late'; }
+  parts.push(['Repayment record', rep, 25, repTxt]);
+  const share = essShare(m.spend);
+  parts.push(['Spending on essentials', share * 20, 20, `${pct(share)} of card spending`]);
+  parts.push(['Card activity', Math.min(15, m.points / S.loyalty.threshold * 15), 15, `${m.points.toLocaleString('en-US')} points`]);
+  return { total: Math.round(parts.reduce((a, x) => a + x[1], 0)), parts };
+}
+
+function loanOffer(m, key) {
+  const P = PRODUCTS[key], book = bookOf(key), sc = score(m).total, blocks = [];
+  if (tierOf(m).free) blocks.push('Free card holders can\'t borrow yet. A package builds the record the score is made from.');
+  if (m.cover === 'active' || m.cover === 'review') blocks.push('This household has an open emergency claim or allowance. Kibanja does not lend during an emergency; the allowance is the help.');
+  if (cover(m).s === 'lapsed') blocks.push('The package is paused. It has to be paid first.');
+  if (m.credit.overdue) blocks.push('A food credit repayment is overdue.');
+  // One loan at a time; fuel credit is small and short, so it may run alongside one other loan.
+  const clash = openLoans(m).find(l => (l.product === 'fuel') === (key === 'fuel'));
+  if (clash) blocks.push(key === 'fuel' ? 'This household already has fuel credit open.' : `One Kibanja Loan at a time: this household already has a ${PRODUCTS[clash.product].name.toLowerCase()} loan open. Fuel credit can still run alongside it.`);
+  if (sc < 50) blocks.push(`A score of ${sc} is below the 50 needed to borrow.`);
+  const step = P.max >= 1000000 ? 50000 : 10000;
+  const limit = sc < 50 ? 0 : Math.floor(P.max * Math.min(1, (sc - 40) / 50) / step) * step;
+  return { limit, blocks, sc, step };
+}
+
+function affordability(m, l) {
+  const other = (m.cover === 'active' ? 0 : m.credit.dueAmt) + S.loans.filter(x => x.m === m.id && x.status === 'active' && x !== l).reduce((a, x) => a + monthlyCost(x), 0);
+  const cap = m.income * AFFORD, total = other + monthlyCost(l);
+  return { ok: total <= cap, total, cap, other };
+}
+
+function loanCard(l) {
+  const P = PRODUCTS[l.product], book = BOOKS[bookOf(l.product)];
+  if (l.status === 'pending') return `<div class="ph-block"><span class="eyebrow">${book.title}</span><h3>${P.name}: under review</h3>
+    <p class="small muted">${ugx(l.amount)} over ${span(l.period, l.n)}, applied ${fdate(l.applied)}. Most decisions take a day.</p></div>`;
+  const late = nextDue(l) < TODAY;
+  return `<div class="ph-block"><div class="row between"><span class="eyebrow">${book.title} · ${P.name}</span>${late ? '<span class="pill bad">Instalment late</span>' : '<span class="pill ok">On track</span>'}</div>
+    <div class="big">${ugx(balanceAfter(l, l.paid))}</div>
+    <div class="meter"><i style="width:${l.paid / l.n * 100}%"></i></div>
+    <p class="small muted">Left to repay on ${ugx(l.amount)}. ${l.paid} of ${span(l.period, l.n)} paid.</p>
+    <div class="due ${late ? 'bad' : ''}"><div class="row between"><span class="small"><b>${late ? 'Late since' : 'Next instalment'}</b> ${fdate(nextDue(l))}</span><span class="num">${ugx(instalment(l))}</span></div>
+      <button class="btn primary block" data-a="loan-pay" data-id="${l.id}">Pay ${ugx(instalment(l))} with Mobile Money</button></div>
+  </div>`;
+}
+
+function loanBlock(m) {
+  const open = openLoans(m), off = loanOffer(m, 'farm');
+  const offer = open.some(l => bookOf(l.product) === 'food') ? '' : `<div class="ph-block"><span class="eyebrow">Loans</span>
+    ${off.blocks.length ? `<p class="small muted">${esc(off.blocks[0])}</p>` : `<p>You could borrow up to <b class="num">${ugx(off.limit)}</b> for farm inputs.</p><p class="small muted">Your Kibanja score is ${off.sc}. It comes from your plan payments, repayments and card use.</p>`}
+    <button class="btn block" data-a="loan-apply">See Kibanja Loan</button></div>`;
+  return open.map(loanCard).join('') + offer;
+}
+
+function loanView(book) {
+  const B = BOOKS[book];
+  ui.loanBook = book;
+  const m = member(ui.loanAs), d = ui.loanDraft[book], P = B.products[d.product];
+  const off = loanOffer(m, d.product), sc = score(m);
+  d.amount = Math.max(off.step, Math.min(d.amount, Math.max(off.limit, off.step)));
+  if (!P.terms.includes(d.n)) d.n = P.terms[1];
+  const inBook = l => bookOf(l.product) === book;
+  const active = S.loans.filter(l => l.status === 'active' && inBook(l)), pending = S.loans.filter(l => l.status === 'pending' && inBook(l));
+  const outstanding = active.reduce((a, l) => a + balanceAfter(l, l.paid), 0);
+  const late = active.filter(l => nextDue(l) < TODAY), lateBal = late.reduce((a, l) => a + balanceAfter(l, l.paid), 0);
+  const rules = [
+    ['Food system only, for now.', 'Every Kibanja Loan grows, stores, sells or moves food. Other needs can be added once the book has a track record.'],
+    ['The money goes where the loan says.', 'Inputs, chicks and storage come from partner suppliers, stock from Kibanja hubs, motorcycles from the dealer and fuel as fuel credit, never as loose cash. That keeps loans productive and defaults lower.'],
+    ['Repay in produce, or from delivery pay.', 'A farmer can sell the harvest, eggs or milk to Kibanja and have the instalments taken off the price. Riders who deliver Food Baskets can repay from their delivery pay.'],
+    ['Motorcycles need a 20% deposit and stay secured.', 'The bike stays registered to the lender with a tracker until the last weekly payment. A rider\'s permit, helmet and third-party insurance are checked at the dealer.'],
+  ];
+  rules.push(['One loan at a time, plus fuel credit, and none during an emergency.', 'A household with an open claim or Package Protection is not offered credit.'],
+    ['Repayments stay under 30% of income.', 'Every loan instalment, weekly ones converted to monthly, is added to the food credit repayment before approval.'],
+    ['The full cost is shown before signing.', `Rate, the ${LOAN_FEE}% fee, every instalment and the total. The highest rate here is 2.5% a month on the reducing balance. Uganda capped money-lender interest at 2.8% a month in 2023; confirm the current cap and whether fees count toward it.`],
+    ['A licensed lender funds the loans.', 'Kibanja originates and services them; the book sits with a licensed lender until Kibanja holds its own licence.']);
+  return `<div class="stack" style="gap:4px"><h2>${B.title}</h2><p class="muted small">${B.intro}</p></div>
+  ${LOAN_GROUPS.map(([g, label]) => `<section class="stack"><h3>${label}</h3><div class="plans">${Object.entries(B.products).filter(([, x]) => x.group === g).map(([k, x]) => `<article class="panel plan-tile">
+    <div class="row between"><h3>${x.name}</h3><span class="pill">${trim2(x.rate)}% a month</span></div>
+    <div class="big">up to ${short(x.max)}<span class="per"> · ${x.terms[0]}–${span(x.period, x.terms[x.terms.length - 1])}</span></div>
+    <p class="small muted">${x.blurb} ${x.to}.</p></article>`).join('')}</div></section>`).join('')}
+
+  <div class="split">
+    <section class="panel">
+      <h3>Apply</h3>
+      <div class="form-grid">
+        <label class="f">Applying as<select class="in" id="ln-as">${S.members.map(x => `<option value="${x.id}" ${x.id === m.id ? 'selected' : ''}>${esc(hh(x))}</option>`).join('')}</select></label>
+        <label class="f">Loan<select class="in" id="ln-product">${LOAN_GROUPS.map(([g, label]) => `<optgroup label="${label}">${Object.entries(B.products).filter(([, x]) => x.group === g).map(([k, x]) => `<option value="${k}" ${k === d.product ? 'selected' : ''}>${x.name}</option>`).join('')}</optgroup>`).join('')}</select></label>
+      </div>
+      <div class="score">
+        <div class="row between"><span class="eyebrow">Kibanja score</span><span class="big">${sc.total}<span class="per"> / 100</span></span></div>
+        <div class="bars">${sc.parts.map(([l, v, max, why]) => `<div class="bar"><span>${l}</span><span class="track"><i style="width:${v / max * 100}%;background:var(--leaf)"></i></span><span class="v">${Math.round(v)}/${max}</span></div><p class="small muted score-why">${esc(why)}</p>`).join('')}</div>
+      </div>
+      ${off.blocks.length ? `<div class="callout bad-callout"><b>Can't apply right now</b>${off.blocks.map(x => `<span class="small">${esc(x)}</span>`).join('')}</div>` : `
+      <form id="loan-form" class="stack">
+        <label class="f">Amount <span class="hint">limit for this household: ${ugx(off.limit)}</span>
+          <input type="range" id="ln-amount" min="${off.step}" max="${Math.max(off.limit, off.step)}" step="${off.step}" value="${d.amount}"><span class="num" id="ln-amount-out">${ugx(d.amount)}</span></label>
+        <label class="f">Repay over<select class="in" id="ln-n">${P.terms.map(t => `<option value="${t}" ${t === d.n ? 'selected' : ''}>${span(P.period, t)}</option>`).join('')}</select></label>
+        <div id="ln-calc"></div>
+        <button class="btn primary" type="submit" id="ln-submit">Send application</button>
+      </form>`}
+    </section>
+    <section class="stack">
+      <h3>Loan book</h3>
+      <div class="kpis">
+        <div class="kpi"><span class="eyebrow">Outstanding</span><span class="v">${short(outstanding)}</span><span class="small muted">${active.length} active loan${active.length === 1 ? '' : 's'}</span></div>
+        <div class="kpi"><span class="eyebrow">Late</span><span class="v" style="color:${late.length ? 'var(--bad)' : 'inherit'}">${outstanding ? pct(lateBal / outstanding) : '0%'}</span><span class="small muted">of the book has a missed instalment</span></div>
+      </div>
+      <h4>Applications</h4>
+      ${pending.length ? `<ul class="queue">${pending.map(l => { const lm = member(l.m), a = affordability(lm, l); return `<li class="panel" style="gap:8px">
+        <div class="row between"><b>${esc(hh(lm))}</b><span class="pill warn">Waiting</span></div>
+        <span class="small">${PRODUCTS[l.product].name} · ${ugx(l.amount)} over ${span(l.period, l.n)} · score ${score(lm).total}</span>
+        <span class="small ${a.ok ? 'muted' : ''}" ${a.ok ? '' : 'style="color:var(--bad)"'}>Repayments ${ugx(a.total)} a month against a ${ugx(a.cap)} limit (30% of income)</span>
+        <div class="row"><button class="btn primary" data-a="loan-approve" data-id="${l.id}" ${a.ok ? '' : 'disabled'}>Approve and pay out</button><button class="btn danger" data-a="loan-decline" data-id="${l.id}">Decline</button></div></li>`; }).join('')}</ul>`
+        : '<p class="small muted">No applications waiting. Send one from the form, then approve it here.</p>'}
+      <h4>Active loans</h4>
+      <div class="tablewrap"><table class="t"><thead><tr><th>Household</th><th>Loan</th><th class="n">Balance</th><th>Next due</th></tr></thead><tbody>
+        ${active.length ? active.map(l => `<tr><td>${esc(member(l.m).name)}</td><td>${PRODUCTS[l.product].name} · ${l.paid}/${span(l.period, l.n)}</td><td class="n">${short(balanceAfter(l, l.paid))}</td><td>${nextDue(l) < TODAY ? `<span class="pill bad">Late · ${fdate(nextDue(l))}</span>` : fdate(nextDue(l))}</td></tr>`).join('') : '<tr><td colspan="4" class="muted">No active loans.</td></tr>'}
+      </tbody></table></div>
+    </section>
+  </div>
+
+  <section class="panel"><h3>Lending rules</h3>
+    <ul class="rules">${rules.map(([b, t]) => `<li><b>${b}</b><span class="muted small">${t}</span></li>`).join('')}</ul>
+  </section>`;
+}
+V.loans = () => loanView('food');
+
+function loanCalc() {
+  const out = $('#ln-calc'); if (!out) return;
+  const book = ui.loanBook, m = member(ui.loanAs), d = ui.loanDraft[book], P = PRODUCTS[d.product];
+  const l = { amount: d.amount, n: d.n, rate: P.rate, period: P.period };
+  const inst = instalment(l), interest = inst * d.n - d.amount, fee = d.amount * LOAN_FEE / 100, a = affordability(m, l);
+  out.innerHTML = `<div class="figs">
+      ${P.deposit ? `<span>Deposit to the dealer (${P.deposit}%)</span><span class="v">${ugx(d.amount / (1 - P.deposit / 100) * P.deposit / 100)}</span>` : ''}
+      <span>${P.period === 'week' ? 'Weekly' : 'Monthly'} instalment</span><span class="v">${ugx(inst)}</span>
+      <span>Interest over ${span(P.period, d.n)}</span><span class="v">${ugx(interest)}</span>
+      <span>Processing fee (${LOAN_FEE}%)</span><span class="v">${ugx(fee)}</span>
+      <span class="tot">Total repaid</span><span class="v tot">${ugx(d.amount + interest + fee)}</span>
+    </div>
+    <p class="small muted">${trim2(P.rate)}% a month on the reducing balance, about ${trim2((Math.pow(1 + P.rate / 100, 12) - 1) * 100)}% a year. ${P.to}.</p>
+    <p class="small" style="color:${a.ok ? 'var(--ok)' : 'var(--bad)'}">${a.ok ? 'Affordable' : 'Too high'}: all repayments would be ${ugx(a.total)} a month against ${ugx(a.cap)} (30% of the declared ${ugx(m.income)} income).</p>`;
+  const btn = $('#ln-submit'); if (btn) btn.disabled = !a.ok;
+}
+
+/* Food and producers */
+function volume(n, unit) {
+  if (unit === 'kg') return n >= 1000 ? `${trim2(n / 1000)} t` : `${Math.round(n).toLocaleString('en-US')} kg`;
+  if (unit === 'L') return n >= 1000 ? `${trim2(n / 1000)}k L` : `${Math.round(n).toLocaleString('en-US')} L`;
+  return `${Math.round(n).toLocaleString('en-US')} ${unit}`;
+}
+
+V.food = () => {
+  const items = BASKET.map(([sku, q, amt, unit]) => { const x = SKUS.find(k => k.sku === sku); return { ...x, q, amt, unit, line: x.price * q }; });
+  const shelf = items.reduce((a, i) => a + i.line, 0), basket = SKUS.find(x => x.sku === '3001');
+  const share = S.sales.all ? S.sales.local / S.sales.all : 0;
+  const up = ui.uptake / 100;
+  return `<section class="hero">
+  <span class="eyebrow">Food and producers</span>
+  <h1>Food security starts <em>with the supply</em>.</h1>
+  <p class="lede">Kibanja's members are predictable demand: thousands of households buying the same staples every month. That lets Kibanja buy straight from Ugandan farmers and manufacturers on forward orders, lock prices for families, and pay producers fast.</p>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <div class="row between"><h3>Kibanja Food Basket</h3><span class="pill ok">Price locked to ${fdate(BASKET_LOCKED_TO)}</span></div>
+    <div class="big">${ugx(basket.price)}<span class="per"> a month · family of five</span></div>
+    <p class="small">Saves <b>${ugx(shelf - basket.price)}</b> (${pct((shelf - basket.price) / shelf)}) against buying the same items one by one. About <b class="num">${ugx(basket.price / 5 / 30)}</b> per person per day.</p>
+    <div class="tablewrap"><table class="t"><thead><tr><th>In the basket</th><th class="n">Qty</th><th class="n">Shelf price</th></tr></thead><tbody>
+      ${items.map(i => `<tr><td>${esc(i.name)}${i.local ? ' <span class="tag ug">UG-made</span>' : ''}</td><td class="n">${i.q}</td><td class="n">${i.line.toLocaleString('en-US')}</td></tr>`).join('')}
+      <tr class="strong"><td>Bought one by one</td><td></td><td class="n">${shelf.toLocaleString('en-US')}</td></tr>
+    </tbody></table></div>
+    <p class="small muted">The price holds because the basket is bought on three-month forward orders. Members pay for it with food credit, the emergency allowance, the wallet or points. Add it at the Store till.</p>
+  </section>
+  <section class="panel">
+    <h3>Ugandan-made share of store sales</h3>
+    <div class="big">${pct(share)}</div>
+    <div class="target" role="img" aria-label="${pct(share)} of sales, against targets of 40% and 50%"><i style="width:${Math.min(100, share * 100)}%"></i><b style="left:40%"></b><b style="left:50%"></b></div>
+    <div class="target-lbl"><span style="left:40%">40%</span><span style="left:50%">50%</span></div>
+    <p class="small">The Buy Uganda Build Uganda policy aimed for half of supermarket shelf space to carry local goods, and a 2017 directive asked for 40%. Manufacturers say most supermarkets haven't got there. Kibanja can report this number every month, which is a strong story for partners and government.</p>
+    <p class="small muted">${ugx(S.sales.local)} of ${ugx(S.sales.all)} this month. Every sale at the Store till updates it, and Ugandan-made goods earn shoppers double points.</p>
+  </section>
+</div>
+
+<section class="stack">
+  <h2>Partners</h2>
+  <div class="tablewrap"><table class="t wrap"><thead><tr><th>Partner</th><th>Type</th><th>Supplies</th><th>Terms</th><th>Status</th></tr></thead><tbody>
+    ${S.partners.map(x => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.kind)}</td><td>${esc(x.supplies)}</td><td>${esc(x.terms)}</td><td><span class="pill ${x.status === 'Proposed' ? 'warn' : ''}">${x.status}</span></td></tr>`).join('')}
+  </tbody></table></div>
+  <p class="small muted">Rows marked "Example" show the kind of partner Kibanja needs, not real agreements. Replace them with real names as deals are signed.</p>
+</section>
+
+<div class="split">
+  <section class="panel">
+    <div class="row between"><h3>Made in Uganda (MIU)</h3><span class="pill warn">Proposed</span></div>
+    <p class="small">Press coverage describes MIU as a government-backed commerce platform for Ugandan manufacturers, SMEs and artisans that combines an online marketplace, physical retail outlets and fulfilment. A 2025 government newsletter mentions a Made in Uganda supermarket at the UMA showground in Lugogo.</p>
+    <h4>What a partnership could look like</h4>
+    <ul class="rules">
+      <li><b>SmartCare accepted at MIU outlets.</b><span class="muted small">Members pay with the card, points and food credit at MIU's shops, so Kibanja grows its store network without building it.</span></li>
+      <li><b>MIU goods on Kibanja shelves and in the Food Basket.</b><span class="muted small">Tagged UG-made, earning double points, with no listing fees.</span></li>
+      <li><b>MIU fulfilment for Kibanja micro-hubs.</b><span class="muted small">One supply line into the container hubs planned for Year 2.</span></li>
+      <li><b>Shared demand data.</b><span class="muted small">Aggregated, never with names: which Ugandan-made goods members buy, where and how often.</span></li>
+    </ul>
+    <p class="small muted">No agreement exists yet. These details come from press coverage; confirm them with MIU directly before quoting them.</p>
+  </section>
+  <section class="panel">
+    <h3>What producers and manufacturers get</h3>
+    <ul class="rules">
+      <li><b>No shelf fees for Ugandan-made goods.</b><span class="muted small">Uganda's manufacturers have complained of paying supermarkets for shelf space. Kibanja doesn't charge listing fees.</span></li>
+      <li><b>Orders they can plan on.</b><span class="muted small">Three-month forward orders sized from member numbers, shown below.</span></li>
+      <li><b>Paid within 48 hours by Mobile Money.</b><span class="muted small">Small producers can't wait 60 days for a supermarket to pay.</span></li>
+      <li><b>Loans repaid in produce.</b><span class="muted small">A Kibanja Loan buys seed, fertiliser, chicks or storage; Kibanja buys the harvest, eggs or milk and takes the instalments off the price.</span></li>
+      <li><b>Riders to move it.</b><span class="muted small">Boda loans put riders on the road who deliver from producers to hubs and from hubs to members.</span></li>
+      <li><b>Offers that move volume.</b><span class="muted small">A supplier-funded offer reaches every member's app and till at once.</span></li>
+    </ul>
+  </section>
+</div>
+
+<section class="stack">
+  <div class="row between"><h2>Volume producers can plan on</h2>
+    <label class="f" style="min-width:220px">Households taking a basket each month <span class="hint">%</span><input class="in num" type="number" id="food-uptake" min="0" max="100" step="5" value="${ui.uptake}"></label></div>
+  <div class="tablewrap"><table class="t"><thead><tr><th>Product, a month</th><th class="n">Per basket</th>${M.fam.map((f, i) => `<th class="n">Year ${i + 1}<br><span style="font-weight:400">${f.toLocaleString('en-US')} households</span></th>`).join('')}</tr></thead><tbody>
+    ${items.map(i => `<tr><td>${esc(i.name)}</td><td class="n">${volume(i.amt, i.unit)}</td>${M.fam.map(f => `<td class="n">${volume(i.amt * f * up, i.unit)}</td>`).join('')}</tr>`).join('')}
+    <tr class="strong"><td>Basket spend</td><td class="n">${short(basket.price)}</td>${M.fam.map(f => `<td class="n">${short(basket.price * f * up)}</td>`).join('')}</tr>
+  </tbody></table></div>
+  <p class="small muted">Household numbers come from the Underwriting screen. This is the volume to put in front of a mill, a cooperative or MIU when negotiating a locked price.</p>
+</section>`;
+};
+
+/* Investors to approach. c: confirmed in research on 22 Oct 2026; the rest are from general knowledge and need checking. */
+const INVESTORS = [{"n": "Catalyst Fund (BFA Global)","k": "grant","w": "Now","a": "Pre-seed equity","f": "Pre-seed fund and accelerator for African ventures building resilience; started in inclusive fintech.","c": true},{"n": "WFP Innovation Accelerator","k": "grant","w": "Now","a": "Grant","f": "Up to US$100k equity-free for food-security innovations that already have traction.","c": true},{"n": "Norrsken Accelerator","k": "grant","w": "Now","a": "Pre-seed equity","f": "Backed Ugandan agri-lender Emata.","c": true},{"n": "UNCDF","k": "grant","w": "Now","a": "Grant","f": "Ran AGRINVEST with Uganda Development Bank and FAO, with US$100k–300k grants for digital lending partners.","c": true},{"n": "IKEA Foundation","k": "grant","w": "Now","a": "Grant","f": "Funds agricultural livelihoods in East Africa, including Aceli Africa.","c": true},{"n": "Mastercard Foundation","k": "grant","w": "Now","a": "Grant","f": "Large funder of youth employment and agriculture work in Uganda.","c": false},{"n": "GSMA Innovation Fund","k": "grant","w": "Now","a": "Grant","f": "Equity-free grants for mobile-enabled services in low-income markets.","c": false},{"n": "Draper Richards Kaplan Foundation","k": "grant","w": "Now","a": "Grant or equity","f": "Venture philanthropy for early social enterprises; backed Emata.","c": true},{"n": "Y Combinator","k": "grant","w": "Now","a": "Pre-seed equity","f": "Standard deal for very early companies; has funded African fintechs.","c": false},{"n": "Antler East Africa","k": "grant","w": "Now","a": "Pre-seed equity","f": "Pre-seed programme and first cheque, run from Nairobi.","c": false},{"n": "Founders Factory Africa","k": "grant","w": "Now","a": "Pre-seed equity","f": "Venture builder and accelerator with fintech and agritech tracks.","c": false},{"n": "Village Capital","k": "grant","w": "Now","a": "Pre-seed equity","f": "Peer-selected accelerator programmes in fintech and agriculture.","c": false},{"n": "African Renaissance Partners","k": "seed","w": "Now","a": "Equity","f": "Led Emata's US$2.4M seed round for agri lending in Uganda.","c": true},{"n": "Zephyr Acorn","k": "seed","w": "Now","a": "Equity","f": "Early-stage investor in Ugandan fintech, including Emata.","c": true},{"n": "Mercy Corps Ventures","k": "seed","w": "Now","a": "Equity","f": "Invests in ventures that make underserved communities more resilient.","c": true},{"n": "Accion Venture Lab","k": "seed","w": "After pilot","a": "Equity","f": "Seed investor in inclusive fintech in emerging markets.","c": false},{"n": "Goodwell Investments","k": "seed","w": "After pilot","a": "Equity","f": "Inclusive-fintech investor; backed Ugandan fintech Agentbanking.","c": true},{"n": "Enabling Qapital","k": "seed","w": "After pilot","a": "Equity or debt","f": "Financial-inclusion investor; reported in Ugandan lender Premier Credit.","c": true},{"n": "Iungo Capital","k": "seed","w": "After pilot","a": "Revenue-based or debt","f": "Growth finance under US$500k for SMEs in Uganda, Kenya and Rwanda.","c": true},{"n": "Inua Capital","k": "seed","w": "After pilot","a": "Equity","f": "EU-backed impact fund for Ugandan SMEs, including agribusiness.","c": true},{"n": "Pearl Capital Partners (Yield Uganda Investment Fund)","k": "seed","w": "After pilot","a": "Equity","f": "Kampala agribusiness investor; the Yield fund targets food security with €250k–€2M deals.","c": true},{"n": "DOB Equity","k": "seed","w": "After pilot","a": "Equity","f": "Dutch family impact investor in East Africa, with a Ugandan agri-trading deal.","c": true},{"n": "Acumen (Resilient Agriculture Fund II)","k": "seed","w": "After pilot","a": "Equity","f": "Backs agribusinesses serving smallholders across ten African countries, Uganda included.","c": true},{"n": "Novastar Ventures","k": "seed","w": "After pilot","a": "Equity","f": "East Africa VC backing businesses that serve mass-market consumers.","c": false},{"n": "Savannah Fund","k": "seed","w": "After pilot","a": "Equity","f": "Nairobi seed fund for East African tech.","c": false},{"n": "Launch Africa Ventures","k": "seed","w": "After pilot","a": "Equity","f": "Pan-African seed fund with many fintech deals.","c": false},{"n": "Future Africa","k": "seed","w": "After pilot","a": "Equity","f": "Pan-African early-stage fund.","c": false},{"n": "Golden Palm Investments","k": "seed","w": "After pilot","a": "Equity","f": "Nairobi-based early-stage investor in East African startups.","c": false},{"n": "Norrsken22","k": "growth","w": "Phase 2","a": "Equity","f": "US$205M growth fund for African tech, including fintech and market enablement.","c": true},{"n": "Partech Africa","k": "growth","w": "Phase 2","a": "Equity","f": "One of the largest Africa VCs; publishes the annual Africa tech funding report.","c": true},{"n": "TLcom Capital","k": "growth","w": "Phase 2","a": "Equity","f": "Series A–B investor in African tech.","c": false},{"n": "LeapFrog Investments","k": "growth","w": "Phase 2","a": "Equity","f": "Private equity in insurance and financial services for emerging consumers; fits Package Protection.","c": true},{"n": "Lightrock","k": "growth","w": "Phase 2","a": "Equity","f": "Impact growth investor with an Africa fund.","c": false},{"n": "4DX Ventures","k": "growth","w": "Phase 2","a": "Equity","f": "Africa-focused VC from seed to Series B.","c": false},{"n": "AlphaMundi Group","k": "growth","w": "Phase 2","a": "Equity or debt","f": "Impact investor in East African agriculture and inclusive finance.","c": false},{"n": "Tiger Global","k": "growth","w": "Phase 2","a": "Equity","f": "Named in your pitch, but it has pulled back sharply from African deals since 2022. Treat as a long shot.","c": false},{"n": "Lendable","k": "debt","w": "After pilot","a": "Debt","f": "Lends to African fintechs against their loan books; arranged funding for Ugandan boda lender Tugende.","c": true},{"n": "Mobility 54 (Toyota Tsusho)","k": "debt","w": "After pilot","a": "Equity","f": "Toyota Tsusho's Africa mobility fund; led Tugende's Series A. Fits the motorcycle book.","c": true},{"n": "PG Impact Investments","k": "debt","w": "After pilot","a": "Debt","f": "Swiss impact investor; lent US$5M to Tugende.","c": true},{"n": "Global Partnerships","k": "debt","w": "After pilot","a": "Debt or equity","f": "Impact investor; joined Tugende's Series A.","c": true},{"n": "Shinnecock Partners","k": "debt","w": "After pilot","a": "Debt","f": "Lent to Kenyan boda financier Watu Credit, secured on loan repayments.","c": true},{"n": "Oikocredit","k": "debt","w": "After pilot","a": "Debt","f": "Cooperative impact lender to financial-inclusion and agriculture partners.","c": false},{"n": "Triple Jump","k": "debt","w": "Phase 2","a": "Debt","f": "Dutch impact manager lending to inclusive-finance institutions.","c": false},{"n": "responsAbility","k": "debt","w": "Phase 2","a": "Debt","f": "Swiss impact manager in financial inclusion and sustainable food.","c": false},{"n": "Aceli Africa","k": "debt","w": "After pilot","a": "Incentive for your lender","f": "First-loss cover and bonuses for loans to agri SMEs in Uganda; makes your lender partner more willing to fund farm loans.","c": true},{"n": "Uganda Development Bank","k": "dfi","w": "After pilot","a": "Debt","f": "Uganda's development bank; agriculture and SME lending, and digital farmer finance through AgriConnect.","c": true},{"n": "British International Investment (BII)","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "UK development finance institution; invests through funds including Norrsken22.","c": true},{"n": "IFC","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "World Bank Group's private-sector arm; agribusiness and financial inclusion.","c": false},{"n": "Norfund","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "Norwegian development finance institution active in East African financial inclusion.","c": false},{"n": "FMO","k": "dfi","w": "Phase 2","a": "Equity or debt","f": "Dutch development bank for agri-food and financial institutions.","c": false}];
+const INV_KINDS = { grant: 'Grants and accelerators', seed: 'Seed to Series A', growth: 'Growth equity', debt: 'Debt and lending', dfi: 'Development finance' };
+const INV_STATUS = ['To approach', 'Contacted', 'Meeting', 'Due diligence', 'Not now'];
+const invTrack = store.get('ksc-investors', {});
+
+V.targets = () => investorTable();
+V.names = () => nameIdeas();
+
+function investorTable() {
+  const f = ui.invFilter, list = INVESTORS.filter(x => f === 'all' || x.k === f);
+  const counts = INV_STATUS.map(st => [st, INVESTORS.filter(x => (invTrack[x.n] || 'To approach') === st).length]);
+  return `<section class="stack">
+    <div class="row between"><h2>50 investors to approach</h2><span class="small muted">${counts.filter(([, n]) => n).map(([st, n]) => `${n} ${st.toLowerCase()}`).join(' · ')}</span></div>
+    <p class="small muted" style="max-width:76ch">Ordered by when to approach them: grants and accelerators now, seed funds once the pilot has real numbers, growth funds and development banks for Phase 2, and lenders to fund the food credit, loans and motorcycles. "Confirmed" means this round of research found the investor active in this space; check every name's current fund and focus before writing. The same list is in target-investors.csv in the repository.</p>
+    <div class="row">${[['all', 'All 50'], ...Object.entries(INV_KINDS)].map(([k, l]) => `<button class="btn chip" data-a="inv-filter" data-k="${k}" aria-pressed="${f === k}">${l}${k === 'all' ? '' : ` (${INVESTORS.filter(x => x.k === k).length})`}</button>`).join('')}</div>
+    <div class="tablewrap"><table class="t wrap inv"><thead><tr><th>#</th><th>Investor</th><th>When</th><th>Ask for</th><th>Why they fit</th><th>Status</th></tr></thead><tbody>
+      ${list.map(x => `<tr><td class="n">${INVESTORS.indexOf(x) + 1}</td><td><b>${esc(x.n)}</b><span class="small muted" style="display:block">${INV_KINDS[x.k]}${x.c ? ' · <span style="color:var(--ok)">confirmed</span>' : ' · check'}</span></td>
+        <td>${x.w}</td><td>${esc(x.a)}</td><td>${esc(x.f)}</td>
+        <td><select class="in" data-inv="${esc(x.n)}" aria-label="Status for ${esc(x.n)}">${INV_STATUS.map(st => `<option ${(invTrack[x.n] || 'To approach') === st ? 'selected' : ''}>${st}</option>`).join('')}</select></td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="small muted">Your status choices stay in this browser.</p>
+  </section>`;
+}
+
+const NAMES = [
+  ['Kibanja', 'Keep it', 'Luganda for a plot of land: rooted, local and already the working name. Weakest outside Buganda.'],
+  ['Kikapu', 'Swahili: basket', 'The shopping basket and the food basket in one word, understood from Kampala to Dar es Salaam, which suits the East Africa plan.'],
+  ['Emmere', 'Luganda: food', 'Says exactly what the card is for, to a Kampala shopper.'],
+  ['Mavuno', 'Swahili: harvest', 'Speaks to producers and farmers as much as shoppers.'],
+  ['Akiba', 'Swahili: savings, a reserve', 'Fits prepaid packages and Package Protection: food put by for later.'],
+  ['Pamoja', 'Swahili: together', 'Fits family and employer packages, and the producer partnerships.'],
+  ['Kibanja Kikapu', 'Both', 'Keeps the Ugandan root and adds a word the whole region knows.'],
+  ['FoodFirst', 'English', 'Plain and international, easy for investors. Generic, and harder to protect as a trademark.'],
+];
+const NAMES_EN = [["The full basket", [["FullBasket", "The promise in one word: the basket is never empty."], ["BasketPlus", "Says the bonus: you get more basket than you paid for."], ["ShopSure", "Shop with certainty, without cash in your pocket."], ["TrolleyPass", "Uses the word Kampala shoppers say; a pass for the trolley."], ["CartKey", "The card is the key that opens the cart."], ["AisleCard", "A card for every aisle in the store."], ["StockUp", "Speaks to the bulk packs and big family packages."], ["BulkBuddy", "Friendly name for buying in bulk at bulk prices."], ["SmartTrolley", "Modern and plain; close to the current SmartCare name."], ["ShelfReady", "Everything on the shelf, ready when you are."]]], ["Food on the table", [["FullTable", "The outcome families want: a full table every day."], ["PlateFull", "Warm and simple; easy to say in any language."], ["FoodSure", "Food security in two syllables."], ["TableFirst", "Food comes first; fits the food-only credit and loans."], ["MealMate", "A friendly companion for everyday meals."], ["FedWell", "A family that is fed well, every month."], ["PantryPass", "A pass to a full pantry."], ["KitchenCard", "Plain: the card for the kitchen."], ["StaplePlus", "Staples, plus the bonus."], ["DailyBread", "Instantly understood and warm; its religious echo will suit many shoppers and not others."]]], ["Paid ahead, stretched further", [["PayAhead", "Describes the prepaid packages exactly."], ["FoodVault", "Money put away for food, safe until you need it."], ["StretchCard", "Makes every shilling stretch further."], ["BonusBasket", "Leads with the bonus on every payment."], ["WeekWise", "For weekly payers; smart with money week by week."], ["MonthFull", "A full month of food, paid once."], ["SureSave", "Saving that turns into food you can count on."], ["SteadyShop", "Steady food, steady prices, steady payments."], ["PocketPantry", "A pantry you carry in your pocket."], ["ValueCart", "Plain value message for price-conscious shoppers."]]], ["Family, staff and community", [["FamilyFull", "For the family packages: every member fed."], ["HomeStock", "Keeps the home stocked."], ["KinCart", "Kin and cart: the whole family on one card."], ["HouseholdPlus", "Clear for families and employers alike."], ["CareCart", "Shopping that looks after people; keeps the SmartCare idea."], ["StaffPantry", "Ready-made name for the employer packages."], ["TogetherTable", "Families, employers and producers around one table."], ["HearthCard", "The hearth is the heart of the home."], ["NeighbourStore", "The trusted shop down the road, including the micro-hubs."], ["FamilyFirst Foods", "Direct and warm; a little long for a card."]]], ["From the land", [["GreenPlot", "An English cousin of kibanja, a plot of land."], ["PlotPlus", "Kibanja's plot, plus the bonus."], ["FieldToTable", "Producers to families, the whole supply in one phrase."], ["SeedToShelf", "Tells the farm-loan and producer story."], ["FarmGate", "Buying at farm-gate prices, straight from growers."], ["HarvestCard", "Every payment brings in a harvest."], ["GoodHarvest", "Optimistic and familiar."], ["RootedFoods", "Rooted in Ugandan farms and producers."], ["FreshField", "Fresh from the field; suits the Ugandan-made goods."], ["HomeGrown", "Ugandan-made, double points; also a common phrase, so harder to protect."]]]];
+const nameStars = store.get('ksc-names', {});
+function nameIdeas() {
+  return `<section class="stack"><h2>Name ideas for the platform</h2>
+    <h3>Local names</h3>
+    <div class="plans">${NAMES.map(([n, m, why]) => `<article class="panel plan-tile"><h3>${n}</h3><span class="eyebrow">${m}</span><p class="small muted">${why}</p></article>`).join('')}</div>
+    <div class="row between"><h3>50 more, in English</h3><span class="small muted">${Object.values(nameStars).filter(Boolean).length} starred: ${Object.keys(nameStars).filter(k => nameStars[k]).join(', ') || 'none yet'}</span></div>
+    <div class="names-en">${NAMES_EN.map(([theme, list]) => `<section class="panel"><h4>${theme}</h4><ul class="name-list">${list.map(([n, why]) => `<li>
+      <button class="star" data-a="star-name" data-name="${n}" aria-pressed="${!!nameStars[n]}" aria-label="Star ${n}">${nameStars[n] ? '★' : '☆'}</button>
+      <span><b>${n}</b><span class="small muted" style="display:block">${why}</span></span></li>`).join('')}</ul></section>`).join('')}</div>
+    <p class="small muted" style="max-width:76ch">Star the ones you like to build a shortlist; stars stay in this browser. Before choosing, search the Uganda Registration Services Bureau trademark register and the Kenyan and Tanzanian registers, check the .ug and .com domains and social handles, and test the shortlist with shoppers in Kampala and outside Buganda. Several of these words are common, so other businesses may already use them.</p>
+  </section>`;
+}
+
+/* ---------- render + actions ---------- */
+function render() {
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.v === ui.view)));
+  $('#main').innerHTML = `<div class="view">${V[ui.view]()}</div>`;
+  if (ui.view === 'model') modelOut();
+  if (ui.view === 'loans') loanCalc();
+}
+
+function go(v) {
+  if (!V[v] || !VIEWS.includes(v)) return;
+  ui.view = v;
+  try { history.replaceState(null, '', '#' + v); } catch {}
+  render();
+  window.scrollTo(0, 0);
+}
+
+function lookup(q) {
+  const d = String(q).replace(/\s/g, '').toUpperCase();
+  if (ui.payCode && d === ui.payCode.code) { const m = member(ui.payCode.m); ui.payCode = null; toast('Pay code accepted'); return m; }
+  return S.members.find(m => m.card.replace(/\s/g, '') === d || m.id === d || (d.length >= 4 && m.card.replace(/\s/g, '').endsWith(d)));
+}
+
+const A = {
+  tab: b => go(b.dataset.v),
+  reset: () => { S = seed(); Object.assign(ui, { usePoints: false, payCode: null, loanAs: 'KSC-0001', loanDraft: { food: { ...BOOKS.food.def }, move: { ...BOOKS.move.def } }, viewAs: 'KSC-0001', claimForm: false, posMember: null, posInput: '', cart: [], receipt: null, opsClaim: 'CLM-0141' }); render(); toast('Example households, plans and offers reset'); },
+  'open-claim': () => { ui.claimForm = true; render(); },
+  'cancel-claim': () => { ui.claimForm = false; render(); },
+  pay: () => {
+    const m = member(ui.viewAs), c = m.credit;
+    const wasOverdue = c.overdue;
+    c.used = Math.max(0, c.used - c.dueAmt);
+    S.txns.push({ d: TODAY, m: m.id, where: 'Repayment · Mobile Money', smart: 0, mm: c.dueAmt, items: 0 });
+    c.onTime = wasOverdue ? 0 : c.onTime + 1;
+    c.overdue = false;
+    c.due = addMonths(wasOverdue ? TODAY : c.due, 1);
+    c.dueAmt = c.used ? Math.max(100000, Math.round(c.used / 4 / 1000) * 1000) : 0;
+    let msg = wasOverdue ? 'Repaid. The food credit line works again.' : `Repaid on time (${Math.min(c.onTime, 3)}/3).`;
+    if (c.onTime >= 3 && cover(m).s === 'paid' && c.rung < ladderOf(m).length - 1) { c.rung++; c.onTime = 0; msg = `Moved up to the ${short(ladderOf(m)[c.rung])} rung`; }
+    render(); toast(msg);
+  },
+  'pay-plan': () => {
+    const m = member(ui.viewAs), wasFree = tierOf(m).free, lapsed = cover(m).s === 'lapsed';
+    const tk = m.sub.nextTier || m.sub.tier, fk = m.sub.next || m.sub.plan, t = S.tiers[tk], price = priceFor(tk, fk), value = valueFor(tk, fk);
+    m.sub.tier = tk; m.sub.plan = fk; delete m.sub.next; delete m.sub.nextTier;
+    // Starting from free or after a lapse, cover starts today, and so does the waiting period for emergency claims.
+    if (wasFree || lapsed) { m.sub.start = TODAY; m.sub.paidUntil = nextPeriod(TODAY, fk); } else m.sub.paidUntil = nextPeriod(m.sub.paidUntil, fk);
+    m.wallet += value;
+    S.txns.push({ d: TODAY, m: m.id, where: `${t.name.replace('Kibanja ', '')}, ${S.plans[fk].name.toLowerCase()} · Mobile Money`, smart: 0, mm: price, items: 0, via: `+ ${value.toLocaleString('en-US')} to spend` });
+    render(); toast(`Paid ${ugx(price)}. ${ugx(value)} added to your shopping balance.`);
+  },
+  topup: b => {
+    const m = member(ui.viewAs), v = +b.dataset.amt;
+    m.wallet += v;
+    S.txns.push({ d: TODAY, m: m.id, where: 'Wallet top-up · Mobile Money', smart: 0, mm: v, items: 0 });
+    render(); toast(`${ugx(v)} added to your shopping balance`);
+  },
+  'pos-lookup': () => {
+    ui.posInput = $('#pos-card').value;
+    const m = lookup(ui.posInput);
+    if (!m) { toast('No SmartCare card matches that number'); return; }
+    ui.posMember = m.id; ui.posInput = m.card; ui.receipt = null; ui.usePoints = false; render();
+  },
+  'pos-pick': b => { const m = member(b.dataset.id); ui.posMember = m.id; ui.posInput = m.card; ui.receipt = null; ui.usePoints = false; render(); },
+  'pos-clear': () => { ui.posMember = null; ui.posInput = ''; ui.usePoints = false; render(); },
+  'pay-code': () => { ui.payCode = { m: ui.viewAs, code: String(100000 + Math.floor(Math.random() * 900000)) }; render(); },
+  'loan-apply': b => { ui.loanAs = ui.viewAs; go(BOOKS[b.dataset.book || 'food'].view); },
+  'loan-approve': b => {
+    const l = S.loans.find(x => x.id === b.dataset.id), P = PRODUCTS[l.product];
+    l.status = 'active'; l.start = TODAY; l.paid = 0;
+    S.txns.push({ d: TODAY, m: l.m, where: `${P.name} loan paid out`, smart: 0, mm: l.amount, items: 0, via: P.via });
+    render(); toast(`${ugx(l.amount)} ${P.name.toLowerCase()} loan paid out: ${P.to.toLowerCase()}`);
+  },
+  'loan-decline': b => { const l = S.loans.find(x => x.id === b.dataset.id); l.status = 'declined'; render(); toast(`${l.id} declined. The household is told why in the app.`); },
+  'loan-pay': b => {
+    const l = S.loans.find(x => x.id === b.dataset.id), P = PRODUCTS[l.product], amt = instalment(l);
+    l.paid++;
+    S.txns.push({ d: TODAY, m: l.m, where: `${P.name} loan instalment`, smart: 0, mm: Math.round(amt), items: 0 });
+    if (l.paid >= l.n) l.status = 'closed';
+    render(); toast(l.status === 'closed' ? `${P.name} loan fully repaid` : `Instalment paid. ${l.n - l.paid} to go.`);
+  },
+  add: b => { ui.receipt = null; const l = ui.cart.find(x => x.sku === b.dataset.sku); l ? l.q++ : ui.cart.push({ sku: b.dataset.sku, q: 1 }); render(); },
+  inc: b => { ui.cart.find(x => x.sku === b.dataset.sku).q++; render(); },
+  dec: b => { const l = ui.cart.find(x => x.sku === b.dataset.sku); l.q--; if (!l.q) ui.cart = ui.cart.filter(x => x !== l); render(); },
+  'clear-cart': () => { ui.cart = []; render(); },
+  charge: () => {
+    const t = cartTotals(), m = t.m, P = t.pay;
+    const kibanjaPromo = t.lines.reduce((s, l) => s + (l.promo && l.promo.funder === 'Kibanja' ? l.promoOff : 0), 0);
+    const margin = Math.round(t.lines.reduce((s, l) => s + l.gross * (l.ess ? MARGIN.ess : MARGIN.other), 0) - kibanjaPromo - t.memberOff);
+    let tenders;
+    if (m) {
+      if (P.points) m.points -= Math.ceil(P.points / S.loyalty.value);
+      m.points += t.earn;
+      if (P.allowance) { m.allowance.month += P.allowance; m.allowance.total += P.allowance; }
+      m.wallet -= P.wallet;
+      if (P.credit) m.credit.used += P.credit;
+      m.spend.ess += t.ess; m.spend.all += t.total;
+      S.txns.push({ d: TODAY, m: m.id, where: 'Kibanja Store · Kira', smart: P.points + P.allowance + P.wallet + P.credit, mm: P.mm, items: t.lines.reduce((s, l) => s + l.q, 0) });
+      tenders = [['Kibanja points', P.points], ['Package Protection', P.allowance], ['Shopping balance', P.wallet], ['Food credit', P.credit], ['Mobile Money (member phone)', P.mm]].filter(x => x[1] > 0);
+    } else tenders = [['Mobile Money or cash', P.mm]];
+    S.sales.local += t.local; S.sales.all += t.total;
+    ui.receipt = { no: 'R' + String(4100 + S.txns.length), lines: t.lines, promoOff: t.promoOff, memberOff: t.memberOff, disc: m ? t.src.disc : 0, total: t.total, tenders, margin, earn: m ? t.earn : 0, balance: m ? m.points : 0 };
+    ui.cart = []; ui.usePoints = false;
+    render();
+    toast(!m ? 'Paid' : P.mm ? `${ugx(t.total - P.mm)} on the card; Mobile Money prompt for ${ugx(P.mm)} sent to the member's phone` : `${ugx(t.total)} paid in full by SmartCare`);
+  },
+  'new-sale': () => { ui.receipt = null; ui.posMember = null; ui.posInput = ''; ui.usePoints = false; render(); },
+  'promo-toggle': b => { const p = S.promos.find(x => x.id === b.dataset.id); p.on = !p.on; render(); toast(`${p.name} ${p.on ? 'started' : 'paused'}`); },
+  'promo-del': b => { const p = S.promos.find(x => x.id === b.dataset.id); S.promos = S.promos.filter(x => x !== p); render(); toast(`${p.name} removed`); },
+  'star-name': b => { nameStars[b.dataset.name] = !nameStars[b.dataset.name]; store.set('ksc-names', nameStars); render(); },
+  'inv-filter': b => { ui.invFilter = b.dataset.k; render(); },
+  'ops-pick': b => { ui.opsClaim = b.dataset.id; render(); },
+  verify: b => { const c = S.claims.find(x => x.id === ui.opsClaim); c.checks[+b.dataset.i].r = 'ok'; render(); },
+  approve: () => {
+    const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
+    c.status = 'approved'; c.decided = TODAY;
+    m.cover = 'active'; m.allowance = { activated: TODAY, month: 0, total: 0 };
+    render(); toast(`${hh(m)}: package continues free for ${PROTECT_MONTHS} months at ${ugx(capOf(m))} a month, food credit frozen`);
+  },
+  decline: () => {
+    const c = S.claims.find(x => x.id === ui.opsClaim), m = member(c.member);
+    c.status = 'declined'; c.decided = TODAY; m.cover = 'none';
+    render(); toast(`${c.id} declined. The household is told why in the app.`);
+  },
+  'model-reset': () => { Object.assign(M, JSON.parse(JSON.stringify(M0))); render(); },
+};
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (!b || b.disabled) return;
+  A[b.dataset.a] && A[b.dataset.a](b);
+});
+
+document.addEventListener('submit', e => {
+  e.preventDefault();
+  if (e.target.id === 'pos-form') return A['pos-lookup']();
+  if (e.target.id === 'promo-form') {
+    const name = $('#pr-name').value.trim(), pctOff = parseFloat($('#pr-pct').value);
+    if (!name || !(pctOff > 0 && pctOff < 100)) { toast('Give the offer a name and a discount between 1 and 99%'); return; }
+    const sku = $('#pr-sku').value;
+    S.promos = S.promos.filter(p => !(p.sku === sku && p.on)); // one running offer per product
+    S.promos.push({ id: 'P' + Date.now(), sku, pct: pctOff, name, funder: $('#pr-funder').value, on: true });
+    render(); toast(`${name} is running at every till`);
+    return;
+  }
+  if (e.target.id === 'loan-form') {
+    const m = member(ui.loanAs), d = ui.loanDraft[ui.loanBook], P = PRODUCTS[d.product];
+    const l = { id: 'LN-' + String(8 + S.loans.length).padStart(4, '0'), m: m.id, product: d.product, amount: d.amount, n: d.n, period: P.period, rate: P.rate, applied: TODAY, paid: 0, status: 'pending' };
+    if (loanOffer(m, d.product).blocks.length || !affordability(m, l).ok) { toast('This application cannot be sent'); return; }
+    S.loans.push(l);
+    render(); toast(`Application ${l.id} sent. Approve it in the loan book.`);
+    return;
+  }
+  if (e.target.id === 'claim-form') {
+    const m = member(ui.viewAs);
+    if (tierOf(m).free) { toast('The free card has no Package Protection. Choose a package first.'); return; }
+    const type = $('#cl-type').value, note = $('#cl-note').value.trim(), hasFile = $('#cl-file').files.length > 0;
+    const inForce = days(m.sub.start, TODAY);
+    const checks = [{ t: `Waiting period passed (${WAIT_DAYS} days)`, r: inForce >= WAIT_DAYS ? 'ok' : 'fail', d: `${inForce} days of continuous cover` }];
+    if (type === 'job') checks.push({ t: 'Termination letter on file', r: hasFile ? 'ok' : 'missing' }, { t: 'NSSF contributions stopped', r: 'todo', d: 'Pull the contribution history' }, { t: 'Employer confirms by phone', r: 'todo', d: 'Call HR on a number the platform finds itself' });
+    if (type === 'medical') checks.push({ t: 'Admission note on file', r: hasFile ? 'ok' : 'missing' }, { t: 'Partner hospital confirms admission', r: 'todo' });
+    if (type === 'drought') checks.push({ t: 'District on the declared drought list', r: 'todo', d: 'Check against the national weather authority\'s rainfall bulletin' });
+    checks.push({ t: 'No other claim this policy year', r: S.claims.some(x => x.member === m.id && x.status === 'approved') ? 'fail' : 'ok' });
+    const id = 'CLM-0' + (142 + S.claims.length - 2);
+    S.claims.push({ id, member: m.id, type, filed: TODAY, status: 'pending', note, checks });
+    m.cover = 'review'; ui.claimForm = false; ui.opsClaim = id;
+    render(); toast(`Claim ${id} sent. Operations can see it now.`);
+  }
+});
+
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'view-as') { ui.viewAs = t.value; ui.claimForm = false; render(); }
+  if (t.id === 'use-points') { ui.usePoints = t.checked; render(); }
+  if (t.dataset.loyalty) { const v = parseFloat(t.value); S.loyalty[t.dataset.loyalty] = isFinite(v) && v >= 0 ? v : 0; render(); }
+  if (t.id === 'ln-as') { ui.loanAs = t.value; ui.loanDraft[ui.loanBook].amount = BOOKS[ui.loanBook].def.amount; render(); }
+  if (t.id === 'ln-product') { const d = ui.loanDraft[ui.loanBook]; d.product = t.value; d.n = PRODUCTS[t.value].terms[1]; render(); }
+  if (t.id === 'ln-n') { ui.loanDraft[ui.loanBook].n = +t.value; loanCalc(); }
+  if (t.id === 'plan-switch') {
+    const m = member(ui.viewAs);
+    if (t.value === m.sub.plan) delete m.sub.next; else m.sub.next = t.value;
+    render();
+  }
+  if (t.id === 'tier-switch') {
+    const m = member(ui.viewAs);
+    if (t.value === m.sub.tier) delete m.sub.nextTier; else m.sub.nextTier = t.value;
+    render();
+  }
+  if (t.dataset.tier) {
+    const v = parseFloat(t.value), x = isFinite(v) && v >= 0 ? v : 0;
+    S.tiers[t.dataset.tier][t.dataset.freq] = x;
+    render();
+  }
+  if (t.dataset.plan) {
+    const v = parseFloat(t.value);
+    S.plans[t.dataset.plan][t.dataset.field] = isFinite(v) && v >= 0 ? v : 0;
+    render();
+  }
+  if (t.dataset.lic) { licences[t.dataset.lic] = t.checked; store.set('ksc-licences', licences); }
+  if (t.dataset.inv) { invTrack[t.dataset.inv] = t.value; store.set('ksc-investors', invTrack); render(); }
+  if (t.dataset.room) { dataroom[t.dataset.room] = t.checked; store.set('ksc-dataroom', dataroom); }
+  if (t.id === 'corp-staff') { const v = parseInt(t.value, 10); ui.corp.staff = isFinite(v) && v > 0 ? v : 1; render(); }
+  if (t.id === 'corp-pkg') { ui.corp.pkg = t.value; render(); }
+  if (t.id === 'corp-freq') { ui.corp.freq = t.value; render(); }
+  if (t.id === 'food-uptake') { const v = parseFloat(t.value); ui.uptake = isFinite(v) ? Math.max(0, Math.min(100, v)) : 0; render(); }
+  if (t.id === 'float-yield') { const v = parseFloat(t.value); ui.floatYield = isFinite(v) && v >= 0 ? v : 0; render(); }
+});
+
+document.addEventListener('input', e => {
+  if (e.target.id === 'pos-card') ui.posInput = e.target.value;
+  if (e.target.id === 'ln-amount') { const d = ui.loanDraft[ui.loanBook]; d.amount = +e.target.value; $('#ln-amount-out').textContent = ugx(d.amount); loanCalc(); }
+  if (!e.target.closest('#model-form')) return;
+  const num = id => { const v = parseFloat($('#' + id).value); return isFinite(v) && v >= 0 ? v : 0; };
+  M.fam = [0, 1, 2].map(i => Math.max(1, num('fam' + i)));
+  M.ops = [0, 1, 2].map(i => num('ops' + i));
+  ['mixW', 'mixM', 'discPct', 'ptsPct', 'limit', 'claimRate', 'avgDraw', 'spend', 'creditShare', 'rebatePct', 'feePct', 'lossPct', 'cofPct'].forEach(k => M[k] = num(k));
+  modelOut();
+});
+
+document.querySelectorAll('[data-mode]').forEach(el => { if (el.dataset.mode !== MODE) el.remove(); });
+const VIEWS = [...document.querySelectorAll('.tab')].map(t => t.dataset.v);
+if (MODE === 'investors') { $('#brand-sub').textContent = 'investor pack'; document.querySelector('.tabs').setAttribute('aria-label', 'Investor pack sections'); }
+const start = (location.hash || '').slice(1);
+ui.view = VIEWS.includes(start) ? start : VIEWS[0];
+render();
+</script>
+

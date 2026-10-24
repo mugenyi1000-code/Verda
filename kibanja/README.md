@@ -4,35 +4,25 @@ A working, click-through prototype of the Kibanja SmartCare platform: a
 food-security card for Kampala households that pay UGX 1.5M a year. It is
 separate from Verda and shares no code with it.
 
-Open `kibanja-smartcare.html` in a browser.
+Open `kibanja-smartcare.html` in a browser. It is the platform as an app,
+with one switch at the top for who is using it:
 
-The investor material lives in a separate page, `kibanja-investor-pack.html`,
-so the platform can be shown to families, stores and partners without it.
-Both pages come from one source: after editing `kibanja-smartcare.html`, run
-`node kibanja/build-investor-pack.js` to rebuild the pack, so the figures
-always match. `target-investors.csv` holds the 50 target investors for a
-spreadsheet or CRM. It is one self-contained file
-with no build step and no server. Everything runs on example households
-dated 22 Oct 2026, and **Reset demo** puts them back.
-
-## The platform's ten screens
-
-| Screen | What it shows |
+| Mode | What it is |
 |---|---|
-| Overview | The one card and what is on it (food credit line, emergency cover, wallet and points, Food Basket, Kibanja Loan), the household's year on the platform, and the one number to check first |
-| How it works | The plain-language explainer: six steps for a family, where every shilling is held and what Kibanja earns from it, who does what, and common questions |
-| Family app | The phone app for each example household: card, plan payments and plan switching, wallet top-ups, Kibanja points, a one-time pay code for when the card is at home, Kibanja Loan repayments, reporting an emergency, the monthly allowance, the credit ladder and repayments |
-| Food and producers | The price-locked Kibanja Food Basket (UGX 169,000 a month for a family of five, 15% under shelf price), the Ugandan-made share of sales against the Buy Uganda Build Uganda shelf targets, the partner directory (Made in Uganda as a proposed partner; producers and manufacturers as clearly marked examples), what partners get, and the monthly volumes producers can plan on |
-| Store till | Cashier view. Reads the card, applies offers and the member discount, and pays the whole basket without cash, by card or pay code: points (if the member chooses), emergency allowance (essentials), then wallet, then credit line, then a Mobile Money prompt on the member's phone for anything left |
-| Packages | Prepaid shopping packages: pay weekly, monthly or yearly and the money plus a bonus (1%, 3% or 8%, more on bigger packages) lands on the card as a shopping balance that buys anything in the store. For individuals (free Kibanja Card, Solo UGX 100,000 a month, Solo Plus 200,000), families (Family Starter 300,000, Family 500,000, Family Max 1,000,000) and employers (Kibanja Staff 150,000 and Staff Plus 300,000 per employee, from 10 staff, with a volume bonus at 50+ and 200+). Each package shows what a month buys in bulk packs (25 kg flour and rice bags, 10 kg beans and sugar, 10 L oil) and what is left over. Corporate calculator, editable settings, who pays for the bonus, points and offers |
-| Kibanja Loan | One loan book for the food system, grouped as "Grow, store and sell food" (farm inputs, poultry and livestock, storage and drying, food-trade stock) and "Move food" (motorcycles with a 20% deposit and weekly repayments, and fuel credit at partner stations). Money goes to suppliers, hubs, dealers or fuel stations, never as cash; farm loans can be repaid in produce and riders can repay from delivery pay. One loan at a time plus fuel credit, an explainable Kibanja score, a full-cost calculator, a 30%-of-income check, no lending during an emergency, and a loan book with approvals and late loans |
-| Operations | Claims queue with automated checks and a human approve/decline, exposure KPIs, member register |
-| Underwriting | The three-year table rebuilt from the plan's assumptions: 96% of households on a monthly credit line, 10M card spend a year, 6% supermarket rebate, 2.5% processing fee per cycle, 4% claiming an average 20M. Lands within 1% of the original (net 1.19B / 6.6B / 20.6B vs 1.2B / 6.65B / 20.75B; the gap is the fee charged only on credit users). Inputs for credit losses and cost of funds, a stress grid, and findings |
-| Rollout | Phase 1 in detail, flagship store set-up costs, and the licences and partners to line up first |
+| Shop | The family's phone app: Home (card, balance, top up, pay code), Packages (individual, family and employer packages paid weekly, monthly or yearly, with the bonus), Loans (score, food-system and boda/fuel loans) and Me (Protection, food credit, points). On a computer it sits in a phone frame beside a live panel. |
+| Store | The till: scan a card or pay code, bulk packs and staples, the basket paid from Protection, balance, food credit and a Mobile Money prompt, points earned. |
+| HQ | Scale from today's 7 demo families to a million households (1 dot = 1,000), live numbers, the inbox for claims and loan requests, and supply (Food Basket, Ugandan-made share, partners). |
 
-The screens share state: a claim filed in the family app appears in
-Operations; approving it unlocks the card; charging a basket at the till
-reduces the household's allowance or credit.
+Every action carries across modes: a pay code made in Shop works at the Store
+till, a claim or loan request lands in the HQ inbox, and approving it changes
+the family's app.
+
+The investor material is a separate page, `kibanja-investor-pack.html`: the
+pitch, 50 target investors, name ideas and the underwriting model. It is built
+from `investor-pack-source.html`, the earlier long-form version of the platform
+that keeps the full working (underwriting, rollout, detailed rules); run
+`node kibanja/build-investor-pack.js` after editing it. `target-investors.csv`
+holds the 50 investors for a spreadsheet or CRM.
 
 ## The investor pack
 
