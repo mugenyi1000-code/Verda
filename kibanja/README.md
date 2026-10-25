@@ -10,13 +10,46 @@ with one switch at the top for who is using it:
 
 | Mode | What it is |
 |---|---|
-| Shop | The family's phone app: Home (card, balance, top up, pay code), Packages (individual, family and employer packages paid weekly, monthly or yearly, with the bonus), Loans (score, food-system and boda/fuel loans) and Me (Protection, food credit, points). On a computer it sits in a phone frame beside a live panel. |
-| Store | The till: scan a card or pay code, bulk packs and staples, the basket paid from Protection, balance, food credit and a Mobile Money prompt, points earned. |
-| HQ | Scale from today's 7 demo families to a million households (1 dot = 1,000), live numbers, the inbox for claims and loan requests, and supply (Food Basket, Ugandan-made share, partners). |
+| Family | The family's phone app (Home, Packages, Loans, Me) beside a basic phone running the USSD menu (`*XXX#` until the UCC issues a code): balance, pay package, pay code, Shop Ahead, emergency. |
+| Agent | Field staff: search families, enrol one (Ugandan phone check, national ID seen but not stored, consent), record a Mobile Money payment with its transaction ID, give a pay code, open the family's app. |
+| Store | The till: scan a card or a single-use 6-digit pay code (5 minutes), bulk packs and staples, paid from Protection, then balance, then Shop Ahead if the family asks, then Mobile Money at the till. Ends with a receipt and the SMS text. |
+| HQ | Scale band (1 dot = 1,000 households), the payment confirmation queue, claims and loan decisions, numbers with CSV exports, the launch checklist and the Mobile Money merchant codes. |
 
-Every action carries across modes: a pay code made in Shop works at the Store
-till, a claim or loan request lands in the HQ inbox, and approving it changes
-the family's app.
+A switch beside the logo picks the records:
+
+- **Practice** uses sample families for training. Nothing is saved; "Start
+  over" resets it.
+- **Live pilot** keeps real records in the page's shared database when it is
+  opened in Claude, signed in. Everyone the page is shared with sees the same
+  families, payments and decisions, so share it with staff only.
+
+## How money moves
+
+- Every balance is worked out from a ledger of entries, never stored as a
+  number that can drift.
+- A Mobile Money payment (from the app, USSD or an agent) is recorded as
+  *awaiting* with its network and transaction ID. It becomes spendable only
+  when HQ ticks it off against the MTN or Airtel statement. "Not received"
+  rejects it.
+- **Shop Ahead** (it replaces "food credit") lets a family take essentials
+  before payday: up to half a month of their package, no interest and no fee,
+  repaid with the next payment. It opens after two on-time payments, pauses
+  while the package is overdue or Protection is paying, and is used only when
+  the family asks at the till.
+- Pay codes are single-use and expire after 5 minutes.
+
+## What the pilot page does not do yet
+
+It is a pilot back office, not the production system. Before launch at scale:
+
+- Mobile Money collections API (MTN MoMo, Airtel Money) so payments confirm
+  themselves instead of by hand.
+- A USSD short code from the UCC and a USSD gateway, and an SMS gateway with a
+  sender ID for receipts and pay codes.
+- A trust account with a licensed payment partner for prepaid balances, a
+  licensed lender for Shop Ahead and loans, and an insurer for Protection.
+- A production backend: the page's database holds up to 25,000 records,
+  enough for roughly the 100-family pilot.
 
 The investor material is a separate page, `kibanja-investor-pack.html`: the
 pitch, 50 target investors, name ideas and the underwriting model. It is built
@@ -36,8 +69,11 @@ holds the 50 investors for a spreadsheet or CRM.
 
 ## Design decisions that differ from the original plan
 
-- **One card, not two models.** Every household gets the food credit line
-  and the emergency cover together, on one plan payment.
+The investor pack's Underwriting screen still models the original plan's
+credit line; in the app it is Shop Ahead.
+
+- **One card, not two models.** Every household gets the credit line
+  (now Shop Ahead) and the emergency cover together, on one plan payment.
 - **Food first.** The credit line and the emergency allowance pay for
   essentials only; points and the wallet pay for anything, with a Mobile
   Money prompt for the rest, so shopping is still cashless.
@@ -62,7 +98,7 @@ holds the 50 investors for a spreadsheet or CRM.
 
 - **90-day waiting period** on emergency claims, so cover can't be bought the week a
   layoff is already known.
-- **The food credit line starts at UGX 4.5M**, not 50M, and climbs a rung
+- **The credit line starts at UGX 4.5M**, not 50M, and climbs a rung
   (4.5M → 9M → 18M → 30M → 50M) after three on-time repayments with the
   plan paid up.
 - **Premiums don't fund the store.** Phase 2 originally used the premium

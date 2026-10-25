@@ -219,13 +219,68 @@ input[type="range"] { width: 100%; accent-color: var(--chili); }
 .toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px); background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 14px; font-weight: 700; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 50; max-width: calc(100% - 32px); }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 @media (prefers-reduced-motion: reduce) { .sheet, .btn, .prod, .meter i, .toast { animation: none; transition: none; } }
+
+/* ---------- pilot additions ---------- */
+.top-l { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.data { display: flex; gap: 4px; background: rgba(255,255,255,.08); border-radius: 999px; padding: 3px; }
+.data button { border: 0; background: none; color: var(--band-muted); border-radius: 999px; padding: 5px 11px; font-size: 12px; font-weight: 800; }
+.data button[aria-pressed="true"][data-d="live"] { background: var(--leaf); color: #fff; }
+.data button[aria-pressed="true"][data-d="practice"] { background: var(--chili); color: #fff; }
+.data button:disabled { opacity: .4; cursor: not-allowed; }
+.notice { border-radius: 14px; padding: 10px 14px; font-size: 13.5px; font-weight: 700; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.notice.prac { background: color-mix(in srgb, var(--chili) 14%, var(--surface)); }
+.notice.live { background: color-mix(in srgb, var(--leaf) 14%, var(--surface)); }
+.field { display: grid; gap: 5px; font-size: 13px; font-weight: 800; }
+.field .hint { font-weight: 500; color: var(--muted); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; font-weight: 600; }
+.check input { width: 20px; height: 20px; accent-color: var(--leaf); margin-top: 1px; flex: none; }
+.err { color: var(--bad); font-size: 13px; font-weight: 700; }
+.split2 { display: grid; gap: 20px; grid-template-columns: 1fr; align-items: start; }
+@media (min-width: 900px) { .split2 { grid-template-columns: minmax(300px, 1fr) minmax(0, 1.3fr); } }
+.split2 > * { min-width: 0; }
+.fams { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fams button { width: 100%; border: 2px solid transparent; background: var(--surface); border-radius: 16px; padding: 12px 14px; text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+.fams button[aria-current="true"] { border-color: var(--sun); }
+.fams .amt { font-family: var(--display); font-weight: 700; text-align: right; }
+.empty { border: 2px dashed var(--line); border-radius: var(--r); padding: 22px; text-align: center; display: grid; gap: 10px; justify-items: center; }
+.queue-item { background: var(--sunk); border-radius: 16px; padding: 12px 14px; display: grid; gap: 6px; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; }
+.todo { list-style: none; margin: 0; padding: 0; display: grid; }
+.todo li { border-top: 1px solid var(--line); padding-block: 8px; }
+.todo li:first-child { border-top: 0; }
+.todo label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 14px; }
+.todo input { width: 18px; height: 18px; accent-color: var(--leaf); margin-top: 2px; flex: none; }
+.todo li:has(input:checked) span { text-decoration: line-through; color: var(--muted); }
+
+/* Basic phone running USSD */
+.phones { display: grid; gap: 20px; align-content: start; }
+.basic { width: 100%; max-width: 300px; margin-inline: auto; background: #1B1B1F; border-radius: 34px; padding: 18px 16px 20px; display: grid; gap: 12px; box-shadow: 0 20px 40px -24px rgba(0,0,0,.6); }
+.basic .brand { text-align: center; color: #8E8C86; font-size: 11px; font-weight: 800; letter-spacing: .2em; }
+.lcd { background: #C7D6B3; color: #1F2A17; border-radius: 10px; padding: 12px; min-height: 190px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.45; white-space: pre-wrap; box-shadow: inset 0 2px 8px rgba(0,0,0,.25); }
+.lcd b { font-weight: 800; }
+.keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.keys button { border: 0; border-radius: 14px; padding: 10px 0; background: #2C2C33; color: #EDEBE4; font-size: 17px; font-weight: 800; }
+.keys button.call { background: #19A35B; color: #fff; font-size: 13px; }
+.keys button.end { background: #D9402E; color: #fff; font-size: 13px; }
+.ussd-in { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.ussd-in input { border-radius: 12px; border: 0; padding: 9px 12px; background: #2C2C33; color: #EDEBE4; font-weight: 800; letter-spacing: .1em; }
+.phone-switch { display: none; }
+@media (max-width: 979px) { .phone-switch { display: flex; } .shop.basic-on .phone { display: none; } .shop:not(.basic-on) .phones { display: none; } }
 </style>
 
 <header class="top">
   <div class="top-in">
-    <div class="logo"><i class="kitenge" aria-hidden="true"></i>kibanja</div>
+    <div class="top-l">
+      <div class="logo"><i class="kitenge" aria-hidden="true"></i>kibanja</div>
+      <div class="data" role="group" aria-label="Which records">
+        <button data-a="data" data-d="practice">Practice</button>
+        <button data-a="data" data-d="live" id="live-btn">Live pilot</button>
+      </div>
+    </div>
     <nav class="modes" aria-label="Who is using Kibanja">
-      <button data-a="mode" data-m="shop">Shop</button>
+      <button data-a="mode" data-m="family">Family</button>
+      <button data-a="mode" data-m="agent">Agent</button>
       <button data-a="mode" data-m="store">Store</button>
       <button data-a="mode" data-m="hq">HQ</button>
     </nav>
@@ -237,10 +292,10 @@ input[type="range"] { width: 100%; accent-color: var(--chili); }
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ---------- data ---------- */
-const TODAY = '2026-10-24';
-const FREQ = { weekly: { label: 'Weekly', per: 'week', bonus: 1, pts: 1 }, monthly: { label: 'Monthly', per: 'month', bonus: 3, pts: 1 }, yearly: { label: 'Yearly', per: 'year', bonus: 8, pts: 2 } };
-const GROUPS = ['Me', 'Family', 'Work'];
+/* ================= settings ================= */
+const PRACTICE_TODAY = '2026-10-25';
+const USSD_CODE = '*XXX#';          // placeholder until the Uganda Communications Commission issues a short code
+const FREQ = { weekly: { label: 'Weekly', per: 'week', bonus: 1, pts: 1, grace: 3 }, monthly: { label: 'Monthly', per: 'month', bonus: 3, pts: 1, grace: 7 }, yearly: { label: 'Yearly', per: 'year', bonus: 8, pts: 2, grace: 14 } };
 // m: price a month (per employee for Work). b: extra bonus %. buys: what a month buys in bulk.
 const PKGS = {
   free: { g: 'Me', name: 'Kibanja Card', who: 'Free', m: 0, b: 0, buys: 'Top up any amount. Earn points.' },
@@ -252,7 +307,7 @@ const PKGS = {
   staff: { g: 'Work', name: 'Staff', who: 'Per employee', m: 150000, b: 3, buys: '25 kg flour · rice · beans · oil', corp: true },
   staffplus: { g: 'Work', name: 'Staff Plus', who: 'Per employee', m: 300000, b: 3, buys: 'Family-sized bulk staples', corp: true },
 };
-const PROTECT_MONTHS = 3, WAIT_DAYS = 90, AFFORD = 0.3;
+const PROTECT_MONTHS = 3, WAIT_DAYS = 90, AFFORD = 0.3, CODE_MINUTES = 5;
 const LOANS = {
   farm: { g: 'Grow food', name: 'Farm inputs', max: 2000000, terms: [3, 4, 6], per: 'month', rate: 2, note: 'Seed and fertiliser. Repay in harvest.' },
   poultry: { g: 'Grow food', name: 'Poultry', max: 1500000, terms: [4, 6, 9], per: 'month', rate: 2, note: 'Chicks, feed, vaccines.' },
@@ -261,7 +316,6 @@ const LOANS = {
   boda: { g: 'Move food', name: 'Boda boda', max: 7000000, terms: [52, 78, 104], per: 'week', rate: 2.5, note: '20% deposit. Weekly repayments.' },
   fuel: { g: 'Move food', name: 'Fuel', max: 150000, terms: [1, 2, 4], per: 'week', rate: 2.5, note: 'Fuel credit at partner stations.' },
 };
-// cat: Bulk | Staples | Other. ess: food credit and Protection can pay. ug: Ugandan-made, double points.
 const PRODUCTS = [
   { id: 'b1', cat: 'Bulk', name: 'Maize flour 25 kg', p: 75000, ess: 1, ug: 1, c: 'sun' },
   { id: 'b2', cat: 'Bulk', name: 'Rice 25 kg', p: 105000, ess: 1, ug: 1, c: 'sun' },
@@ -283,100 +337,206 @@ const PRODUCTS = [
   { id: 'o3', cat: 'Other', name: 'Biscuits', p: 3500, ess: 0, ug: 0, c: 'leaf' },
   { id: 'o4', cat: 'Other', name: 'Beer', p: 4500, ess: 0, ug: 0, c: 'chili' },
 ];
-// Scale targets (not forecasts). hh: households. Each dot in HQ = 1,000 households.
 const STAGES = [
-  { k: 'now', label: 'Today', hh: null, stores: 1, cities: ['Kampala'] },
-  { k: 'y1', label: 'Year 1', hh: 1000, stores: 6, cities: ['Kampala'] },
-  { k: 'y3', label: 'Year 3', hh: 15000, stores: 40, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu'] },
-  { k: 'y5', label: 'Year 5', hh: 100000, stores: 150, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu', 'Mbale', 'Masaka', 'Arua', 'Lira'] },
-  { k: 'y10', label: 'Year 10', hh: 1000000, stores: 1000, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu', 'Mbale', 'Masaka', 'Arua', 'Lira', 'Nairobi', 'Kigali', 'Dar es Salaam'] },
+  { label: 'Today', hh: null, stores: 1, cities: ['Kampala'] },
+  { label: 'Pilot', hh: 100, stores: 1, cities: ['Kampala'] },
+  { label: 'Year 1', hh: 1000, stores: 6, cities: ['Kampala'] },
+  { label: 'Year 3', hh: 15000, stores: 40, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu'] },
+  { label: 'Year 5', hh: 100000, stores: 150, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu', 'Mbale', 'Masaka', 'Arua', 'Lira'] },
+  { label: 'Year 10', hh: 1000000, stores: 1000, cities: ['Kampala', 'Jinja', 'Mbarara', 'Gulu', 'Mbale', 'Masaka', 'Arua', 'Lira', 'Nairobi', 'Kigali', 'Dar es Salaam'] },
 ];
-const ALL_CITIES = STAGES[4].cities;
+const ALL_CITIES = STAGES[5].cities;
+const LAUNCH = [
+  ['momo', 'MTN MoMo and Airtel Money merchant codes for collections'],
+  ['store', 'One partner store signed, one till, cashier trained'],
+  ['agents', '2 field agents trained on enrolment, consent and ID checks'],
+  ['pdpo', 'Registered with the Personal Data Protection Office'],
+  ['insurer', 'Insurer agrees Protection terms (or Protection off for the pilot)'],
+  ['lender', 'Licensed lender for Shop Ahead and loans (or both off for the pilot)'],
+  ['trust', 'Trust account for prepaid balances with a licensed payment partner'],
+  ['sms', 'SMS sender ID for receipts and pay codes'],
+  ['ussd', 'USSD short code applied for with the UCC'],
+  ['families', '100 pilot families and 1 employer recruited'],
+  ['recon', 'Daily routine: confirm payments against the MoMo statement'],
+  ['review', 'Weekly review of payments, sales, claims and complaints'],
+];
 
-function seed() {
-  return {
-    members: [
-      { id: 'KB-0001', name: 'Nakato', area: 'Kira', size: 5, pkg: 'family', freq: 'monthly', since: '2026-03-02', next: '2026-11-02', balance: 412000, points: 3420, used: 120000, ontime: 3, ess: 0.96, income: 1800000, prot: 'ready' },
-      { id: 'KB-0002', name: 'Ssempijja', area: 'Kisaasi', size: 6, pkg: 'family', freq: 'monthly', since: '2026-01-15', next: '2026-11-15', balance: 268000, points: 7880, used: 210000, ontime: 5, ess: 0.96, income: 2400000, prot: 'ready' },
-      { id: 'KB-0003', name: 'Achieng', area: 'Naalya', size: 4, pkg: 'starter', freq: 'monthly', since: '2025-12-10', next: '2026-11-10', balance: 12000, points: 5210, used: 0, ontime: 2, ess: 0.95, income: 400000, prot: 'active', allowance: { start: '2026-09-14', month: 120000, total: 420000 } },
-      { id: 'KB-0004', name: 'Mugisha', area: 'Bweyogerere', size: 1, pkg: 'solo', freq: 'weekly', since: '2026-02-10', next: '2026-10-27', balance: 22000, points: 2600, used: 20000, ontime: 2, ess: 0.85, income: 700000, prot: 'ready' },
-      { id: 'KB-0005', name: 'Namubiru', area: 'Kyaliwajjala', size: 4, pkg: 'starter', freq: 'monthly', since: '2026-05-30', next: '2026-10-30', balance: 150000, points: 2150, used: 60000, ontime: 1, ess: 0.94, income: 400000, prot: 'review' },
-      { id: 'KB-0006', name: 'Kato', area: 'Mukono', size: 4, pkg: 'staff', freq: 'monthly', since: '2026-07-01', next: '2026-11-01', balance: 96000, points: 1900, used: 0, ontime: 0, ess: 0.95, income: 1200000, prot: 'ready', employer: 'Lakeside Packers (example)' },
-      { id: 'KB-0007', name: 'Auma', area: 'Kawempe', size: 3, pkg: 'free', freq: 'monthly', since: '2026-09-20', next: null, balance: 30000, points: 800, used: 0, ontime: 0, ess: 0.84, income: 350000, prot: 'none' },
-    ],
-    claims: [{ id: 'CL-141', m: 'KB-0005', type: 'Job loss', filed: '2026-10-19', note: 'Laid off when the factory cut its second shift.', checks: [['90 days of cover', 1], ['Termination letter', 1], ['NSSF payments stopped', 1], ['Employer confirms', 0]], status: 'pending' }],
-    loans: [{ id: 'LN-007', m: 'KB-0002', k: 'stock', amount: 1500000, n: 6, start: '2026-08-01', paid: 2, status: 'active' }],
-    txns: [
-      { d: '2026-10-22', m: 'KB-0001', t: 'Kibanja Store · Kira', a: -61750 },
-      { d: '2026-10-02', m: 'KB-0001', t: 'Family package', a: 525000, note: 'paid 500,000' },
-      { d: '2026-10-18', m: 'KB-0002', t: 'Partner store · Kisaasi', a: -204500 },
-      { d: '2026-10-15', m: 'KB-0002', t: 'Family package', a: 525000, note: 'paid 500,000' },
-      { d: '2026-10-20', m: 'KB-0003', t: 'Protection · essentials', a: -96000 },
-      { d: '2026-10-20', m: 'KB-0004', t: 'Solo package', a: 23230, note: 'paid 23,000' },
-      { d: '2026-10-19', m: 'KB-0004', t: 'Kibanja Store · Kira', a: -18400 },
-      { d: '2026-09-30', m: 'KB-0005', t: 'Family Starter package', a: 312000, note: 'paid 300,000' },
-      { d: '2026-10-01', m: 'KB-0006', t: 'Staff package', a: 159000, note: 'paid by employer' },
-      { d: '2026-10-14', m: 'KB-0007', t: 'Top up', a: 50000 },
-    ],
-    sales: { local: 2350000, all: 5120000, today: 0 },
-  };
-}
-let S = seed();
-const ui = { mode: 'shop', tab: 'home', me: 'KB-0001', freq: 'monthly', group: 'Family', staff: 40, stage: 2, sheet: null, payCode: null,
-  till: { m: null, input: '', cat: 'Bulk', cart: [] } };
-
-/* ---------- helpers ---------- */
+/* ================= helpers ================= */
 const $ = (s, r = document) => r.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ugx = n => 'UGX ' + Math.round(n).toLocaleString('en-US');
 const commas = n => Math.round(n).toLocaleString('en-US');
 const short = n => { const a = Math.abs(n), t = x => String(Math.round(x * 10) / 10); return a >= 1e9 ? t(n / 1e9) + 'B' : a >= 1e6 ? t(n / 1e6) + 'M' : a >= 1e3 ? t(n / 1e3) + 'k' : String(Math.round(n)); };
-const utc = s => new Date(s + 'T00:00:00Z');
+const utc = s => new Date(s.slice(0, 10) + 'T00:00:00Z');
 const days = (a, b) => Math.round((utc(b) - utc(a)) / 864e5);
 const addDays = (s, n) => { const d = utc(s); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const addMonths = (s, n) => { const d = utc(s); d.setUTCMonth(d.getUTCMonth() + n); return d.toISOString().slice(0, 10); };
-const fdate = s => utc(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
-const member = id => S.members.find(m => m.id === id);
-const me = () => member(ui.me);
-
+const fdate = s => s ? utc(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }) : '';
+const ftime = s => s ? new Date(s).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+const store = { get(k, f) { try { const v = localStorage.getItem(k); return v === null ? f : JSON.parse(v); } catch { return f; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const price = (k, f) => { const m = PKGS[k].m; return f === 'weekly' ? Math.round(m * 12 / 52 / 500) * 500 : f === 'monthly' ? m : m * 12; };
-const bonusPct = (k, f) => PKGS[k].m ? FREQ[f].bonus + PKGS[k].b : 0;
-const value = (k, f) => Math.round(price(k, f) * (1 + bonusPct(k, f) / 100));
-const creditLimit = m => PKGS[m.pkg].m / 2;            // food credit: half a month of the package
-const creditFree = m => m.prot === 'active' ? 0 : Math.max(0, creditLimit(m) - m.used);
-const protCap = m => PKGS[m.pkg].m;                    // Protection pays the package's month, for essentials
-const protLeft = m => m.prot !== 'active' ? 0 : Math.max(0, Math.min(protCap(m) - m.allowance.month, protCap(m) * PROTECT_MONTHS - m.allowance.total));
+const bonusPct = (k, f, staff = 0) => PKGS[k].m ? FREQ[f].bonus + PKGS[k].b + (PKGS[k].corp ? (staff >= 200 ? 2 : staff >= 50 ? 1 : 0) : 0) : 0;
+const value = (k, f, staff) => Math.round(price(k, f) * (1 + bonusPct(k, f, staff) / 100));
+const nextDate = (from, f) => f === 'weekly' ? addDays(from, 7) : addMonths(from, f === 'monthly' ? 1 : 12);
+const swatch = name => (name.match(/\d+\s?(kg|L|g|bars)\b/) || [name.split(/[ ,]/)[0]])[0];
+const validPhone = p => /^(\+?256|0)7\d{8}$/.test(String(p).replace(/[\s-]/g, ''));
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2800); }
 
-function score(m) {
-  const months = Math.min(12, Math.max(0, Math.floor(days(m.since, TODAY) / 30)));
-  const s = months / 12 * 30 + Math.min(m.ontime, 5) / 5 * 30 + m.ess * 20 + Math.min(m.points / 5000, 1) * 20;
-  return Math.round(m.pkg === 'free' ? s * 0.5 : s);
+/* ================= state ================= */
+const SRC = { mode: store.get('kb-data', 'practice'), db: null, uid: null, live: { families: [], ledger: [], claims: [], loans: [], codes: [], config: {} }, ready: false, readOnly: false };
+let P = practice();                          // practice records, in memory only
+const D = () => SRC.mode === 'live' ? SRC.live : P;
+const today = () => SRC.mode === 'live' ? new Date().toISOString().slice(0, 10) : PRACTICE_TODAY;
+const nowIso = () => SRC.mode === 'live' ? new Date().toISOString() : PRACTICE_TODAY + 'T' + new Date().toISOString().slice(11);
+const ui = { mode: 'family', tab: 'home', fam: null, freq: 'monthly', group: 'Family', staff: 40, stage: 0, sheet: null, q: '', agentFam: null,
+  till: { f: null, input: '', cat: 'Bulk', cart: [], name: store.get('kb-till', 'Kibanja Store · Kira') }, ussd: { lines: null, step: 'idle', input: '' }, basic: false };
+
+function practice() {
+  const fam = (id, name, area, size, pkg, freq, since, next, prot, extra = {}) => ({ id, card: '6201 4410 ' + id.slice(1).padStart(4, '0'), name, phone: '07' + (70000000 + +id.slice(1) * 1234567 % 29999999), area, size, pkg, freq, since, next, prot, idChecked: true, consent: true, at: since + 'T09:00:00Z', ...extra });
+  const L = (f, kind, at, o) => ({ id: rid() + kind, f, kind, at: at + 'T10:00:00Z', status: 'confirmed', bal: 0, ...o });
+  return {
+    families: [
+      fam('F1', 'Nakato', 'Kira', 5, 'family', 'monthly', '2026-03-02', '2026-11-02', 'ready', { ontime0: 2 }),
+      fam('F2', 'Ssempijja', 'Kisaasi', 6, 'family', 'monthly', '2026-01-15', '2026-11-15', 'ready', { ontime0: 4 }),
+      fam('F3', 'Achieng', 'Naalya', 4, 'starter', 'monthly', '2025-12-10', '2026-11-10', 'active', { protStart: '2026-09-14', ontime0: 3 }),
+      fam('F4', 'Mugisha', 'Bweyogerere', 1, 'solo', 'weekly', '2026-02-10', '2026-10-27', 'ready', { ontime0: 1 }),
+      fam('F5', 'Namubiru', 'Kyaliwajjala', 4, 'starter', 'monthly', '2026-05-30', '2026-10-30', 'review', { ontime0: 0 }),
+      fam('F6', 'Kato', 'Mukono', 4, 'staff', 'monthly', '2026-07-01', '2026-11-01', 'ready', { employer: 'Lakeside Packers (example)', ontime0: 2 }),
+      fam('F7', 'Auma', 'Kawempe', 3, 'free', 'monthly', '2026-09-20', null, 'none'),
+    ],
+    ledger: [
+      L('F1', 'points', '2026-09-30', { pts: 3420, note: 'Points so far' }),
+      L('F1', 'package', '2026-10-02', { pkg: 'family', freq: 'monthly', paid: 500000, bal: 525000, ch: 'MTN', ref: 'MP261002.0915.B11872' }),
+      L('F1', 'sale', '2026-10-15', { adv: 120000, tot: 120000, ess: 120000, ug: 120000, store: 'Kibanja Store · Kira' }),
+      L('F1', 'sale', '2026-10-22', { bal: -61750, tot: 61750, ess: 52750, ug: 50000, pts: 1123, store: 'Kibanja Store · Kira' }),
+      L('F2', 'points', '2026-09-30', { pts: 7880, note: 'Points so far' }),
+      L('F2', 'package', '2026-10-15', { pkg: 'family', freq: 'monthly', paid: 500000, bal: 525000, ch: 'MTN', ref: 'MP261015.1402.C55120' }),
+      L('F2', 'sale', '2026-10-18', { bal: -204500, adv: 210000, tot: 414500, ess: 398000, ug: 380000, store: 'Partner store · Kisaasi' }),
+      { id: 'pend1', f: 'F2', kind: 'topup', at: '2026-10-24T18:20:00Z', status: 'pending', bal: 100000, paid: 100000, ch: 'MTN', ref: 'MP261024.1820.D90311' },
+      L('F3', 'points', '2026-09-30', { pts: 5210, note: 'Points so far' }),
+      L('F3', 'package', '2026-09-10', { pkg: 'starter', freq: 'monthly', paid: 300000, bal: 312000, ch: 'Airtel', ref: 'AM260910.0811.7781' }),
+      L('F3', 'sale', '2026-09-20', { bal: -300000, prot: 0, tot: 300000, ess: 290000, ug: 270000, store: 'Partner store · Naalya' }),
+      L('F3', 'sale', '2026-10-20', { prot: 120000, tot: 120000, ess: 120000, ug: 110000, store: 'Partner store · Naalya' }),
+      L('F3', 'sale', '2026-09-28', { prot: 300000, tot: 300000, ess: 300000, ug: 280000, store: 'Partner store · Naalya' }),
+      L('F4', 'points', '2026-09-30', { pts: 2600, note: 'Points so far' }),
+      L('F4', 'topup', '2026-10-12', { paid: 20000, bal: 20000, ch: 'Airtel', ref: 'AM261012.1730.4410' }),
+      L('F4', 'package', '2026-10-20', { pkg: 'solo', freq: 'weekly', paid: 23000, bal: 23230, ch: 'Airtel', ref: 'AM261020.0702.5521' }),
+      L('F4', 'sale', '2026-10-21', { bal: -18400, adv: 20000, tot: 38400, ess: 33400, ug: 30000, store: 'Kibanja Store · Kira' }),
+      { id: 'pend2', f: 'F4', kind: 'package', at: '2026-10-25T06:45:00Z', status: 'pending', pkg: 'solo', freq: 'weekly', paid: 23000, bal: 23230, ch: 'Airtel', ref: 'AM261025.0645.6602' },
+      L('F5', 'points', '2026-09-30', { pts: 2150, note: 'Points so far' }),
+      L('F5', 'package', '2026-09-30', { pkg: 'starter', freq: 'monthly', paid: 300000, bal: 312000, ch: 'MTN', ref: 'MP260930.1215.E2231' }),
+      L('F5', 'sale', '2026-10-08', { bal: -162000, adv: 60000, tot: 222000, ess: 210000, ug: 190000, store: 'Kibanja Store · Kira' }),
+      L('F6', 'points', '2026-09-30', { pts: 1900, note: 'Points so far' }),
+      L('F6', 'package', '2026-10-01', { pkg: 'staff', freq: 'monthly', paid: 150000, bal: 159000, ch: 'Employer', ref: 'LPK-PAYROLL-OCT' }),
+      L('F6', 'sale', '2026-10-09', { bal: -63000, tot: 63000, ess: 60000, ug: 58000, store: 'Kibanja Store · Kira' }),
+      L('F7', 'points', '2026-09-30', { pts: 800, note: 'Points so far' }),
+      L('F7', 'topup', '2026-10-14', { paid: 50000, bal: 50000, ch: 'MTN', ref: 'MP261014.1101.F7781' }),
+      L('F7', 'sale', '2026-10-16', { bal: -20000, tot: 20000, ess: 17000, ug: 15000, store: 'Kibanja Store · Kira' }),
+    ],
+    claims: [{ id: 'CL141', f: 'F5', type: 'Job loss', note: 'Laid off when the factory cut its second shift.', checks: [['90 days of cover', 1], ['Termination letter', 1], ['NSSF payments stopped', 1], ['Employer confirms by phone', 0]], status: 'pending', at: '2026-10-19T09:00:00Z' }],
+    loans: [{ id: 'LN7', f: 'F2', k: 'stock', amount: 1500000, n: 6, start: '2026-08-01', paid: 2, status: 'active', at: '2026-07-28T09:00:00Z' }],
+    codes: [],
+    config: { mtn: '123456 (example)', airtel: '654321 (example)', launch: {} },
+  };
+}
+
+/* ================= data layer: practice in memory, live in the shared db ================= */
+const COLS = ['families', 'ledger', 'claims', 'loans', 'codes'];
+async function connectLive() {
+  try {
+    const [db, user] = await Promise.all([claude.use('db'), claude.use('user')]);
+    if (!db) { SRC.db = null; render(); return; }
+    SRC.db = db; SRC.uid = user ? await user.id() : null;
+    if (user) { const can = await user.can('data.write'); SRC.readOnly = can === false; }
+    for (const c of COLS) db.collection(c).onSnapshot(snap => { SRC.live[c] = snap.docs.map(d => ({ id: d.id, ...d.data() })); SRC.ready = true; if (SRC.mode === 'live') render(); }, e => { if (SRC.mode === 'live') toast('Live records unavailable: ' + e.code); });
+    db.doc('config/main').onSnapshot(s => { SRC.live.config = s.exists ? s.data() : {}; if (SRC.mode === 'live') render(); });
+    render();
+  } catch { SRC.db = null; render(); }
+}
+const by = () => SRC.mode === 'live' ? (SRC.uid || 'unknown') : 'practice';
+function fail(e) {
+  const code = e && e.code;
+  if (code === 'invalid_argument') { SRC.readOnly = true; toast('You can view live records but not change them. Ask the owner for Contributor access.'); }
+  else if (code === 'quota_exceeded') toast('The pilot database is full. Export, then move to the production system.');
+  else toast('Not saved. Check the connection and try again.');
+  render();
+}
+async function put(col, id, data) {
+  if (SRC.mode === 'live') { if (!SRC.db) return toast('Live records are not available here.'); try { await SRC.db.collection(col).doc(id).set(data); } catch (e) { fail(e); return false; } return true; }
+  const arr = P[col], i = arr.findIndex(x => x.id === id); const row = { id, ...data }; i >= 0 ? (arr[i] = row) : arr.push(row); render(); return true;
+}
+async function patch(col, id, data) {
+  if (SRC.mode === 'live') { if (!SRC.db) return; try { await SRC.db.collection(col).doc(id).update(data); } catch (e) { fail(e); return false; } return true; }
+  const row = P[col].find(x => x.id === id); if (row) Object.assign(row, data); render(); return true;
+}
+async function putConfig(data) {
+  if (SRC.mode === 'live') { if (!SRC.db) return; const cur = SRC.live.config || {}; try { await SRC.db.doc('config/main').set({ ...cur, ...data }); } catch (e) { fail(e); } return; }
+  Object.assign(P.config, data); render();
+}
+const ledger = (o) => { const id = rid(); return put('ledger', id, { by: by(), at: nowIso(), status: 'confirmed', bal: 0, ...o }); };
+
+/* ================= accounts, derived from the ledger ================= */
+let ACC = new Map();
+function buildAccounts() {
+  const d = D(), month = today().slice(0, 7), fams = new Map(d.families.map(f => [f.id, f]));
+  ACC = new Map(d.families.map(f => [f.id, { bal: 0, pend: 0, adv: 0, pts: 0, protM: 0, protT: 0, ontime: f.ontime0 || 0, ess: 0, tot: 0, last: null }]));
+  for (const e of d.ledger) {
+    const a = ACC.get(e.f); if (!a || e.status === 'rejected') continue;
+    if (e.status === 'pending') { a.pend += e.bal || 0; continue; }
+    a.bal += e.bal || 0; a.adv += e.adv || 0; a.pts += e.pts || 0;
+    const f = fams.get(e.f);
+    if (e.prot && f.protStart && e.at.slice(0, 10) >= f.protStart) { a.protT += e.prot; if (e.at.slice(0, 7) === month) a.protM += e.prot; }
+    if (e.kind === 'package' || e.kind === 'repay') a.ontime++;
+    if (e.kind === 'sale') { a.ess += e.ess || 0; a.tot += e.tot || 0; }
+  }
+}
+const acc = f => ACC.get(f.id) || { bal: 0, pend: 0, adv: 0, pts: 0, protM: 0, protT: 0, ontime: 0, ess: 0, tot: 0 };
+const fam = id => D().families.find(f => f.id === id);
+const aheadLimit = f => PKGS[f.pkg].m / 2;                      // Shop Ahead: up to half a month of the package, repaid with the next payment
+const AHEAD_AFTER = 2;                                                // on-time payments before Shop Ahead opens
+const aheadOpen = f => !!PKGS[f.pkg].m && f.prot !== 'active' && ['paid', 'due'].includes(status(f)) && acc(f).ontime >= AHEAD_AFTER;
+const aheadFree = f => aheadOpen(f) ? Math.max(0, aheadLimit(f) - acc(f).adv) : 0;
+const aheadNote = f => !PKGS[f.pkg].m ? 'With a package' : f.prot === 'active' ? 'Paused' : status(f) === 'lapsed' ? 'Pay to reopen' : acc(f).ontime < AHEAD_AFTER || status(f) === 'new' ? `Opens after ${AHEAD_AFTER} payments` : 'ready to use';
+const protCap = f => PKGS[f.pkg].m;
+const protLeft = f => { if (f.prot !== 'active' || !f.protStart || today() >= addMonths(f.protStart, PROTECT_MONTHS)) return 0; const a = acc(f); return Math.max(0, Math.min(protCap(f) - a.protM, protCap(f) * PROTECT_MONTHS - a.protT)); };
+const status = f => { if (f.pkg === 'free') return 'free'; if (!f.next) return 'new'; if (today() <= f.next) return 'paid'; return days(f.next, today()) <= FREQ[f.freq].grace ? 'due' : 'lapsed'; };
+function score(f) {
+  const a = acc(f), months = Math.min(12, Math.max(0, Math.floor(days(f.since, today()) / 30)));
+  const share = a.tot ? a.ess / a.tot : 0.9;
+  const s = months / 12 * 30 + Math.min(a.ontime, 5) / 5 * 30 + share * 20 + Math.min(a.pts / 5000, 1) * 20;
+  return Math.round(f.pkg === 'free' ? s * 0.5 : s);
 }
 const perRate = l => LOANS[l.k].rate / 100 * (LOANS[l.k].per === 'week' ? 12 / 52 : 1);
 const instalment = l => { const r = perRate(l); return l.amount * r / (1 - Math.pow(1 + r, -l.n)); };
 const monthly = l => instalment(l) * (LOANS[l.k].per === 'week' ? 52 / 12 : 1);
 const balanceAfter = l => { const r = perRate(l), i = instalment(l), k = l.paid; return Math.max(0, l.amount * Math.pow(1 + r, k) - i * (Math.pow(1 + r, k) - 1) / r); };
 const nextDue = l => LOANS[l.k].per === 'week' ? addDays(l.start, 7 * (l.paid + 1)) : addMonths(l.start, l.paid + 1);
-const openLoans = m => S.loans.filter(l => l.m === m.id && (l.status === 'active' || l.status === 'pending'));
-
-function loanOffer(m, k) {
-  const sc = score(m), P = LOANS[k];
-  let why = null;
-  if (m.pkg === 'free') why = 'Loans need a package. It builds your score.';
-  else if (m.prot !== 'ready') why = 'No new loans while Protection is open.';
-  else if (openLoans(m).some(l => (l.k === 'fuel') === (k === 'fuel'))) why = k === 'fuel' ? 'Fuel credit already open.' : 'One loan at a time (fuel can run alongside).';
+const openLoans = f => D().loans.filter(l => l.f === f.id && (l.status === 'active' || l.status === 'pending'));
+function loanOffer(f, k) {
+  const sc = score(f), L = LOANS[k]; let why = null;
+  if (f.pkg === 'free') why = 'Loans need a package. It builds your score.';
+  else if (['lapsed', 'new'].includes(status(f))) why = 'Pay your package first.';
+  else if (f.prot !== 'ready') why = 'No new loans while Protection is open.';
+  else if (openLoans(f).some(l => (l.k === 'fuel') === (k === 'fuel'))) why = k === 'fuel' ? 'Fuel credit already open.' : 'One loan at a time (fuel can run alongside).';
   else if (sc < 50) why = `Score ${sc}. You need 50.`;
-  const step = P.max >= 1000000 ? 50000 : 10000;
-  const limit = sc < 50 ? 0 : Math.floor(P.max * Math.min(1, (sc - 40) / 50) / step) * step;
-  return { why, limit, step, sc };
+  const step = L.max >= 1000000 ? 50000 : 10000;
+  return { why, step, sc, limit: sc < 50 ? 0 : Math.floor(L.max * Math.min(1, (sc - 40) / 50) / step) * step };
 }
-function afford(m, l) {
-  const others = S.loans.filter(x => x.m === m.id && x.status === 'active').reduce((a, x) => a + monthly(x), 0) + (m.prot === 'active' ? 0 : m.used);
-  return { ok: others + monthly(l) <= m.income * AFFORD, total: others + monthly(l), cap: m.income * AFFORD };
+function afford(f, l) {
+  const others = D().loans.filter(x => x.f === f.id && x.status === 'active').reduce((a, x) => a + monthly(x), 0) + (f.prot === 'active' ? 0 : acc(f).adv);
+  const income = f.income || PKGS[f.pkg].m * 3 || 300000;     // declared income when given, else a cautious estimate from the package
+  return { ok: others + monthly(l) <= income * AFFORD };
+}
+const KIND = { package: 'Package', topup: 'Top up', sale: 'Shopping', repay: 'Shop Ahead repaid', 'loan-pay': 'Loan instalment', points: 'Points', protection: 'Protection' };
+function activity(f, n) {
+  const list = D().ledger.filter(e => e.f === f.id && e.kind !== 'points').sort((a, b) => b.at.localeCompare(a.at)).slice(0, n);
+  if (!list.length) return '<p class="small muted">Nothing yet.</p>';
+  return `<ul class="list card">${list.map(e => { const amt = e.kind === 'sale' ? -(e.tot - (e.mm || 0)) : e.kind === 'repay' || e.kind === 'loan-pay' ? -(e.paid || 0) : e.bal;
+    return `<li><span>${KIND[e.kind] || e.kind}${e.store ? ' · ' + esc(e.store) : ''}<span class="sub" style="display:block">${fdate(e.at)}${e.status === 'pending' ? ' · <b style="color:var(--warn)">awaiting confirmation</b>' : e.status === 'rejected' ? ' · <b style="color:var(--bad)">not received</b>' : ''}${e.paid && e.kind === 'package' ? ' · paid ' + commas(e.paid) : ''}</span></span><span class="amt" style="color:${amt > 0 ? 'var(--ok)' : 'inherit'}">${amt > 0 ? '+' : amt < 0 ? '−' : ''}${commas(Math.abs(amt))}</span></li>`; }).join('')}</ul>`;
 }
 
-function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('on'), 2600); }
-
+/* ================= icons ================= */
 const IC = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>',
   tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="8" cy="9" r="1.6" fill="currentColor"/></svg>',
@@ -386,403 +546,544 @@ const IC = {
   qr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z" fill="currentColor"/></svg>',
 };
 
-/* ---------- shop: the family's phone ---------- */
-function cardHtml(m) {
-  const P = PKGS[m.pkg];
+/* ================= family: smartphone app ================= */
+function cardHtml(f) {
+  const Pk = PKGS[f.pkg];
   return `<div class="kcard"><div style="position:absolute;inset:0" class="diamonds" aria-hidden="true"></div><div class="band kitenge" aria-hidden="true"></div>
-    <div class="k-top"><span class="k-brand">kibanja</span><span class="k-chip">${P.name}</span></div>
-    <span class="k-num">6201 4410 ${m.id.slice(-4)}</span>
-    <div class="k-foot"><span>${esc(m.name)} · ${m.size} ${m.size === 1 ? 'person' : 'people'}</span><span>${m.employer ? 'Paid by employer' : P.m ? FREQ[m.freq].label : 'Free'}</span></div></div>`;
+    <div class="k-top"><span class="k-brand">kibanja</span><span class="k-chip">${Pk.name}</span></div>
+    <span class="k-num">${esc(f.card)}</span>
+    <div class="k-foot"><span>${esc(f.name)} · ${f.size} ${f.size === 1 ? 'person' : 'people'}</span><span>${f.employer ? 'Paid by employer' : Pk.m ? FREQ[f.freq].label : 'Free'}</span></div></div>`;
 }
-function activity(m, n) {
-  const list = S.txns.filter(t => t.m === m.id).sort((a, b) => b.d.localeCompare(a.d)).slice(0, n);
-  if (!list.length) return '<p class="small muted">Nothing yet.</p>';
-  return `<ul class="list card">${list.map(t => `<li><span>${esc(t.t)}<span class="sub" style="display:block">${fdate(t.d)}${t.note ? ' · ' + esc(t.note) : ''}</span></span><span class="amt" style="color:${t.a > 0 ? 'var(--ok)' : 'inherit'}">${t.a > 0 ? '+' : '−'}${commas(Math.abs(t.a))}</span></li>`).join('')}</ul>`;
-}
-function protTile(m) {
-  return { none: ['No cover', 'var(--line)'], ready: ['Ready', 'var(--leaf)'], review: ['Checking claim', 'var(--sun)'], active: [`${short(protLeft(m))} left`, 'var(--chili)'] }[m.prot];
-}
-
-const SHOP = {};
-SHOP.home = m => {
-  const P = PKGS[m.pkg], loan = openLoans(m)[0], [pt, pc] = protTile(m);
-  return `<div class="hello"><div><span class="small muted">Hi</span><h2>${esc(m.name)}</h2></div><button class="avatar" data-a="tab" data-t="me" aria-label="Your account">${esc(m.name[0])}</button></div>
-  ${cardHtml(m)}
-  <div class="balance"><span class="label">To spend</span><b class="bignum">${ugx(m.balance)}</b>
-    <span class="small muted">${m.employer ? `Topped up by ${esc(m.employer)} on ${fdate(m.next)}` : P.m ? `Next ${P.name} payment ${fdate(m.next)}` : 'Free card. Get a package for a bonus on every payment.'}</span>
+const STATUS = { free: 'free card', new: 'first payment due', paid: 'paid', due: 'due', lapsed: 'paused' };
+const protWord = f => ({ none: 'No cover', ready: days(f.since, today()) >= WAIT_DAYS ? 'Ready' : 'Starts soon', review: 'Checking', active: short(protLeft(f)) + ' left' }[f.prot]);
+const APP = {};
+APP.home = f => {
+  const Pk = PKGS[f.pkg], a = acc(f), st = status(f), loan = openLoans(f)[0];
+  const line = st === 'new' ? `<b style="color:var(--warn)">${f.employer ? 'Waiting for your employer\'s first payment.' : 'Pay your first package to start.'}</b>` : f.employer ? `Topped up by ${esc(f.employer)} on ${fdate(f.next)}` : !Pk.m ? 'Free card. A package adds a bonus to every payment.' : st === 'paid' ? `Next payment ${fdate(f.next)}` : st === 'due' ? `<b style="color:var(--warn)">Payment due. Pay by ${fdate(addDays(f.next, FREQ[f.freq].grace))}.</b>` : `<b style="color:var(--bad)">Package paused. Pay to restart.</b>`;
+  return `<div class="hello"><div><span class="small muted">Hi</span><h2>${esc(f.name)}</h2></div><button class="avatar" data-a="tab" data-t="me" aria-label="Your account">${esc(f.name[0])}</button></div>
+  ${cardHtml(f)}
+  <div class="balance"><span class="label">To spend</span><b class="bignum">${ugx(a.bal)}</b>
+    ${a.pend ? `<span class="small" style="color:var(--warn);font-weight:800">+ ${ugx(a.pend)} awaiting confirmation</span>` : ''}
+    <span class="small muted">${line}</span>
     <div class="quick">
       <button data-a="sheet" data-s="topup">${IC.plus}<span>Top up</span></button>
-      <button data-a="sheet" data-s="code">${IC.qr}<span>Pay code</span></button>
-      <button data-a="${P.m && !m.employer ? 'sheet' : 'tab'}" data-s="pay" data-k="${m.pkg}" data-t="pkgs">${IC.tag}<span>${P.m && !m.employer ? 'Pay package' : 'Packages'}</span></button>
+      <button data-a="paycode">${IC.qr}<span>Pay code</span></button>
+      ${Pk.m && !f.employer ? `<button data-a="sheet" data-s="pay" data-k="${f.pkg}">${IC.tag}<span>Pay package</span></button>` : `<button data-a="tab" data-t="pkgs">${IC.tag}<span>Packages</span></button>`}
     </div></div>
   <div class="tiles">
-    <button class="tile" data-a="tab" data-t="me"><span class="label">Food credit</span><b>${P.m ? short(creditFree(m)) : '—'}</b><span class="small muted">${m.prot === 'active' ? 'Frozen' : P.m ? 'available' : 'With a package'}</span></button>
-    <button class="tile" data-a="tab" data-t="me"><span class="label">Protection</span><b>${pt}</b><span class="dot" style="background:${pc}"></span></button>
-    <button class="tile" data-a="tab" data-t="me"><span class="label">Points</span><b>${commas(m.points)}</b><span class="small muted">Double on UG-made</span></button>
+    <button class="tile" data-a="tab" data-t="me"><span class="label">Shop Ahead</span><b>${Pk.m ? short(aheadFree(f)) : '—'}</b><span class="small muted">${aheadNote(f)}</span></button>
+    <button class="tile" data-a="tab" data-t="me"><span class="label">Protection</span><b>${protWord(f)}</b><span class="dot" style="background:${f.prot === 'active' ? 'var(--chili)' : f.prot === 'review' ? 'var(--sun)' : f.prot === 'ready' ? 'var(--leaf)' : 'var(--line)'}"></span></button>
+    <button class="tile" data-a="tab" data-t="me"><span class="label">Points</span><b>${commas(a.pts)}</b><span class="small muted">Double on UG-made</span></button>
     <button class="tile" data-a="tab" data-t="loans"><span class="label">Loan</span><b>${loan ? short(loan.status === 'pending' ? loan.amount : balanceAfter(loan)) : 'None'}</b><span class="small muted">${loan ? (loan.status === 'pending' ? 'In review' : LOANS[loan.k].name) : 'See loans'}</span></button>
   </div>
-  <h3 class="sec">Recent</h3>${activity(m, 4)}`;
+  <h3 class="sec">Recent</h3>${activity(f, 5)}`;
 };
-
-SHOP.pkgs = m => {
-  const f = ui.freq, list = Object.entries(PKGS).filter(([, P]) => P.g === ui.group);
-  return `<h2>Packages</h2>
-  <p class="small muted">Pay. Get more to spend. Buy anything.</p>
-  <div class="seg" role="group" aria-label="How often">${Object.entries(FREQ).map(([k, F]) => `<button data-a="freq" data-f="${k}" aria-pressed="${f === k}">${F.label}</button>`).join('')}</div>
-  <div class="chips">${GROUPS.map(g => `<button class="chip" data-a="group" data-g="${g}" aria-pressed="${ui.group === g}">${g === 'Me' ? 'Just me' : g === 'Work' ? 'Employers' : 'Family'}</button>`).join('')}</div>
-  ${ui.group === 'Work' ? `<div class="card"><div class="row between"><b>Employees</b><div class="stepper"><button data-a="staff" data-d="-10" aria-label="Fewer">−</button><b class="num">${ui.staff}</b><button data-a="staff" data-d="10" aria-label="More">+</button></div></div>
-    <span class="small muted">${ui.staff >= 200 ? '+2% volume bonus' : ui.staff >= 50 ? '+1% volume bonus' : '50+ staff earn a volume bonus'}</span></div>` : ''}
-  ${list.map(([k, P]) => {
-    const on = m.pkg === k, staffBonus = P.corp ? (ui.staff >= 200 ? 2 : ui.staff >= 50 ? 1 : 0) : 0;
-    const v = Math.round(price(k, f) * (1 + (bonusPct(k, f) + staffBonus) / 100));
-    if (!P.m) return `<article class="pkg ${on ? 'on' : ''}"><div class="row between"><h3>${P.name}</h3><span class="pill">Free</span></div><p class="small muted">${P.buys}</p></article>`;
-    return `<article class="pkg ${on ? 'on' : ''}">
-      <div class="row between"><h3>${P.name}</h3><span class="pill">${P.who}</span></div>
-      <div class="price"><span class="bignum">${ugx(price(k, f))}</span><span class="muted small">/ ${FREQ[f].per}</span></div>
-      <div class="get">Get <b>${ugx(v)}</b> to spend <span class="bonus">+${bonusPct(k, f) + staffBonus}%</span></div>
-      <p class="small muted">${P.buys}</p>
-      ${P.corp ? `<button class="btn ghost block" data-a="sheet" data-s="quote" data-k="${k}">Quote for ${ui.staff} staff</button>` : `<button class="btn ${on ? 'ghost' : 'sun'} block" data-a="sheet" data-s="pay" data-k="${k}">${on ? 'Pay again' : 'Choose'}</button>`}
-    </article>`;
-  }).join('')}`;
+APP.pkgs = f => {
+  const fq = ui.freq, list = Object.entries(PKGS).filter(([, Pk]) => Pk.g === ui.group);
+  return `<h2>Packages</h2><p class="small muted">Pay. Get more to spend. Buy anything.</p>
+  <div class="seg" role="group" aria-label="How often">${Object.entries(FREQ).map(([k, F]) => `<button data-a="freq" data-f="${k}" aria-pressed="${fq === k}">${F.label}</button>`).join('')}</div>
+  <div class="chips">${['Me', 'Family', 'Work'].map(g => `<button class="chip" data-a="group" data-g="${g}" aria-pressed="${ui.group === g}">${g === 'Me' ? 'Just me' : g === 'Work' ? 'Employers' : 'Family'}</button>`).join('')}</div>
+  ${ui.group === 'Work' ? `<div class="card"><div class="row between"><b>Employees</b><div class="stepper"><button data-a="staff" data-d="-10" aria-label="Fewer">−</button><b class="num">${ui.staff}</b><button data-a="staff" data-d="10" aria-label="More">+</button></div></div><span class="small muted">${ui.staff >= 200 ? '+2% volume bonus' : ui.staff >= 50 ? '+1% volume bonus' : '50+ staff earn a volume bonus'}</span></div>` : ''}
+  ${list.map(([k, Pk]) => { const on = f.pkg === k;
+    if (!Pk.m) return `<article class="pkg ${on ? 'on' : ''}"><div class="row between"><h3>${Pk.name}</h3><span class="pill">Free</span></div><p class="small muted">${Pk.buys}</p></article>`;
+    return `<article class="pkg ${on ? 'on' : ''}"><div class="row between"><h3>${Pk.name}</h3><span class="pill">${Pk.who}</span></div>
+      <div class="price"><span class="bignum">${ugx(price(k, fq))}</span><span class="muted small">/ ${FREQ[fq].per}</span></div>
+      <div class="get">Get <b>${ugx(value(k, fq, ui.staff))}</b> to spend <span class="bonus">+${bonusPct(k, fq, ui.staff)}%</span></div>
+      <p class="small muted">${Pk.buys}</p>
+      ${Pk.corp ? `<button class="btn ghost block" data-a="sheet" data-s="quote" data-k="${k}">Quote for ${ui.staff} staff</button>` : `<button class="btn ${on ? 'ghost' : 'sun'} block" data-a="sheet" data-s="pay" data-k="${k}">${on ? 'Pay again' : 'Choose'}</button>`}</article>`; }).join('')}`;
 };
-
-SHOP.loans = m => {
-  const sc = score(m), mine = openLoans(m), ring = 2 * Math.PI * 34;
+APP.loans = f => {
+  const sc = score(f), ring = 2 * Math.PI * 34;
   return `<h2>Loans</h2>
   <div class="card score"><svg viewBox="0 0 84 84" width="84" height="84" aria-hidden="true"><circle cx="42" cy="42" r="34" fill="none" stroke="var(--sunk)" stroke-width="10"/><circle cx="42" cy="42" r="34" fill="none" stroke="${sc >= 50 ? 'var(--leaf)' : 'var(--sun)'}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${ring * sc / 100} ${ring}" transform="rotate(-90 42 42)"/><text x="42" y="49" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="700" font-size="20" fill="var(--ink)">${sc}</text></svg>
     <div><b>Your score</b><p class="small muted">From payments, repayments and what you buy. 50 unlocks loans.</p></div></div>
-  ${mine.map(l => l.status === 'pending' ? `<div class="card"><div class="row between"><b>${LOANS[l.k].name}</b><span class="pill warn">In review</span></div><span class="small muted">${ugx(l.amount)} · ${l.n} ${LOANS[l.k].per}s</span></div>`
-    : `<div class="card"><div class="row between"><b>${LOANS[l.k].name}</b><span class="pill ${nextDue(l) < TODAY ? 'bad' : 'ok'}">${nextDue(l) < TODAY ? 'Late' : 'On track'}</span></div>
+  ${openLoans(f).map(l => l.status === 'pending' ? `<div class="card"><div class="row between"><b>${LOANS[l.k].name}</b><span class="pill warn">In review</span></div><span class="small muted">${ugx(l.amount)} · ${l.n} ${LOANS[l.k].per}s</span></div>`
+    : `<div class="card"><div class="row between"><b>${LOANS[l.k].name}</b><span class="pill ${nextDue(l) < today() ? 'bad' : 'ok'}">${nextDue(l) < today() ? 'Late' : 'Due ' + fdate(nextDue(l))}</span></div>
       <b class="bignum" style="font-size:22px">${ugx(balanceAfter(l))}</b><div class="meter"><i style="width:${l.paid / l.n * 100}%"></i></div>
-      <button class="btn sun block" data-a="loan-pay" data-id="${l.id}">Pay ${ugx(instalment(l))}</button></div>`).join('')}
-  ${['Grow food', 'Move food'].map(g => `<h3 class="sec">${g}</h3><div class="loan-grid">${Object.entries(LOANS).filter(([, L]) => L.g === g).map(([k, L]) => {
-    const o = loanOffer(m, k);
-    return `<button class="loan" data-a="sheet" data-s="loan" data-k="${k}"><b>${L.name}</b><span class="bignum">${o.why ? short(L.max) : short(o.limit)}</span><span class="small muted">${o.why ? 'up to' : 'for you'} · ${L.rate}%/mo</span><span class="small muted">${L.note}</span></button>`;
-  }).join('')}</div>`).join('')}`;
+      <button class="btn sun block" data-a="sheet" data-s="momo" data-kind="loan-pay" data-id="${l.id}">Pay ${ugx(instalment(l))}</button></div>`).join('')}
+  ${['Grow food', 'Move food'].map(g => `<h3 class="sec">${g}</h3><div class="loan-grid">${Object.entries(LOANS).filter(([, L]) => L.g === g).map(([k, L]) => { const o = loanOffer(f, k);
+    return `<button class="loan" data-a="sheet" data-s="loan" data-k="${k}"><b>${L.name}</b><span class="bignum">${o.why ? short(L.max) : short(o.limit)}</span><span class="small muted">${o.why ? 'up to' : 'for you'} · ${L.rate}%/mo</span><span class="small muted">${L.note}</span></button>`; }).join('')}</div>`).join('')}`;
 };
-
-SHOP.me = m => {
-  const P = PKGS[m.pkg], lim = creditLimit(m), inForce = days(m.since, TODAY);
+APP.me = f => {
+  const a = acc(f), lim = aheadLimit(f), inForce = days(f.since, today());
   const prot = ({
-    none: () => `<p class="small muted">Comes with every package.</p>`,
-    ready: () => inForce >= WAIT_DAYS ? `<p class="small">Lose your job or go to hospital? Your package keeps going for ${PROTECT_MONTHS} months.</p><button class="btn ghost block" data-a="sheet" data-s="claim">Report an emergency</button>` : `<p class="small muted">Starts ${fdate(addDays(m.since, WAIT_DAYS))}.</p>`,
-    review: () => `<p class="small">We're checking your claim. Most take 72 hours.</p>`,
-    active: () => `<b class="bignum" style="font-size:22px">${ugx(protLeft(m))}</b><span class="small muted">left this month, essentials only. Credit is frozen.</span><div class="meter"><i style="width:${m.allowance.total / (protCap(m) * PROTECT_MONTHS) * 100}%;background:var(--chili)"></i></div>`,
-  })[m.prot]();
-  const [pt] = protTile(m);
-  return `<h2>${esc(m.name)}</h2>
-  <div class="card"><div class="row between"><b>Protection</b><span class="pill ${m.prot === 'active' ? 'bad' : m.prot === 'ready' ? 'ok' : m.prot === 'review' ? 'warn' : ''}">${pt}</span></div>${prot}</div>
-  ${P.m ? `<div class="card"><div class="row between"><b>Food credit</b><span class="small muted">essentials only</span></div>
-    <b class="bignum" style="font-size:22px">${ugx(creditFree(m))}</b><div class="meter"><i style="width:${lim ? m.used / lim * 100 : 0}%"></i></div>
-    <span class="small muted">${ugx(m.used)} of ${ugx(lim)} used</span>
-    ${m.used && m.prot !== 'active' ? `<button class="btn sun block" data-a="repay">Repay ${ugx(m.used)}</button>` : ''}</div>` : ''}
-  <div class="card"><div class="row between"><b>Points</b><span class="small muted">spend from 5,000</span></div>
-    <b class="bignum" style="font-size:22px">${commas(m.points)}</b><div class="meter"><i style="width:${Math.min(100, m.points / 50)}%;background:var(--sun)"></i></div></div>
-  <h3 class="sec">Switch account (demo)</h3>
-  <div class="chips">${S.members.map(x => `<button class="chip" data-a="me" data-id="${x.id}" aria-pressed="${x.id === m.id}">${esc(x.name)} · ${PKGS[x.pkg].name}</button>`).join('')}</div>
-  <button class="btn ghost" data-a="reset">Reset demo</button>`;
+    none: () => '<p class="small muted">Comes with every package.</p>',
+    ready: () => inForce >= WAIT_DAYS ? `<p class="small">Lose your job or go to hospital? Your package keeps going for ${PROTECT_MONTHS} months, for essentials.</p><button class="btn ghost block" data-a="sheet" data-s="claim">Report an emergency</button>` : `<p class="small muted">Starts ${fdate(addDays(f.since, WAIT_DAYS))}, after ${WAIT_DAYS} days of payments.</p>`,
+    review: () => '<p class="small">We\'re checking your claim. An officer calls within 72 hours.</p>',
+    active: () => `<b class="bignum" style="font-size:22px">${ugx(protLeft(f))}</b><span class="small muted">left this month, essentials only. Shop Ahead is paused, with nothing to repay.</span><div class="meter"><i style="width:${Math.min(100, a.protT / (protCap(f) * PROTECT_MONTHS) * 100)}%;background:var(--chili)"></i></div>`,
+  })[f.prot]();
+  return `<h2>${esc(f.name)}</h2>
+  <div class="card"><div class="row between"><b>Protection</b><span class="pill ${f.prot === 'active' ? 'bad' : f.prot === 'ready' ? 'ok' : f.prot === 'review' ? 'warn' : ''}">${protWord(f)}</span></div>${prot}</div>
+  ${PKGS[f.pkg].m ? `<div class="card"><div class="row between"><b>Shop Ahead</b><span class="small muted">essentials now, repay with your next payment</span></div>
+    <b class="bignum" style="font-size:22px">${ugx(aheadFree(f))}</b><div class="meter"><i style="width:${lim ? Math.min(100, a.adv / lim * 100) : 0}%"></i></div>
+    <span class="small muted">${ugx(a.adv)} of ${ugx(lim)} used · no interest, no fee${aheadOpen(f) || a.adv ? '' : ' · ' + aheadNote(f)}</span>
+    ${a.adv && f.prot !== 'active' ? `<button class="btn sun block" data-a="sheet" data-s="momo" data-kind="repay">Repay ${ugx(a.adv)}</button>` : ''}</div>` : ''}
+  <div class="card"><div class="row between"><b>Points</b><span class="small muted">spend from 5,000</span></div><b class="bignum" style="font-size:22px">${commas(a.pts)}</b><div class="meter"><i style="width:${Math.min(100, a.pts / 50)}%;background:var(--sun)"></i></div></div>
+  <div class="card"><div class="row between"><b>Account</b><span class="small muted">${esc(f.card)}</span></div><span class="small muted">${esc(f.phone)} · ${esc(f.area)} · member since ${fdate(f.since)}</span></div>
+  <h3 class="sec">Viewing</h3>
+  <div class="chips">${D().families.map(x => `<button class="chip" data-a="fam" data-id="${x.id}" aria-pressed="${x.id === f.id}">${esc(x.name)}</button>`).join('')}</div>`;
 };
 
-function shopView() {
-  const m = me(), tabs = [['home', 'Home', IC.home], ['pkgs', 'Packages', IC.tag], ['loans', 'Loans', IC.coins], ['me', 'Me', IC.me]];
-  const hh = S.members.length, held = S.members.reduce((a, x) => a + x.balance, 0);
-  return `<div class="shop">
-    <div class="phone"><div class="screen" id="screen">${SHOP[ui.tab](m)}</div>
+/* ================= family: basic phone (USSD) ================= */
+function ussdScreen(f) {
+  const u = ui.ussd;
+  if (u.step === 'idle') return `Dial ${USSD_CODE}\n\nWorks on any phone.\nNo data or app needed.`;
+  return u.lines;
+}
+function ussdMenu() { return `<b>Kibanja</b>\n1 Balance\n2 Pay package\n3 Pay code\n4 Shop Ahead\n5 Emergency\n0 Exit`; }
+async function ussdReply(f, key) {
+  const u = ui.ussd, a = acc(f), Pk = PKGS[f.pkg];
+  const back = '\n\n0 Back';
+  if (u.step === 'idle') { u.step = 'menu'; u.lines = ussdMenu(); return; }
+  if (key === '0' && u.step !== 'menu') { u.step = 'menu'; u.lines = ussdMenu(); return; }
+  if (u.step === 'menu') {
+    if (key === '0') { u.step = 'idle'; return; }
+    if (key === '1') { u.step = 'info'; u.lines = `Balance ${ugx(a.bal)}${a.pend ? `\nAwaiting ${ugx(a.pend)}` : ''}\nShop Ahead ${ugx(aheadFree(f))}\nPoints ${commas(a.pts)}` + back; return; }
+    if (key === '2') {
+      if (!Pk.m || f.employer) { u.step = 'info'; u.lines = (f.employer ? 'Your employer pays your package.' : 'Free card. Choose a package\nin the app or with an agent.') + back; return; }
+      u.step = 'pay'; u.lines = `${Pk.name}, ${FREQ[f.freq].label.toLowerCase()}\nPay ${ugx(price(f.pkg, f.freq))}\nGet ${ugx(value(f.pkg, f.freq))}\n\n1 Pay with Mobile Money` + back; return;
+    }
+    if (key === '3') { const c = await makeCode(f); u.step = 'info'; u.lines = c ? `Pay code\n<b>${c.slice(0, 3)} ${c.slice(3)}</b>\nGive it to the cashier.\nWorks once, ${CODE_MINUTES} minutes.` + back : 'Could not make a code.' + back; return; }
+    if (key === '4') { u.step = 'ahead'; u.lines = `Shop Ahead\nReady ${ugx(aheadFree(f))}\nUsed ${ugx(a.adv)}` + (a.adv && f.prot !== 'active' ? '\n\n1 Repay with Mobile Money' : '') + back; return; }
+    if (key === '5') {
+      if (f.prot !== 'ready' || days(f.since, today()) < WAIT_DAYS) { u.step = 'info'; u.lines = (f.prot === 'review' ? 'Your claim is being checked.' : f.prot === 'active' ? 'Protection is already paying.' : 'Protection is not open yet.') + back; return; }
+      u.step = 'claim'; u.lines = 'Emergency\n1 Job loss\n2 Hospital\n3 Drought' + back; return;
+    }
+  }
+  if (u.step === 'pay' && key === '1') { await mobileMoney(f, { kind: 'package', pkg: f.pkg, freq: f.freq, paid: price(f.pkg, f.freq), bal: value(f.pkg, f.freq) }, 'USSD'); u.step = 'info'; u.lines = 'Check your phone and enter\nyour Mobile Money PIN.\n\nWe SMS you when it is\nconfirmed.' + back; return; }
+  if (u.step === 'ahead' && key === '1' && a.adv) { await mobileMoney(f, { kind: 'repay', paid: a.adv, adv: -a.adv }, 'USSD'); u.step = 'info'; u.lines = 'Enter your PIN on the\nMobile Money prompt.' + back; return; }
+  if (u.step === 'claim' && ['1', '2', '3'].includes(key)) { await fileClaim(f, ['Job loss', 'Hospital', 'Drought'][+key - 1]); u.step = 'info'; u.lines = 'Sent. An officer calls you\nwithin 72 hours.' + back; return; }
+  u.lines = (u.lines || '').replace(/\n\nTry again\.?$/, '') + '\n\nTry again.';
+}
+function basicPhone(f) {
+  return `<div class="basic"><span class="brand">BASIC PHONE · USSD</span><div class="lcd" aria-live="polite">${ussdScreen(f)}</div>
+    <form class="ussd-in" id="ussd-form"><input id="ussd-input" inputmode="numeric" maxlength="3" value="${esc(ui.ussd.input)}" placeholder="${ui.ussd.step === 'idle' ? '' : 'Reply'}" aria-label="USSD reply" ${ui.ussd.step === 'idle' ? 'disabled' : ''}><button class="btn sun" type="submit">${ui.ussd.step === 'idle' ? 'Dial' : 'Send'}</button></form>
+    <div class="keys">${['1', '2', '3', '4', '5', '0'].map(k => `<button data-a="ussd-key" data-k="${k}" ${ui.ussd.step === 'idle' ? 'disabled' : ''}>${k}</button>`).join('')}<button class="call" data-a="ussd-dial">Dial</button><span></span><button class="end" data-a="ussd-end">End</button></div></div>`;
+}
+
+function familyView() {
+  const d = D();
+  if (!d.families.length) return emptyState('No families yet', 'Enrol the first family in Agent.', 'agent');
+  const f = fam(ui.fam) || d.families[0]; ui.fam = f.id;
+  const tabs = [['home', 'Home', IC.home], ['pkgs', 'Packages', IC.tag], ['loans', 'Loans', IC.coins], ['me', 'Me', IC.me]];
+  return `<div class="shop ${ui.basic ? 'basic-on' : ''}">
+    <div class="chips phone-switch" style="grid-column:1/-1"><button class="chip" data-a="basic" data-v="0" aria-pressed="${!ui.basic}">Smartphone</button><button class="chip" data-a="basic" data-v="1" aria-pressed="${ui.basic}">Basic phone</button></div>
+    <div class="phone"><div class="screen" id="screen">${APP[ui.tab](f)}</div>
       <nav class="tabbar" aria-label="App">${tabs.map(([k, l, i]) => `<button data-a="tab" data-t="${k}" ${ui.tab === k ? 'aria-current="page"' : ''}>${i}<span>${l}</span></button>`).join('')}</nav></div>
-    <aside class="live">
-      <div class="live-hero"><div class="strip kitenge" aria-hidden="true"></div><div class="pad">
-        <h1>Pay weekly. <em>Shop for what you want.</em> No cash.</h1>
-        <div class="stats">
-          <div class="stat"><b class="bignum">${hh}</b><span>households live</span></div>
-          <div class="stat"><b class="bignum">${short(held)}</b><span>UGX ready to spend</span></div>
-          <div class="stat"><b class="bignum">${Math.round(S.sales.local / S.sales.all * 100)}%</b><span>spent on UG-made</span></div>
-        </div>
-        <div><button class="btn sun" data-a="mode" data-m="hq">See it at a million families</button></div>
-      </div></div>
-      <div class="how">
-        <div><span class="n">1</span><b>Pick a package</b><span class="small muted">Weekly, monthly or yearly.</span></div>
-        <div><span class="n">2</span><b>Get a bonus</b><span class="small muted">Up to 11% more to spend.</span></div>
-        <div><span class="n">3</span><b>Shop anything</b><span class="small muted">Card or pay code. No cash.</span></div>
-        <div><span class="n">4</span><b>Stay covered</b><span class="small muted">${PROTECT_MONTHS} months free if income stops.</span></div>
-      </div>
+    <aside class="phones">
+      <div class="card"><b>Same account, any phone</b><span class="small muted">Most families shop with a basic phone. Dial, reply with a number, done.</span></div>
+      ${basicPhone(f)}
     </aside></div>`;
 }
+const emptyState = (title, line, mode) => `<div class="empty"><h2>${title}</h2><p class="muted">${line}</p>${mode ? `<button class="btn sun" data-a="mode" data-m="${mode}">Open ${mode === 'agent' ? 'Agent' : mode}</button>` : ''}</div>`;
 
-/* ---------- store: the till ---------- */
-function tillMember() { return ui.till.m && member(ui.till.m); }
+/* ================= shared actions ================= */
+async function makeCode(f) {
+  const code = String(100000 + Math.floor(Math.random() * 900000)), exp = Date.now() + CODE_MINUTES * 60000;
+  const ok = await put('codes', code, { f: f.id, exp, used: false, by: by(), at: nowIso() });
+  return ok ? code : null;
+}
+async function mobileMoney(f, o, ref) {
+  // A payment counts only once HQ confirms it against the Mobile Money statement.
+  return ledger({ f: f.id, status: 'pending', ch: o.ch || 'MTN', ref: ref || '', ...o });
+}
+async function fileClaim(f, type) {
+  const id = 'CL' + rid();
+  await put('claims', id, { f: f.id, type, note: 'Reported by the family.', checks: [['90 days of cover', days(f.since, today()) >= WAIT_DAYS ? 1 : 0], [type === 'Hospital' ? 'Hospital confirms admission' : type === 'Drought' ? 'District on the drought list' : 'Employer confirms by phone', 0], ['Officer has called the family', 0]], status: 'pending', by: by(), at: nowIso() });
+  await patch('families', f.id, { prot: 'review' });
+}
+
+/* ================= agent ================= */
+function agentView() {
+  const d = D(), q = ui.q.trim().toLowerCase();
+  const list = d.families.filter(f => !q || [f.name, f.phone, f.card, f.area].some(v => String(v).toLowerCase().replace(/\s/g, '').includes(q.replace(/\s/g, ''))));
+  const f = fam(ui.agentFam);
+  return `<div class="split2">
+    <section style="display:grid;gap:12px">
+      <div class="row between"><h2>Families</h2><button class="btn sun" data-a="sheet" data-s="enrol">Enrol family</button></div>
+      <input class="in" id="fam-search" placeholder="Search name, phone or card" value="${esc(ui.q)}" aria-label="Search families">
+      ${d.families.length ? `<ul class="fams">${list.map(x => { const a = acc(x), st = status(x); return `<li><button data-a="agent-pick" data-id="${x.id}" aria-current="${x.id === ui.agentFam}">
+        <b>${esc(x.name)}</b><span class="amt">${short(a.bal)}</span>
+        <span class="small muted">${esc(x.area)} · ${PKGS[x.pkg].name}</span><span class="small" style="text-align:right;color:${st === 'lapsed' ? 'var(--bad)' : st === 'due' ? 'var(--warn)' : 'var(--muted)'}">${STATUS[st]}</span></button></li>`; }).join('')}</ul>${list.length ? '' : '<p class="small muted">No match.</p>'}`
+        : `<div class="empty"><b>No families yet</b><span class="small muted">Enrol the first one. You need their phone, ID and consent.</span></div>`}
+    </section>
+    <section>${f ? agentDetail(f) : `<div class="empty"><b>Pick a family</b><span class="small muted">Record a payment, give a pay code, or open their app.</span></div>`}</section>
+  </div>`;
+}
+function agentDetail(f) {
+  const a = acc(f), st = status(f);
+  return `<div class="card" style="gap:14px">
+    <div class="row between"><div><h2>${esc(f.name)}</h2><span class="small muted">${esc(f.card)} · ${esc(f.phone)} · ${esc(f.area)} · ${f.size} people</span></div><span class="pill ${st === 'lapsed' ? 'bad' : st === 'due' ? 'warn' : 'ok'}">${PKGS[f.pkg].name}${PKGS[f.pkg].m ? ' · ' + FREQ[f.freq].label.toLowerCase() : ''}</span></div>
+    <div class="tiles">
+      <div class="tile" style="background:var(--sunk)"><span class="label">To spend</span><b>${ugx(a.bal)}</b>${a.pend ? `<span class="small" style="color:var(--warn)">+ ${commas(a.pend)} awaiting</span>` : ''}</div>
+      <div class="tile" style="background:var(--sunk)"><span class="label">Next payment</span><b>${f.next ? fdate(f.next) : '—'}</b><span class="small muted">${STATUS[st]}</span></div>
+      <div class="tile" style="background:var(--sunk)"><span class="label">Shop Ahead used</span><b>${short(a.adv)}</b><span class="small muted">of ${short(aheadLimit(f))}</span></div>
+      <div class="tile" style="background:var(--sunk)"><span class="label">Protection</span><b>${protWord(f)}</b></div>
+    </div>
+    <div class="row"><button class="btn sun" data-a="sheet" data-s="record">Record a payment</button><button class="btn" data-a="paycode">Give pay code</button><button class="btn ghost" data-a="open-app" data-id="${f.id}">Open their app</button></div>
+    <h3 class="sec">Recent</h3>${activity(f, 6)}</div>`;
+}
+
+/* ================= store: the till ================= */
 function totals() {
-  const m = tillMember(), lines = ui.till.cart.map(c => ({ ...PRODUCTS.find(p => p.id === c.id), q: c.q })).map(l => ({ ...l, sum: l.p * l.q }));
-  const total = lines.reduce((a, l) => a + l.sum, 0), ess = lines.filter(l => l.ess).reduce((a, l) => a + l.sum, 0), ug = lines.filter(l => l.ug).reduce((a, l) => a + l.sum, 0);
-  let e = ess, o = total - ess;
-  const pay = { prot: 0, bal: 0, credit: 0, mm: 0 };
-  if (m) {
-    pay.prot = Math.min(e, protLeft(m)); e -= pay.prot;
-    const b1 = Math.min(o, m.balance); o -= b1; const b2 = Math.min(e, m.balance - b1); e -= b2; pay.bal = b1 + b2;
-    pay.credit = Math.min(e, creditFree(m)); e -= pay.credit;
+  const f = ui.till.f && fam(ui.till.f), lines = ui.till.cart.map(c => ({ ...PRODUCTS.find(p => p.id === c.id), q: c.q })).map(l => ({ ...l, sum: l.p * l.q }));
+  const total = lines.reduce((s, l) => s + l.sum, 0), ess = lines.filter(l => l.ess).reduce((s, l) => s + l.sum, 0), ug = lines.filter(l => l.ug).reduce((s, l) => s + l.sum, 0);
+  let e = ess, o = total - ess; const pay = { prot: 0, bal: 0, adv: 0, mm: 0 };
+  if (f) {
+    const a = acc(f), live = status(f) !== 'lapsed';
+    pay.prot = live ? Math.min(e, protLeft(f)) : 0; e -= pay.prot;
+    const b1 = Math.min(o, Math.max(0, a.bal)); o -= b1; const b2 = Math.min(e, Math.max(0, a.bal) - b1); e -= b2; pay.bal = b1 + b2;
+    pay.adv = live && ui.till.ahead ? Math.min(e, aheadFree(f)) : 0; e -= pay.adv;
   }
   pay.mm = e + o;
-  const paidIn = pay.bal + pay.credit + pay.mm, rate = m ? FREQ[m.freq].pts : 0;
-  const earn = m ? Math.floor(paidIn / 100 * rate) + Math.floor(Math.min(ug, paidIn) / 100 * rate) : 0;
-  return { m, lines, total, ug, pay, earn };
+  const paidIn = pay.bal + pay.adv + pay.mm, rate = f && f.pkg !== 'free' ? FREQ[f.freq].pts : 1;
+  const earn = f ? Math.floor(paidIn / 100 * rate) + Math.floor(Math.min(ug, paidIn) / 100 * rate) : 0;
+  return { f, lines, total, ess, ug, pay, earn };
 }
-// The size printed on a product tile: "25 kg", "10 L", "10 bars", or the first word when there is none.
-const swatch = name => (name.match(/\d+\s?(kg|L|g|bars)\b/) || [name.split(/[ ,]/)[0]])[0];
 function storeView() {
-  const t = totals(), m = t.m, cat = ui.till.cat;
+  const t = totals(), f = t.f, cat = ui.till.cat;
   return `<div class="store">
     <section style="display:grid;gap:14px">
-      <h2>Till</h2>
-      <form class="scan" id="scan-form"><input class="in" id="scan" placeholder="Card number or 6-digit pay code" value="${esc(ui.till.input)}" autocomplete="off" aria-label="Card number or pay code"><button class="btn sun" type="submit">Scan</button></form>
-      ${m ? `<div class="who"><div class="row between"><b style="font-family:var(--display)">${esc(m.name)}</b><button class="btn" style="padding:6px 12px;background:rgba(255,255,255,.1);color:inherit" data-a="till-clear">Next customer</button></div>
-        <div class="stats"><div class="stat"><b class="bignum">${short(m.balance)}</b><span>to spend</span></div><div class="stat"><b class="bignum">${short(creditFree(m))}</b><span>food credit</span></div>${m.prot === 'active' ? `<div class="stat"><b class="bignum">${short(protLeft(m))}</b><span>Protection</span></div>` : ''}</div></div>`
-        : `<div class="chips">${S.members.map(x => `<button class="chip" data-a="till-pick" data-id="${x.id}">${esc(x.name)}</button>`).join('')}</div>`}
+      <div class="row between"><h2>Till</h2><input class="in" id="till-name" style="max-width:260px" value="${esc(ui.till.name)}" aria-label="Store name"></div>
+      <form class="scan" id="scan-form"><input class="in" id="scan" placeholder="Card number or 6-digit pay code" value="${esc(ui.till.input)}" autocomplete="off" inputmode="numeric" aria-label="Card number or pay code"><button class="btn sun" type="submit">Scan</button></form>
+      ${f ? `<div class="who"><div class="row between"><b style="font-family:var(--display)">${esc(f.name)} <span class="small" style="color:var(--band-muted)">${esc(f.card)}</span></b><button class="btn" style="padding:6px 12px;background:rgba(255,255,255,.1);color:inherit" data-a="till-clear">Next customer</button></div>
+        <div class="stats"><div class="stat"><b class="bignum">${short(acc(f).bal)}</b><span>to spend</span></div><div class="stat"><b class="bignum">${short(aheadFree(f))}</b><span>Shop Ahead</span></div>${f.prot === 'active' ? `<div class="stat"><b class="bignum">${short(protLeft(f))}</b><span>Protection</span></div>` : ''}</div>
+        ${status(f) === 'lapsed' ? '<span class="small" style="color:var(--sun)">Package paused: balance only.</span>' : ''}</div>`
+        : `<p class="small muted">Scan the card, or type the code from the family's phone.</p>`}
       <div class="chips">${['Bulk', 'Staples', 'Other'].map(c => `<button class="chip" data-a="cat" data-c="${c}" aria-pressed="${cat === c}">${c}</button>`).join('')}</div>
       <div class="prods">${PRODUCTS.filter(p => p.cat === cat).map(p => `<button class="prod" data-a="add" data-id="${p.id}"><span class="sw" style="background:var(--${p.c})">${esc(swatch(p.name))}</span><b>${esc(p.name)}</b><span class="p">${commas(p.p)}</span><span class="tags">${p.ug ? '<span class="tg ug">UG-made</span>' : ''}${p.ess ? '' : '<span class="tg">Extra</span>'}</span></button>`).join('')}</div>
     </section>
     <aside class="card basket">
       <div class="row between"><h3>Basket</h3>${t.lines.length ? '<button class="chip" data-a="clear">Clear</button>' : ''}</div>
       ${t.lines.length ? `<ul class="list cart">${t.lines.map(l => `<li><span>${esc(l.name)}</span><span class="qty"><button data-a="dec" data-id="${l.id}" aria-label="One fewer">−</button>${l.q}<button data-a="add" data-id="${l.id}" aria-label="One more">+</button></span><span class="amt">${short(l.sum)}</span></li>`).join('')}</ul>` : '<p class="small muted">Tap products to add them.</p>'}
+      ${f && aheadFree(f) && t.ess && (ui.till.ahead || t.pay.mm) ? `<label class="check"><input type="checkbox" id="use-ahead" ${ui.till.ahead ? 'checked' : ''}> Family asks to use Shop Ahead for essentials</label>` : ''}
       <div class="sum"><span class="big">Total</span><span class="v big">${ugx(t.total)}</span>
-        ${m ? `${t.pay.prot ? `<span>Protection</span><span class="v">${commas(t.pay.prot)}</span>` : ''}<span>Balance</span><span class="v">${commas(t.pay.bal)}</span><span>Food credit</span><span class="v">${commas(t.pay.credit)}</span><span>Mobile Money prompt</span><span class="v">${commas(t.pay.mm)}</span>${t.earn ? `<span class="muted">Points earned</span><span class="v muted">+${commas(t.earn)}</span>` : ''}`
-        : `<span class="muted">No card: Mobile Money or cash</span><span></span>`}</div>
+        ${f ? `${t.pay.prot ? `<span>Protection</span><span class="v">${commas(t.pay.prot)}</span>` : ''}<span>Balance</span><span class="v">${commas(t.pay.bal)}</span>${t.pay.adv ? `<span>Shop Ahead</span><span class="v">${commas(t.pay.adv)}</span>` : ''}<span>Mobile Money at the till</span><span class="v">${commas(t.pay.mm)}</span>${t.earn ? `<span class="muted">Points earned</span><span class="v muted">+${commas(t.earn)}</span>` : ''}`
+        : '<span class="muted">No card: Mobile Money or cash</span><span></span>'}</div>
       <button class="btn sun block" data-a="charge" ${t.lines.length ? '' : 'disabled'}>Charge ${ugx(t.total)}</button>
     </aside></div>`;
 }
 
-/* ---------- HQ: scale, inbox, supply ---------- */
-function stageNumbers(st) {
-  const hh = st.hh ?? S.members.length;
-  const avg = st.hh ? 380000 : S.members.reduce((a, m) => a + PKGS[m.pkg].m, 0) / S.members.length;
-  return { hh, stores: st.stores, tonnes: hh * 0.6 * 0.04, spend: hh * avg, ug: hh * avg * (S.sales.local / S.sales.all) };
-}
+/* ================= HQ ================= */
 function hqView() {
-  const st = STAGES[ui.stage], n = stageNumbers(st);
-  const claims = S.claims.filter(c => c.status === 'pending'), apps = S.loans.filter(l => l.status === 'pending');
-  const held = S.members.reduce((a, m) => a + m.balance, 0), share = S.sales.local / S.sales.all;
-  const loansOut = S.loans.filter(l => l.status === 'active').reduce((a, l) => a + balanceAfter(l), 0);
+  const d = D(), st = STAGES[ui.stage];
+  const pend = d.ledger.filter(e => e.status === 'pending').sort((a, b) => a.at.localeCompare(b.at));
+  const claims = d.claims.filter(c => c.status === 'pending'), apps = d.loans.filter(l => l.status === 'pending');
+  const held = d.families.reduce((s, f) => s + Math.max(0, acc(f).bal), 0), ahead = d.families.reduce((s, f) => s + acc(f).adv, 0);
+  const sales = d.ledger.filter(e => e.kind === 'sale' && e.status === 'confirmed'), month = today().slice(0, 7);
+  const salesM = sales.filter(e => e.at.slice(0, 7) === month).reduce((s, e) => s + (e.tot || 0), 0);
+  const allTot = sales.reduce((s, e) => s + (e.tot || 0), 0), share = allTot ? sales.reduce((s, e) => s + (e.ug || 0), 0) / allTot : 0;
+  const hh = st.hh ?? d.families.length, avg = 380000, tonnes = hh * 0.6 * 0.04;
   const fmtT = t => t >= 1000 ? `${commas(t / 1000)}k t` : t >= 1 ? `${commas(t)} t` : `${commas(t * 1000)} kg`;
+  const cfg = d.config || {}, launch = cfg.launch || {}, done = LAUNCH.filter(([k]) => launch[k]).length;
   return `<div class="hq">
     <section class="scale"><div class="strip kitenge" aria-hidden="true"></div><div class="pad">
-      <h1>From ${S.members.length} families <em>to a million.</em></h1>
+      <h1>From ${d.families.length} ${d.families.length === 1 ? 'family' : 'families'} <em>to a million.</em></h1>
       <div class="stages" role="group" aria-label="Stage">${STAGES.map((s, i) => `<button data-a="stage" data-i="${i}" aria-pressed="${ui.stage === i}">${s.label}</button>`).join('')}</div>
       <div class="stats">
-        <div class="stat"><b class="bignum">${short(n.hh)}</b><span>households</span></div>
-        <div class="stat"><b class="bignum">${commas(n.stores)}</b><span>stores and hubs</span></div>
-        <div class="stat"><b class="bignum">${fmtT(n.tonnes)}</b><span>staples moved a month</span></div>
-        <div class="stat"><b class="bignum">${short(n.ug)}</b><span>UGX a month to UG producers</span></div>
+        <div class="stat"><b class="bignum">${short(hh)}</b><span>households</span></div>
+        <div class="stat"><b class="bignum">${commas(st.stores)}</b><span>stores and hubs</span></div>
+        <div class="stat"><b class="bignum">${fmtT(tonnes)}</b><span>staples moved a month</span></div>
+        <div class="stat"><b class="bignum">${short(st.hh ? hh * avg * 0.46 : salesM * share)}</b><span>UGX a month to UG producers</span></div>
       </div>
-      <canvas class="dots" id="dots" height="120" aria-label="${short(n.hh)} households; each dot is 1,000 households"></canvas>
-      <div class="row between"><div class="cities">${ALL_CITIES.map(c => `<span class="city ${st.cities.includes(c) ? 'on' : ''}">${c}</span>`).join('')}</div><span class="small" style="color:var(--band-muted)">1 dot = 1,000 households · targets, not forecasts</span></div>
+      <canvas class="dots" id="dots" height="120" aria-label="${short(hh)} households; each dot is 1,000"></canvas>
+      <div class="row between"><div class="cities">${ALL_CITIES.map(c => `<span class="city ${st.cities.includes(c) ? 'on' : ''}">${c}</span>`).join('')}</div><span class="small" style="color:var(--band-muted)">1 dot = 1,000 households · ${ui.stage ? 'targets, not forecasts' : 'live count'}</span></div>
     </div></section>
 
     <div class="hq-grid">
-      <section class="card"><h3>Live</h3>
-        <div class="tiles">
-          <div class="tile" style="background:var(--sunk)"><span class="label">Ready to spend</span><b>${short(held)}</b><span class="small muted">held in trust</span></div>
-          <div class="tile" style="background:var(--sunk)"><span class="label">Sold today</span><b>${short(S.sales.today)}</b><span class="small muted">at Kibanja tills</span></div>
-          <div class="tile" style="background:var(--sunk)"><span class="label">Loans out</span><b>${short(loansOut)}</b><span class="small muted">${S.loans.filter(l => l.status === 'active').length} active</span></div>
-          <div class="tile" style="background:var(--sunk)"><span class="label">UG-made</span><b>${Math.round(share * 100)}%</b><span class="small muted">of sales</span></div>
-        </div></section>
-
-      <section class="card"><div class="row between"><h3>Inbox</h3><span class="pill ${claims.length + apps.length ? 'warn' : 'ok'}">${claims.length + apps.length} to decide</span></div>
-        ${claims.map(c => { const cm = member(c.m), open = c.checks.filter(k => !k[1]).length; return `<div class="card" style="background:var(--sunk)">
-          <div class="row between"><b>${esc(cm.name)} · ${c.type}</b><span class="pill bad">Claim</span></div>
-          <span class="small muted">${esc(c.note)}</span>
-          <ul class="checks">${c.checks.map((k, i) => `<li class="${k[1] ? '' : 'no'}">${k[0]}${k[1] ? '' : ` <button class="chip" style="padding:2px 8px" data-a="verify" data-id="${c.id}" data-i="${i}">Verify</button>`}</li>`).join('')}</ul>
-          <div class="row"><button class="btn leaf" data-a="approve" data-id="${c.id}" ${open ? 'disabled' : ''}>Approve</button><button class="btn ghost" data-a="decline" data-id="${c.id}">Decline</button></div></div>`; }).join('')}
-        ${apps.map(l => { const lm = member(l.m), a = afford(lm, l); return `<div class="card" style="background:var(--sunk)">
-          <div class="row between"><b>${esc(lm.name)} · ${LOANS[l.k].name}</b><span class="pill">Loan</span></div>
-          <span class="small muted">${ugx(l.amount)} over ${l.n} ${LOANS[l.k].per}s · score ${score(lm)} · ${a.ok ? 'affordable' : 'over 30% of income'}</span>
-          <div class="row"><button class="btn leaf" data-a="loan-ok" data-id="${l.id}" ${a.ok ? '' : 'disabled'}>Approve</button><button class="btn ghost" data-a="loan-no" data-id="${l.id}">Decline</button></div></div>`; }).join('')}
-        ${claims.length + apps.length ? '' : '<p class="small muted">All clear. New claims and loan requests land here.</p>'}
+      <section class="card"><div class="row between"><h3>Confirm payments</h3><span class="pill ${pend.length ? 'warn' : 'ok'}">${pend.length} waiting</span></div>
+        <span class="small muted">Tick each one off against the MTN and Airtel statements. Money is spendable only after this.</span>
+        ${pend.length ? pend.map(e => { const f = fam(e.f); return `<div class="queue-item">
+          <div class="row between"><b>${esc(f ? f.name : 'Unknown')} · ${KIND[e.kind]}</b><b class="num">${ugx(e.paid || e.bal)}</b></div>
+          <span class="small muted">${esc(e.ch || '')} · <span class="mono">${esc(e.ref || 'no reference')}</span> · ${fdate(e.at)} ${ftime(e.at)}</span>
+          <div class="row"><button class="btn leaf" data-a="confirm" data-id="${e.id}">Received</button><button class="btn ghost" data-a="reject" data-id="${e.id}">Not received</button></div></div>`; }).join('') : '<p class="small muted">All payments confirmed.</p>'}
       </section>
 
-      <section class="card"><h3>Supply</h3>
-        <div class="row between"><b>Food Basket</b><span class="pill ok">Locked to 31 Jan</span></div>
-        <span class="small muted">${ugx(169000)} a month for 5. 15% under shelf price.</span>
-        <div class="row between"><b>UG-made share</b><span class="small muted">target 40–50%</span></div>
-        <div class="share" aria-label="${Math.round(share * 100)}% of sales"><i style="width:${share * 100}%"></i><b style="left:40%"></b><b style="left:50%"></b></div>
-        <ul class="list">${[['Made in Uganda (MIU)', 'Outlets, goods, delivery', 'Proposed'], ['Maize growers (example)', 'Flour on forward orders', 'Example'], ['Dairy co-op (example)', 'Daily milk', 'Example'], ['Flour mill (example)', 'Basket packing', 'Example']].map(([a, b, c]) => `<li><span>${a}<span class="sub" style="display:block">${b}</span></span><span class="pill ${c === 'Proposed' ? 'warn' : ''}">${c}</span></li>`).join('')}</ul>
+      <section class="card"><div class="row between"><h3>Decide</h3><span class="pill ${claims.length + apps.length ? 'warn' : 'ok'}">${claims.length + apps.length} open</span></div>
+        ${claims.map(c => { const f = fam(c.f), open = c.checks.filter(k => !k[1]).length; return `<div class="queue-item">
+          <div class="row between"><b>${esc(f ? f.name : '')} · ${esc(c.type)}</b><span class="pill bad">Claim</span></div>
+          <span class="small muted">${esc(c.note)}</span>
+          <ul class="checks">${c.checks.map((k, i) => `<li class="${k[1] ? '' : 'no'}">${esc(k[0])}${k[1] ? '' : ` <button class="chip" style="padding:2px 8px" data-a="verify" data-id="${c.id}" data-i="${i}">Done</button>`}</li>`).join('')}</ul>
+          <div class="row"><button class="btn leaf" data-a="approve" data-id="${c.id}" ${open ? 'disabled' : ''}>Approve</button><button class="btn ghost" data-a="decline" data-id="${c.id}">Decline</button></div></div>`; }).join('')}
+        ${apps.map(l => { const f = fam(l.f), a = f ? afford(f, l) : { ok: false }; return `<div class="queue-item">
+          <div class="row between"><b>${esc(f ? f.name : '')} · ${LOANS[l.k].name}</b><span class="pill">Loan</span></div>
+          <span class="small muted">${ugx(l.amount)} over ${l.n} ${LOANS[l.k].per}s · score ${f ? score(f) : '—'} · ${a.ok ? 'affordable' : 'over 30% of income'}</span>
+          <div class="row"><button class="btn leaf" data-a="loan-ok" data-id="${l.id}" ${a.ok ? '' : 'disabled'}>Lender approved</button><button class="btn ghost" data-a="loan-no" data-id="${l.id}">Decline</button></div></div>`; }).join('')}
+        ${claims.length + apps.length ? '' : '<p class="small muted">No claims or loan requests.</p>'}
+      </section>
+
+      <section class="card"><h3>Numbers</h3>
+        <div class="tiles">
+          <div class="tile" style="background:var(--sunk)"><span class="label">Families</span><b>${d.families.length}</b><span class="small muted">${d.families.filter(f => status(f) === 'lapsed').length} paused</span></div>
+          <div class="tile" style="background:var(--sunk)"><span class="label">Held in trust</span><b>${short(held)}</b><span class="small muted">ready to spend</span></div>
+          <div class="tile" style="background:var(--sunk)"><span class="label">Sales this month</span><b>${short(salesM)}</b><span class="small muted">${Math.round(share * 100)}% UG-made</span></div>
+          <div class="tile" style="background:var(--sunk)"><span class="label">Shop Ahead out</span><b>${short(ahead)}</b><span class="small muted">repaid with packages</span></div>
+        </div>
+        <div class="row"><button class="btn" data-a="export" data-what="ledger">Export payments and sales</button><button class="btn ghost" data-a="export" data-what="families">Export families</button></div>
+      </section>
+
+      <section class="card"><div class="row between"><h3>Launch checklist</h3><span class="pill ${done === LAUNCH.length ? 'ok' : 'warn'}">${done}/${LAUNCH.length}</span></div>
+        <ul class="todo">${LAUNCH.map(([k, t]) => `<li><label><input type="checkbox" data-launch="${k}" ${launch[k] ? 'checked' : ''}><span>${t}</span></label></li>`).join('')}</ul></section>
+
+      <section class="card"><h3>Mobile Money</h3><span class="small muted">Families pay these merchant codes. Shown in the app when they pay.</span>
+        <form id="momo-form" class="field-row"><label class="field">MTN MoMo<input class="in" id="cfg-mtn" value="${esc(cfg.mtn || '')}" placeholder="Merchant code"></label><label class="field">Airtel Money<input class="in" id="cfg-airtel" value="${esc(cfg.airtel || '')}" placeholder="Merchant code"></label><button class="btn" type="submit" style="grid-column:1/-1">Save codes</button></form>
       </section>
     </div></div>`;
 }
-
 function drawDots() {
   const cv = $('#dots'); if (!cv) return;
-  const n = stageNumbers(STAGES[ui.stage]), w = cv.clientWidth, cols = w > 700 ? 100 : 40, total = 1000, rows = total / cols;
-  const dpr = window.devicePixelRatio || 1, gap = w / cols, h = gap * rows;
+  const st = STAGES[ui.stage], hh = st.hh ?? D().families.length, w = cv.clientWidth, cols = w > 700 ? 100 : 40, total = 1000;
+  const dpr = window.devicePixelRatio || 1, gap = w / cols, h = gap * (total / cols);
   cv.width = w * dpr; cv.height = h * dpr; cv.style.height = h + 'px';
   const ctx = cv.getContext('2d'); ctx.scale(dpr, dpr);
-  const css = getComputedStyle(document.documentElement), on = [css.getPropertyValue('--sun'), css.getPropertyValue('--chili'), css.getPropertyValue('--leaf')].map(s => s.trim());
-  const lit = n.hh / 1000, r = Math.max(1.5, gap * 0.32);
-  const target = Math.min(total, Math.ceil(lit));
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let shown = reduce ? target : 0;
-  const frame = () => {
-    ctx.clearRect(0, 0, w, h);
-    for (let i = 0; i < total; i++) {
-      const x = (i % cols) * gap + gap / 2, y = Math.floor(i / cols) * gap + gap / 2;
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-      if (i < shown) { ctx.fillStyle = on[i % 3]; ctx.globalAlpha = i === target - 1 && lit < 1 ? Math.max(0.35, lit) : 1; }
-      else { ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.09; }
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    if (shown < target) { shown = Math.min(target, shown + Math.max(1, Math.ceil(target / 40))); requestAnimationFrame(frame); }
-  };
+  const css = getComputedStyle(document.documentElement), on = ['--sun', '--chili', '--leaf'].map(v => css.getPropertyValue(v).trim());
+  const lit = hh / 1000, target = Math.min(total, Math.ceil(lit)), r = Math.max(1.5, gap * 0.32);
+  let shown = matchMedia('(prefers-reduced-motion: reduce)').matches ? target : 0;
+  const frame = () => { ctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < total; i++) { ctx.beginPath(); ctx.arc((i % cols) * gap + gap / 2, Math.floor(i / cols) * gap + gap / 2, r, 0, Math.PI * 2);
+      if (i < shown) { ctx.fillStyle = on[i % 3]; ctx.globalAlpha = i === target - 1 && lit < 1 ? Math.max(0.35, lit) : 1; } else { ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.09; } ctx.fill(); }
+    ctx.globalAlpha = 1; if (shown < target) { shown = Math.min(target, shown + Math.max(1, Math.ceil(target / 40))); requestAnimationFrame(frame); } };
   frame();
 }
 
-/* ---------- sheets ---------- */
+/* ================= sheets ================= */
+function momoBlock(amount) {
+  const cfg = D().config || {};
+  return `<div class="queue-item"><b>Pay ${ugx(amount)} by Mobile Money</b>
+    <span class="small">MTN MoMo merchant <b class="mono">${esc(cfg.mtn || 'not set')}</b> · Airtel Money <b class="mono">${esc(cfg.airtel || 'not set')}</b></span>
+    <span class="small muted">Then type the transaction ID from the SMS you get back.</span></div>
+    <div class="seg" role="group" aria-label="Network">${['MTN', 'Airtel'].map(c => `<button type="button" data-a="ch" data-c="${c}" aria-pressed="${(ui.sheet.ch || 'MTN') === c}">${c === 'MTN' ? 'MTN MoMo' : 'Airtel Money'}</button>`).join('')}</div>
+    <label class="field">Transaction ID<input class="in mono" id="momo-ref" placeholder="e.g. MP261025.1530.A12345" autocomplete="off" value="${esc(ui.sheet.ref || '')}"></label>`;
+}
 function sheetHtml() {
   const s = ui.sheet; if (!s) return '';
-  const m = me();
+  const f = s.fam ? fam(s.fam) : null;
   let body = '';
-  if (s.type === 'topup') body = `<h2>Top up</h2><p class="small muted">From Mobile Money. Any amount.</p>
-    <div class="chips">${[20000, 50000, 100000, 200000].map(v => `<button class="chip" data-a="do-topup" data-v="${v}">+ ${short(v)}</button>`).join('')}</div>`;
-  if (s.type === 'code') body = `<h2>Pay code</h2><div class="code">${ui.payCode.slice(0, 3)} ${ui.payCode.slice(3)}</div><p class="small muted">Read it to the cashier. Works once, for 5 minutes.</p>`;
-  if (s.type === 'pay') {
-    const P = PKGS[s.k], f = ui.freq;
-    body = `<h2>${P.name}</h2>
-      <div class="seg" role="group" aria-label="How often">${Object.entries(FREQ).map(([k, F]) => `<button data-a="freq" data-f="${k}" aria-pressed="${f === k}">${F.label}</button>`).join('')}</div>
-      <div class="sum"><span>You pay</span><span class="v">${ugx(price(s.k, f))}</span><span>You get to spend</span><span class="v big" style="color:var(--ok)">${ugx(value(s.k, f))}</span><span class="muted">Bonus</span><span class="v muted">+${bonusPct(s.k, f)}%</span></div>
-      <p class="small muted">${P.buys}. Food credit and Protection included.</p>
-      <button class="btn sun block" data-a="do-pay" data-k="${s.k}">Pay with Mobile Money</button>`;
+  if (s.type === 'enrol') body = `<h2>Enrol a family</h2>
+    <form id="enrol-form" class="stack" style="display:grid;gap:12px">
+      <label class="field">Name of the main shopper<input class="in" id="e-name" required autocomplete="off"></label>
+      <div class="field-row"><label class="field">Phone<input class="in" id="e-phone" inputmode="tel" placeholder="07XX XXX XXX" required></label><label class="field">People<input class="in" id="e-size" type="number" min="1" max="20" value="4"></label></div>
+      <div class="field-row"><label class="field">Area<input class="in" id="e-area" placeholder="Kira, Ntinda…"></label><label class="field">Monthly income <span class="hint">optional</span><input class="in" id="e-income" type="number" min="0" step="10000" placeholder="UGX"></label></div>
+      <div class="field-row"><label class="field">Package<select class="in" id="e-pkg">${Object.entries(PKGS).filter(([, Pk]) => !Pk.corp).map(([k, Pk]) => `<option value="${k}" ${k === 'starter' ? 'selected' : ''}>${Pk.name}</option>`).join('')}</select></label><label class="field">Pays<select class="in" id="e-freq">${Object.entries(FREQ).map(([k, F]) => `<option value="${k}" ${k === 'monthly' ? 'selected' : ''}>${F.label}</option>`).join('')}</select></label></div>
+      <label class="field">Employer pays <span class="hint">optional, for staff packages</span><input class="in" id="e-employer" placeholder="Company name"></label>
+      <label class="check"><input type="checkbox" id="e-id"> I checked their national ID. (Kibanja does not store the number.)</label>
+      <label class="check"><input type="checkbox" id="e-consent"> They agreed to the terms and to Kibanja keeping their name, phone and purchases.</label>
+      <span class="err" id="e-err"></span>
+      <button class="btn sun block" type="submit">Enrol and issue card</button></form>`;
+  if (s.type === 'record' && f) {
+    const k = s.kind || 'package', a = acc(f), amt = k === 'package' ? price(f.pkg, f.freq) : k === 'repay' ? a.adv : s.amount || 50000;
+    body = `<h2>Record a payment</h2><span class="small muted">${esc(f.name)} · ${esc(f.card)}</span>
+      <div class="chips">${[['package', 'Package'], ['topup', 'Top up'], ['repay', 'Shop Ahead']].map(([v, l]) => `<button class="chip" data-a="rec-kind" data-v="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</div>
+      ${k === 'package' && !PKGS[f.pkg].m ? '<p class="small">Free card: choose a package in their app first.</p>' : k === 'repay' && !a.adv ? '<p class="small">Nothing to repay.</p>' : `
+      ${k === 'topup' ? `<div class="chips">${[20000, 50000, 100000, 200000].map(v => `<button class="chip" data-a="rec-amt" data-v="${v}" aria-pressed="${amt === v}">${short(v)}</button>`).join('')}</div>` : ''}
+      ${k === 'package' ? `<p class="small">${PKGS[f.pkg].name}, ${FREQ[f.freq].label.toLowerCase()}: pays ${ugx(amt)}, gets ${ugx(value(f.pkg, f.freq))}.</p>` : ''}
+      ${momoBlock(amt)}<button class="btn sun block" data-a="do-record" data-amt="${amt}">Record ${ugx(amt)}</button>`}`;
   }
-  if (s.type === 'quote') {
-    const P = PKGS[s.k], f = ui.freq, vb = ui.staff >= 200 ? 2 : ui.staff >= 50 ? 1 : 0, per = Math.round(price(s.k, f) * (1 + (bonusPct(s.k, f) + vb) / 100));
-    body = `<h2>${P.name} for ${ui.staff} staff</h2>
-      <div class="sum"><span>Employer pays / ${FREQ[f].per}</span><span class="v">${ugx(price(s.k, f) * ui.staff)}</span><span>Staff get to spend</span><span class="v big" style="color:var(--ok)">${ugx(per * ui.staff)}</span><span class="muted">Each employee</span><span class="v muted">${ugx(per)}</span></div>
-      <p class="small muted">One invoice. A card for everyone.</p><button class="btn sun block" data-a="close" data-msg="Quote sent to HR">Send quote to HR</button>`;
+  if (s.type === 'pay' && f) {
+    const fq = ui.freq, Pk = PKGS[s.k];
+    body = `<h2>${Pk.name}</h2>
+      <div class="seg" role="group" aria-label="How often">${Object.entries(FREQ).map(([k, F]) => `<button data-a="freq" data-f="${k}" aria-pressed="${fq === k}">${F.label}</button>`).join('')}</div>
+      <div class="sum"><span>You pay</span><span class="v">${ugx(price(s.k, fq))}</span><span>You get to spend</span><span class="v big" style="color:var(--ok)">${ugx(value(s.k, fq))}</span><span class="muted">Bonus</span><span class="v muted">+${bonusPct(s.k, fq)}%</span></div>
+      ${momoBlock(price(s.k, fq))}<button class="btn sun block" data-a="do-pay" data-k="${s.k}">I've paid</button>`;
   }
-  if (s.type === 'loan') {
-    const L = LOANS[s.k], o = loanOffer(m, s.k);
+  if (s.type === 'topup' && f) body = `<h2>Top up</h2>
+    <div class="chips">${[20000, 50000, 100000, 200000].map(v => `<button class="chip" data-a="top-amt" data-v="${v}" aria-pressed="${(s.amount || 50000) === v}">${short(v)}</button>`).join('')}</div>
+    ${momoBlock(s.amount || 50000)}<button class="btn sun block" data-a="do-topup">I've paid</button>`;
+  if (s.type === 'momo' && f) {
+    const l = s.kind === 'loan-pay' ? D().loans.find(x => x.id === s.id) : null, amt = l ? Math.round(instalment(l)) : acc(f).adv;
+    body = `<h2>${l ? LOANS[l.k].name + ' instalment' : 'Repay Shop Ahead'}</h2>${momoBlock(amt)}<button class="btn sun block" data-a="do-momo" data-amt="${amt}">I've paid</button>`;
+  }
+  if (s.type === 'code') body = `<h2>Pay code</h2><div class="code">${s.code.slice(0, 3)} ${s.code.slice(3)}</div><p class="small muted">Read it to the cashier. Works once, for ${CODE_MINUTES} minutes.</p><button class="btn ghost block" data-a="close">Done</button>`;
+  if (s.type === 'quote') { const Pk = PKGS[s.k], fq = ui.freq, per = value(s.k, fq, ui.staff);
+    body = `<h2>${Pk.name} for ${ui.staff} staff</h2><div class="sum"><span>Employer pays / ${FREQ[fq].per}</span><span class="v">${ugx(price(s.k, fq) * ui.staff)}</span><span>Staff get to spend</span><span class="v big" style="color:var(--ok)">${ugx(per * ui.staff)}</span><span class="muted">Each employee</span><span class="v muted">${ugx(per)}</span></div><p class="small muted">One invoice. A card for everyone. Enrol staff in Agent with the employer's name.</p><button class="btn ghost block" data-a="close">Done</button>`; }
+  if (s.type === 'loan' && f) {
+    const L = LOANS[s.k], o = loanOffer(f, s.k);
     if (o.why) body = `<h2>${L.name}</h2><p>${o.why}</p><p class="small muted">${L.note}</p><button class="btn ghost block" data-a="close">OK</button>`;
-    else {
-      const d = s.d || (s.d = { amount: Math.min(o.limit, Math.max(o.step, Math.round(o.limit / 2 / o.step) * o.step)), n: L.terms[1] });
-      body = `<h2>${L.name}</h2><p class="small muted">${L.note}</p>
-        <label class="label" for="ln-amount">Amount · up to ${ugx(o.limit)}</label>
-        <input type="range" id="ln-amount" min="${o.step}" max="${o.limit}" step="${o.step}" value="${d.amount}"><b class="bignum" style="font-size:24px" id="ln-amt"></b>
-        <div class="chips">${L.terms.map(t => `<button class="chip" data-a="term" data-n="${t}" aria-pressed="${d.n === t}">${t} ${L.per}s</button>`).join('')}</div>
+    else { const dd = s.d || (s.d = { amount: Math.min(o.limit, Math.max(o.step, Math.round(o.limit / 2 / o.step) * o.step)), n: L.terms[1] });
+      body = `<h2>${L.name}</h2><p class="small muted">${L.note} A licensed lender partner makes the final decision.</p>
+        <label class="label" for="ln-amount">Amount · up to ${ugx(o.limit)}</label><input type="range" id="ln-amount" min="${o.step}" max="${o.limit}" step="${o.step}" value="${dd.amount}"><b class="bignum" style="font-size:24px" id="ln-amt"></b>
+        <div class="chips">${L.terms.map(t => `<button class="chip" data-a="term" data-n="${t}" aria-pressed="${dd.n === t}">${t} ${L.per}s</button>`).join('')}</div>
         <div class="sum"><span>${L.per === 'week' ? 'Weekly' : 'Monthly'}</span><span class="v big" id="ln-inst"></span><span class="muted">Total repaid</span><span class="v muted" id="ln-total"></span>${s.k === 'boda' ? '<span class="muted">Deposit to dealer</span><span class="v muted" id="ln-dep"></span>' : ''}</div>
-        <p class="small" id="ln-aff"></p>
-        <button class="btn sun block" id="ln-apply" data-a="do-loan" data-k="${s.k}">Apply</button>`;
-    }
+        <p class="small" id="ln-aff"></p><button class="btn sun block" id="ln-apply" data-a="do-loan" data-k="${s.k}">Apply</button>`; }
   }
   if (s.type === 'claim') body = `<h2>Report an emergency</h2>
     <div class="chips">${['Job loss', 'Hospital', 'Drought'].map(t => `<button class="chip" data-a="claim-type" data-t="${t}" aria-pressed="${s.t === t}">${t}</button>`).join('')}</div>
-    <p class="small muted">We check with your employer, NSSF or the hospital. A person decides.</p>
+    <p class="small muted">An officer calls you, then checks with your employer, NSSF or the hospital. A person decides.</p>
     <button class="btn sun block" data-a="do-claim" ${s.t ? '' : 'disabled'}>Send</button>`;
-  if (s.type === 'receipt') body = `<h2>Paid</h2><div class="sum">${s.lines.map(([a, b]) => `<span>${a}</span><span class="v">${b}</span>`).join('')}</div><button class="btn sun block" data-a="close">Done</button>`;
+  if (s.type === 'receipt') body = `<h2>Paid</h2><div class="sum">${s.lines.map(([a, b]) => `<span>${a}</span><span class="v">${b}</span>`).join('')}</div>
+    ${s.sms ? `<div class="queue-item"><span class="label">SMS to ${esc(s.phone)}</span><span class="small mono">${esc(s.sms)}</span></div>` : ''}<button class="btn sun block" data-a="close">Next customer</button>`;
   return `<div class="veil" data-a="veil"><div class="sheet" role="dialog" aria-modal="true"><span class="grab" aria-hidden="true"></span>${body}</div></div>`;
 }
-
-// Fills the loan sheet's numbers; called on render and while the amount slider moves, without rebuilding the sheet.
 function loanNumbers() {
   const s = ui.sheet; if (!s || s.type !== 'loan' || !s.d || !$('#ln-inst')) return;
-  const l = { k: s.k, amount: s.d.amount, n: s.d.n }, inst = instalment(l), a = afford(me(), l);
-  $('#ln-amt').textContent = ugx(s.d.amount);
-  $('#ln-inst').textContent = ugx(inst);
-  $('#ln-total').textContent = ugx(inst * s.d.n + s.d.amount * 0.01);
+  const f = fam(s.fam), l = { k: s.k, amount: s.d.amount, n: s.d.n }, inst = instalment(l), a = afford(f, l);
+  $('#ln-amt').textContent = ugx(s.d.amount); $('#ln-inst').textContent = ugx(inst); $('#ln-total').textContent = ugx(inst * s.d.n + s.d.amount * 0.01);
   if ($('#ln-dep')) $('#ln-dep').textContent = ugx(s.d.amount / 4);
-  const aff = $('#ln-aff'); aff.textContent = a.ok ? 'Affordable for you.' : 'Too much for your income. Try less or longer.'; aff.style.color = a.ok ? 'var(--ok)' : 'var(--bad)';
-  $('#ln-apply').disabled = !a.ok;
+  const el = $('#ln-aff'); el.textContent = a.ok ? 'Affordable for you.' : 'Too much for your income. Try less or longer.'; el.style.color = a.ok ? 'var(--ok)' : 'var(--bad)'; $('#ln-apply').disabled = !a.ok;
 }
 
-/* ---------- render ---------- */
+/* ================= render ================= */
+function notice() {
+  if (SRC.mode === 'practice') return `<div class="notice prac"><span>Practice: sample families for training. Nothing here is real or saved.</span><button class="chip" data-a="reset">Start over</button></div>`;
+  if (!SRC.db) return `<div class="notice prac"><span>Live records need this page opened in Claude, signed in.</span><button class="chip" data-a="data" data-d="practice">Use practice</button></div>`;
+  return `<div class="notice live"><span>Live pilot: real records, shared with everyone on this page.${SRC.readOnly ? ' You can view but not change them.' : ''}</span>${SRC.ready ? '' : '<span class="small">Loading…</span>'}</div>`;
+}
 function render() {
+  buildAccounts();
   document.querySelectorAll('.modes button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === ui.mode)));
-  const sc = $('#screen'), top = sc ? sc.scrollTop : 0;
-  $('#main').innerHTML = ui.mode === 'shop' ? shopView() : ui.mode === 'store' ? storeView() : hqView();
-  if (ui.mode === 'shop' && $('#screen') && ui.keepScroll) $('#screen').scrollTop = top;
+  document.querySelectorAll('.data button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === SRC.mode)));
+  const sc = $('#screen'), top = sc ? sc.scrollTop : 0, focus = document.activeElement && document.activeElement.id;
+  const view = ui.mode === 'family' ? familyView() : ui.mode === 'agent' ? agentView() : ui.mode === 'store' ? storeView() : hqView();
+  $('#main').innerHTML = `<div style="display:grid;gap:16px">${notice()}${view}</div>`;
+  if ($('#screen') && ui.keepScroll) $('#screen').scrollTop = top;
   ui.keepScroll = false;
   $('#sheet-root').innerHTML = sheetHtml();
   loanNumbers();
+  if (focus && ['fam-search', 'scan', 'ussd-input'].includes(focus) && $('#' + focus)) { const el = $('#' + focus); el.focus(); const v = el.value; el.setSelectionRange && el.setSelectionRange(v.length, v.length); }
   if (ui.mode === 'hq') drawDots();
 }
 const keep = () => { ui.keepScroll = true; };
+const curFam = () => fam(ui.sheet && ui.sheet.fam) || fam(ui.mode === 'agent' ? ui.agentFam : ui.fam);
+const openSheet = (type, extra = {}) => { const f = fam(ui.mode === 'agent' ? ui.agentFam : ui.fam); ui.sheet = { type, fam: f && f.id, ...extra }; keep(); render(); };
+const readRef = () => ($('#momo-ref') ? $('#momo-ref').value.trim() : '');
+function needRef() { const ref = readRef(); if (ref.length < 6) { toast('Type the Mobile Money transaction ID from the SMS.'); ui.sheet.ref = ref; return null; } return ref; }
 
-function lookup(q) {
-  const d = String(q).replace(/\s/g, '');
-  if (ui.payCode && d === ui.payCode) { const m = me(); ui.payCode = null; return m; }
-  return S.members.find(m => ('62014410' + m.id.slice(-4)) === d || m.id === d.toUpperCase() || (d.length === 4 && m.id.endsWith(d)));
+async function lookup(q) {
+  const dgt = String(q).replace(/\s/g, ''), d = D();
+  if (/^\d{6}$/.test(dgt)) {
+    const c = d.codes.find(x => x.id === dgt);
+    if (!c || c.used || c.exp < Date.now()) { toast(c && c.used ? 'That code was already used.' : 'Code not found or expired. Ask for a new one.'); return null; }
+    await patch('codes', dgt, { used: true });
+    return fam(c.f);
+  }
+  return d.families.find(f => f.card.replace(/\s/g, '') === dgt || f.card.replace(/\s/g, '').endsWith(dgt) && dgt.length === 4);
 }
 
 const A = {
+  data: b => { const d = b.dataset.d; if (d === 'live' && !SRC.db) { toast('Live records need this page opened in Claude, signed in.'); } SRC.mode = d; store.set('kb-data', d); ui.fam = null; ui.agentFam = null; ui.till.f = null; ui.till.cart = []; ui.sheet = null; ui.ussd = { step: 'idle', lines: null, input: '' }; render(); },
   mode: b => { ui.mode = b.dataset.m; ui.sheet = null; try { history.replaceState(null, '', '#' + ui.mode); } catch {} render(); window.scrollTo(0, 0); },
-  tab: b => { ui.tab = b.dataset.t; render(); const sc = $('#screen'); if (sc) sc.scrollTop = 0; window.scrollTo(0, 0); },
-  sheet: b => { if (b.dataset.s === 'code') ui.payCode = String(100000 + Math.floor(Math.random() * 900000)); ui.sheet = { type: b.dataset.s, k: b.dataset.k }; if (b.dataset.k && PKGS[b.dataset.k]) ui.freq = ui.sheet.k === me().pkg ? me().freq : ui.freq; keep(); render(); },
-  close: b => { ui.sheet = null; keep(); render(); if (b.dataset.msg) toast(b.dataset.msg); },
+  tab: b => { ui.tab = b.dataset.t; render(); const s = $('#screen'); if (s) s.scrollTop = 0; },
+  fam: b => { ui.fam = b.dataset.id; ui.tab = 'home'; ui.ussd = { step: 'idle', lines: null, input: '' }; render(); },
+  basic: b => { ui.basic = b.dataset.v === '1'; render(); },
+  sheet: b => openSheet(b.dataset.s, { k: b.dataset.k, kind: b.dataset.kind, id: b.dataset.id }),
+  close: () => { ui.sheet = null; keep(); render(); },
   veil: (b, e) => { if (e.target === b) { ui.sheet = null; keep(); render(); } },
   freq: b => { ui.freq = b.dataset.f; keep(); render(); },
   group: b => { ui.group = b.dataset.g; keep(); render(); },
   staff: b => { ui.staff = Math.max(10, ui.staff + +b.dataset.d); keep(); render(); },
-  me: b => { ui.me = b.dataset.id; ui.tab = 'home'; render(); toast(`Now viewing ${member(ui.me).name}`); },
-  'do-topup': b => { const m = me(), v = +b.dataset.v; m.balance += v; S.txns.push({ d: TODAY, m: m.id, t: 'Top up', a: v }); ui.sheet = null; keep(); render(); toast(`${ugx(v)} added`); },
-  'do-pay': b => {
-    const m = me(), k = b.dataset.k, f = ui.freq, p = price(k, f), v = value(k, f), wasFree = m.pkg === 'free';
-    m.pkg = k; m.freq = f; m.balance += v; m.next = f === 'weekly' ? addDays(TODAY, 7) : addMonths(TODAY, f === 'monthly' ? 1 : 12);
-    if (wasFree) { m.since = TODAY; m.prot = 'ready'; }
-    S.txns.push({ d: TODAY, m: m.id, t: `${PKGS[k].name} package`, a: v, note: `paid ${commas(p)}` });
-    ui.sheet = null; ui.tab = 'home'; render(); toast(`Paid ${ugx(p)} · ${ugx(v)} to spend`);
-  },
-  repay: () => { const m = me(), v = m.used; m.used = 0; m.ontime++; S.txns.push({ d: TODAY, m: m.id, t: 'Food credit repaid', a: -v }); keep(); render(); toast('Repaid. Credit back in full.'); },
+  ch: b => { ui.sheet.ch = b.dataset.c; ui.sheet.ref = readRef(); keep(); render(); },
+  paycode: async () => { const f = fam(ui.mode === 'agent' ? ui.agentFam : ui.fam); if (!f) return; const code = await makeCode(f); if (code) { ui.sheet = { type: 'code', code, fam: f.id }; keep(); render(); } },
+  'top-amt': b => { ui.sheet.amount = +b.dataset.v; ui.sheet.ref = readRef(); keep(); render(); },
+  'do-topup': async () => { const f = curFam(), ref = needRef(); if (!ref) return; const v = ui.sheet.amount || 50000; await mobileMoney(f, { kind: 'topup', paid: v, bal: v, ch: ui.sheet.ch || 'MTN' }, ref); ui.sheet = null; keep(); render(); toast('Sent. Spendable once Kibanja confirms it.'); },
+  'do-pay': async b => { const f = curFam(), ref = needRef(); if (!ref) return; const k = b.dataset.k, fq = ui.freq;
+    await mobileMoney(f, { kind: 'package', pkg: k, freq: fq, paid: price(k, fq), bal: value(k, fq), ch: ui.sheet.ch || 'MTN' }, ref);
+    ui.sheet = null; ui.tab = 'home'; render(); toast(`Sent. ${ugx(value(k, fq))} lands once Kibanja confirms it.`); },
+  'do-momo': async b => { const f = curFam(), ref = needRef(); if (!ref) return; const s = ui.sheet, amt = +b.dataset.amt;
+    await mobileMoney(f, s.kind === 'loan-pay' ? { kind: 'loan-pay', loan: s.id, paid: amt, ch: s.ch || 'MTN' } : { kind: 'repay', paid: amt, adv: -amt, ch: s.ch || 'MTN' }, ref);
+    ui.sheet = null; keep(); render(); toast('Sent. Counted once Kibanja confirms it.'); },
+  'rec-kind': b => { ui.sheet.kind = b.dataset.v; ui.sheet.ref = readRef(); keep(); render(); },
+  'rec-amt': b => { ui.sheet.amount = +b.dataset.v; ui.sheet.ref = readRef(); keep(); render(); },
+  'do-record': async b => { const f = curFam(), ref = needRef(); if (!ref) return; const k = ui.sheet.kind || 'package', amt = +b.dataset.amt, ch = ui.sheet.ch || 'MTN';
+    const o = k === 'package' ? { kind: 'package', pkg: f.pkg, freq: f.freq, paid: amt, bal: value(f.pkg, f.freq) } : k === 'repay' ? { kind: 'repay', paid: amt, adv: -amt } : { kind: 'topup', paid: amt, bal: amt };
+    await mobileMoney(f, { ...o, ch }, ref); ui.sheet = null; keep(); render(); toast('Recorded. HQ confirms it against the statement.'); },
   term: b => { ui.sheet.d.n = +b.dataset.n; keep(); render(); },
-  'do-loan': b => { const m = me(), d = ui.sheet.d; S.loans.push({ id: 'LN-' + (100 + S.loans.length), m: m.id, k: b.dataset.k, amount: d.amount, n: d.n, start: null, paid: 0, status: 'pending' }); ui.sheet = null; keep(); render(); toast('Sent. HQ decides within a day.'); },
-  'loan-pay': b => { const l = S.loans.find(x => x.id === b.dataset.id), v = instalment(l); l.paid++; if (l.paid >= l.n) l.status = 'closed'; S.txns.push({ d: TODAY, m: l.m, t: `${LOANS[l.k].name} instalment`, a: -v }); keep(); render(); toast(l.status === 'closed' ? 'Loan fully repaid' : 'Instalment paid'); },
+  'do-loan': async b => { const f = curFam(), d = ui.sheet.d; await put('loans', 'LN' + rid(), { f: f.id, k: b.dataset.k, amount: d.amount, n: d.n, start: null, paid: 0, status: 'pending', by: by(), at: nowIso() }); ui.sheet = null; keep(); render(); toast('Sent to the lender for a decision.'); },
   'claim-type': b => { ui.sheet.t = b.dataset.t; keep(); render(); },
-  'do-claim': () => { const m = me(); S.claims.push({ id: 'CL-' + (140 + S.claims.length + 1), m: m.id, type: ui.sheet.t, filed: TODAY, note: 'Reported in the app.', checks: [['90 days of cover', 1], ['Proof uploaded', 0], ['Confirmed at source', 0]], status: 'pending' }); m.prot = 'review'; ui.sheet = null; keep(); render(); toast('Sent. Open HQ to decide it.'); },
-  reset: () => { S = seed(); ui.me = 'KB-0001'; ui.tab = 'home'; ui.till = { m: null, input: '', cat: 'Bulk', cart: [] }; render(); toast('Demo reset'); },
+  'do-claim': async () => { const f = curFam(); await fileClaim(f, ui.sheet.t); ui.sheet = null; keep(); render(); toast('Sent. An officer calls within 72 hours.'); },
+  reset: () => { P = practice(); ui.fam = null; ui.agentFam = null; ui.till.f = null; ui.till.cart = []; ui.ussd = { step: 'idle', lines: null, input: '' }; render(); toast('Practice data reset'); },
+  // agent
+  'agent-pick': b => { ui.agentFam = b.dataset.id; render(); },
+  'open-app': b => { ui.fam = b.dataset.id; ui.mode = 'family'; ui.tab = 'home'; render(); window.scrollTo(0, 0); },
+  // USSD
+  'ussd-dial': async () => { const f = fam(ui.fam); ui.ussd = { step: 'idle', lines: null, input: '' }; await ussdReply(f, ''); render(); },
+  'ussd-end': () => { ui.ussd = { step: 'idle', lines: null, input: '' }; render(); },
+  'ussd-key': async b => { const f = fam(ui.fam); await ussdReply(f, b.dataset.k); render(); },
   // till
-  'till-pick': b => { ui.till.m = b.dataset.id; render(); },
-  'till-clear': () => { ui.till.m = null; ui.till.input = ''; ui.till.cart = []; render(); },
+  'till-clear': () => { ui.till.f = null; ui.till.input = ''; ui.till.cart = []; ui.till.ahead = false; render(); },
   cat: b => { ui.till.cat = b.dataset.c; render(); },
   add: b => { const c = ui.till.cart.find(x => x.id === b.dataset.id); c ? c.q++ : ui.till.cart.push({ id: b.dataset.id, q: 1 }); render(); },
   dec: b => { const c = ui.till.cart.find(x => x.id === b.dataset.id); if (--c.q <= 0) ui.till.cart = ui.till.cart.filter(x => x !== c); render(); },
   clear: () => { ui.till.cart = []; render(); },
-  charge: () => {
-    const t = totals(), m = t.m, P = t.pay;
-    if (m) {
-      if (P.prot) { m.allowance.month += P.prot; m.allowance.total += P.prot; }
-      m.balance -= P.bal; m.used += P.credit; m.points += t.earn;
-      S.txns.push({ d: TODAY, m: m.id, t: 'Kibanja Store · Kira', a: -(P.prot + P.bal + P.credit), note: P.mm ? `+ ${commas(P.mm)} Mobile Money` : '' });
-    }
-    S.sales.local += t.ug; S.sales.all += t.total; S.sales.today += t.total;
-    const lines = [['Total', ugx(t.total)], ...(m ? [['Protection', P.prot], ['Balance', P.bal], ['Food credit', P.credit], ['Mobile Money', P.mm]].filter(x => x[1]).map(([a, v]) => [a, commas(v)]) : [['Mobile Money or cash', commas(t.total)]]), ...(t.earn ? [['Points earned', '+' + commas(t.earn)]] : [])];
-    ui.till.cart = []; ui.sheet = { type: 'receipt', lines }; render();
+  charge: async () => {
+    const t = totals(), f = t.f, Pp = t.pay, left = f ? acc(f).bal - Pp.bal : 0;
+    const ok = await ledger({ f: f ? f.id : null, kind: 'sale', bal: -Pp.bal, adv: Pp.adv, prot: Pp.prot, pts: t.earn, tot: t.total, ess: t.ess, ug: t.ug, mm: Pp.mm, store: ui.till.name, items: t.lines.map(l => `${l.q}x ${l.name}`).join(', ') });
+    if (!ok) return;
+    const lines = [['Total', ugx(t.total)], ...(f ? [['Protection', Pp.prot], ['Balance', Pp.bal], ['Shop Ahead', Pp.adv], ['Mobile Money at till', Pp.mm]].filter(x => x[1]).map(([a, v]) => [a, commas(v)]) : [['Mobile Money or cash', commas(t.total)]]), ...(t.earn ? [['Points earned', '+' + commas(t.earn)]] : [])];
+    ui.till.cart = []; ui.till.ahead = false;
+    ui.sheet = { type: 'receipt', lines, phone: f ? f.phone : '', sms: f ? `Kibanja: you spent UGX ${commas(t.total - Pp.mm)} at ${ui.till.name}. Balance UGX ${commas(left)}.${t.earn ? ` +${commas(t.earn)} points.` : ''}` : '' };
+    render();
   },
   // hq
   stage: b => { ui.stage = +b.dataset.i; render(); },
-  verify: b => { S.claims.find(c => c.id === b.dataset.id).checks[+b.dataset.i][1] = 1; render(); },
-  approve: b => { const c = S.claims.find(x => x.id === b.dataset.id), m = member(c.m); c.status = 'approved'; m.prot = 'active'; m.allowance = { start: TODAY, month: 0, total: 0 }; render(); toast(`${m.name}: package continues free for ${PROTECT_MONTHS} months`); },
-  decline: b => { const c = S.claims.find(x => x.id === b.dataset.id); c.status = 'declined'; member(c.m).prot = 'ready'; render(); toast('Declined. Member told why.'); },
-  'loan-ok': b => { const l = S.loans.find(x => x.id === b.dataset.id); l.status = 'active'; l.start = TODAY; render(); toast(`${member(l.m).name}: ${LOANS[l.k].name} approved`); },
-  'loan-no': b => { const l = S.loans.find(x => x.id === b.dataset.id); l.status = 'declined'; render(); toast('Declined'); },
+  confirm: async b => {
+    const e = D().ledger.find(x => x.id === b.dataset.id), f = fam(e.f);
+    await patch('ledger', e.id, { status: 'confirmed', confirmedBy: by(), confirmedAt: nowIso() });
+    if (f && e.kind === 'package') { const wasFree = f.pkg === 'free'; const base = f.next && f.next > today() ? f.next : today();
+      await patch('families', f.id, { pkg: e.pkg, freq: e.freq, next: nextDate(base, e.freq), ...(wasFree || status(f) === 'lapsed' ? { since: today(), prot: 'ready' } : {}) }); }
+    if (e.kind === 'loan-pay') { const l = D().loans.find(x => x.id === e.loan); if (l) await patch('loans', l.id, { paid: l.paid + 1, ...(l.paid + 1 >= l.n ? { status: 'closed' } : {}) }); }
+    toast(`${f ? f.name : 'Payment'}: confirmed`);
+  },
+  reject: async b => { await patch('ledger', b.dataset.id, { status: 'rejected', confirmedBy: by(), confirmedAt: nowIso() }); toast('Marked not received. The family is told to check.'); },
+  verify: async b => { const c = D().claims.find(x => x.id === b.dataset.id), checks = c.checks.map((k, i) => i === +b.dataset.i ? [k[0], 1] : k); await patch('claims', c.id, { checks }); },
+  approve: async b => { const c = D().claims.find(x => x.id === b.dataset.id); await patch('claims', c.id, { status: 'approved', decidedBy: by(), decidedAt: nowIso() }); await patch('families', c.f, { prot: 'active', protStart: today() }); toast(`Protection on for ${PROTECT_MONTHS} months`); },
+  decline: async b => { const c = D().claims.find(x => x.id === b.dataset.id); await patch('claims', c.id, { status: 'declined', decidedBy: by(), decidedAt: nowIso() }); await patch('families', c.f, { prot: 'ready' }); toast('Declined. Call the family to explain.'); },
+  'loan-ok': async b => { await patch('loans', b.dataset.id, { status: 'active', start: today(), decidedBy: by() }); toast('Approved. The lender pays out.'); },
+  'loan-no': async b => { await patch('loans', b.dataset.id, { status: 'declined', decidedBy: by() }); toast('Declined'); },
+  export: async b => {
+    const d = D(), what = b.dataset.what, q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = what === 'families'
+      ? [['Card', 'Name', 'Phone', 'Area', 'People', 'Package', 'Pays', 'Next payment', 'Member since', 'Balance', 'Shop Ahead used', 'Protection'], ...d.families.map(f => [f.card, f.name, f.phone, f.area, f.size, PKGS[f.pkg].name, FREQ[f.freq].label, f.next || '', f.since, acc(f).bal, acc(f).adv, f.prot])]
+      : [['Date', 'Time', 'Card', 'Family', 'Type', 'Status', 'Amount paid', 'Balance change', 'Shop Ahead change', 'Network', 'Transaction ID', 'Store', 'Sale total', 'Mobile Money at till', 'Items'], ...d.ledger.filter(e => e.kind !== 'points').sort((a, b) => a.at.localeCompare(b.at)).map(e => { const f = fam(e.f); return [e.at.slice(0, 10), e.at.slice(11, 16), f ? f.card : '', f ? f.name : 'Walk-in', KIND[e.kind] || e.kind, e.status, e.paid || '', e.bal || 0, e.adv || 0, e.ch || '', e.ref || '', e.store || '', e.tot || '', e.mm || '', e.items || '']; })];
+    const csv = rows.map(r => r.map(q).join(',')).join('\n');
+    const dl = await claude.use('downloads').catch(() => null);
+    if (!dl) return toast('Downloads are not available in this view.');
+    try { await dl.save({ filename: `kibanja-${what}-${today()}.csv`, data: csv }); } catch (e) { if (e && e.code !== 'declined') toast('Could not save the file.'); }
+  },
 };
 
 document.addEventListener('click', e => {
-  const b = e.target.closest('[data-a]');
-  if (!b || b.disabled) return;
+  const b = e.target.closest('[data-a]'); if (!b || b.disabled) return;
   if (b.dataset.a === 'veil' && e.target !== b) return;
   A[b.dataset.a] && A[b.dataset.a](b, e);
 });
-document.addEventListener('submit', e => {
+document.addEventListener('submit', async e => {
   e.preventDefault();
-  if (e.target.id === 'scan-form') {
-    ui.till.input = $('#scan').value;
-    const m = lookup(ui.till.input);
-    if (!m) { toast('No card or code matches'); return; }
-    ui.till.m = m.id; ui.till.input = ''; render(); toast(`${m.name} · ready`);
+  const id = e.target.id;
+  if (id === 'scan-form') { ui.till.input = $('#scan').value; const f = await lookup(ui.till.input); if (!f) { if (!/^\d{6}$/.test(ui.till.input.replace(/\s/g, ''))) toast('No card matches'); render(); return; } ui.till.f = f.id; ui.till.input = ''; ui.till.ahead = false; render(); toast(`${f.name} · ready`); }
+  if (id === 'ussd-form') { const f = fam(ui.fam), v = ($('#ussd-input') || {}).value || ''; ui.ussd.input = ''; await ussdReply(f, ui.ussd.step === 'idle' ? '' : v.trim()); render(); }
+  if (id === 'momo-form') { await putConfig({ mtn: $('#cfg-mtn').value.trim(), airtel: $('#cfg-airtel').value.trim() }); toast('Merchant codes saved'); }
+  if (id === 'enrol-form') {
+    const v = k => ($('#' + k).value || '').trim(), err = m => { $('#e-err').textContent = m; };
+    const name = v('e-name'), phone = v('e-phone').replace(/[\s-]/g, ''), size = Math.max(1, +v('e-size') || 1);
+    if (!name) return err('Add the shopper\'s name.');
+    if (!validPhone(phone)) return err('Use a Ugandan mobile number, like 0772 123 456.');
+    if (D().families.some(f => f.phone.replace(/[\s-]/g, '') === phone)) return err('That phone number is already enrolled.');
+    if (!$('#e-id').checked) return err('Check their national ID first.');
+    if (!$('#e-consent').checked) return err('They need to agree to the terms.');
+    let n = D().families.length + 1, card; do { card = '6201 4410 ' + String(Math.floor(1000 + Math.random() * 9000)); } while (D().families.some(f => f.card === card) && n++ < 50);
+    const fid = 'F' + rid(), pkg = v('e-pkg'), employer = v('e-employer');
+    const ok = await put('families', fid, { card, name, phone, area: v('e-area'), size, pkg, freq: v('e-freq'), since: today(), next: null, prot: pkg === 'free' ? 'none' : 'ready', income: +v('e-income') || null, employer: employer || null, idChecked: true, consent: true, by: by(), at: nowIso() });
+    if (ok) { ui.agentFam = fid; ui.sheet = null; render(); toast(`${name} enrolled · card ${card}. Record their first payment.`); }
   }
 });
 document.addEventListener('input', e => {
-  if (e.target.id === 'scan') ui.till.input = e.target.value;
-  if (e.target.id === 'ln-amount') { ui.sheet.d.amount = +e.target.value; loanNumbers(); }
+  const t = e.target;
+  if (t.id === 'fam-search') { ui.q = t.value; render(); }
+  if (t.id === 'scan') ui.till.input = t.value;
+  if (t.id === 'ussd-input') ui.ussd.input = t.value;
+  if (t.id === 'ln-amount') { ui.sheet.d.amount = +t.value; loanNumbers(); }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'use-ahead') { ui.till.ahead = t.checked; render(); }
+  if (t.id === 'till-name') { ui.till.name = t.value.trim() || 'Kibanja Store'; store.set('kb-till', ui.till.name); }
+  if (t.dataset.launch) { const cur = { ...((D().config || {}).launch || {}) }; cur[t.dataset.launch] = t.checked; putConfig({ launch: cur }); }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && ui.sheet) { ui.sheet = null; keep(); render(); } });
 window.addEventListener('resize', () => { if (ui.mode === 'hq') drawDots(); });
 
 const start = (location.hash || '').slice(1);
-if (['shop', 'store', 'hq'].includes(start)) ui.mode = start;
+if (['family', 'agent', 'store', 'hq'].includes(start)) ui.mode = start;
 render();
+if (window.claude && window.claude.use) connectLive(); else { SRC.db = null; }
 </script>
